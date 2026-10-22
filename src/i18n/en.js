@@ -465,4 +465,21 @@ export default {
   "set.working": "Working… this can take a few seconds.",
   "set.failed": "Something went wrong. Your data was not changed.",
   "more.title": "More",
+  "pwa.offline": "Offline mode – diary and health guides remain fully available",
+  "pwa.offlineDiscreet": "Offline mode – diary remains fully available",
+  "pwa.offlineNotice": "External medical references and links require an internet connection.",
+  "pwa.updateReady": "A new version of Saheli is ready.",
+  "pwa.updateReadyDiscreet": "A new version of Diary is ready.",
+  "pwa.updateNow": "Refresh to update",
+  "pwa.updateLater": "Later",
+  "pwa.install": "Install app",
+  "pwa.installDiscreet": "Install Diary",
+  "pwa.installDesc":
+    "Add to your home screen for private, instant offline access without opening a browser.",
+  "pwa.installDescDiscreet": "Add Diary to your home screen for private, quick offline access.",
+  "pwa.installed": "Installed on this device (offline ready)",
+  "pwa.installedDesc": "Saheli is installed as a home screen app and works offline.",
+  "pwa.iosGuide":
+    "To install on iPhone or iPad: tap the Share button in Safari, then select 'Add to Home Screen'.",
+  "pwa.offlineTitle": "Offline Access",
 };

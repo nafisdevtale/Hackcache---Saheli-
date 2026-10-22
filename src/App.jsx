@@ -30,6 +30,14 @@ import { buildDemo } from "./data/demo.js";
 import { emptyRecord, normalizeRecord, mergeRecords } from "./lib/exportImport.js";
 import { todayStr, formatDate, formatRange, addDays } from "./lib/localDate.js";
 import { translate, pick } from "./i18n/index.js";
+import {
+  isStandalone,
+  registerServiceWorker,
+  applyServiceWorkerUpdate,
+  setDeferredPrompt,
+  promptPwaInstall,
+  clearAppCaches,
+} from "./lib/pwa.js";
 
 const Ctx = createContext(null);
 export const useApp = () => useContext(Ctx);
@@ -41,6 +49,12 @@ export function AppProvider({ children }) {
   const [meta, setMeta] = useState(null);
   const [record, setRecord] = useState(null);
   const [banners, setBanners] = useState([]);
+  const [isOnline, setIsOnline] = useState(() =>
+    typeof navigator !== "undefined" && "onLine" in navigator ? navigator.onLine : true,
+  );
+  const [isInstalled, setIsInstalled] = useState(isStandalone);
+  const [canInstall, setCanInstall] = useState(false);
+  const [updateWaiting, setUpdateWaiting] = useState(false);
   const keyRef = useRef(null);
   const stateRef = useRef({ meta: null, record: null });
   const writes = useRef(Promise.resolve());
@@ -77,6 +91,49 @@ export function AppProvider({ children }) {
         setStatus("error");
       }
     })();
+  }, []);
+
+  // PWA offline state, installation prompt and service worker updates
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    const handleBeforeInstall = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setCanInstall(true);
+    };
+    window.addEventListener("beforeinstallprompt", handleBeforeInstall);
+
+    const handleAppInstalled = () => {
+      setCanInstall(false);
+      setIsInstalled(true);
+      setDeferredPrompt(null);
+    };
+    window.addEventListener("appinstalled", handleAppInstalled);
+
+    registerServiceWorker(() => setUpdateWaiting(true));
+
+    if ("serviceWorker" in navigator) {
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        if (!refreshing) {
+          refreshing = true;
+          window.location.reload();
+        }
+      });
+    }
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstall);
+      window.removeEventListener("appinstalled", handleAppInstalled);
+    };
   }, []);
 
   // Apply display prefs
@@ -233,9 +290,24 @@ export function AppProvider({ children }) {
         writeRecord(mergeRecords(r, incoming, strategy), m),
       );
     },
+    async installApp() {
+      const res = await promptPwaInstall();
+      if (res?.outcome === "accepted") {
+        setCanInstall(false);
+        setIsInstalled(true);
+      }
+      return res;
+    },
+    applyUpdate() {
+      applyServiceWorkerUpdate();
+    },
+    dismissUpdate() {
+      setUpdateWaiting(false);
+    },
     async deleteAll() {
       await idbDeleteDatabase();
       clearAppLocalStorage();
+      await clearAppCaches();
       keyRef.current = null;
       window.location.replace("/");
     },
@@ -345,6 +417,10 @@ export function AppProvider({ children }) {
     fertilityVisible,
     pregnancyVisible,
     isDemo: meta?.mode === "demo",
+    isOnline,
+    canInstall,
+    isInstalled,
+    updateWaiting,
     banners: prefs.discreet
       ? bannersView.map((b) => ({ ...b, text: t("rem.msg.checkin") }))
       : bannersView,

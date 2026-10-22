@@ -11,6 +11,7 @@ import {
   Volume2,
   X,
   Bell,
+  WifiOff,
 } from "lucide-react";
 import { useApp } from "@/App.jsx";
 import { Btn, Card, speak, cx, inputCls } from "@/components/common/ui.jsx";
@@ -171,7 +172,19 @@ const NAV = [
 
 export function Shell({ children }) {
   const app = useApp();
-  const { t, prefs, setPrefs, status, isDemo, banners, dismissBanner } = app;
+  const {
+    t,
+    prefs,
+    setPrefs,
+    status,
+    isDemo,
+    banners,
+    dismissBanner,
+    isOnline,
+    updateWaiting,
+    applyUpdate,
+    dismissUpdate,
+  } = app;
   const [speechFailed, setSpeechFailed] = useState(false);
   if (status === "loading")
     return (
@@ -229,6 +242,35 @@ export function Shell({ children }) {
           </button>
         </div>
       </header>
+      {!isOnline && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="flex items-center justify-center gap-2 border-b border-border bg-muted px-4 py-1.5 text-center text-xs font-semibold text-muted-foreground print:hidden"
+        >
+          <WifiOff aria-hidden className="h-3.5 w-3.5" />
+          <span>{prefs.discreet ? t("pwa.offlineDiscreet") : t("pwa.offline")}</span>
+        </div>
+      )}
+      {updateWaiting && (
+        <div
+          role="alert"
+          aria-live="polite"
+          className="mx-4 my-2 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-accent p-3 text-sm text-accent-foreground shadow-soft print:hidden"
+        >
+          <p className="font-medium">
+            {prefs.discreet ? t("pwa.updateReadyDiscreet") : t("pwa.updateReady")}
+          </p>
+          <div className="flex shrink-0 items-center gap-2">
+            <Btn size="sm" onClick={applyUpdate}>
+              {t("pwa.updateNow")}
+            </Btn>
+            <Btn size="sm" variant="ghost" onClick={dismissUpdate}>
+              {t("pwa.updateLater")}
+            </Btn>
+          </div>
+        </div>
+      )}
       {isDemo && (
         <p className="bg-accent px-4 py-1 text-center text-sm font-semibold text-accent-foreground print:hidden">
           {t("common.demoBadge")}

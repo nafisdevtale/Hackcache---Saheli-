@@ -263,6 +263,51 @@ function ImportBlock() {
   );
 }
 
+function PwaSection() {
+  const { t, prefs, isInstalled, canInstall, installApp } = useApp();
+  const [installMsg, setInstallMsg] = useState(null);
+
+  const isIos =
+    typeof navigator !== "undefined" &&
+    /iPad|iPhone|iPod/.test(navigator.userAgent || "") &&
+    !("MSStream" in window);
+
+  return (
+    <Card className="space-y-3">
+      <h2 className="text-lg font-bold">{t("pwa.offlineTitle")}</h2>
+      <p className="text-sm text-muted-foreground">
+        {prefs.discreet ? t("pwa.installDescDiscreet") : t("pwa.installDesc")}
+      </p>
+
+      {isInstalled ? (
+        <div className="flex items-center gap-2 rounded-xl bg-muted p-3 text-sm font-semibold">
+          <p>{t("pwa.installed")}</p>
+        </div>
+      ) : canInstall ? (
+        <div className="space-y-2">
+          <Btn
+            onClick={async () => {
+              const res = await installApp();
+              if (res?.outcome === "dismissed") {
+                setInstallMsg(t("common.cancel"));
+              }
+            }}
+          >
+            {prefs.discreet ? t("pwa.installDiscreet") : t("pwa.install")}
+          </Btn>
+          {installMsg && <p className="text-xs text-muted-foreground">{installMsg}</p>}
+        </div>
+      ) : isIos ? (
+        <div className="rounded-xl bg-muted p-3 text-sm">
+          <p>{t("pwa.iosGuide")}</p>
+        </div>
+      ) : (
+        <p className="text-xs text-muted-foreground">{t("pwa.installedDesc")}</p>
+      )}
+    </Card>
+  );
+}
+
 export default function Settings() {
   const app = useApp();
   const { t, prefs, setPrefs, record, update, isDemo, exitDemo, tryDemo, deleteAll } = app;
@@ -406,6 +451,8 @@ export default function Settings() {
           onChange={(v) => setPrefs({ discreet: v })}
         />
       </Card>
+
+      <PwaSection />
 
       <Card className="space-y-3">
         <h2 className="text-lg font-bold">{t("set.data")}</h2>

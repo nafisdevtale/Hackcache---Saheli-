@@ -35,6 +35,16 @@ Baseline statuses intentionally distinguish implementation from verified behavio
 - **Medical Source Verifiability**: Audited all 31 sources across WHO, NHS, ACOG, FIGO, FOGSI, and MoHFW. All lesson paragraphs and conditions carry direct citations.
 - **Bilingual Coverage**: Confirmed 100% parity between English (`en.js`) and Hindi (`hi.js`) dictionaries, with 0 missing keys.
 
+## Stage 2 Progressive Web App (PWA) & Offline-First Implementation
+
+- **Web App Manifest**: Configured `manifest.webmanifest` with standalone display mode, orientation, theme colors (`#a34438`), background color (`#fcf8f6`), and high-resolution icons (192px, 512px, maskable 192px/512px, SVG vector, and apple-touch-icon).
+- **Installation Lifecycle**: Integrated discreet, accessible PWA installation flow supporting `beforeinstallprompt` on Chromium browsers and platform instructions for iOS Safari. Respects discreet mode renaming ("Install Diary" / "डायरी इंस्टॉल करें").
+- **Offline Shell & Caching**: Deployed `sw.js` precaching the application shell (`/`, manifest, icons, favicon) and handling versioned static assets with Cache-First. Offline navigation falls back to the local client shell or an accessible offline document.
+- **Strict Privacy Boundaries**: Service Worker enforces GET-only requests, origin isolation (no caching of external health sites), and explicit exclusion of sensitive query strings (`pin`, `key`) or export endpoints (`/export`). Zero user cycle data or database payloads enter the Cache API.
+- **Cache Purging on Deletion**: `deleteAll` in `App.jsx` now explicitly deletes all Cache API entries (`caches.delete`) alongside IndexedDB and localStorage purge, ensuring zero residual data remains on the device.
+- **Safe Update Handling**: Service worker updates trigger a non-disruptive, user-facing notice with explicit "Refresh to update" and "Later" options, avoiding abrupt reloads during user input. Obsolete cache versions are purged on `activate`.
+- **Automated Test Coverage**: Added `pwa.test.js` validating manifest schema, icon existence, service worker privacy rules, cache allowlisting, update messaging, and offline fallback. Total test count increased to 67 passing tests.
+
 ## Environment constraints
 
 - Production builds are managed by the Lovable harness; do not run a second manual build. Inspect its available build logs instead.

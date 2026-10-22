@@ -1,5 +1,26 @@
 # Saheli Cycle Companion
 
+Saheli is a free, private, local-first menstrual health companion Progressive Web App (PWA) built with mobile-first design, bilingual support (English & Hindi), client-side AES-GCM encryption, and reliable offline access.
+
+## Progressive Web App (PWA) & Offline Capabilities
+
+- **Installable PWA**: Configured with a W3C web app manifest (`/manifest.webmanifest`), standalone display mode, portrait orientation, theme colors (`#a34438`), and complete standard/maskable app icon sets (192px, 512px, SVG vector, and Apple Touch Icon).
+- **Offline-First Application Shell**: A dedicated Service Worker (`/sw.js`) precaches the application shell, icons, manifest, and stylesheets. Once loaded, all core screens (Today, Log, Calendar, Insights, Doctor Guidance, Visit Summary, Learn, Ask, Reminders, Pregnancy, and Settings) remain completely functional without internet access.
+- **Strict Privacy Guarantees**:
+  - Personal health logs, symptoms, cycle calculations, and encryption keys live strictly in client-side **IndexedDB / WebCrypto** and are **never transmitted to any server or cached in the Service Worker Cache API**.
+  - Service worker caching is restricted to same-origin GET requests for the application shell and static assets (`/assets/*`).
+  - Sensitive export queries, credentials, and non-GET requests bypass the cache completely.
+  - Complete data deletion (`Settings > Delete everything`) purges all IndexedDB data, localStorage/sessionStorage keys, and explicitly purges the Service Worker Cache API (`caches.delete`).
+- **Discreet & Accessible Installation**:
+  - Standard mode prompts: "Install app" / "ऐप इंस्टॉल करें".
+  - Discreet mode prompts: "Install Diary" / "डायरी इंस्टॉल करें".
+  - Graceful fallbacks for browsers without programmatic install prompts (including iOS Safari Add-to-Home-Screen instructions).
+- **Safe Update Handling**:
+  - Service worker updates trigger a polite, non-intrusive notification ("A new version is ready") with explicit user approval to refresh, preventing mid-session disruption or unsaved data loss.
+  - Obsolete cache versions are purged automatically upon activation.
+
+---
+
 # SAHELI — HACKCACHE STAGE 1: COMPLETE BUILD PROMPT
 
 Build a complete, functional web application for the HackCache hackathon. This is an implementation task, not a request for a plan, wireframe, or static mockup. Build the actual application, with working navigation, local data persistence, calculations, health guidance, bilingual content, privacy controls, and responsive design.
