@@ -166,7 +166,7 @@ export function AppProvider({ children }) {
   // ---- Reminders (only while the app is open) ----
   const fired = useRef(new Set());
   const fire = useCallback((msgKey, vars) => {
-    const text = prefs.discreet ? translate(prefs.lang, "rem.msg.checkin") : translate(prefs.lang, msgKey, vars);
+    const text = prefs.discreet ? translate(prefs.lang, "rem.msg.checkin") : msgKey === "__custom" ? record?.reminders.custom.text || "" : translate(prefs.lang, msgKey, vars);
     const title = translate(prefs.lang, prefs.discreet ? "app.discreetName" : "app.name");
     let shown = false;
     if (record?.reminders.notify && typeof Notification !== "undefined" && Notification.permission === "granted") {
@@ -193,8 +193,7 @@ export function AppProvider({ children }) {
     return () => clearInterval(id);
   }, [status, record, analysis, fire, prefs.discreet]);
 
-  // custom reminder text is user-entered; translate() falls back to the key, so map it here
-  const bannersView = banners.map((b) => (b.text === "__custom" ? { ...b, text: record?.reminders.custom.text || "" } : b));
+  const bannersView = banners;
 
   const value = {
     prefs, setPrefs, t, L, fmt, fmtRange, lang: prefs.lang, today,
