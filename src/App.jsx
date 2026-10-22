@@ -23,12 +23,13 @@ import {
   decryptJSON,
   randomSaltB64,
   isEncrypted,
+  isValidPin,
 } from "./lib/encryption.js";
 import { analyze } from "./lib/cycle.js";
 import { evaluateSafety } from "./lib/safetyRules.js";
 import { buildDemo } from "./data/demo.js";
-import { emptyRecord, normalizeRecord, mergeRecords } from "./lib/exportImport.js";
-import { todayStr, formatDate, formatRange, addDays } from "./lib/localDate.js";
+import { emptyRecord, normalizeRecord, mergeRecords, blankDay } from "./lib/exportImport.js";
+import { todayStr, formatDate, formatRange, addDays, isValidDate } from "./lib/localDate.js";
 import { translate, pick } from "./i18n/index.js";
 import {
   isStandalone,
@@ -206,6 +207,67 @@ export function AppProvider({ children }) {
       const m = { onboarded: true, mode: "real", pin: meta?.pin || { enabled: false } };
       await writeRecord(r, m, ["demo"]);
       setStatus("ready");
+    },
+    async completeOnboarding({
+      mode = "real",
+      ageGroup = "under18",
+      pin = null,
+      firstPeriodDate = null,
+      discreet = false,
+      lang = null,
+    } = {}) {
+      if (lang) {
+        setPrefs({ lang, ...(discreet ? { discreet: true } : {}) });
+      } else if (discreet) {
+        setPrefs({ discreet: true });
+      }
+
+      if (mode === "demo") {
+        return api.chooseDemo(ageGroup);
+      }
+
+      const r = emptyRecord();
+      r.settings.ageGroup = ageGroup || "under18";
+      if (r.settings.ageGroup === "under18") r.settings.showFertility = false;
+
+      if (firstPeriodDate && isValidDate(firstPeriodDate)) {
+        r.days[firstPeriodDate] = {
+          ...blankDay(firstPeriodDate),
+          period: true,
+          flow: "medium",
+          pain: 0,
+          painStoppedActivities: false,
+          symptoms: [],
+        };
+      }
+
+      if (pin && isValidPin(pin)) {
+        const salt = randomSaltB64();
+        const iterations = CONFIG.pbkdf2Iterations;
+        const key = await deriveKey(pin, salt, iterations);
+        const nextMeta = {
+          onboarded: true,
+          mode: "real",
+          pin: { enabled: true, salt, iterations, kdf: "PBKDF2-SHA256", cipher: "AES-GCM-256" },
+        };
+        const ct = await encryptJSON(key, r);
+        await idbWrite(
+          [
+            ["meta", nextMeta],
+            [storeKey(nextMeta), ct],
+          ],
+          ["demo"],
+        );
+        keyRef.current = key;
+        setMeta(nextMeta);
+        setRecord(r);
+        stateRef.current = { meta: nextMeta, record: r };
+        setStatus("ready");
+      } else {
+        const nextMeta = { onboarded: true, mode: "real", pin: { enabled: false } };
+        await writeRecord(r, nextMeta, ["demo"]);
+        setStatus("ready");
+      }
     },
     async exitDemo() {
       const r = emptyRecord();

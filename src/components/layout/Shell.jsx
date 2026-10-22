@@ -17,89 +17,7 @@ import { useApp } from "@/App.jsx";
 import { Btn, Card, speak, cx, inputCls } from "@/components/common/ui.jsx";
 import { isValidPin } from "@/lib/encryption.js";
 import { CONFIG } from "@/config.js";
-
-function Onboarding() {
-  const { t, prefs, setPrefs, chooseDemo, chooseFresh } = useApp();
-  const [age, setAge] = useState("under18");
-  const [busy, setBusy] = useState(false);
-  const [failure, setFailure] = useState(false);
-  const choose = async (fn) => {
-    setBusy(true);
-    setFailure(false);
-    try {
-      await fn(age);
-    } catch {
-      setFailure(true);
-      setBusy(false);
-    }
-  };
-  return (
-    <main id="main" className="mx-auto max-w-md space-y-5 px-4 py-8">
-      <div className="text-center">
-        <Flower2 aria-hidden className="mx-auto h-14 w-14 text-primary" />
-        <h1 className="font-display mt-2 text-3xl font-bold">{t("onb.title")}</h1>
-        <p className="mt-2">{t("onb.intro")}</p>
-        <p className="mt-2 rounded-xl bg-secondary p-3 text-secondary-foreground">
-          {t("onb.privacy")}
-        </p>
-      </div>
-      <fieldset className="space-y-2">
-        <legend className="font-semibold">{t("onb.lang")}</legend>
-        <div className="grid grid-cols-2 gap-2">
-          {[
-            ["en", "English"],
-            ["hi", "हिंदी"],
-          ].map(([v, l]) => (
-            <Btn
-              key={v}
-              variant={prefs.lang === v ? "primary" : "outline"}
-              aria-pressed={prefs.lang === v}
-              onClick={() => setPrefs({ lang: v })}
-            >
-              {l}
-            </Btn>
-          ))}
-        </div>
-      </fieldset>
-      <fieldset className="space-y-2">
-        <legend className="font-semibold">{t("onb.ageQ")}</legend>
-        <div className="grid grid-cols-2 gap-2">
-          {["under18", "adult"].map((v) => (
-            <Btn
-              key={v}
-              variant={age === v ? "primary" : "outline"}
-              aria-pressed={age === v}
-              onClick={() => setAge(v)}
-            >
-              {t(`age.${v}`)}
-            </Btn>
-          ))}
-        </div>
-      </fieldset>
-      <div className="space-y-3">
-        <Card>
-          <Btn className="w-full" disabled={busy} onClick={() => choose(chooseDemo)}>
-            {t("onb.demo")}
-          </Btn>
-          <p className="mt-2 text-sm text-muted-foreground">{t("onb.demoDesc")}</p>
-        </Card>
-        <Card>
-          <Btn
-            variant="secondary"
-            className="w-full"
-            disabled={busy}
-            onClick={() => choose(chooseFresh)}
-          >
-            {t("onb.fresh")}
-          </Btn>
-          <p className="mt-2 text-sm text-muted-foreground">{t("onb.freshDesc")}</p>
-        </Card>
-      </div>
-      {failure && <p role="alert">{t("set.failed")}</p>}
-      <p className="text-center text-sm text-muted-foreground">{t("common.disclaimer")}</p>
-    </main>
-  );
-}
+import { OnboardingFlow } from "@/components/onboarding/OnboardingFlow.jsx";
 
 let failCount = 0;
 function LockScreen() {
@@ -198,7 +116,7 @@ export function Shell({ children }) {
         {t("set.failed")}
       </p>
     );
-  if (status === "onboarding") return <Onboarding />;
+  if (status === "onboarding") return <OnboardingFlow />;
   if (status === "locked") return <LockScreen />;
   const AppIcon = prefs.discreet ? NotebookPen : Flower2;
   return (

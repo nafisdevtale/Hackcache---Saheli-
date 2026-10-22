@@ -62,6 +62,45 @@ export default {
     "See the app with 8 months of made-up history. Nothing is mixed with your real records.",
   "onb.fresh": "Start fresh",
   "onb.freshDesc": "Begin with an empty, private diary.",
+  "onb.step": "Step {current} of {total}",
+  "onb.step1Title": "Choose your language",
+  "onb.step1Desc":
+    "Welcome to Saheli — a private, supportive space to track your periods, understand your body, and get trusted health answers.",
+  "onb.step2Title": "Age & Care Setup",
+  "onb.under18Desc":
+    "Normal cycles for teenagers can range from 21 to 45 days. Fertility predictions are hidden for your privacy and safety.",
+  "onb.adultDesc":
+    "Adult cycles typically range from 21 to 35 days. Fertility estimates can be customized in settings.",
+  "onb.step3Title": "Privacy & PIN Lock",
+  "onb.privacyStorage":
+    "Local-only storage: Your health records stay on this phone only. There are no user accounts, no ads, and no data uploaded to the cloud.",
+  "onb.privacyNotDiagnosis":
+    "Educational guidance: Period and cycle projections are educational estimates, not medical diagnoses or birth control.",
+  "onb.pinOptional": "Protect with a 4-digit PIN (optional)",
+  "onb.pinDesc":
+    "Lock your diary when the app closes. Recommended if you share your phone with family or friends.",
+  "onb.pinWarning":
+    "Important: Because your records are encrypted with your PIN, a forgotten PIN cannot be recovered. Remember your PIN and export backups regularly.",
+  "onb.pinEnter": "Enter 4-digit PIN",
+  "onb.pinConfirm": "Confirm 4-digit PIN",
+  "onb.pinMismatch": "PINs do not match. Please re-enter.",
+  "onb.pinInvalid": "PIN must be exactly 4 digits.",
+  "onb.discreetTitle": "Discreet mode on shared phones",
+  "onb.discreetDesc": 'Show the app title as "Diary" and use neutral notifications.',
+  "onb.step4Title": "How would you like to start?",
+  "onb.firstPeriodOption": "Log recent period start date (optional)",
+  "onb.firstPeriodDateLabel": "When did your last period start?",
+  "onb.startEmpty": "Start with an empty diary",
+  "onb.startEmptyDesc": "I will log my period when it starts.",
+  "onb.startDemo": "Explore with sample demo data",
+  "onb.startDemoDesc":
+    "Preview 8 months of simulated cycles and health insights before logging your own.",
+  "onb.startLearn": "Start by browsing health guides",
+  "onb.startLearnDesc": "Go directly to verified articles and common questions.",
+  "onb.next": "Next",
+  "onb.prev": "Back",
+  "onb.finish": "Enter Diary",
+  "onb.quickStart": "Skip setup and start with default settings",
 
   "lock.title": "Enter your PIN",
   "lock.prompt": "Your records are locked with a 4-digit PIN.",
@@ -73,6 +112,22 @@ export default {
     "Forgot your PIN? Protected records can't be recovered without it. You can only delete everything from Settings after unlocking, or clear the site's data in your browser.",
 
   "today.title": "Today",
+  "today.welcomeTitle": "Welcome to your diary",
+  "today.welcomeSub":
+    "Your records are completely private on this device. You can log whenever you are ready, or read how cycles work.",
+  "today.startActionLog": "Log today's symptoms or period",
+  "today.startActionPast": "Add past periods on calendar",
+  "today.startActionLearn": "Learn how cycles work",
+  "today.startActionAsk": "Common questions & answers",
+  "today.startActionDemo": "Explore with demo records",
+  "today.progressTitle": "Building your personal cycle profile",
+  "today.progressDesc":
+    "Every body has its own rhythm. After you log 3 complete periods, Saheli will show your cycle length range and future estimates.",
+  "today.quickLinks": "Helpful resources for today",
+  "today.linkPeriodCare": "Period care & cramps",
+  "today.linkWhyLate": "Why might a period be late?",
+  "today.linkDoctorGuide": "When to see a doctor",
+  "today.linkVisitSummary": "Doctor-visit summary",
   "today.cycleDay": "Day {n} of your cycle",
   "today.next": "Next period",
   "today.insufficient": "Log 3 periods and I'll start estimating",
@@ -507,6 +562,18 @@ export default {
   "set.lockNow": "Lock now",
   "set.discreet": "Discreet mode",
   "set.discreetDesc": 'Shows the app as "Diary" and reminders only say "Time to check in".',
+  "set.sharedPhone": "Shared device privacy guide",
+  "set.sharedPhoneDesc":
+    "Understand what is protected on a shared phone and how to keep your health diary private.",
+  "set.sharedWhatProtected": "What is protected",
+  "set.sharedWhatProtectedDesc":
+    "Your records are stored only on this phone (IndexedDB). No cloud account, no remote servers, and no tracking. When PIN lock is enabled, records are encrypted with AES-GCM-256.",
+  "set.sharedLimitations": "What local storage cannot protect",
+  "set.sharedLimitationsDesc":
+    "Anyone holding your unlocked phone while Saheli is open can read the screen. Browser history may still show visited pages, and installed app icons are visible on the home screen.",
+  "set.sharedTips": "Privacy recommendations for shared phones",
+  "set.sharedTipsDesc":
+    'Enable 4-digit PIN lock, turn on Discreet Mode ("Diary"), use "Lock now" before handing your phone to someone, and clear browser history if needed.',
   "set.data": "Your data",
   "set.exportWarn":
     "Exported files are NOT encrypted. Anyone who opens them can read your health records. Keep them safe.",

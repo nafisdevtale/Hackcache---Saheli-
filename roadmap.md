@@ -27,3 +27,11 @@
   - Unapproved same-origin GET endpoints (e.g. `/api/*`, dynamic JSON) bypass cache completely.
 - [x] **Run regression tests and record evidence, discrepancies, and limitations in AUDIT.md**:
   - 117 tests passing across 8 test suites. Zero lint errors. Production build verified.
+- [x] **Build Guided First-Run Onboarding Flow (Saheli 3.0)**:
+  - 4-step mobile-first wizard (`OnboardingFlow.jsx`) with language switcher (EN/HI), Under-18 / Adult gating (fertility predictions suppressed for adolescents), privacy explanation, optional PIN setup with loss warnings, optional first period date entry, and quick-start bypass.
+- [x] **Revamp Daily Dashboard (Today Screen)**:
+  - Empty diary state with welcoming actions, progress indicator for 1–2 cycles towards 3-cycle threshold, prediction window intervals, and contextual educational links.
+- [x] **Shared Phone Privacy Polish**:
+  - Discreet Mode ("Diary" / "डायरी") across headers, titles, and notifications; dedicated Shared Device Privacy Guide in Settings.
+- [x] **Saheli 3.0 Release Verification**:
+  - 129 automated tests passing across 9 test suites (`onboarding-today.test.js`). 0 ESLint errors. Clean production build verified.

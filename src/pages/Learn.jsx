@@ -72,7 +72,7 @@ export default function Learn() {
     <div className="space-y-3">
       <PageTitle sub={t("learn.intro")}>{t("learn.title")}</PageTitle>
       {LESSONS.map((l) => (
-        <Card key={l.id} className="p-0">
+        <Card key={l.id} id={l.id} className="scroll-mt-20 p-0">
           <details>
             <summary className="flex min-h-14 cursor-pointer items-center gap-3 p-4 text-lg font-bold">
               <Illustration kind={l.illustration} /> <span>{L(l.title)}</span>

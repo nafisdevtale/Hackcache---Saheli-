@@ -450,6 +450,27 @@ export default function Settings() {
           checked={prefs.discreet}
           onChange={(v) => setPrefs({ discreet: v })}
         />
+
+        {/* Shared Device Privacy Guide */}
+        <div className="space-y-2 border-t border-border pt-3">
+          <h3 className="font-bold">{t("set.sharedPhone")}</h3>
+          <p className="text-xs text-muted-foreground">{t("set.sharedPhoneDesc")}</p>
+
+          <div className="space-y-2 rounded-xl bg-muted/60 p-3 text-xs">
+            <div>
+              <p className="font-semibold text-foreground">{t("set.sharedWhatProtected")}</p>
+              <p className="text-muted-foreground">{t("set.sharedWhatProtectedDesc")}</p>
+            </div>
+            <div>
+              <p className="font-semibold text-foreground">{t("set.sharedLimitations")}</p>
+              <p className="text-muted-foreground">{t("set.sharedLimitationsDesc")}</p>
+            </div>
+            <div>
+              <p className="font-semibold text-foreground">{t("set.sharedTips")}</p>
+              <p className="text-muted-foreground">{t("set.sharedTipsDesc")}</p>
+            </div>
+          </div>
+        </div>
       </Card>
 
       <PwaSection />

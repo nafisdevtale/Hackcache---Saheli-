@@ -36,6 +36,25 @@ Saheli is a free, private, local-first menstrual health companion Progressive We
 - **Medical & Governance Auditing**: Automated test suite (`medical-sources.test.js`) verifies all 31 sources across NHS, WHO, ACOG, FIGO, FOGSI, MoHFW, Tele-MANAS, and 112 India, verifying that 100% of medical statements carry verified source attributions.
 - **Route & Workflow Verification**: Comprehensive test coverage across all 12 application routes (`app-routing.test.tsx`) and full pregnancy, doctor summary, and preferences workflows (`user-workflows.test.js`). Total automated test coverage expanded to 117 tests.
 
+## First-Run Experience, Personalisation & Product Polish (Saheli 3.0)
+
+- **Guided First-Run Onboarding Flow**:
+  - Replaces legacy single-screen onboarding with a 4-step mobile-first wizard (`OnboardingFlow.jsx`).
+  - **Language Selection**: Immediate English / हिंदी switcher on the welcome screen with visual feedback.
+  - **Age-Appropriate Setup**: Clear guidance for teenagers (Under 18) explaining normal cycle variation (21–45 days per ACOG) with automatic suppression of fertility predictions for adolescent privacy.
+  - **Transparent Privacy & PIN Lock**: Details local-only IndexedDB architecture and educational nature of estimates. Offers optional 4-digit PIN setup with double-entry confirmation and clear warnings regarding forgotten PIN data recovery.
+  - **Flexible First-Run Entry**: Lets users log their most recent period start date immediately, start with an empty diary, explore educational guides first, or preview simulated demo history.
+  - **Low-Friction Bypass**: Users who want to skip setup can start immediately with safe defaults.
+- **Supportive Daily Dashboard (`Today`)**:
+  - **Empty State**: Reassuring welcome state when no entries exist with direct actions to log today, record past periods on the calendar, read how cycles work, or load demo data.
+  - **Building Profile State**: Encouraging progress card for 1–2 cycles showing how many cycles remain until 3-cycle predictions unlock without treating missing history as abnormal.
+  - **Active State**: Displays current cycle day, phase explanation, and prediction window intervals.
+  - **Contextual Education Shortcuts**: Direct shortcuts to relevant educational lessons (`/learn`), doctor visit summary (`/visit`), and questions (`/ask`).
+- **Privacy for Shared Devices**:
+  - Discreet Mode ("Diary" / "डायरी") with neutral icon and neutral notification copy ("Time to check in" / "देखने का समय").
+  - Dedicated "Shared Device Privacy Guide" in Settings explaining local encryption protections alongside physical device limitations (unlocked screen, browser history, homescreen icon).
+- **Automated Test Coverage**: 129 tests passing across 9 test suites, including dedicated tests in `onboarding-today.test.js`.
+
 ---
 
 # SAHELI — HACKCACHE STAGE 1: COMPLETE BUILD PROMPT

@@ -77,8 +77,26 @@ Baseline statuses intentionally distinguish implementation from verified behavio
 - **Comprehensive Route & Workflow Verification**:
   - Added routing tests in `src/test/app-routing.test.tsx` verifying that all 12 application routes resolve correctly without falling back to `rootRouteId` or 404.
   - Added workflow tests in `src/test/user-workflows.test.js` verifying pregnancy due date (280 days), WHO 8-contact antenatal schedule, doctor visit summary aggregation, and preference persistence.
-- **Regression Suite**:
-  - **117 automated tests passing** across 8 test suites.
+
+## Stage 5 (Saheli 3.0) First-Run Experience, Personalisation & Product Polish
+
+- **Guided First-Run Onboarding (`OnboardingFlow.jsx`)**:
+  - Implemented a 4-step mobile-first wizard replacing the legacy single-screen onboarding.
+  - **Step 1 (Welcome & Language)**: Empathetic, supportive greeting with immediate English/Hindi toggle and discreet mode pre-selection. Fast-track bypass button allows starting immediately with safe defaults.
+  - **Step 2 (Age & Care Setup)**: Clear choice between Under 18 and Adult. Explains adolescent cycle variability (21–45 days per ACOG) and automatically disables fertility predictions for younger users' privacy and safety.
+  - **Step 3 (Privacy & PIN Setup)**: Clear explanation of local-only storage (IndexedDB) and educational estimates. Optional 4-digit PIN lock with confirmation input, validation, and honest warning regarding unrecoverable data on forgotten PIN.
+  - **Step 4 (Start Options & First Entry)**: Allows logging recent period start date immediately, starting with an empty diary, browsing health guides first, or exploring sample demo data.
+- **Supportive Daily Dashboard (`Today.jsx`)**:
+  - **Empty State**: Warm, welcoming banner when no entries exist (`dayCount === 0`) with low-friction quick actions to log, calendar, health guides, and demo exploration.
+  - **Progress State**: Encouraging progress indicator when 1–2 cycles are recorded, explaining that 3 complete cycles are needed for personalized range calculations without alarming the user.
+  - **Active State**: Displays current cycle day, phase guidance, and predicted window with uncertainty ranges.
+  - **Contextual Education Shortcuts**: Direct shortcuts to educational topics (`/learn#cycle`, `/learn#cramps`, `/learn#late`, `/doctor`, `/visit`, `/ask`) based on logged symptoms, bleeding, or cycle irregularity.
+- **Shared Device Privacy & Discreet Mode**:
+  - Preserved discreet app naming ("Diary" / "डायरी") across header, document title, PWA prompts, and notifications ("Time to check in" / "देखने का समय").
+  - Added a dedicated "Shared Device Privacy Guide" in `Settings.jsx` detailing what local storage protects (AES-GCM encryption, zero cloud tracking) and honest physical limitations (unlocked screen, browser history, homescreen icon) with actionable recommendations.
+- **Automated Test Coverage**:
+  - Added `src/test/onboarding-today.test.js` with 12 targeted tests for onboarding progression, adolescent gating, WebCrypto AES-GCM first-run encryption, empty/progress/active dashboard states, and bilingual key parity.
+  - **129 automated tests passing** across 9 test suites.
   - **0 ESLint errors** (6 fast-refresh warnings in shadcn UI primitives).
   - **Production build verified** (`bun run build`).
 
