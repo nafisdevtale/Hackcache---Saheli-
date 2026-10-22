@@ -55,6 +55,33 @@ Baseline statuses intentionally distinguish implementation from verified behavio
 - **Accessible & Localised Interface**: Enhanced `Insights.jsx` with screen-reader summaries for charts, semantic history tables, clear units, and 100% bilingual parity across English and Hindi.
 - **Automated Test Coverage**: Added `src/test/insights.test.js` with 14 comprehensive tests covering minimum-history gates, irregular cycle widening, adolescent rules, symptom phase associations, pain tracking, and bilingual key integrity. Total test count increased to 85 passing tests across 6 test suites.
 
+## Stage 4 (Saheli 2.2) Trust, Safety & Release Hardening
+
+- **Service-Worker Cache Tightening**:
+  - Refactored `public/sw.js` to strictly enforce an explicit static-asset allowlist (`/`, manifest, icons, favicon, robots.txt, and hashed `/assets/*` bundles).
+  - Unapproved same-origin GET endpoints (e.g. dynamic JSON, API routes) bypass caching completely.
+  - Sensitive query parameters (`pin`, `key`, `token`, `auth`, `data`) and `/export` endpoints are strictly excluded from caching.
+  - Navigation requests receive the canonical cached root shell `/` when offline without persisting arbitrary route parameters.
+  - Added behavioural service-worker fetch interception tests in `src/test/pwa.test.js`.
+- **PIN & WebCrypto Hardening**:
+  - Hardened `decryptJSON` to validate payload structure and handle malformed base64 or corrupt ciphertext gracefully with specific, descriptive error types (`not-encrypted`, `corrupt-ciphertext`, `corrupt-payload`).
+  - Added test suite in `src/test/encryption.test.js` exercising PBKDF2 key derivation, AES-GCM 256-bit authentication tag verification on tampered bytes, 4-digit PIN format validation, and PIN change re-encryption.
+- **Data Persistence & Isolation**:
+  - Implemented resilient storage fallback in `src/lib/storage.js` for private-browsing or restricted iframe contexts where `localStorage` is disabled or throws `SecurityError`.
+  - Verified demo data isolation: demo mode cannot be entered if real diary entries exist; exiting demo purges demo store and resets to empty real diary.
+  - Verified atomic multi-key operations and complete data purge (`deleteAll` purges IndexedDB, localStorage, sessionStorage, and Cache API stores).
+- **Medical & Governance Auditing**:
+  - Implemented automated clinical governance suite in `src/test/medical-sources.test.js` verifying that all 31 cited references in `src/content/sources.js` are valid HTTPS URLs from official authorities (NHS, WHO, ACOG, FIGO, FOGSI, MoHFW, Tele-MANAS, 112).
+  - Verified 100% of red flag rules, urgent checks, pregnancy milestones, and educational paragraphs link to active, cited references.
+  - Verified preservation of national emergency numbers (112, 108, 14416).
+- **Comprehensive Route & Workflow Verification**:
+  - Added routing tests in `src/test/app-routing.test.tsx` verifying that all 12 application routes resolve correctly without falling back to `rootRouteId` or 404.
+  - Added workflow tests in `src/test/user-workflows.test.js` verifying pregnancy due date (280 days), WHO 8-contact antenatal schedule, doctor visit summary aggregation, and preference persistence.
+- **Regression Suite**:
+  - **117 automated tests passing** across 8 test suites.
+  - **0 ESLint errors** (6 fast-refresh warnings in shadcn UI primitives).
+  - **Production build verified** (`bun run build`).
+
 ## Environment constraints
 
 - Production builds are managed by the Lovable harness; do not run a second manual build. Inspect its available build logs instead.

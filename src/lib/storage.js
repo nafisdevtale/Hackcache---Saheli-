@@ -65,24 +65,67 @@ export const DEFAULT_PREFS = {
   readAloud: false,
   discreet: false,
 };
+let memoryStore = {};
+
+function getStorage(type = "localStorage") {
+  try {
+    if (typeof window !== "undefined" && window[type]) {
+      const k = "__saheli_test__";
+      window[type].setItem(k, "1");
+      window[type].removeItem(k);
+      return window[type];
+    }
+  } catch {
+    /* access denied or disabled in private browsing */
+  }
+  return {
+    getItem: (k) => (Object.prototype.hasOwnProperty.call(memoryStore, k) ? memoryStore[k] : null),
+    setItem: (k, v) => {
+      memoryStore[k] = String(v);
+    },
+    removeItem: (k) => {
+      delete memoryStore[k];
+    },
+    clear: () => {
+      memoryStore = {};
+    },
+  };
+}
+
 export function loadPrefs() {
   try {
-    return { ...DEFAULT_PREFS, ...JSON.parse(localStorage.getItem(PREFS_KEY) || "{}") };
+    const store = getStorage("localStorage");
+    return { ...DEFAULT_PREFS, ...JSON.parse(store?.getItem(PREFS_KEY) || "{}") };
   } catch {
     return { ...DEFAULT_PREFS };
   }
 }
 export function savePrefs(p) {
-  localStorage.setItem(PREFS_KEY, JSON.stringify(p));
+  try {
+    const store = getStorage("localStorage");
+    store?.setItem(PREFS_KEY, JSON.stringify(p));
+  } catch {
+    /* access denied */
+  }
 }
 export function clearAppLocalStorage() {
-  Object.keys(localStorage)
-    .filter((k) => k.startsWith("saheli."))
-    .forEach((k) => localStorage.removeItem(k));
   try {
-    Object.keys(sessionStorage)
-      .filter((k) => k.startsWith("saheli."))
-      .forEach((k) => sessionStorage.removeItem(k));
+    const store = getStorage("localStorage");
+    if (store) {
+      Object.keys(store)
+        .filter((k) => k.startsWith("saheli."))
+        .forEach((k) => store.removeItem(k));
+    }
+  } catch {
+    /* unavailable */
+  }
+  try {
+    const sStore = getStorage("sessionStorage");
+    if (sStore) {
+      Object.keys(sStore)
+        .filter((k) => k.startsWith("saheli."))
+        .forEach((k) => sStore.removeItem(k));
+    }
   } catch {
     /* unavailable */
   }

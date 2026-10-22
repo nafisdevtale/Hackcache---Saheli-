@@ -37,12 +37,19 @@ export async function encryptJSON(key, obj) {
 
 export async function decryptJSON(key, payload) {
   if (!isEncrypted(payload)) throw new Error("not-encrypted");
-  const pt = await crypto.subtle.decrypt(
-    { name: "AES-GCM", iv: unb64(payload.iv) },
-    key,
-    unb64(payload.ct),
-  );
-  return JSON.parse(dec.decode(pt));
+  let ivBytes, ctBytes;
+  try {
+    ivBytes = unb64(payload.iv);
+    ctBytes = unb64(payload.ct);
+  } catch {
+    throw new Error("corrupt-ciphertext");
+  }
+  const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: ivBytes }, key, ctBytes);
+  try {
+    return JSON.parse(dec.decode(pt));
+  } catch {
+    throw new Error("corrupt-payload");
+  }
 }
 
 export const isEncrypted = (p) =>

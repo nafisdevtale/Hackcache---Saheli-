@@ -28,6 +28,14 @@ Saheli is a free, private, local-first menstrual health companion Progressive We
 - **Supportive Health Guidance**: Provides contextual links to medical guidance (`/doctor`), relevant lessons (`/learn`), doctor visit summaries (`/visit`), and national helplines (112, 108, Tele-MANAS 14416).
 - **Accessibility & Bilingual Localization**: Fully screen-reader accessible with semantic data tables, SVG chart summaries, high-contrast support, and 100% matched English and Hindi coverage.
 
+## Trust, Safety & Release Hardening (Saheli 2.2)
+
+- **Strict Service Worker Allowlist**: `public/sw.js` restricts caching to an explicit static asset allowlist (`/`, manifest, icons, favicon, robots.txt, and hashed `/assets/*` bundles). Unapproved same-origin GET endpoints and sensitive query parameters (`pin`, `key`, `token`, `auth`, `/export`) are strictly excluded.
+- **WebCrypto Hardening**: Enhanced `decryptJSON` to validate payload structure and handle malformed base64 and tampered ciphertext bytes with descriptive error handling.
+- **Storage Resilience**: Implemented fallback in-memory storage for private browsing and restricted iframe environments where `localStorage` is disabled or inaccessible.
+- **Medical & Governance Auditing**: Automated test suite (`medical-sources.test.js`) verifies all 31 sources across NHS, WHO, ACOG, FIGO, FOGSI, MoHFW, Tele-MANAS, and 112 India, verifying that 100% of medical statements carry verified source attributions.
+- **Route & Workflow Verification**: Comprehensive test coverage across all 12 application routes (`app-routing.test.tsx`) and full pregnancy, doctor summary, and preferences workflows (`user-workflows.test.js`). Total automated test coverage expanded to 117 tests.
+
 ---
 
 # SAHELI — HACKCACHE STAGE 1: COMPLETE BUILD PROMPT

@@ -155,7 +155,9 @@ describe("PWA Client Lifecycle & Helpers", () => {
 describe("Service Worker Fetch Interception Simulation", () => {
   const swCode = fs.readFileSync(path.resolve(process.cwd(), "public/sw.js"), "utf-8");
 
-  function createSwEnvironment(fetchImpl = vi.fn()) {
+  function createSwEnvironment(
+    fetchImpl = vi.fn().mockResolvedValue(new Response("ok", { status: 200 })),
+  ) {
     const listeners = {};
     const mockCacheStorage = new Map();
     const mockCaches = {
@@ -279,5 +281,71 @@ describe("Service Worker Fetch Interception Simulation", () => {
     };
     listeners["fetch"](event);
     expect(respondedWith).toBe(false);
+  });
+
+  it("bypasses service worker cache for unapproved same-origin GET endpoints (strict allowlist)", () => {
+    const { listeners } = createSwEnvironment();
+    const unapprovedUrls = [
+      "https://saheli.local/api/records.json",
+      "https://saheli.local/user/data",
+      "https://saheli.local/private/notes",
+      "https://saheli.local/settings.json",
+    ];
+
+    for (const url of unapprovedUrls) {
+      let respondedWith = false;
+      const event = {
+        request: { method: "GET", url },
+        respondWith: () => {
+          respondedWith = true;
+        },
+      };
+      listeners["fetch"](event);
+      expect(respondedWith, `URL ${url} should not be intercepted by SW`).toBe(false);
+    }
+  });
+
+  it("bypasses service worker cache for requests with sensitive query parameters", () => {
+    const { listeners } = createSwEnvironment();
+    const sensitiveUrls = [
+      "https://saheli.local/?pin=1234",
+      "https://saheli.local/view?key=secret",
+      "https://saheli.local/auth?token=abc",
+    ];
+
+    for (const url of sensitiveUrls) {
+      let respondedWith = false;
+      const event = {
+        request: { method: "GET", url },
+        respondWith: () => {
+          respondedWith = true;
+        },
+      };
+      listeners["fetch"](event);
+      expect(respondedWith, `URL ${url} should bypass SW cache`).toBe(false);
+    }
+  });
+
+  it("intercepts and handles approved static assets from allowlist", () => {
+    const { listeners } = createSwEnvironment();
+    const approvedUrls = [
+      "https://saheli.local/manifest.webmanifest",
+      "https://saheli.local/favicon.ico",
+      "https://saheli.local/icon-192.png",
+      "https://saheli.local/assets/index-abc123.js",
+      "https://saheli.local/assets/styles-xyz789.css",
+    ];
+
+    for (const url of approvedUrls) {
+      let respondedWith = false;
+      const event = {
+        request: { method: "GET", url },
+        respondWith: () => {
+          respondedWith = true;
+        },
+      };
+      listeners["fetch"](event);
+      expect(respondedWith, `Approved URL ${url} should be handled by SW`).toBe(true);
+    }
   });
 });

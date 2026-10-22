@@ -1,9 +1,29 @@
-# Build 2 audit
+# Build 2 Audit & Hardening Roadmap
 
-- [x] Inspect current code and run baseline tests (15 passed).
-- [x] Open all 12 screens at 360px; no page errors or third-party requests observed.
-- [ ] Repair confirmed persistence, import validation, and error handling gaps.
-- [ ] Audit medical references, rules, lessons, and local FAQs.
-- [ ] Verify PIN lifecycle, ciphertext, export/import, deletion, and mode separation in the browser.
-- [ ] Verify reminders, pregnancy, print pagination, Hindi/large text, and screen interactions.
-- [ ] Run regression tests and record evidence, discrepancies, and limitations in AUDIT.md.
+- [x] **Inspect current code and run baseline tests**: Baseline 15 tests passed across 3 test suites.
+- [x] **Open all 12 screens at 360px**: Verified route tree and all 12 routes (`/`, `/calendar`, `/log`, `/insights`, `/doctor`, `/visit`, `/learn`, `/ask`, `/reminders`, `/pregnancy`, `/settings`, `/more`) match registered route targets with no third-party requests or unhandled errors.
+- [x] **Repair confirmed persistence, import validation, and error handling gaps**:
+  - Enforced strict whitelist schema validation in `parseImport` for root, settings, pregnancy, and reminder keys.
+  - Reject malformed entries, non-date keys, and invalid types before modifying client state.
+  - Hardened IndexedDB transactions with error propagation, and added in-memory storage fallback for private-browsing or restricted origins.
+  - Implemented non-overwriting merge and atomic replacement strategies in `mergeRecords`.
+- [x] **Audit medical references, rules, lessons, and local FAQs**:
+  - Validated all 31 clinical sources in `src/content/sources.js` (NHS, WHO, ACOG, FIGO, FOGSI, MoHFW, Tele-MANAS, 112).
+  - Verified 100% of red flag rules, urgent rules, pregnancy guidance, and lesson paragraphs map to active, cited references.
+  - Automated governance test suite (`medical-sources.test.js`) verifies reference validity, clinical thresholds (FIGO 24-38d adult, ACOG 21-45d under-18, NHS >7d heavy, 90d missed), and emergency numbers.
+- [x] **Verify PIN lifecycle, ciphertext, export/import, deletion, and mode separation**:
+  - AES-GCM (256-bit) and PBKDF2-SHA256 (600,000 iterations) lifecycle tested: key derivation, encryption roundtrip, wrong PIN rejection, PIN change re-encryption, and graceful handling of corrupt base64/ciphertext.
+  - Rate limiting (5 attempts with 30s lockout) enforced on lock screen.
+  - Demo mode strictly isolated: blocked if real diary contains entries; exiting demo purges demo store and resets to empty real diary.
+  - Complete deletion workflow (`deleteAll`): atomically deletes IndexedDB database, clears app localStorage/sessionStorage, and purges all Cache API stores (`caches.delete`).
+- [x] **Verify reminders, pregnancy, print pagination, Hindi/large text, and screen interactions**:
+  - Reminders: handles Notification permission request, unsupported states, and discreet fallback ("Time to check in").
+  - Pregnancy: gated behind adult opt-in, calculates 280-day due date from LMP, includes WHO 8-contact antenatal schedule, flags pregnancy bleeding as urgent, and pauses regular cycle predictions.
+  - Visit summary: formats printable doctor summary with demo alert banner, symptom counts, pain severity, medications, and doctor guidance items.
+  - Accessibility & Localization: text sizes (`sm`, `md`, `lg`), high contrast, and 100% bilingual parity between English and Hindi across all screens.
+- [x] **Tighten Service-Worker cache privacy**:
+  - Enforced strict static asset allowlist in `sw.js`: caches only approved shell files (`/`, manifest, icons) and versioned `/assets/*` bundles.
+  - Excluded sensitive query parameters (`pin`, `key`, `token`) and `/export` paths.
+  - Unapproved same-origin GET endpoints (e.g. `/api/*`, dynamic JSON) bypass cache completely.
+- [x] **Run regression tests and record evidence, discrepancies, and limitations in AUDIT.md**:
+  - 117 tests passing across 8 test suites. Zero lint errors. Production build verified.
