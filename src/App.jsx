@@ -21,6 +21,8 @@ export function AppProvider({ children }) {
   const [record, setRecord] = useState(null);
   const [banners, setBanners] = useState([]);
   const keyRef = useRef(null);
+  const stateRef = useRef({ meta: null, record: null });
+  const writes = useRef(Promise.resolve());
   const today = todayStr();
 
   const setPrefs = useCallback((patch) => {
@@ -42,7 +44,9 @@ export function AppProvider({ children }) {
         if (m.pin?.enabled) return setStatus("locked");
         const r = await idbGet(storeKey(m));
         if (isEncrypted(r)) return setStatus("locked");
-        setRecord(normalizeRecord(r));
+        const normalized = normalizeRecord(r);
+        stateRef.current = { meta: m, record: normalized };
+        setRecord(normalized);
         setStatus("ready");
       } catch {
         setStatus("error");
@@ -72,12 +76,20 @@ export function AppProvider({ children }) {
     await idbWrite([["meta", nextMeta], [storeKey(nextMeta), value]], extraDeletes);
     setMeta(nextMeta);
     setRecord(next);
+    stateRef.current = { meta: nextMeta, record: next };
+  }
+
+  // Serialize mutations and read the last committed record, not a stale render.
+  function mutate(fn) {
+    const task = writes.current.then(() => fn(stateRef.current));
+    writes.current = task.catch(() => {});
+    return task;
   }
 
   const api = {
-    async saveDay(entry) { await writeRecord({ ...record, days: { ...record.days, [entry.date]: entry } }); },
-    async deleteDay(date) { const days = { ...record.days }; delete days[date]; await writeRecord({ ...record, days }); },
-    async update(fn) { await writeRecord(fn(record)); },
+    async saveDay(entry) { return mutate(({ record: r, meta: m }) => writeRecord({ ...r, days: { ...r.days, [entry.date]: entry } }, m)); },
+    async deleteDay(date) { return mutate(({ record: r, meta: m }) => { const days = { ...r.days }; delete days[date]; return writeRecord({ ...r, days }, m); }); },
+    async update(fn) { return mutate(({ record: r, meta: m }) => writeRecord(fn(r), m)); },
     async chooseDemo(ageGroup) {
       const m = { onboarded: true, mode: "demo", pin: { enabled: false } };
       const r = buildDemo(todayStr());
@@ -101,8 +113,9 @@ export function AppProvider({ children }) {
       await writeRecord(r, { ...meta, mode: "real" }, ["demo"]);
     },
     async tryDemo() {
+      if (Object.keys(record.days).length) throw new Error("Demo requires an empty diary");
       const r = buildDemo(todayStr());
-      await writeRecord(r, { ...meta, mode: "demo" });
+      await writeRecord(r, { ...meta, mode: "demo" }, ["real"]);
     },
     async unlock(pin) {
       const key = await deriveKey(pin, meta.pin.salt, meta.pin.iterations);
@@ -110,9 +123,10 @@ export function AppProvider({ children }) {
       const r = await decryptJSON(key, payload); // throws on wrong PIN / corrupt data
       keyRef.current = key;
       setRecord(normalizeRecord(r));
+      stateRef.current = { meta, record: normalizeRecord(r) };
       setStatus("ready");
     },
-    lock() { keyRef.current = null; setRecord(null); setStatus("locked"); },
+    lock() { keyRef.current = null; stateRef.current = { meta, record: null }; setRecord(null); setBanners([]); setStatus("locked"); },
     async enablePin(pin) {
       const salt = randomSaltB64();
       const iterations = CONFIG.pbkdf2Iterations;
@@ -122,6 +136,7 @@ export function AppProvider({ children }) {
       await idbWrite([["meta", nextMeta], [storeKey(nextMeta), ct]]);
       keyRef.current = key;
       setMeta(nextMeta);
+      stateRef.current.meta = nextMeta;
     },
     async verifyPin(pin) {
       const key = await deriveKey(pin, meta.pin.salt, meta.pin.iterations);
@@ -134,6 +149,7 @@ export function AppProvider({ children }) {
       await idbWrite([["meta", nextMeta], [storeKey(nextMeta), record]]);
       keyRef.current = null;
       setMeta(nextMeta);
+      stateRef.current.meta = nextMeta;
     },
     async changePin(oldPin, newPin) {
       await api.verifyPin(oldPin);
@@ -144,12 +160,13 @@ export function AppProvider({ children }) {
       await idbWrite([["meta", nextMeta], [storeKey(nextMeta), ct]]);
       keyRef.current = key;
       setMeta(nextMeta);
+      stateRef.current.meta = nextMeta;
     },
-    async importRecord(incoming, strategy) { await writeRecord(mergeRecords(record, incoming, strategy)); },
+    async importRecord(incoming, strategy) { if (meta?.mode === "demo") throw new Error("Import is unavailable in demo mode"); return mutate(({ record: r, meta: m }) => writeRecord(mergeRecords(r, incoming, strategy), m)); },
     async deleteAll() {
-      keyRef.current = null;
       await idbDeleteDatabase();
       clearAppLocalStorage();
+      keyRef.current = null;
       window.location.replace("/");
     },
   };
@@ -198,7 +215,7 @@ export function AppProvider({ children }) {
   const value = {
     prefs, setPrefs, t, L, fmt, fmtRange, lang: prefs.lang, today,
     status, meta, record, analysis, safety, fertilityVisible, pregnancyVisible,
-    isDemo: meta?.mode === "demo", banners: bannersView, dismissBanner: (id) => setBanners((b) => b.filter((x) => x.id !== id)), fire,
+    isDemo: meta?.mode === "demo", banners: prefs.discreet ? bannersView.map((b) => ({ ...b, text: t("rem.msg.checkin") })) : bannersView, dismissBanner: (id) => setBanners((b) => b.filter((x) => x.id !== id)), fire,
     ...api,
   };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

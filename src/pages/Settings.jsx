@@ -160,11 +160,14 @@ export default function Settings() {
   const { t, prefs, setPrefs, record, update, isDemo, exitDemo, tryDemo, deleteAll } = app;
   const s = record.settings;
   const [confirmDel, setConfirmDel] = useState(false);
-  const setS = (patch) => update((r) => ({ ...r, settings: { ...r.settings, ...patch } }));
+  const [failure, setFailure] = useState("");
+  const act = async (fn) => { try { await fn(); setFailure(""); } catch { setFailure(t("set.failed")); } };
+  const setS = (patch) => act(() => update((r) => ({ ...r, settings: { ...r.settings, ...patch } })));
   const realEmpty = Object.keys(record.days).length === 0;
   return (
     <div className="space-y-4">
       <PageTitle>{t("set.title")}</PageTitle>
+      <Status msg={failure} tone="err" />
 
       <Card className="space-y-3">
         <h2 className="text-lg font-bold">{t("set.display")}</h2>
@@ -217,8 +220,8 @@ export default function Settings() {
 
       <Card className="space-y-2">
         <h2 className="text-lg font-bold">{t("set.demo")}</h2>
-        {isDemo ? <><p>{t("set.demoActive")}</p><Btn onClick={exitDemo}>{t("set.exitDemo")}</Btn></>
-          : realEmpty ? <Btn variant="outline" onClick={tryDemo}>{t("set.tryDemo")}</Btn> : <p className="text-sm">{t("set.tryDemoBlocked")}</p>}
+        {isDemo ? <><p>{t("set.demoActive")}</p><Btn onClick={() => act(exitDemo)}>{t("set.exitDemo")}</Btn></>
+          : realEmpty ? <Btn variant="outline" onClick={() => act(tryDemo)}>{t("set.tryDemo")}</Btn> : <p className="text-sm">{t("set.tryDemoBlocked")}</p>}
       </Card>
 
       <Card className="space-y-2 border-destructive">
@@ -226,7 +229,7 @@ export default function Settings() {
         <p>{t("set.deleteWarn")}</p>
         {!confirmDel ? <Btn variant="danger" onClick={() => setConfirmDel(true)}>{t("set.delete")}</Btn> : (
           <div role="alertdialog" aria-label={t("set.deleteWarn")} className="flex flex-wrap gap-2">
-            <Btn variant="danger" onClick={deleteAll}>{t("set.deleteConfirm")}</Btn>
+            <Btn variant="danger" onClick={() => act(deleteAll)}>{t("set.deleteConfirm")}</Btn>
             <Btn variant="outline" onClick={() => setConfirmDel(false)}>{t("common.cancel")}</Btn>
           </div>
         )}

@@ -30,9 +30,10 @@ export function blankDay(date) {
 // Validates a single day entry; returns list of error keys.
 export function validateDay(d) {
   const errs = [];
+  if (typeof d.period !== "boolean" || typeof d.painStoppedActivities !== "boolean" || ![true, false, null].includes(d.padHourly) || ![true, false, null].includes(d.bigClots) || !["yes", "no", "na"].includes(d.painkillerHelped)) errs.push("imp.badEntry");
   if (!isValidDate(d.date)) errs.push("err.date");
   if (d.flow != null && !FLOWS.includes(d.flow)) errs.push("err.flow");
-  if (typeof d.pain !== "number" || d.pain < 0 || d.pain > 10) errs.push("err.pain");
+  if (!Number.isInteger(d.pain) || d.pain < 0 || d.pain > 10) errs.push("err.pain");
   if (d.sleep != null && (typeof d.sleep !== "number" || isNaN(d.sleep) || d.sleep < 0 || d.sleep > 24)) errs.push("err.sleep");
   if (d.mood != null && !MOODS.includes(d.mood)) errs.push("err.mood");
   if (d.energy != null && !ENERGY.includes(d.energy)) errs.push("err.energy");
@@ -64,8 +65,16 @@ export function parseImport(text) {
   let obj;
   try { obj = JSON.parse(text); } catch { return { ok: false, error: "imp.notJson" }; }
   if (!obj || obj.app !== "saheli" || obj.format !== 1 || !obj.record) return { ok: false, error: "imp.wrongFormat" };
+  const object = (v) => !!v && typeof v === "object" && !Array.isArray(v);
+  const raw = obj.record;
+  if (!object(raw) || raw.version !== 1 || !object(raw.days) || !object(raw.settings) || !object(raw.pregnancy) || !object(raw.reminders)) return { ok: false, error: "imp.wrongFormat" };
   const rec = normalizeRecord(obj.record);
+  const s = rec.settings, p = rec.pregnancy, r = rec.reminders;
+  const time = (v) => typeof v === "string" && /^([01]\d|2[0-3]):[0-5]\d$/.test(v);
+  const bool = (v) => typeof v === "boolean";
+  if (!["adult", "under18"].includes(s.ageGroup) || !Array.isArray(s.trackedSymptoms) || s.trackedSymptoms.some((id) => !SYMPTOM_IDS.includes(id)) || [s.showFertility, s.fertilityOptIn, s.pregnancyOptIn, s.trackingPaused, p.active, r.notify, r.nextPeriod, r.daily.on, r.custom.on].some((v) => !bool(v)) || (p.lmp !== null && !isValidDate(p.lmp)) || (p.active && !isValidDate(p.lmp)) || !time(r.daily.time) || !time(r.custom.time) || typeof r.custom.text !== "string" || r.custom.text.length > 80 || !Array.isArray(r.medicines) || r.medicines.some((m) => !object(m) || typeof m.name !== "string" || !m.name.trim() || m.name.length > 60 || !time(m.time))) return { ok: false, error: "imp.wrongFormat" };
   for (const [k, v] of Object.entries(rec.days)) {
+    if (!object(v)) return { ok: false, error: "imp.badEntry", date: k };
     const day = { ...blankDay(k), ...v };
     if (day.date !== k || validateDay(day).length) return { ok: false, error: "imp.badEntry", date: k };
     rec.days[k] = day;
