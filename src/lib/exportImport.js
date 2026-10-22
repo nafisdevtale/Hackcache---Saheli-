@@ -5,9 +5,22 @@ export function emptyRecord() {
   return {
     version: 1,
     days: {},
-    settings: { ageGroup: "adult", trackedSymptoms: [...SYMPTOM_IDS], showFertility: true, fertilityOptIn: false, pregnancyOptIn: false, trackingPaused: false },
+    settings: {
+      ageGroup: "adult",
+      trackedSymptoms: [...SYMPTOM_IDS],
+      showFertility: true,
+      fertilityOptIn: false,
+      pregnancyOptIn: false,
+      trackingPaused: false,
+    },
     pregnancy: { active: false, lmp: null },
-    reminders: { notify: false, nextPeriod: false, daily: { on: false, time: "20:00" }, medicines: [], custom: { on: false, text: "", time: "09:00" } },
+    reminders: {
+      notify: false,
+      nextPeriod: false,
+      daily: { on: false, time: "20:00" },
+      medicines: [],
+      custom: { on: false, text: "", time: "09:00" },
+    },
   };
 }
 
@@ -19,32 +32,107 @@ export function normalizeRecord(r) {
     days: r.days && typeof r.days === "object" ? r.days : {},
     settings: { ...e.settings, ...(r.settings || {}) },
     pregnancy: { ...e.pregnancy, ...(r.pregnancy || {}) },
-    reminders: { ...e.reminders, ...(r.reminders || {}), daily: { ...e.reminders.daily, ...(r.reminders?.daily || {}) }, custom: { ...e.reminders.custom, ...(r.reminders?.custom || {}) } },
+    reminders: {
+      ...e.reminders,
+      ...(r.reminders || {}),
+      daily: { ...e.reminders.daily, ...(r.reminders?.daily || {}) },
+      custom: { ...e.reminders.custom, ...(r.reminders?.custom || {}) },
+    },
   };
 }
 
 export function blankDay(date) {
-  return { date, period: false, flow: null, padHourly: null, bigClots: null, pain: 0, painStoppedActivities: false, painkillerHelped: "na", symptoms: [], mood: null, energy: null, sleep: null, medicines: "", note: "" };
+  return {
+    date,
+    period: false,
+    flow: null,
+    padHourly: null,
+    bigClots: null,
+    pain: 0,
+    painStoppedActivities: false,
+    painkillerHelped: "na",
+    symptoms: [],
+    mood: null,
+    energy: null,
+    sleep: null,
+    medicines: "",
+    note: "",
+  };
 }
+
+const ALLOWED_DAY_KEYS = [
+  "date",
+  "period",
+  "flow",
+  "padHourly",
+  "bigClots",
+  "pain",
+  "painStoppedActivities",
+  "painkillerHelped",
+  "symptoms",
+  "mood",
+  "energy",
+  "sleep",
+  "medicines",
+  "note",
+];
+const ALLOWED_ROOT_KEYS = ["version", "days", "settings", "pregnancy", "reminders"];
+const ALLOWED_SETTINGS_KEYS = [
+  "ageGroup",
+  "trackedSymptoms",
+  "showFertility",
+  "fertilityOptIn",
+  "pregnancyOptIn",
+  "trackingPaused",
+];
+const ALLOWED_PREGNANCY_KEYS = ["active", "lmp"];
+const ALLOWED_REMINDERS_KEYS = ["notify", "nextPeriod", "daily", "medicines", "custom"];
+const ALLOWED_DAILY_KEYS = ["on", "time"];
+const ALLOWED_CUSTOM_KEYS = ["on", "text", "time"];
+const ALLOWED_MEDICINE_KEYS = ["name", "time"];
+
+const hasOnlyKeys = (obj, allowed) => {
+  const keys = Object.keys(obj);
+  return keys.length === allowed.length && keys.every((k) => allowed.includes(k));
+};
 
 // Validates a single day entry; returns list of error keys.
 export function validateDay(d) {
   const errs = [];
-  if (typeof d.period !== "boolean" || typeof d.painStoppedActivities !== "boolean" || ![true, false, null].includes(d.padHourly) || ![true, false, null].includes(d.bigClots) || !["yes", "no", "na"].includes(d.painkillerHelped)) errs.push("imp.badEntry");
+  if (!Object.keys(d).every((k) => ALLOWED_DAY_KEYS.includes(k))) {
+    errs.push("imp.badEntry");
+  }
+  if (
+    typeof d.period !== "boolean" ||
+    typeof d.painStoppedActivities !== "boolean" ||
+    ![true, false, null].includes(d.padHourly) ||
+    ![true, false, null].includes(d.bigClots) ||
+    !["yes", "no", "na"].includes(d.painkillerHelped)
+  )
+    errs.push("imp.badEntry");
   if (!isValidDate(d.date)) errs.push("err.date");
   if (d.flow != null && !FLOWS.includes(d.flow)) errs.push("err.flow");
   if (!Number.isInteger(d.pain) || d.pain < 0 || d.pain > 10) errs.push("err.pain");
-  if (d.sleep != null && (typeof d.sleep !== "number" || isNaN(d.sleep) || d.sleep < 0 || d.sleep > 24)) errs.push("err.sleep");
+  if (
+    d.sleep != null &&
+    (typeof d.sleep !== "number" || isNaN(d.sleep) || d.sleep < 0 || d.sleep > 24)
+  )
+    errs.push("err.sleep");
   if (d.mood != null && !MOODS.includes(d.mood)) errs.push("err.mood");
   if (d.energy != null && !ENERGY.includes(d.energy)) errs.push("err.energy");
-  if (!Array.isArray(d.symptoms) || d.symptoms.some((s) => !SYMPTOM_IDS.includes(s))) errs.push("err.symptoms");
+  if (!Array.isArray(d.symptoms) || d.symptoms.some((s) => !SYMPTOM_IDS.includes(s)))
+    errs.push("err.symptoms");
   if (typeof d.note !== "string" || d.note.length > 2000) errs.push("err.note");
   if (typeof d.medicines !== "string" || d.medicines.length > 300) errs.push("err.medicines");
   return errs;
 }
 
 export function exportJSON(record) {
-  return JSON.stringify({ app: "saheli", format: 1, exportedAt: new Date().toISOString(), record }, null, 2);
+  return JSON.stringify(
+    { app: "saheli", format: 1, exportedAt: new Date().toISOString(), record },
+    null,
+    2,
+  );
 }
 
 const csvCell = (v) => {
@@ -52,31 +140,104 @@ const csvCell = (v) => {
   return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 };
 export function exportCSV(record) {
-  const cols = ["date", "period", "flow", "padHourly", "bigClots", "pain", "painStoppedActivities", "painkillerHelped", "symptoms", "mood", "energy", "sleep", "medicines", "note"];
-  const rows = Object.keys(record.days).sort().map((k) => {
-    const d = { ...blankDay(k), ...record.days[k] };
-    return cols.map((c) => csvCell(c === "symptoms" ? d.symptoms.join(";") : d[c])).join(",");
-  });
+  const cols = [
+    "date",
+    "period",
+    "flow",
+    "padHourly",
+    "bigClots",
+    "pain",
+    "painStoppedActivities",
+    "painkillerHelped",
+    "symptoms",
+    "mood",
+    "energy",
+    "sleep",
+    "medicines",
+    "note",
+  ];
+  const rows = Object.keys(record.days)
+    .sort()
+    .map((k) => {
+      const d = { ...blankDay(k), ...record.days[k] };
+      return cols.map((c) => csvCell(c === "symptoms" ? d.symptoms.join(";") : d[c])).join(",");
+    });
   return [cols.join(","), ...rows].join("\n");
 }
 
 // Returns { ok, record?, error? }. Never mutates storage.
 export function parseImport(text) {
   let obj;
-  try { obj = JSON.parse(text); } catch { return { ok: false, error: "imp.notJson" }; }
-  if (!obj || obj.app !== "saheli" || obj.format !== 1 || !obj.record) return { ok: false, error: "imp.wrongFormat" };
+  try {
+    obj = JSON.parse(text);
+  } catch {
+    return { ok: false, error: "imp.notJson" };
+  }
+  if (!obj || obj.app !== "saheli" || obj.format !== 1 || !obj.record)
+    return { ok: false, error: "imp.wrongFormat" };
   const object = (v) => !!v && typeof v === "object" && !Array.isArray(v);
   const raw = obj.record;
-  if (!object(raw) || raw.version !== 1 || !object(raw.days) || !object(raw.settings) || !object(raw.pregnancy) || !object(raw.reminders)) return { ok: false, error: "imp.wrongFormat" };
+  if (
+    !object(raw) ||
+    !hasOnlyKeys(raw, ALLOWED_ROOT_KEYS) ||
+    raw.version !== 1 ||
+    !object(raw.days) ||
+    !object(raw.settings) ||
+    !hasOnlyKeys(raw.settings, ALLOWED_SETTINGS_KEYS) ||
+    !object(raw.pregnancy) ||
+    !hasOnlyKeys(raw.pregnancy, ALLOWED_PREGNANCY_KEYS) ||
+    !object(raw.reminders) ||
+    !hasOnlyKeys(raw.reminders, ALLOWED_REMINDERS_KEYS) ||
+    !object(raw.reminders.daily) ||
+    !hasOnlyKeys(raw.reminders.daily, ALLOWED_DAILY_KEYS) ||
+    !object(raw.reminders.custom) ||
+    !hasOnlyKeys(raw.reminders.custom, ALLOWED_CUSTOM_KEYS)
+  )
+    return { ok: false, error: "imp.wrongFormat" };
   const rec = normalizeRecord(obj.record);
-  const s = rec.settings, p = rec.pregnancy, r = rec.reminders;
+  const s = rec.settings,
+    p = rec.pregnancy,
+    r = rec.reminders;
   const time = (v) => typeof v === "string" && /^([01]\d|2[0-3]):[0-5]\d$/.test(v);
   const bool = (v) => typeof v === "boolean";
-  if (!["adult", "under18"].includes(s.ageGroup) || !Array.isArray(s.trackedSymptoms) || s.trackedSymptoms.some((id) => !SYMPTOM_IDS.includes(id)) || [s.showFertility, s.fertilityOptIn, s.pregnancyOptIn, s.trackingPaused, p.active, r.notify, r.nextPeriod, r.daily.on, r.custom.on].some((v) => !bool(v)) || (p.lmp !== null && !isValidDate(p.lmp)) || (p.active && !isValidDate(p.lmp)) || !time(r.daily.time) || !time(r.custom.time) || typeof r.custom.text !== "string" || r.custom.text.length > 80 || !Array.isArray(r.medicines) || r.medicines.some((m) => !object(m) || typeof m.name !== "string" || !m.name.trim() || m.name.length > 60 || !time(m.time))) return { ok: false, error: "imp.wrongFormat" };
-  for (const [k, v] of Object.entries(rec.days)) {
-    if (!object(v)) return { ok: false, error: "imp.badEntry", date: k };
+  if (
+    !["adult", "under18"].includes(s.ageGroup) ||
+    !Array.isArray(s.trackedSymptoms) ||
+    s.trackedSymptoms.some((id) => !SYMPTOM_IDS.includes(id)) ||
+    [
+      s.showFertility,
+      s.fertilityOptIn,
+      s.pregnancyOptIn,
+      s.trackingPaused,
+      p.active,
+      r.notify,
+      r.nextPeriod,
+      r.daily.on,
+      r.custom.on,
+    ].some((v) => !bool(v)) ||
+    (p.lmp !== null && !isValidDate(p.lmp)) ||
+    (p.active && !isValidDate(p.lmp)) ||
+    !time(r.daily.time) ||
+    !time(r.custom.time) ||
+    typeof r.custom.text !== "string" ||
+    r.custom.text.length > 80 ||
+    !Array.isArray(r.medicines) ||
+    r.medicines.some(
+      (m) =>
+        !object(m) ||
+        !hasOnlyKeys(m, ALLOWED_MEDICINE_KEYS) ||
+        typeof m.name !== "string" ||
+        !m.name.trim() ||
+        m.name.length > 60 ||
+        !time(m.time),
+    )
+  )
+    return { ok: false, error: "imp.wrongFormat" };
+  for (const [k, v] of Object.entries(raw.days)) {
+    if (!isValidDate(k) || !object(v)) return { ok: false, error: "imp.badEntry", date: k };
     const day = { ...blankDay(k), ...v };
-    if (day.date !== k || validateDay(day).length) return { ok: false, error: "imp.badEntry", date: k };
+    if (day.date !== k || validateDay(v).length)
+      return { ok: false, error: "imp.badEntry", date: k };
     rec.days[k] = day;
   }
   return { ok: true, record: rec };

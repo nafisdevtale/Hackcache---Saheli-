@@ -8,7 +8,9 @@ export function isValidDate(s) {
   if (typeof s !== "string") return false;
   const m = RE.exec(s);
   if (!m) return false;
-  const y = +m[1], mo = +m[2], d = +m[3];
+  const y = +m[1],
+    mo = +m[2],
+    d = +m[3];
   const dt = new Date(Date.UTC(y, mo - 1, d));
   return dt.getUTCFullYear() === y && dt.getUTCMonth() === mo - 1 && dt.getUTCDate() === d;
 }
@@ -46,16 +48,20 @@ export const weekdayOf = (s) => new Date(toNum(s) * DAY).getUTCDay(); // 0=Sun
 const loc = (lang) => (lang === "hi" ? "hi-IN" : "en-IN");
 export function formatDate(s, lang = "en", opts = { day: "numeric", month: "short" }) {
   if (!isValidDate(s)) return "";
-  return new Intl.DateTimeFormat(loc(lang), { ...opts, timeZone: "UTC" }).format(new Date(toNum(s) * DAY));
+  return new Intl.DateTimeFormat(loc(lang), { ...opts, timeZone: "UTC" }).format(
+    new Date(toNum(s) * DAY),
+  );
 }
 export function formatRange(a, b, lang = "en") {
   if (a === b) return formatDate(a, lang);
   return `${formatDate(a, lang)} – ${formatDate(b, lang)}`;
 }
 export function monthTitle(y, m0, lang = "en") {
-  return new Intl.DateTimeFormat(loc(lang), { month: "long", year: "numeric", timeZone: "UTC" }).format(
-    new Date(Date.UTC(y, m0, 1)),
-  );
+  return new Intl.DateTimeFormat(loc(lang), {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(Date.UTC(y, m0, 1)));
 }
 export function weekdayNames(lang = "en") {
   const f = new Intl.DateTimeFormat(loc(lang), { weekday: "short", timeZone: "UTC" });

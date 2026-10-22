@@ -6,15 +6,26 @@ import { PageTitle } from "@/components/common/ui.jsx";
 export default function More() {
   const { t, pregnancyVisible } = useApp();
   const items = [
-    ["/insights", "nav.insights", BarChart3], ["/doctor", "nav.doctor", Stethoscope], ["/ask", "nav.ask", MessageCircle],
-    ["/reminders", "nav.reminders", Bell], ...(pregnancyVisible ? [["/pregnancy", "nav.pregnancy", Baby]] : []), ["/settings", "nav.settings", Settings],
+    ["/insights", "nav.insights", BarChart3],
+    ["/doctor", "nav.doctor", Stethoscope],
+    ["/ask", "nav.ask", MessageCircle],
+    ["/reminders", "nav.reminders", Bell],
+    ...(pregnancyVisible ? [["/pregnancy", "nav.pregnancy", Baby]] : []),
+    ["/settings", "nav.settings", Settings],
   ];
   return (
     <div>
       <PageTitle>{t("more.title")}</PageTitle>
       <ul className="space-y-2">
         {items.map(([to, k, Icon]) => (
-          <li key={to}><Link to={to} className="flex min-h-14 items-center gap-3 rounded-2xl border border-border bg-card p-4 text-lg font-semibold hover:bg-muted"><Icon aria-hidden className="h-6 w-6 text-primary" /> {t(k)}</Link></li>
+          <li key={to}>
+            <Link
+              to={to}
+              className="flex min-h-14 items-center gap-3 rounded-2xl border border-border bg-card p-4 text-lg font-semibold hover:bg-muted"
+            >
+              <Icon aria-hidden className="h-6 w-6 text-primary" /> {t(k)}
+            </Link>
+          </li>
         ))}
       </ul>
     </div>

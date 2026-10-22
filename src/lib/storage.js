@@ -7,7 +7,10 @@ function open() {
   return new Promise((res, rej) => {
     const r = indexedDB.open(DB, 1);
     r.onupgradeneeded = () => r.result.createObjectStore(STORE);
-    r.onsuccess = () => { r.result.onversionchange = () => r.result.close(); res(r.result); };
+    r.onsuccess = () => {
+      r.result.onversionchange = () => r.result.close();
+      res(r.result);
+    };
     r.onerror = () => rej(r.error);
   });
 }
@@ -31,9 +34,18 @@ export async function idbWrite(puts = [], deletes = []) {
     const st = tx.objectStore(STORE);
     for (const [k, v] of puts) st.put(v, k);
     for (const k of deletes) st.delete(k);
-    tx.oncomplete = () => { db.close(); res(); };
-    tx.onerror = () => { db.close(); rej(tx.error); };
-    tx.onabort = () => { db.close(); rej(tx.error || new Error("aborted")); };
+    tx.oncomplete = () => {
+      db.close();
+      res();
+    };
+    tx.onerror = () => {
+      db.close();
+      rej(tx.error);
+    };
+    tx.onabort = () => {
+      db.close();
+      rej(tx.error || new Error("aborted"));
+    };
   });
 }
 
@@ -46,7 +58,13 @@ export function idbDeleteDatabase() {
   });
 }
 
-export const DEFAULT_PREFS = { lang: "en", textSize: "md", contrast: false, readAloud: false, discreet: false };
+export const DEFAULT_PREFS = {
+  lang: "en",
+  textSize: "md",
+  contrast: false,
+  readAloud: false,
+  discreet: false,
+};
 export function loadPrefs() {
   try {
     return { ...DEFAULT_PREFS, ...JSON.parse(localStorage.getItem(PREFS_KEY) || "{}") };
@@ -58,6 +76,14 @@ export function savePrefs(p) {
   localStorage.setItem(PREFS_KEY, JSON.stringify(p));
 }
 export function clearAppLocalStorage() {
-  Object.keys(localStorage).filter((k) => k.startsWith("saheli.")).forEach((k) => localStorage.removeItem(k));
-  try { Object.keys(sessionStorage).filter((k) => k.startsWith("saheli.")).forEach((k) => sessionStorage.removeItem(k)); } catch { /* unavailable */ }
+  Object.keys(localStorage)
+    .filter((k) => k.startsWith("saheli."))
+    .forEach((k) => localStorage.removeItem(k));
+  try {
+    Object.keys(sessionStorage)
+      .filter((k) => k.startsWith("saheli."))
+      .forEach((k) => sessionStorage.removeItem(k));
+  } catch {
+    /* unavailable */
+  }
 }

@@ -10,22 +10,24 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import { ClientOnly } from "@tanstack/react-router";
-// @ts-ignore plain JS module
+// @ts-expect-error plain JS module
 import { AppProvider } from "../App.jsx";
-// @ts-ignore plain JS module
+// @ts-expect-error plain JS module
 import { Shell } from "../components/layout/Shell.jsx";
 
 import appCss from "../styles.css?url";
-// @ts-ignore plain JS module (application logic intentionally remains JavaScript)
+// @ts-expect-error plain JS module (application logic intentionally remains JavaScript)
 import { loadPrefs } from "../lib/storage.js";
-// @ts-ignore plain JS module
+// @ts-expect-error plain JS module
 import { translate } from "../i18n/index.js";
-// @ts-ignore plain JS module
+// @ts-expect-error plain JS module
 import { Btn } from "../components/common/ui.jsx";
 
 function useFallbackTranslation() {
   const [lang, setLang] = useState("en");
-  useEffect(() => { setLang(loadPrefs().lang); }, []);
+  useEffect(() => {
+    setLang(loadPrefs().lang);
+  }, []);
   return (key: string) => translate(lang, key);
 }
 
@@ -36,9 +38,7 @@ function NotFoundComponent() {
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-foreground">404</h1>
         <h2 className="mt-4 text-xl font-semibold text-foreground">{t("error.notFound")}</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {t("error.notFoundText")}
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">{t("error.notFoundText")}</p>
         <div className="mt-6">
           <Link
             to="/"
@@ -59,12 +59,8 @@ function ErrorComponent({ reset }: ErrorComponentProps) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          {t("error.title")}
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {t("error.text")}
-        </p>
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">{t("error.title")}</h1>
+        <p className="mt-2 text-sm text-muted-foreground">{t("error.text")}</p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <Btn
             onClick={() => {
@@ -94,8 +90,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Saheli" },
       { name: "description", content: "Saheli: a free, private, bilingual period companion." },
-            { property: "og:title", content: "Saheli" },
-      { property: "og:description", content: "Saheli: a free, private, bilingual period companion." },
+      { property: "og:title", content: "Saheli" },
+      {
+        property: "og:description",
+        content: "Saheli: a free, private, bilingual period companion.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

@@ -13,7 +13,9 @@ export const isValidPin = (p) => typeof p === "string" && /^\d{4}$/.test(p);
 export const randomSaltB64 = () => b64(crypto.getRandomValues(new Uint8Array(16)));
 
 export async function deriveKey(pin, saltB64, iterations = CONFIG.pbkdf2Iterations) {
-  const base = await crypto.subtle.importKey("raw", enc.encode(pin), "PBKDF2", false, ["deriveKey"]);
+  const base = await crypto.subtle.importKey("raw", enc.encode(pin), "PBKDF2", false, [
+    "deriveKey",
+  ]);
   return crypto.subtle.deriveKey(
     { name: "PBKDF2", salt: unb64(saltB64), iterations, hash: "SHA-256" },
     base,
@@ -25,14 +27,23 @@ export async function deriveKey(pin, saltB64, iterations = CONFIG.pbkdf2Iteratio
 
 export async function encryptJSON(key, obj) {
   const iv = crypto.getRandomValues(new Uint8Array(12));
-  const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, enc.encode(JSON.stringify(obj)));
+  const ct = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    key,
+    enc.encode(JSON.stringify(obj)),
+  );
   return { enc: 1, alg: "AES-GCM", iv: b64(iv), ct: b64(ct) };
 }
 
 export async function decryptJSON(key, payload) {
   if (!isEncrypted(payload)) throw new Error("not-encrypted");
-  const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: unb64(payload.iv) }, key, unb64(payload.ct));
+  const pt = await crypto.subtle.decrypt(
+    { name: "AES-GCM", iv: unb64(payload.iv) },
+    key,
+    unb64(payload.ct),
+  );
   return JSON.parse(dec.decode(pt));
 }
 
-export const isEncrypted = (p) => !!p && p.enc === 1 && typeof p.iv === "string" && typeof p.ct === "string";
+export const isEncrypted = (p) =>
+  !!p && p.enc === 1 && typeof p.iv === "string" && typeof p.ct === "string";

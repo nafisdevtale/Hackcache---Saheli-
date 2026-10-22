@@ -19,14 +19,20 @@ import { CONFIG } from "../config.js";
 import { addDays, diffDays, todayStr } from "./localDate.js";
 
 export function periodDates(days = {}) {
-  return Object.keys(days).filter((d) => days[d] && days[d].period).sort();
+  return Object.keys(days)
+    .filter((d) => days[d] && days[d].period)
+    .sort();
 }
 
 export function groupPeriods(dates, gap = CONFIG.periodGroupGapDays, days = {}) {
   const out = [];
   for (const d of dates) {
     const last = out[out.length - 1];
-    const explicitlyEnded = last && Array.from({ length: Math.max(0, diffDays(last.end, d) - 1) }, (_, i) => addDays(last.end, i + 1)).some((date) => days[date]?.period === false);
+    const explicitlyEnded =
+      last &&
+      Array.from({ length: Math.max(0, diffDays(last.end, d) - 1) }, (_, i) =>
+        addDays(last.end, i + 1),
+      ).some((date) => days[date]?.period === false);
     if (last && diffDays(last.end, d) <= gap + 1 && !explicitlyEnded) {
       last.end = d;
       last.days.push(d);
@@ -60,20 +66,29 @@ export function isIrregular(lengths, ageGroup = "adult") {
   const r = CONFIG.irregular[ageGroup === "under18" ? "under18" : "adult"];
   const spread = Math.max(...lengths) - Math.min(...lengths);
   if (spread > r.maxSpread) return { irregular: true, reason: "spread", spread };
-  if (lengths.some((l) => l < r.minLen || l > r.maxLen)) return { irregular: true, reason: "range", spread };
+  if (lengths.some((l) => l < r.minLen || l > r.maxLen))
+    return { irregular: true, reason: "range", spread };
   return { irregular: false, reason: null, spread };
 }
 
 export function analyze(days = {}, opts = {}) {
   const { ageGroup = "adult", today = todayStr(), paused = false } = opts;
-  const periods = groupPeriods(periodDates(days).filter((d) => d <= today), CONFIG.periodGroupGapDays, days);
+  const periods = groupPeriods(
+    periodDates(days).filter((d) => d <= today),
+    CONFIG.periodGroupGapDays,
+    days,
+  );
   const cycles = completeCycles(periods);
   const recent = cycles.slice(-CONFIG.historyWindow);
   const lengths = recent.map((c) => c.length);
   const lastPeriod = periods[periods.length - 1] || null;
   const lastStart = lastPeriod ? lastPeriod.start : null;
   const currentCycleDay = lastStart ? diffDays(lastStart, today) + 1 : null;
-  const inPeriod = !!(lastPeriod && today >= lastPeriod.start && diffDays(lastPeriod.end, today) <= CONFIG.periodGroupGapDays);
+  const inPeriod = !!(
+    lastPeriod &&
+    today >= lastPeriod.start &&
+    diffDays(lastPeriod.end, today) <= CONFIG.periodGroupGapDays
+  );
 
   const stats = lengths.length
     ? {
@@ -82,26 +97,63 @@ export function analyze(days = {}, opts = {}) {
         min: Math.min(...lengths),
         max: Math.max(...lengths),
         median: median(lengths),
-        avgPeriod: Math.round((periods.reduce((a, p) => a + p.length, 0) / periods.length) * 10) / 10,
+        avgPeriod:
+          Math.round((periods.reduce((a, p) => a + p.length, 0) / periods.length) * 10) / 10,
       }
     : null;
 
   const irr = isIrregular(lengths, ageGroup);
-  const base = { periods, cycles, recent, lastStart, lastPeriod, inPeriod, currentCycleDay, stats, irregular: irr.irregular, irregularReason: irr.reason };
+  const base = {
+    periods,
+    cycles,
+    recent,
+    lastStart,
+    lastPeriod,
+    inPeriod,
+    currentCycleDay,
+    stats,
+    irregular: irr.irregular,
+    irregularReason: irr.reason,
+  };
 
-  if (paused) return { ...base, status: "paused", prediction: null, fertility: null, fertilityUnavailable: "paused", possibleMissedLog: false };
+  if (paused)
+    return {
+      ...base,
+      status: "paused",
+      prediction: null,
+      fertility: null,
+      fertilityUnavailable: "paused",
+      possibleMissedLog: false,
+    };
   if (recent.length < CONFIG.minCyclesForPrediction) {
-    return { ...base, status: "insufficient", prediction: null, fertility: null, fertilityUnavailable: "insufficient", possibleMissedLog: false };
+    return {
+      ...base,
+      status: "insufficient",
+      prediction: null,
+      fertility: null,
+      fertilityUnavailable: "insufficient",
+      possibleMissedLog: false,
+    };
   }
 
   const med = median(lengths);
   const spread = Math.max(...lengths) - Math.min(...lengths);
-  const halfWidth = Math.max(CONFIG.minHalfWidth, spread) + (irr.irregular ? CONFIG.irregularExtraDays : 0);
+  const halfWidth =
+    Math.max(CONFIG.minHalfWidth, spread) + (irr.irregular ? CONFIG.irregularExtraDays : 0);
   const center = addDays(lastStart, med);
-  const prediction = { start: addDays(center, -halfWidth), end: addDays(center, halfWidth), center, halfWidth, median: med, spread, basedOn: recent.length };
+  const prediction = {
+    start: addDays(center, -halfWidth),
+    end: addDays(center, halfWidth),
+    center,
+    halfWidth,
+    median: med,
+    spread,
+    basedOn: recent.length,
+  };
 
   const gap = diffDays(lastStart, today);
-  const possibleMissedLog = gap > med * CONFIG.missingLogFactor && gap > med + CONFIG.missingLogMinExtra;
+  const possibleMissedLog =
+    gap > med * CONFIG.missingLogFactor && gap > med + CONFIG.missingLogMinExtra;
 
   let fertility = null;
   let fertilityUnavailable = null;
@@ -109,7 +161,10 @@ export function analyze(days = {}, opts = {}) {
   else {
     const ovStart = addDays(prediction.start, -CONFIG.lutealDays);
     const ovEnd = addDays(prediction.end, -CONFIG.lutealDays);
-    fertility = { ovulation: { start: ovStart, end: ovEnd }, fertile: { start: addDays(ovStart, -CONFIG.fertileDaysBefore), end: ovEnd } };
+    fertility = {
+      ovulation: { start: ovStart, end: ovEnd },
+      fertile: { start: addDays(ovStart, -CONFIG.fertileDaysBefore), end: ovEnd },
+    };
   }
   return { ...base, status: "ok", prediction, fertility, fertilityUnavailable, possibleMissedLog };
 }
@@ -140,13 +195,15 @@ export function symptomPatterns(days, a) {
     seen.forEach((s) => (symCounts[s] = (symCounts[s] || 0) + 1));
   }
   for (const [s, n] of Object.entries(symCounts)) {
-    if (n >= CONFIG.patternMinCycles) out.push({ type: "earlySymptom", symptom: s, n, total: periods.length });
+    if (n >= CONFIG.patternMinCycles)
+      out.push({ type: "earlySymptom", symptom: s, n, total: periods.length });
   }
   // Energy before period: low energy in 5 days before a period start.
   let lowBefore = 0;
   let checked = 0;
   for (const p of periods.slice(1)) {
-    let any = false, logged = false;
+    let any = false,
+      logged = false;
     for (let i = 1; i <= 5; i++) {
       const e = days[addDays(p.start, -i)];
       if (e?.energy) logged = true;
@@ -155,10 +212,12 @@ export function symptomPatterns(days, a) {
     if (logged) checked++;
     if (any) lowBefore++;
   }
-  if (lowBefore >= CONFIG.patternMinCycles) out.push({ type: "lowEnergyBefore", n: lowBefore, total: checked });
+  if (lowBefore >= CONFIG.patternMinCycles)
+    out.push({ type: "lowEnergyBefore", n: lowBefore, total: checked });
   // Pain on day 1
   let pain = 0;
   for (const p of periods) if ((days[p.start]?.pain || 0) >= 6) pain++;
-  if (pain >= CONFIG.patternMinCycles) out.push({ type: "painDay1", n: pain, total: periods.length });
+  if (pain >= CONFIG.patternMinCycles)
+    out.push({ type: "painDay1", n: pain, total: periods.length });
   return out.sort((x, y) => y.n - x.n);
 }

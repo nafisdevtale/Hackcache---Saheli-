@@ -9,12 +9,19 @@ export function MonthGrid({ year, month, onSelect, selected }) {
   const lead = weekdayOf(first);
   const n = daysInMonth(year, month);
   const p = analysis.prediction;
-  const cells = [...Array(lead).fill(null), ...Array.from({ length: n }, (_, i) => ymd(year, month, i + 1))];
+  const cells = [
+    ...Array(lead).fill(null),
+    ...Array.from({ length: n }, (_, i) => ymd(year, month, i + 1)),
+  ];
   const names = weekdayNames(lang);
   return (
     <div role="group" aria-label={t("cal.title")}>
       <div className="grid grid-cols-7 text-center text-sm font-semibold text-muted-foreground">
-        {names.map((w) => <div key={w} className="py-1">{w}</div>)}
+        {names.map((w) => (
+          <div key={w} className="py-1">
+            {w}
+          </div>
+        ))}
       </div>
       <div className="grid grid-cols-7 gap-1">
         {cells.map((d, i) => {
@@ -28,16 +35,33 @@ export function MonthGrid({ year, month, onSelect, selected }) {
           if (predicted) parts.push(t("cal.estDay"));
           if (sym) parts.push(t("cal.symDay"));
           return (
-            <button key={d} type="button" aria-label={parts.join(", ")} aria-pressed={selected === d} onClick={() => onSelect(d)}
-              className={cx("relative flex aspect-square min-h-12 flex-col items-center justify-center rounded-full text-base font-semibold",
+            <button
+              key={d}
+              type="button"
+              aria-label={parts.join(", ")}
+              aria-pressed={selected === d}
+              onClick={() => onSelect(d)}
+              className={cx(
+                "relative flex aspect-square min-h-12 flex-col items-center justify-center rounded-full text-base font-semibold",
                 logged && "bg-period text-period-foreground",
-                predicted && "predicted-pattern border-2 border-dashed border-primary text-foreground",
+                predicted &&
+                  "predicted-pattern border-2 border-dashed border-primary text-foreground",
                 !logged && !predicted && "hover:bg-muted",
                 selected === d && "ring-4 ring-ring",
-                d === today && "underline decoration-2 underline-offset-4")}>
+                d === today && "underline decoration-2 underline-offset-4",
+              )}
+            >
               <span>{Number(d.slice(8))}</span>
               {logged && <Droplet aria-hidden className="h-3 w-3" fill="currentColor" />}
-              {sym && <span aria-hidden className={cx("absolute bottom-0.5 right-1 h-2 w-2 rounded-full", logged ? "bg-period-foreground" : "bg-foreground")} />}
+              {sym && (
+                <span
+                  aria-hidden
+                  className={cx(
+                    "absolute bottom-0.5 right-1 h-2 w-2 rounded-full",
+                    logged ? "bg-period-foreground" : "bg-foreground",
+                  )}
+                />
+              )}
             </button>
           );
         })}

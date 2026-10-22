@@ -60,6 +60,7 @@ These requirements must be implemented, not merely displayed as disclaimers.
 When the applicable rules identify an urgent situation, show "Get medical help now" and appropriate instructions to seek urgent care.
 
 Examples include:
+
 - Sudden, severe lower abdominal pain.
 - Very heavy bleeding accompanied by dizziness or fainting.
 - Bleeding or severe pain when pregnancy is possible.
@@ -110,6 +111,7 @@ Implement a functional PIN lock using the Web Crypto API.
 ### Discreet mode
 
 When enabled:
+
 - Display the app name "Diary".
 - Use a neutral, non-menstrual icon.
 - Ensure notifications say "Time to check in", never "period".
@@ -158,6 +160,7 @@ Keep the code modular, readable, and suitable for debugging during a 48-hour hac
 Maintain this structure, adapting only when necessary to the existing project:
 
 src/
+
 - components/
   - layout/
   - common/
@@ -274,6 +277,7 @@ Do not silently assume that a missed log means a health event or a medical condi
 ### SCREEN 1 — TODAY
 
 Display:
+
 - Current cycle day where it can be calculated reliably.
 - One plain-language sentence about the current phase.
 - Next-period estimate as a date range where sufficient history exists.
@@ -287,6 +291,7 @@ Do not present sample values as genuine predictions.
 ### SCREEN 2 — LOG A DAY
 
 Allow the user to record:
+
 - Period on/off.
 - Flow: spotting, light, medium, heavy.
 - If heavy flow is selected, ask whether a pad needs changing every one to two hours and whether clots are larger than a ₹10 coin.
@@ -308,6 +313,7 @@ Save actual records locally, allow editing previous dates, validate the input, a
 ### SCREEN 3 — CALENDAR
 
 Create a month-view calendar containing:
+
 - Logged period days.
 - Predicted period date ranges.
 - Recorded symptoms.
@@ -319,6 +325,7 @@ Logged and predicted days must look different in both shape or pattern and colou
 ### SCREEN 4 — INSIGHTS
 
 Display:
+
 - Cycle history.
 - Cycle-length and period-length bar charts.
 - Average and range of recorded cycle lengths.
@@ -326,6 +333,7 @@ Display:
 - Symptom patterns across cycles.
 
 Examples of acceptable, evidence-based patterns:
+
 - "Cramps were logged on days 1–2 of your last 4 periods."
 - "Energy was usually lower in the 5 days before your period in the recorded history."
 
@@ -352,11 +360,13 @@ The specified checks include:
 - Heavy periods accompanied by tiredness, breathlessness, or dizziness, which may warrant assessment for anaemia.
 
 Also provide information about important signs that cannot be established from the app's logs:
+
 - No period by age 15.
 - Periods changing suddenly after years of being regular.
 - Any bleeding after menopause.
 
 Every alert must contain:
+
 - What was noticed.
 - The recorded dates or observations supporting it.
 - Why it matters in plain language.
@@ -377,6 +387,7 @@ The summary must be legible when printed and must not expose demo records in pla
 Provide short, readable lessons with simple local illustrations and a "Listen" button using browser-native text-to-speech where supported.
 
 Include:
+
 - Menstrual cycle and its phases.
 - What is common and what may require medical attention.
 - PCOS/PCOD: what it is, how the terms are used in India according to the source material, common signs, the need for medical evaluation, and possible treatment approaches explained generally.
@@ -407,6 +418,7 @@ This is a local, rule-based FAQ implementation. Do not present it as a real AI c
 ### SCREEN 8 — REMINDERS
 
 Provide optional reminders for:
+
 - Next period estimate.
 - Daily check-in.
 - Medicines at times entered by the user.
@@ -426,6 +438,7 @@ All reminders must be off by default.
 This mode must be off by default and available only after the user indicates a positive pregnancy test or confirmation from a doctor.
 
 When enabled:
+
 - Estimate gestational week using the first day of the last menstrual period.
 - Estimate the due date as 280 days after that date, clearly labelled as an estimate.
 - Display short weekly information from locally stored sourced content.
@@ -441,6 +454,7 @@ All pregnancy guidance must be medically sourced and must not be used as a diagn
 ### SCREEN 10 — SETTINGS
 
 Implement:
+
 - Language selection: English or Hindi.
 - Three text-size settings.
 - High contrast.
@@ -512,6 +526,7 @@ Do not add Stage 2 add-ons, an external AI assistant, community functionality, M
 Execute the relevant tests and report actual results.
 
 ### Application integrity
+
 - Every screen opens and navigates correctly.
 - No critical console errors.
 - No broken imports or build errors.
@@ -520,6 +535,7 @@ Execute the relevant tests and report actual results.
 - Saved entries survive a page reload.
 
 ### Cycle calculations
+
 - Fewer than three complete cycles produce no prediction.
 - Three or more complete cycles produce a calculated estimate range.
 - The last six complete cycles are used where available.
@@ -531,6 +547,7 @@ Execute the relevant tests and report actual results.
 - Date calculations work across month boundaries and leap years without shifting logged dates.
 
 ### Doctor Guidance
+
 - The demo data triggers at least two appropriate guidance cards.
 - Each card identifies the underlying observations and dates.
 - Adult and under-18 cycle thresholds are applied correctly.
@@ -538,6 +555,7 @@ Execute the relevant tests and report actual results.
 - The print-ready doctor-visit summary works.
 
 ### Privacy and storage
+
 - No personal cycle data is sent to a backend or external service.
 - After the application has loaded, the Network panel shows no unexpected third-party requests or tracking resources.
 - Encrypted records are unreadable in the storage panel when PIN protection is enabled.
@@ -548,6 +566,7 @@ Execute the relevant tests and report actual results.
 - Demo data is never accidentally merged with real user records.
 
 ### Language and accessibility
+
 - Every screen switches between English and Hindi.
 - Longer Hindi content does not break the layout.
 - All screens work at 360px width.
@@ -557,6 +576,7 @@ Execute the relevant tests and report actual results.
 - Logged and predicted calendar days remain distinguishable without colour.
 
 ### Reminders and pregnancy mode
+
 - Reminders remain off by default.
 - Denied notification permission produces a graceful fallback.
 - Discreet mode does not reveal sensitive information in reminder text.

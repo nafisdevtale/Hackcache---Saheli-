@@ -1,4 +1,23 @@
-import { Zap, Brain, Sparkles, CircleDot, BatteryLow, Shuffle, Moon, Activity, Heart, Waves, RotateCw, Wind, TriangleAlert, Droplets, Droplet, Siren, Scissors, Cloud } from "lucide-react";
+import {
+  Zap,
+  Brain,
+  Sparkles,
+  CircleDot,
+  BatteryLow,
+  Shuffle,
+  Moon,
+  Activity,
+  Heart,
+  Waves,
+  RotateCw,
+  Wind,
+  TriangleAlert,
+  Droplets,
+  Droplet,
+  Siren,
+  Scissors,
+  Cloud,
+} from "lucide-react";
 
 // Labels live in i18n as "sym.<id>". `safety: true` symptoms are always shown
 // in the log form because safety rules depend on them.

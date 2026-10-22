@@ -11,15 +11,30 @@ export function evaluateSafety({ record, analysis, today = todayStr() }) {
   const cards = [];
   for (const r of RED_FLAG_RULES) {
     const evidence = r.check(ctx);
-    if (evidence && evidence.length) cards.push({ id: r.id, severity: "doctor", evidence, sources: r.sources, params: r.params ? r.params(ctx) : {} });
+    if (evidence && evidence.length)
+      cards.push({
+        id: r.id,
+        severity: "doctor",
+        evidence,
+        sources: r.sources,
+        params: r.params ? r.params(ctx) : {},
+      });
   }
 
-  const recentDates = Object.keys(days).filter((d) => d <= today && diffDays(d, today) < CONFIG.urgentRecentDays);
+  const recentDates = Object.keys(days).filter(
+    (d) => d <= today && diffDays(d, today) < CONFIG.urgentRecentDays,
+  );
   const recent = recentDates.sort().map((d) => ({ ...days[d], date: d }));
   const urgent = [];
   for (const r of URGENT_RULES) {
     const hits = r.check({ ...ctx, recent });
-    if (hits.length) urgent.push({ id: r.id, severity: "urgent", evidence: hits.map((e) => ({ kind: "day", start: e.date })), sources: r.sources });
+    if (hits.length)
+      urgent.push({
+        id: r.id,
+        severity: "urgent",
+        evidence: hits.map((e) => ({ kind: "day", start: e.date })),
+        sources: r.sources,
+      });
   }
 
   return { cards, urgent, mood: lowMoodRun(days, today) };

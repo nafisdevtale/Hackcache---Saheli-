@@ -9,4 +9,4 @@ export function translate(lang, key, vars) {
   return s;
 }
 
-export const pick = (lang, obj) => (obj ? obj[lang] ?? obj.en : "");
+export const pick = (lang, obj) => (obj ? (obj[lang] ?? obj.en) : "");
