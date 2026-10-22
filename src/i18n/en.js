@@ -15,6 +15,8 @@ export default {
   "common.listen": "Listen", "common.stop": "Stop", "common.ttsUnsupported": "Listening isn't supported in this browser.",
   "common.readPage": "Read this page aloud", "common.demoBadge": "Demo data — not real records",
   "common.external": "(opens an external website)", "common.days": "{n} days",
+  "common.skipToContent": "Skip to content", "ask.allFaq": "Questions and answers ({n})",
+  "error.notFound": "Page not found", "error.notFoundText": "This page isn't available.", "error.home": "Go home", "error.title": "This page didn't load", "error.text": "Try again or return home. Your saved records have not been changed.", "error.retry": "Try again",
 
   "onb.title": "Welcome to Saheli",
   "onb.intro": "A free, private companion to track your periods, understand changes, and know when to see a doctor.",
@@ -97,6 +99,7 @@ export default {
   "reg.insufficient": "Not enough complete cycles yet to describe regularity.",
   "reg.regular": "Your recent cycles look fairly regular (they vary by {spread} days).",
   "reg.irregular": "Your recent cycles vary by {spread} days, which is more than usual for your age group. This is described as irregular.",
+  "reg.outside": "Some recent cycles fall outside the {min}–{max} day range used for estimates for your age group. This history is classified as irregular.",
 
   "doc.title": "When to see a doctor",
   "doc.intro": "Saheli checks your saved logs against guidance from the NHS, ACOG and others. It cannot diagnose anything.",

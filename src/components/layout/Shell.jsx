@@ -10,6 +10,8 @@ function Onboarding() {
   const { t, prefs, setPrefs, chooseDemo, chooseFresh } = useApp();
   const [age, setAge] = useState("under18");
   const [busy, setBusy] = useState(false);
+  const [failure, setFailure] = useState(false);
+  const choose = async (fn) => { setBusy(true); setFailure(false); try { await fn(age); } catch { setFailure(true); setBusy(false); } };
   return (
     <main id="main" className="mx-auto max-w-md space-y-5 px-4 py-8">
       <div className="text-center">
@@ -36,14 +38,15 @@ function Onboarding() {
       </fieldset>
       <div className="space-y-3">
         <Card>
-          <Btn className="w-full" disabled={busy} onClick={async () => { setBusy(true); await chooseDemo(age); }}>{t("onb.demo")}</Btn>
+          <Btn className="w-full" disabled={busy} onClick={() => choose(chooseDemo)}>{t("onb.demo")}</Btn>
           <p className="mt-2 text-sm text-muted-foreground">{t("onb.demoDesc")}</p>
         </Card>
         <Card>
-          <Btn variant="secondary" className="w-full" disabled={busy} onClick={async () => { setBusy(true); await chooseFresh(age); }}>{t("onb.fresh")}</Btn>
+          <Btn variant="secondary" className="w-full" disabled={busy} onClick={() => choose(chooseFresh)}>{t("onb.fresh")}</Btn>
           <p className="mt-2 text-sm text-muted-foreground">{t("onb.freshDesc")}</p>
         </Card>
       </div>
+      {failure && <p role="alert">{t("set.failed")}</p>}
       <p className="text-center text-sm text-muted-foreground">{t("common.disclaimer")}</p>
     </main>
   );
@@ -53,20 +56,20 @@ let failCount = 0;
 function LockScreen() {
   const { t, unlock, prefs } = useApp();
   const [pin, setPin] = useState("");
-  const [err, setErr] = useState("");
+  const [err, setErr] = useState(null);
   const [busy, setBusy] = useState(false);
   async function submit(e) {
     e.preventDefault();
-    if (!isValidPin(pin)) return setErr(t("set.pinInvalid"));
+    if (!isValidPin(pin)) return setErr({ key: "set.pinInvalid" });
     setBusy(true); setErr("");
     try { await unlock(pin); failCount = 0; }
     catch {
       failCount++;
       setPin("");
       if (failCount >= CONFIG.maxPinAttemptsBeforeDelay) {
-        setErr(t("lock.wait", { s: CONFIG.pinDelayMs / 1000 }));
+        setErr({ key: "lock.wait", vars: { s: CONFIG.pinDelayMs / 1000 } });
         await new Promise((r) => setTimeout(r, CONFIG.pinDelayMs));
-      } else setErr(t("lock.wrong"));
+      } else setErr({ key: "lock.wrong" });
     }
     setBusy(false);
   }
@@ -81,7 +84,7 @@ function LockScreen() {
           onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))} className={cx(inputCls, "text-center text-2xl tracking-[0.5em]")} placeholder="••••" />
         <Btn type="submit" className="w-full" disabled={busy}>{busy ? t("set.working") : t("lock.unlock")}</Btn>
       </form>
-      {err && <p role="alert" className="rounded-xl bg-destructive/10 p-2 text-destructive">{err}</p>}
+      {err && <p role="alert" className="rounded-xl bg-destructive/10 p-2 text-destructive">{t(err.key, err.vars)}</p>}
       <p className="text-sm text-muted-foreground">{t("lock.forgot")}</p>
     </main>
   );
@@ -98,6 +101,7 @@ const NAV = [
 export function Shell({ children }) {
   const app = useApp();
   const { t, prefs, setPrefs, status, isDemo, banners, dismissBanner } = app;
+  const [speechFailed, setSpeechFailed] = useState(false);
   if (status === "loading") return <p className="p-8 text-center" role="status">{t("common.loading")}</p>;
   if (status === "error") return <p className="p-8 text-center" role="alert">{t("set.failed")}</p>;
   if (status === "onboarding") return <Onboarding />;
@@ -105,7 +109,7 @@ export function Shell({ children }) {
   const AppIcon = prefs.discreet ? NotebookPen : Flower2;
   return (
     <div className="mx-auto flex min-h-screen max-w-2xl flex-col">
-      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-card focus:p-2">Skip to content</a>
+      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-card focus:p-2">{t("common.skipToContent")}</a>
       <header className="sticky top-0 z-20 flex items-center justify-between gap-2 border-b border-border bg-background/95 px-4 py-2 backdrop-blur print:hidden">
         <Link to="/" className="flex min-h-12 items-center gap-2 font-display text-xl font-bold text-primary">
           <AppIcon aria-hidden className="h-7 w-7" /> {prefs.discreet ? t("app.discreetName") : t("app.name")}
@@ -113,7 +117,7 @@ export function Shell({ children }) {
         <div className="flex items-center gap-1">
           {prefs.readAloud && (
             <button type="button" aria-label={t("common.readPage")} className="inline-flex h-12 w-12 items-center justify-center rounded-xl hover:bg-muted"
-              onClick={() => speak(document.getElementById("main")?.innerText || "", prefs.lang)}>
+              onClick={() => setSpeechFailed(!speak(document.getElementById("main")?.innerText || "", prefs.lang))}>
               <Volume2 aria-hidden className="h-6 w-6" />
             </button>
           )}
@@ -122,6 +126,7 @@ export function Shell({ children }) {
         </div>
       </header>
       {isDemo && <p className="bg-accent px-4 py-1 text-center text-sm font-semibold text-accent-foreground print:hidden">{t("common.demoBadge")}</p>}
+      {speechFailed && <p role="status" className="px-4 print:hidden">{t("common.ttsUnsupported")}</p>}
       <div aria-live="polite" className="space-y-2 px-4 pt-2 print:hidden">
         {banners.map((b) => (
           <div key={b.id} className="flex items-center justify-between gap-2 rounded-xl bg-accent p-3 text-accent-foreground">

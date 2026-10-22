@@ -11,3 +11,5 @@
 
 - Saheli is local-first: personal records live only in IndexedDB (optionally AES-GCM encrypted); no backend, analytics or remote assets. Why: privacy for shared phones.
 - Pages/logic are plain JS (.jsx/.js) under src/pages, src/lib, src/data, src/content; route files in src/routes are thin .jsx wrappers. Thresholds live in src/config.js. Why: hackathon spec.
+- Serialize record mutations against the last successfully persisted record; commit UI state only after IndexedDB completes, so rapid controls cannot overwrite newer changes.
+- Validate imported record containers, settings, reminders and day relationships before applying either merge or replacement, so invalid backups cannot break the diary.

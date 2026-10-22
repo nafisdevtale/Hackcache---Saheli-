@@ -7,7 +7,7 @@ function open() {
   return new Promise((res, rej) => {
     const r = indexedDB.open(DB, 1);
     r.onupgradeneeded = () => r.result.createObjectStore(STORE);
-    r.onsuccess = () => res(r.result);
+    r.onsuccess = () => { r.result.onversionchange = () => r.result.close(); res(r.result); };
     r.onerror = () => rej(r.error);
   });
 }
@@ -42,7 +42,7 @@ export function idbDeleteDatabase() {
     const r = indexedDB.deleteDatabase(DB);
     r.onsuccess = () => res();
     r.onerror = () => rej(r.error);
-    r.onblocked = () => res();
+    r.onblocked = () => rej(new Error("Close other Saheli tabs before deleting data"));
   });
 }
 
@@ -59,5 +59,5 @@ export function savePrefs(p) {
 }
 export function clearAppLocalStorage() {
   Object.keys(localStorage).filter((k) => k.startsWith("saheli.")).forEach((k) => localStorage.removeItem(k));
-  try { sessionStorage.clear(); } catch { /* ignore */ }
+  try { Object.keys(sessionStorage).filter((k) => k.startsWith("saheli.")).forEach((k) => sessionStorage.removeItem(k)); } catch { /* unavailable */ }
 }

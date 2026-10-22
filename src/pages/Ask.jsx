@@ -20,6 +20,17 @@ export default function Ask() {
         <Btn type="submit" className="w-full">{t("ask.submit")}</Btn>
       </form>
       <div aria-live="polite">
+        {res?.type === "urgent" && (
+          <Card className="border-4 border-urgent bg-urgent-soft">
+            <h2 className="font-bold text-urgent">{t("doc.urgentTitle")}</h2>
+            <p>{t("doc.urgentNotApp")}</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <a href="tel:112" className="inline-flex min-h-12 items-center rounded-xl bg-urgent px-4 font-semibold text-urgent-foreground">{t("doc.call112")}</a>
+              <a href="tel:108" className="inline-flex min-h-12 items-center rounded-xl bg-urgent px-4 font-semibold text-urgent-foreground">{t("doc.call108")}</a>
+            </div>
+            <Sources ids={["nhs_heavy", "nhs_preg_bleeding", "nhs_pain", "india_112"]} />
+          </Card>
+        )}
         {res?.type === "selfharm" && (
           <Card className="border-l-8 border-l-urgent">
             <p>{t("ask.selfharm")}</p>
@@ -48,7 +59,7 @@ export default function Ask() {
         </div>
       </section>
       <details className="rounded-2xl border border-border bg-card p-4">
-        <summary className="min-h-12 cursor-pointer font-bold">FAQ ({FAQ.length})</summary>
+        <summary className="min-h-12 cursor-pointer font-bold">{t("ask.allFaq", { n: FAQ.length })}</summary>
         <ul className="mt-2 space-y-1">{FAQ.map((f) => <li key={f.id}><button type="button" className="min-h-12 text-left underline" onClick={() => showItem(f)}>{L(f.q)}</button></li>)}</ul>
       </details>
     </div>

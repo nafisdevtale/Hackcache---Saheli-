@@ -36,7 +36,7 @@ export const FAQ = [
   f("long_period", ["7 days", "long period", "lamba", "लंबा", "ज़्यादा दिन", "week"],
     { en: "My period lasts more than a week. Should I worry?", hi: "मेरा पीरियड एक हफ़्ते से ज़्यादा चलता है। क्या चिंता करूँ?" },
     { en: "Periods usually last 2–7 days. If yours often last longer, it is a good idea to see a doctor.", hi: "पीरियड आमतौर पर 2–7 दिन चलता है। अगर आपका अक्सर इससे लंबा चलता है, तो डॉक्टर को दिखाना अच्छा है।" }, ["nhs_heavy"], true),
-  f("spotting", ["spotting", "between periods", "धब्बे", "बीच में", "dhabbe"],
+  f("spotting", ["spotting", "between periods", "after sex", "संबंध के बाद", "धब्बे", "बीच में", "dhabbe"],
     { en: "Why do I bleed between periods?", hi: "पीरियड के बीच में खून क्यों आता है?" },
     { en: "Bleeding between periods or after sex should be checked by a doctor, even if it is light.", hi: "पीरियड के बीच या संबंध के बाद खून आए, तो डॉक्टर से जाँच करवानी चाहिए, चाहे थोड़ा ही हो।" }, ["nhs_irregular"], true),
   f("anaemia", ["anaemia", "anemia", "tired", "dizzy", "khoon ki kami", "खून की कमी", "थकान", "चक्कर"],
@@ -103,19 +103,26 @@ export const FAQ = [
 
 export const SUGGESTED = ["late_reason", "pcos_what", "cramps_help", "heavy", "doctor_where", "irregular"];
 
-export const SELF_HARM_KW = ["suicide", "self harm", "self-harm", "kill myself", "end my life", "hurt myself", "आत्महत्या", "खुद को नुकसान", "मरना चाहती", "जान दे"];
+export const SELF_HARM_KW = ["suicide", "self harm", "self-harm", "kill myself", "end my life", "hurt myself", "want to die", "आत्महत्या", "खुद को नुकसान", "ख़ुद को नुकसान", "मरना चाहती", "मरना चाहता", "जान दे"];
 
 const norm = (s) => s.toLowerCase().replace(/[?.!,।]/g, " ").replace(/\s+/g, " ").trim();
 
-// Transparent matching: score = number of FAQ keywords contained in the question.
+// Whole tokens/phrases avoid matching "din" inside "bleeding". Longer phrases win ties.
 export function matchFaq(question) {
   const q = ` ${norm(question)} `;
   if (!q.trim()) return { type: "empty" };
   if (SELF_HARM_KW.some((k) => q.includes(k))) return { type: "selfharm" };
+  const contains = (words) => words.some((word) => q.includes(word));
+  const bleeding = contains(["bleeding", "blood", "खून", "रक्तस्राव"]);
+  const heavy = contains(["heavy", "very heavy", "ज़्यादा", "ज्यादा", "बहुत"]);
+  const faint = contains(["faint", "dizzy", "dizziness", "बेहोश", "चक्कर"]);
+  const severe = contains(["severe pain", "sudden pain", "बहुत दर्द", "तेज़ दर्द", "अचानक दर्द"]);
+  const pregnant = contains(["pregnant", "pregnancy", "गर्भ", "प्रेगनेंसी"]);
+  if ((bleeding && heavy && faint) || (pregnant && (bleeding || severe)) || contains(["sudden severe", "अचानक तेज़", "अचानक बहुत दर्द"])) return { type: "urgent" };
   let best = null;
   for (const item of FAQ) {
-    const hits = item.kw.filter((k) => q.includes(norm(k)));
-    const score = hits.reduce((a, k) => a + (k.includes(" ") ? 2 : 1), 0);
+    const hits = item.kw.filter((k) => q.includes(` ${norm(k)} `));
+    const score = hits.reduce((a, k) => a + (k.includes(" ") ? 2 : 1), 0) + Math.max(0, ...hits.map((k) => k.length)) / 1000;
     if (score > 0 && (!best || score > best.score)) best = { item, hits, score };
   }
   return best ? { type: "match", ...best } : { type: "none" };
