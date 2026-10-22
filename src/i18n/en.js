@@ -15,6 +15,8 @@ export default {
   "common.listen": "Listen", "common.stop": "Stop", "common.ttsUnsupported": "Listening isn't supported in this browser.",
   "common.readPage": "Read this page aloud", "common.demoBadge": "Demo data — not real records",
   "common.external": "(opens an external website)", "common.days": "{n} days",
+  "common.skipToContent": "Skip to content", "ask.allFaq": "Questions and answers ({n})",
+  "error.notFound": "Page not found", "error.notFoundText": "This page isn't available.", "error.home": "Go home", "error.title": "This page didn't load", "error.text": "Try again or return home. Your saved records have not been changed.", "error.retry": "Try again",
 
   "onb.title": "Welcome to Saheli",
   "onb.intro": "A free, private companion to track your periods, understand changes, and know when to see a doctor.",

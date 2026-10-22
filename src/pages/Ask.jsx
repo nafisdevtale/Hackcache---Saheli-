@@ -48,7 +48,7 @@ export default function Ask() {
         </div>
       </section>
       <details className="rounded-2xl border border-border bg-card p-4">
-        <summary className="min-h-12 cursor-pointer font-bold">FAQ ({FAQ.length})</summary>
+        <summary className="min-h-12 cursor-pointer font-bold">{t("ask.allFaq", { n: FAQ.length })}</summary>
         <ul className="mt-2 space-y-1">{FAQ.map((f) => <li key={f.id}><button type="button" className="min-h-12 text-left underline" onClick={() => showItem(f)}>{L(f.q)}</button></li>)}</ul>
       </details>
     </div>

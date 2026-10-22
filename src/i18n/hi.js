@@ -15,6 +15,8 @@ export default {
   "common.listen": "सुनें", "common.stop": "रोकें", "common.ttsUnsupported": "इस ब्राउज़र में सुनने की सुविधा नहीं है।",
   "common.readPage": "यह पेज पढ़कर सुनाएँ", "common.demoBadge": "डेमो डेटा — असली जानकारी नहीं",
   "common.external": "(बाहरी वेबसाइट खुलेगी)", "common.days": "{n} दिन",
+  "common.skipToContent": "मुख्य जानकारी पर जाएँ", "ask.allFaq": "सवाल और जवाब ({n})",
+  "error.notFound": "पेज नहीं मिला", "error.notFoundText": "यह पेज उपलब्ध नहीं है।", "error.home": "मुख्य पेज पर जाएँ", "error.title": "यह पेज नहीं खुला", "error.text": "फिर कोशिश करें या मुख्य पेज पर जाएँ। आपकी सेव की हुई जानकारी नहीं बदली है।", "error.retry": "फिर कोशिश करें",
 
   "onb.title": "सहेली में आपका स्वागत है",
   "onb.intro": "एक मुफ़्त, निजी साथी — पीरियड लिखने, बदलाव समझने और यह जानने के लिए कि डॉक्टर को कब दिखाना है।",

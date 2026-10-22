@@ -12,9 +12,9 @@ export function MonthGrid({ year, month, onSelect, selected }) {
   const cells = [...Array(lead).fill(null), ...Array.from({ length: n }, (_, i) => ymd(year, month, i + 1))];
   const names = weekdayNames(lang);
   return (
-    <div role="grid" aria-label={t("cal.title")}>
-      <div role="row" className="grid grid-cols-7 text-center text-sm font-semibold text-muted-foreground">
-        {names.map((w) => <div role="columnheader" key={w} className="py-1">{w}</div>)}
+    <div role="group" aria-label={t("cal.title")}>
+      <div className="grid grid-cols-7 text-center text-sm font-semibold text-muted-foreground">
+        {names.map((w) => <div key={w} className="py-1">{w}</div>)}
       </div>
       <div className="grid grid-cols-7 gap-1">
         {cells.map((d, i) => {
@@ -28,7 +28,7 @@ export function MonthGrid({ year, month, onSelect, selected }) {
           if (predicted) parts.push(t("cal.estDay"));
           if (sym) parts.push(t("cal.symDay"));
           return (
-            <button key={d} type="button" role="gridcell" aria-label={parts.join(", ")} aria-selected={selected === d} onClick={() => onSelect(d)}
+            <button key={d} type="button" aria-label={parts.join(", ")} aria-pressed={selected === d} onClick={() => onSelect(d)}
               className={cx("relative flex aspect-square min-h-12 flex-col items-center justify-center rounded-full text-base font-semibold",
                 logged && "bg-period text-period-foreground",
                 predicted && "predicted-pattern border-2 border-dashed border-primary text-foreground",

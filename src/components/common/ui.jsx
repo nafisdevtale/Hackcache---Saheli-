@@ -74,11 +74,13 @@ export function Sources({ ids }) {
   );
 }
 
-export function speak(text, lang) {
+export function speak(text, lang, done = () => {}) {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) return false;
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.lang = lang === "hi" ? "hi-IN" : "en-IN";
+  u.onend = done;
+  u.onerror = done;
   window.speechSynthesis.speak(u);
   return true;
 }
@@ -91,11 +93,11 @@ export function ListenButton({ text }) {
     <div>
       <Btn variant="outline" onClick={() => {
         if (on) { window.speechSynthesis?.cancel(); setOn(false); return; }
-        if (!speak(text, lang)) setMsg(t("common.ttsUnsupported")); else setOn(true);
+        if (!speak(text, lang, () => setOn(false))) setMsg("common.ttsUnsupported"); else setOn(true);
       }}>
         {on ? <Square aria-hidden className="h-4 w-4" /> : <Volume2 aria-hidden className="h-5 w-5" />} {on ? t("common.stop") : t("common.listen")}
       </Btn>
-      {msg && <p role="status" className="mt-1 text-sm text-muted-foreground">{msg}</p>}
+      {msg && <p role="status" className="mt-1 text-sm text-muted-foreground">{t(msg)}</p>}
     </div>
   );
 }

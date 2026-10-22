@@ -18,6 +18,10 @@ export default function LogDay() {
   const [msg, setMsg] = useState(null);
 
   useEffect(() => {
+    setDate(initial);
+  }, [initial]);
+
+  useEffect(() => {
     setForm({ ...blankDay(date), ...(record.days[date] || {}) });
     setErrors([]);
   }, [date]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -47,8 +51,8 @@ export default function LogDay() {
     if (date > today) errs.push("err.future");
     setErrors(errs);
     if (errs.length) return;
-    try { await saveDay(entry); setMsg({ text: t("log.saved") }); }
-    catch { setMsg({ text: t("log.saveFailed"), tone: "err" }); }
+    try { await saveDay(entry); setMsg({ key: "log.saved" }); }
+    catch { setMsg({ key: "log.saveFailed", tone: "err" }); }
   }
 
   const YesNo = ({ value, onChange, legend }) => (
@@ -71,7 +75,7 @@ export default function LogDay() {
           <div className="flex-1">
             <Field id="date" label={t("log.date")}>
               <input id="date" type="date" max={today} value={date} className={inputCls}
-                onChange={(e) => isValidDate(e.target.value) && e.target.value <= today && setDate(e.target.value)} />
+                onChange={(e) => { const d = e.target.value; if (isValidDate(d) && d <= today) { setDate(d); navigate({ to: "/log", search: { date: d }, replace: true }); } }} />
             </Field>
           </div>
           <button type="button" aria-label={t("log.next")} disabled={date >= today} onClick={() => go(1)} className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border-2 border-border disabled:opacity-40"><ChevronRight aria-hidden /></button>
@@ -155,10 +159,10 @@ export default function LogDay() {
           <ul className="ml-5 list-disc">{errors.map((e) => <li key={e}>{t(e)}</li>)}</ul>
         </div>
       )}
-      <Status msg={msg?.text} tone={msg?.tone} />
+      <Status msg={msg?.key && t(msg.key)} tone={msg?.tone} />
       <div className="sticky bottom-20 z-10 flex gap-2 bg-background/90 py-2">
         <Btn type="submit" className="flex-1 text-lg">{t("log.save")}</Btn>
-        {exists && <Btn variant="outline" onClick={async () => { try { await deleteDay(date); setForm(blankDay(date)); setMsg({ text: t("log.deleted") }); } catch { setMsg({ text: t("log.saveFailed"), tone: "err" }); } }}>{t("common.delete")}</Btn>}
+        {exists && <Btn variant="outline" onClick={async () => { try { await deleteDay(date); setForm(blankDay(date)); setMsg({ key: "log.deleted" }); } catch { setMsg({ key: "log.saveFailed", tone: "err" }); } }}>{t("common.delete")}</Btn>}
       </div>
     </form>
   );
