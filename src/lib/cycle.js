@@ -22,11 +22,12 @@ export function periodDates(days = {}) {
   return Object.keys(days).filter((d) => days[d] && days[d].period).sort();
 }
 
-export function groupPeriods(dates, gap = CONFIG.periodGroupGapDays) {
+export function groupPeriods(dates, gap = CONFIG.periodGroupGapDays, days = {}) {
   const out = [];
   for (const d of dates) {
     const last = out[out.length - 1];
-    if (last && diffDays(last.end, d) <= gap + 1) {
+    const explicitlyEnded = last && Array.from({ length: Math.max(0, diffDays(last.end, d) - 1) }, (_, i) => addDays(last.end, i + 1)).some((date) => days[date]?.period === false);
+    if (last && diffDays(last.end, d) <= gap + 1 && !explicitlyEnded) {
       last.end = d;
       last.days.push(d);
     } else out.push({ start: d, end: d, days: [d] });
@@ -65,7 +66,7 @@ export function isIrregular(lengths, ageGroup = "adult") {
 
 export function analyze(days = {}, opts = {}) {
   const { ageGroup = "adult", today = todayStr(), paused = false } = opts;
-  const periods = groupPeriods(periodDates(days).filter((d) => d <= today));
+  const periods = groupPeriods(periodDates(days).filter((d) => d <= today), CONFIG.periodGroupGapDays, days);
   const cycles = completeCycles(periods);
   const recent = cycles.slice(-CONFIG.historyWindow);
   const lengths = recent.map((c) => c.length);
@@ -127,7 +128,7 @@ export function phaseKey(a, today = todayStr()) {
 // Symptom patterns across cycles. Only reported when seen in >= patternMinCycles cycles.
 export function symptomPatterns(days, a) {
   const out = [];
-  const periods = a.periods.slice(-6);
+  const periods = a.periods.slice(0, -1).slice(-CONFIG.historyWindow);
   if (periods.length < CONFIG.patternMinCycles) return out;
   const symCounts = {};
   for (const p of periods) {

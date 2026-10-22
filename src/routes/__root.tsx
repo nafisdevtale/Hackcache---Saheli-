@@ -16,8 +16,11 @@ import { AppProvider } from "../App.jsx";
 import { Shell } from "../components/layout/Shell.jsx";
 
 import appCss from "../styles.css?url";
+// @ts-ignore plain JS module (application logic intentionally remains JavaScript)
 import { loadPrefs } from "../lib/storage.js";
+// @ts-ignore plain JS module
 import { translate } from "../i18n/index.js";
+// @ts-ignore plain JS module
 import { Btn } from "../components/common/ui.jsx";
 
 function useFallbackTranslation() {

@@ -22,7 +22,7 @@ export default function Insights() {
               <div><p className="text-sm text-muted-foreground">{t("ins.range")}</p><p className="font-display text-3xl font-bold">{a.stats.min}–{a.stats.max}</p></div>
             </div>
             <p className="mt-3">
-              {a.cycles.length < CONFIG.minCyclesForPrediction ? t("reg.insufficient") : a.irregular ? t("reg.irregular", { spread }) : t("reg.regular", { spread })}
+              {a.cycles.length < CONFIG.minCyclesForPrediction ? t("reg.insufficient") : a.irregular ? a.irregularReason === "range" ? t("reg.outside", { min: limits.minLen, max: limits.maxLen }) : t("reg.irregular", { spread }) : t("reg.regular", { spread })}
             </p>
           </Card>
           <Card>
