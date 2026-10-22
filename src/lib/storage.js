@@ -1,0 +1,63 @@
+// IndexedDB for personal records; localStorage only for non-sensitive UI prefs.
+const DB = "saheli";
+const STORE = "kv";
+const PREFS_KEY = "saheli.prefs";
+
+function open() {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open(DB, 1);
+    r.onupgradeneeded = () => r.result.createObjectStore(STORE);
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+}
+
+export async function idbGet(key) {
+  const db = await open();
+  return new Promise((res, rej) => {
+    const tx = db.transaction(STORE, "readonly");
+    const q = tx.objectStore(STORE).get(key);
+    q.onsuccess = () => res(q.result);
+    q.onerror = () => rej(q.error);
+    tx.oncomplete = () => db.close();
+  });
+}
+
+// Atomic multi-key write: all puts/deletes succeed or none do.
+export async function idbWrite(puts = [], deletes = []) {
+  const db = await open();
+  return new Promise((res, rej) => {
+    const tx = db.transaction(STORE, "readwrite");
+    const st = tx.objectStore(STORE);
+    for (const [k, v] of puts) st.put(v, k);
+    for (const k of deletes) st.delete(k);
+    tx.oncomplete = () => { db.close(); res(); };
+    tx.onerror = () => { db.close(); rej(tx.error); };
+    tx.onabort = () => { db.close(); rej(tx.error || new Error("aborted")); };
+  });
+}
+
+export function idbDeleteDatabase() {
+  return new Promise((res, rej) => {
+    const r = indexedDB.deleteDatabase(DB);
+    r.onsuccess = () => res();
+    r.onerror = () => rej(r.error);
+    r.onblocked = () => res();
+  });
+}
+
+export const DEFAULT_PREFS = { lang: "en", textSize: "md", contrast: false, readAloud: false, discreet: false };
+export function loadPrefs() {
+  try {
+    return { ...DEFAULT_PREFS, ...JSON.parse(localStorage.getItem(PREFS_KEY) || "{}") };
+  } catch {
+    return { ...DEFAULT_PREFS };
+  }
+}
+export function savePrefs(p) {
+  localStorage.setItem(PREFS_KEY, JSON.stringify(p));
+}
+export function clearAppLocalStorage() {
+  Object.keys(localStorage).filter((k) => k.startsWith("saheli.")).forEach((k) => localStorage.removeItem(k));
+  try { sessionStorage.clear(); } catch { /* ignore */ }
+}
