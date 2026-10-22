@@ -1,0 +1,163 @@
+/*
+ Cycle engine (deterministic, documented):
+ 1. Period days = logged days with period:true. Consecutive days (allowing
+    CONFIG.periodGroupGapDays unlogged day) form one period.
+ 2. A complete cycle = first day of one period -> first day of the next.
+    The current, unfinished cycle is never counted.
+ 3. Use the last CONFIG.historyWindow complete cycles.
+ 4. < CONFIG.minCyclesForPrediction cycles => no prediction.
+ 5. median = median of included lengths; spread = max - min.
+    halfWidth = max(minHalfWidth, spread) (+ irregularExtraDays if irregular).
+    Estimate = [lastStart + median - halfWidth, lastStart + median + halfWidth].
+ 6. Irregular (age-dependent, CONFIG.irregular): spread > maxSpread or any
+    cycle outside [minLen, maxLen].
+ 7. Ovulation ~ lutealDays before estimated period, as a range; fertile window
+    = fertileDaysBefore days before + ovulation. Never computed when irregular.
+ This is an implementation definition, not a medical guarantee.
+*/
+import { CONFIG } from "../config.js";
+import { addDays, diffDays, todayStr } from "./localDate.js";
+
+export function periodDates(days = {}) {
+  return Object.keys(days).filter((d) => days[d] && days[d].period).sort();
+}
+
+export function groupPeriods(dates, gap = CONFIG.periodGroupGapDays) {
+  const out = [];
+  for (const d of dates) {
+    const last = out[out.length - 1];
+    if (last && diffDays(last.end, d) <= gap + 1) {
+      last.end = d;
+      last.days.push(d);
+    } else out.push({ start: d, end: d, days: [d] });
+  }
+  return out.map((p) => ({ ...p, length: diffDays(p.start, p.end) + 1 }));
+}
+
+export function completeCycles(periods) {
+  const c = [];
+  for (let i = 0; i < periods.length - 1; i++) {
+    c.push({
+      start: periods[i].start,
+      nextStart: periods[i + 1].start,
+      length: diffDays(periods[i].start, periods[i + 1].start),
+      periodLength: periods[i].length,
+    });
+  }
+  return c;
+}
+
+export function median(arr) {
+  if (!arr.length) return null;
+  const s = [...arr].sort((a, b) => a - b);
+  const m = Math.floor(s.length / 2);
+  return s.length % 2 ? s[m] : Math.round((s[m - 1] + s[m]) / 2);
+}
+
+export function isIrregular(lengths, ageGroup = "adult") {
+  if (lengths.length < 2) return { irregular: false, reason: null };
+  const r = CONFIG.irregular[ageGroup === "under18" ? "under18" : "adult"];
+  const spread = Math.max(...lengths) - Math.min(...lengths);
+  if (spread > r.maxSpread) return { irregular: true, reason: "spread", spread };
+  if (lengths.some((l) => l < r.minLen || l > r.maxLen)) return { irregular: true, reason: "range", spread };
+  return { irregular: false, reason: null, spread };
+}
+
+export function analyze(days = {}, opts = {}) {
+  const { ageGroup = "adult", today = todayStr(), paused = false } = opts;
+  const periods = groupPeriods(periodDates(days).filter((d) => d <= today));
+  const cycles = completeCycles(periods);
+  const recent = cycles.slice(-CONFIG.historyWindow);
+  const lengths = recent.map((c) => c.length);
+  const lastPeriod = periods[periods.length - 1] || null;
+  const lastStart = lastPeriod ? lastPeriod.start : null;
+  const currentCycleDay = lastStart ? diffDays(lastStart, today) + 1 : null;
+  const inPeriod = !!(lastPeriod && today >= lastPeriod.start && diffDays(lastPeriod.end, today) <= CONFIG.periodGroupGapDays);
+
+  const stats = lengths.length
+    ? {
+        count: lengths.length,
+        avg: Math.round((lengths.reduce((a, b) => a + b, 0) / lengths.length) * 10) / 10,
+        min: Math.min(...lengths),
+        max: Math.max(...lengths),
+        median: median(lengths),
+        avgPeriod: Math.round((periods.reduce((a, p) => a + p.length, 0) / periods.length) * 10) / 10,
+      }
+    : null;
+
+  const irr = isIrregular(lengths, ageGroup);
+  const base = { periods, cycles, recent, lastStart, lastPeriod, inPeriod, currentCycleDay, stats, irregular: irr.irregular, irregularReason: irr.reason };
+
+  if (paused) return { ...base, status: "paused", prediction: null, fertility: null, fertilityUnavailable: "paused", possibleMissedLog: false };
+  if (recent.length < CONFIG.minCyclesForPrediction) {
+    return { ...base, status: "insufficient", prediction: null, fertility: null, fertilityUnavailable: "insufficient", possibleMissedLog: false };
+  }
+
+  const med = median(lengths);
+  const spread = Math.max(...lengths) - Math.min(...lengths);
+  const halfWidth = Math.max(CONFIG.minHalfWidth, spread) + (irr.irregular ? CONFIG.irregularExtraDays : 0);
+  const center = addDays(lastStart, med);
+  const prediction = { start: addDays(center, -halfWidth), end: addDays(center, halfWidth), center, halfWidth, median: med, spread, basedOn: recent.length };
+
+  const gap = diffDays(lastStart, today);
+  const possibleMissedLog = gap > med * CONFIG.missingLogFactor && gap > med + CONFIG.missingLogMinExtra;
+
+  let fertility = null;
+  let fertilityUnavailable = null;
+  if (irr.irregular) fertilityUnavailable = "irregular";
+  else {
+    const ovStart = addDays(prediction.start, -CONFIG.lutealDays);
+    const ovEnd = addDays(prediction.end, -CONFIG.lutealDays);
+    fertility = { ovulation: { start: ovStart, end: ovEnd }, fertile: { start: addDays(ovStart, -CONFIG.fertileDaysBefore), end: ovEnd } };
+  }
+  return { ...base, status: "ok", prediction, fertility, fertilityUnavailable, possibleMissedLog };
+}
+
+export function phaseKey(a, today = todayStr()) {
+  if (!a.lastStart || a.status === "paused") return "phase.unknown";
+  if (a.inPeriod) return "phase.period";
+  if (!a.prediction) return "phase.dayOnly";
+  if (today > a.prediction.end) return "phase.late";
+  if (a.irregular) return "phase.irregular";
+  if (diffDays(today, a.prediction.start) <= 5) return "phase.premenstrual";
+  if (a.currentCycleDay <= Math.floor(a.prediction.median / 2) - 3) return "phase.follicular";
+  return "phase.middle";
+}
+
+// Symptom patterns across cycles. Only reported when seen in >= patternMinCycles cycles.
+export function symptomPatterns(days, a) {
+  const out = [];
+  const periods = a.periods.slice(-6);
+  if (periods.length < CONFIG.patternMinCycles) return out;
+  const symCounts = {};
+  for (const p of periods) {
+    const seen = new Set();
+    for (const off of [0, 1]) {
+      const e = days[addDays(p.start, off)];
+      (e?.symptoms || []).forEach((s) => seen.add(s));
+    }
+    seen.forEach((s) => (symCounts[s] = (symCounts[s] || 0) + 1));
+  }
+  for (const [s, n] of Object.entries(symCounts)) {
+    if (n >= CONFIG.patternMinCycles) out.push({ type: "earlySymptom", symptom: s, n, total: periods.length });
+  }
+  // Energy before period: low energy in 5 days before a period start.
+  let lowBefore = 0;
+  let checked = 0;
+  for (const p of periods.slice(1)) {
+    let any = false, logged = false;
+    for (let i = 1; i <= 5; i++) {
+      const e = days[addDays(p.start, -i)];
+      if (e?.energy) logged = true;
+      if (e?.energy === "low") any = true;
+    }
+    if (logged) checked++;
+    if (any) lowBefore++;
+  }
+  if (lowBefore >= CONFIG.patternMinCycles) out.push({ type: "lowEnergyBefore", n: lowBefore, total: checked });
+  // Pain on day 1
+  let pain = 0;
+  for (const p of periods) if ((days[p.start]?.pain || 0) >= 6) pain++;
+  if (pain >= CONFIG.patternMinCycles) out.push({ type: "painDay1", n: pain, total: periods.length });
+  return out.sort((x, y) => y.n - x.n);
+}
