@@ -211,11 +211,84 @@ export default {
     "Energy was logged as low in the 5 days before your period in {n} of {total} recorded cycles.",
   "ins.patternPain":
     "Pain of 6 or more was logged on the first day of {n} of your last {total} periods.",
+  "ins.patternPremenstrual":
+    "{sym} was logged in the 5 days before your period in {n} of {total} recorded cycles.",
+  "ins.patternDisruptivePain":
+    "Disruptive pain was logged during {n} of your last {total} periods.",
   "ins.noData": "Log at least 2 periods to see your cycle history.",
   "ins.started": "Started",
   "ins.length": "Cycle",
   "ins.periodLen": "Period",
   "ins.notDiagnosis": "Patterns describe your logs only. They are not a diagnosis.",
+  "ins.medianCycle": "Median cycle",
+  "ins.medianPeriod": "Median period",
+  "ins.basedOnCycles": "Based on {n} recorded cycles",
+  "ins.basedOnPeriods": "Based on {n} recorded periods",
+  "ins.currentCycle": "Current cycle in progress: Day {day}",
+  "ins.nextWindow": "Next period estimate (window)",
+  "ins.nextWindowDesc": "Estimated window: {start} to {end} ({days} days wide)",
+  "ins.notContraception":
+    "Important: Not for contraception. Cycle estimates are never reliable for preventing pregnancy.",
+  "ins.historyVsEstimate": "Recorded history vs. future estimate",
+  "ins.historyVsEstimateDesc":
+    "Recorded history shows what was logged. Estimates are mathematical projections that naturally vary with stress, health, sleep, and lifestyle.",
+  "ins.windowWidenedIrregular":
+    "Estimate window widened by {extra} days because your cycle lengths vary by {spread} days.",
+  "ins.insufficientForEstimate":
+    "At least {min} complete cycles are required before estimates can be made. You have recorded {count}.",
+  "ins.insufficientSubtitle": "Keep logging each period to establish your personal cycle pattern.",
+  "ins.symptomsTitle": "Symptom observations & trends",
+  "ins.frequentSymptoms": "Most frequently logged symptoms",
+  "ins.loggedTimes": "Logged on {n} days ({pct}%)",
+  "ins.phaseAssociation": "Associated with: {phase}",
+  "ins.phasePremenstrual": "Premenstrual phase (5 days before period)",
+  "ins.phasePeriod": "During period",
+  "ins.phaseOther": "Other cycle days",
+  "ins.associationNotice":
+    "Associations describe your logged records only. They are not proven causes or medical diagnoses.",
+  "ins.painOverview": "Pain and comfort",
+  "ins.avgPain": "Average pain score: {score}/10",
+  "ins.disruptivePain": "Days where pain stopped daily activities: {count}",
+  "ins.highPainDays": "Days with high pain (6 or above): {count}",
+  "ins.moodEnergy": "Mood and energy distribution",
+  "ins.sleepAvg": "Average sleep when logged: {hours} hours",
+  "ins.shortSleep": "Days with less than 6 hours sleep: {count}",
+  "ins.dataCompleteness": "Data completeness & confidence",
+  "ins.completenessNote":
+    "You logged on {logged} days across your history. Days without a log are treated as unrecorded, not confirmed symptom-free.",
+  "ins.supportTitle": "Supportive health guidance",
+  "ins.supportHeavyTitle": "Heavy bleeding or clots recorded",
+  "ins.supportHeavyDesc":
+    "You have logged heavy flow days, pad changes, or large clots. Learn what is common and when to consult a doctor.",
+  "ins.supportPainTitle": "Disruptive period pain recorded",
+  "ins.supportPainDesc":
+    "Severe cramps or pain that interrupts normal life deserve medical review and effective relief.",
+  "ins.supportIrregularTitle": "Cycle variation observed",
+  "ins.supportIrregularDesc":
+    "Natural cycle variation is common, especially in adolescents or during stress. Learn more about cycle regularity.",
+  "ins.adolescentTitle": "Teenager / adolescent cycle guidance",
+  "ins.adolescentNotice":
+    "For teenagers under 18: Cycles commonly range between 21 and 45 days in the first few years after periods begin (ACOG guidance).",
+  "ins.viewDoctorGuidance": "When to see a doctor",
+  "ins.learnArticle": "Read health guide",
+  "ins.visitSummary": "Prepare doctor visit summary",
+  "ins.compareMedianSame": "Same as median",
+  "ins.compareMedianLonger": "+{n}d vs median",
+  "ins.compareMedianShorter": "-{n}d vs median",
+  "ins.comparePrevious": "{diff > 0 ? '+' : ''}{diff}d vs prev",
+  "ins.flowTitle": "Recorded bleeding patterns",
+  "ins.flowBreakdown": "Flow intensity distribution",
+  "ins.chartSummaryCycle":
+    "Cycle lengths chart showing {count} cycles ranging from {min} to {max} days.",
+  "ins.chartSummaryPeriod":
+    "Period lengths chart showing {count} periods ranging from {min} to {max} days.",
+  "ins.tableCycleCaption":
+    "Recorded cycle history with start dates, durations, and comparison to your median.",
+  "ins.tableFlowCaption": "Recorded period duration and flow intensity.",
+  "ins.flowSpotting": "Spotting",
+  "ins.flowLight": "Light",
+  "ins.flowMedium": "Medium",
+  "ins.flowHeavy": "Heavy",
   "reg.insufficient": "Not enough complete cycles yet to describe regularity.",
   "reg.regular": "Your recent cycles look fairly regular (they vary by {spread} days).",
   "reg.irregular":

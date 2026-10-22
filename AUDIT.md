@@ -43,7 +43,17 @@ Baseline statuses intentionally distinguish implementation from verified behavio
 - **Strict Privacy Boundaries**: Service Worker enforces GET-only requests, origin isolation (no caching of external health sites), and explicit exclusion of sensitive query strings (`pin`, `key`) or export endpoints (`/export`). Zero user cycle data or database payloads enter the Cache API.
 - **Cache Purging on Deletion**: `deleteAll` in `App.jsx` now explicitly deletes all Cache API entries (`caches.delete`) alongside IndexedDB and localStorage purge, ensuring zero residual data remains on the device.
 - **Safe Update Handling**: Service worker updates trigger a non-disruptive, user-facing notice with explicit "Refresh to update" and "Later" options, avoiding abrupt reloads during user input. Obsolete cache versions are purged on `activate`.
-- **Automated Test Coverage**: Added `pwa.test.js` validating manifest schema, icon existence, service worker privacy rules, cache allowlisting, update messaging, and offline fallback. Total test count increased to 67 passing tests.
+- **Automated Test Coverage**: Added `pwa.test.js` validating manifest schema, icon existence, service worker privacy rules, cache allowlisting, update messaging, and offline fallback. Total test count increased to 71 passing tests.
+
+## Stage 3 (Saheli 2.1) Personalised Cycle Insights & Health Guidance
+
+- **Cycle-History Analysis**: Built `src/lib/insights.js` to compute median cycle length, range, spread, and cycle-by-cycle comparisons against median and preceding cycles, clearly labeled as summaries of recorded history.
+- **Cautious Predictions & Uncertainty Representation**: Enforced minimum-history requirement (3 complete cycles); distinguished recorded history from future estimates; represented uncertainty as date intervals/windows; widened intervals when cycles are irregular; suppressed estimates during active pregnancy; and included prominent warnings against relying on fertile window estimates for contraception.
+- **Bleeding Patterns**: Analyzed recorded period durations (median, range, spread), flow intensity distributions (spotting, light, medium, heavy), and flags for pad-hourly changes, ₹10-coin clots, and periods > 7 days.
+- **Symptom Patterns & Well-being Trends**: Analyzed symptom frequencies and timing associations (premenstrual, during period, other days), recurrent patterns across cycles (e.g. early cramps, premenstrual headaches, energy dips, disruptive pain), and pain/sleep/mood metrics without treating unlogged days as confirmed symptom-free.
+- **Supportive Health Guidance**: Connected insights directly to verified medical guidance (`/doctor`), relevant educational lessons (`/learn`), and doctor visit summaries (`/visit`), preserving national emergency and mental-health contact info (112, 108, Tele-MANAS 14416).
+- **Accessible & Localised Interface**: Enhanced `Insights.jsx` with screen-reader summaries for charts, semantic history tables, clear units, and 100% bilingual parity across English and Hindi.
+- **Automated Test Coverage**: Added `src/test/insights.test.js` with 14 comprehensive tests covering minimum-history gates, irregular cycle widening, adolescent rules, symptom phase associations, pain tracking, and bilingual key integrity. Total test count increased to 85 passing tests across 6 test suites.
 
 ## Environment constraints
 

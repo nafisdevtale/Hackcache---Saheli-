@@ -219,5 +219,38 @@ export function symptomPatterns(days, a) {
   for (const p of periods) if ((days[p.start]?.pain || 0) >= 6) pain++;
   if (pain >= CONFIG.patternMinCycles)
     out.push({ type: "painDay1", n: pain, total: periods.length });
+
+  // Premenstrual symptoms (in 5 days before period start across >= patternMinCycles cycles)
+  const premenstrualCounts = {};
+  for (const p of periods.slice(1)) {
+    const seenPre = new Set();
+    for (let i = 1; i <= 5; i++) {
+      const e = days[addDays(p.start, -i)];
+      (e?.symptoms || []).forEach((s) => seenPre.add(s));
+    }
+    seenPre.forEach((s) => (premenstrualCounts[s] = (premenstrualCounts[s] || 0) + 1));
+  }
+  for (const [s, n] of Object.entries(premenstrualCounts)) {
+    if (n >= CONFIG.patternMinCycles) {
+      out.push({ type: "premenstrualSymptom", symptom: s, n, total: periods.length - 1 });
+    }
+  }
+
+  // Recurrent disruptive pain across cycles
+  let disruptivePain = 0;
+  for (const p of periods) {
+    let anyDisruptive = false;
+    for (const d of p.days || [p.start]) {
+      const entry = days[d];
+      if (entry?.painStoppedActivities === true || entry?.painkillerHelped === "no") {
+        anyDisruptive = true;
+      }
+    }
+    if (anyDisruptive) disruptivePain++;
+  }
+  if (disruptivePain >= CONFIG.patternMinCycles) {
+    out.push({ type: "recurrentDisruptivePain", n: disruptivePain, total: periods.length });
+  }
+
   return out.sort((x, y) => y.n - x.n);
 }

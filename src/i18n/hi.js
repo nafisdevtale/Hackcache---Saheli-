@@ -212,11 +212,84 @@ export default {
     "{total} लिखे चक्रों में से {n} में पीरियड से पहले के 5 दिनों में ताकत कम लिखी गई।",
   "ins.patternPain":
     "आपके पिछले {total} पीरियड में से {n} में पहले दिन 6 या ज़्यादा दर्द लिखा गया।",
+  "ins.patternPremenstrual":
+    "{total} दर्ज चक्रों में से {n} में पीरियड से 5 दिन पहले {sym} दर्ज किया गया।",
+  "ins.patternDisruptivePain":
+    "पिछले {total} पीरियड में से {n} में रोज़ के काम रोकने वाला दर्द दर्ज हुआ।",
   "ins.noData": "चक्र का इतिहास देखने के लिए कम से कम 2 पीरियड लिखें।",
   "ins.started": "शुरू",
   "ins.length": "चक्र",
   "ins.periodLen": "पीरियड",
   "ins.notDiagnosis": "ये बातें सिर्फ़ आपके लिखे पर आधारित हैं। यह किसी बीमारी की पहचान नहीं है।",
+  "ins.medianCycle": "मध्यम चक्र",
+  "ins.medianPeriod": "मध्यम पीरियड",
+  "ins.basedOnCycles": "{n} दर्ज चक्रों के आधार पर",
+  "ins.basedOnPeriods": "{n} दर्ज पीरियड के आधार पर",
+  "ins.currentCycle": "चालू चक्र: दिन {day}",
+  "ins.nextWindow": "अगले पीरियड का अनुमान (समय दायरा)",
+  "ins.nextWindowDesc": "अनुमानित दायरा: {start} से {end} ({days} दिन लंबा)",
+  "ins.notContraception":
+    "ज़रूरी: गर्भनिरोधक नहीं है। गर्भ रोकने के लिए कभी भी चक्र के अनुमान पर भरोसा न करें।",
+  "ins.historyVsEstimate": "दर्ज इतिहास बनाम भविष्य का अनुमान",
+  "ins.historyVsEstimateDesc":
+    "दर्ज इतिहास बताता है कि क्या लिखा गया था। अनुमान केवल गणितीय संभावना है जो तनाव, स्वास्थ्य, नींद और जीवनशैली से स्वाभाविक रूप से बदल सकती है।",
+  "ins.windowWidenedIrregular":
+    "दायरा {extra} दिन बढ़ा दिया गया है क्योंकि आपके चक्रों में {spread} दिन का अंतर है।",
+  "ins.insufficientForEstimate":
+    "अनुमान लगाने के लिए कम से कम {min} पूरे चक्र दर्ज होने चाहिए। आपने अभी {count} पूरा चक्र दर्ज किया है।",
+  "ins.insufficientSubtitle":
+    "अपना व्यक्तिगत चक्र पैटर्न स्थापित करने के लिए हर पीरियड को लिखते रहें।",
+  "ins.symptomsTitle": "लक्षणों के अवलोकन और रुझान",
+  "ins.frequentSymptoms": "सबसे ज़्यादा दर्ज किए गए लक्षण",
+  "ins.loggedTimes": "{n} दिन ({pct}%) दर्ज हुआ",
+  "ins.phaseAssociation": "जुड़ा समय: {phase}",
+  "ins.phasePremenstrual": "पीरियड से 5 दिन पहले (प्रीमेंस्ट्रुअल)",
+  "ins.phasePeriod": "पीरियड के दौरान",
+  "ins.phaseOther": "चक्र के अन्य दिन",
+  "ins.associationNotice":
+    "ये संबंध सिर्फ़ आपके लिखे गए रिकॉर्ड का मेल दिखाते हैं। यह किसी बीमारी की पहचान या कारण नहीं है।",
+  "ins.painOverview": "दर्द और आराम",
+  "ins.avgPain": "औसत दर्द: {score}/10",
+  "ins.disruptivePain": "दिन जब दर्द से रोज़ के काम रुके: {count}",
+  "ins.highPainDays": "दिन जब दर्द 6 या ज़्यादा था: {count}",
+  "ins.moodEnergy": "मनोदशा और ऊर्जा का विवरण",
+  "ins.sleepAvg": "औसत नींद: {hours} घंटे",
+  "ins.shortSleep": "6 घंटे से कम नींद वाले दिन: {count}",
+  "ins.dataCompleteness": "डेटा की पूर्णता और विश्वास",
+  "ins.completenessNote":
+    "आपने कुल {logged} दिनों की जानकारी लिखी है। बिना एंट्री वाले दिनों को खाली माना गया है, लक्षण-मुक्त नहीं।",
+  "ins.supportTitle": "मददगार स्वास्थ्य सलाह",
+  "ins.supportHeavyTitle": "ज़्यादा खून या थक्के दर्ज हुए",
+  "ins.supportHeavyDesc":
+    "आपने ज़्यादा खून, बार-बार पैड बदलने या थक्कों की जानकारी दी है। जानें क्या सामान्य है और कब डॉक्टर को दिखाना चाहिए।",
+  "ins.supportPainTitle": "दैनिक काम रोकने वाला दर्द दर्ज हुआ",
+  "ins.supportPainDesc":
+    "तेज़ दर्द या जिससे रोज़ के काम रुकें, उसकी डॉक्टरी जाँच और सुरक्षित इलाज ज़रूरी है।",
+  "ins.supportIrregularTitle": "चक्र में बदलाव देखा गया",
+  "ins.supportIrregularDesc":
+    "चक्र में स्वाभाविक बदलाव आम है, खासकर किशोरियों में या तनाव के समय। जानें चक्र की नियमितता के बारे में।",
+  "ins.adolescentTitle": "किशोरियों (18 से कम) के लिए चक्र सलाह",
+  "ins.adolescentNotice":
+    "18 वर्ष से कम उम्र के लिए: पीरियड शुरू होने के शुरुआती वर्षों में चक्र 21 से 45 दिन का होना आम और स्वाभाविक है (ACOG निर्देश)।",
+  "ins.viewDoctorGuidance": "डॉक्टर को कब दिखाएँ",
+  "ins.learnArticle": "स्वास्थ्य जानकारी पढ़ें",
+  "ins.visitSummary": "डॉक्टर के लिए सारांश तैयार करें",
+  "ins.compareMedianSame": "मध्यम के बराबर",
+  "ins.compareMedianLonger": "मध्यम से +{n} दिन",
+  "ins.compareMedianShorter": "मध्यम से -{n} दिन",
+  "ins.comparePrevious": "पिछले से {diff} दिन",
+  "ins.flowTitle": "पीरियड और रक्तस्राव का स्वरूप",
+  "ins.flowBreakdown": "खून के बहाव का विवरण",
+  "ins.chartSummaryCycle":
+    "चक्र की लंबाई का चार्ट जिसमें {count} चक्र {min} से {max} दिन के बीच दिखाए गए हैं।",
+  "ins.chartSummaryPeriod":
+    "पीरियड की लंबाई का चार्ट जिसमें {count} पीरियड {min} से {max} दिन के बीच दिखाए गए हैं।",
+  "ins.tableCycleCaption": "दर्ज चक्र का इतिहास, शुरू होने की तारीख, लंबाई और आपके मध्यम से तुलना।",
+  "ins.tableFlowCaption": "दर्ज पीरियड की लंबाई और बहाव की तीव्रता।",
+  "ins.flowSpotting": "धब्बे (स्पॉटिंग)",
+  "ins.flowLight": "हल्का",
+  "ins.flowMedium": "मध्यम",
+  "ins.flowHeavy": "ज़्यादा",
   "reg.insufficient": "नियमितता बताने के लिए अभी पूरे चक्र कम हैं।",
   "reg.regular": "आपके हाल के चक्र काफ़ी नियमित लगते हैं (इनमें {spread} दिन का फ़र्क है)।",
   "reg.irregular":

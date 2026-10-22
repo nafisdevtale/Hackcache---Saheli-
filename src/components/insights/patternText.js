@@ -3,5 +3,9 @@ export function patternText(p, t) {
     return t("ins.patternEarly", { sym: t(`sym.${p.symptom}`), n: p.n, total: p.total });
   if (p.type === "lowEnergyBefore") return t("ins.patternEnergy", { n: p.n, total: p.total });
   if (p.type === "painDay1") return t("ins.patternPain", { n: p.n, total: p.total });
+  if (p.type === "premenstrualSymptom")
+    return t("ins.patternPremenstrual", { sym: t(`sym.${p.symptom}`), n: p.n, total: p.total });
+  if (p.type === "recurrentDisruptivePain")
+    return t("ins.patternDisruptivePain", { n: p.n, total: p.total });
   return "";
 }

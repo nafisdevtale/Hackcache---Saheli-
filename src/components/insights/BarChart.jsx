@@ -1,16 +1,28 @@
 // Lightweight accessible SVG bar chart. Values are also printed as text.
-export function BarChart({ data, title, refLines = [] }) {
+export function BarChart({ data = [], title, refLines = [], summary = "" }) {
+  if (!data || data.length === 0) {
+    return (
+      <figure className="py-4 text-center text-sm text-muted-foreground">
+        <p>{title}</p>
+        <figcaption className="sr-only">{title}: No data recorded yet.</figcaption>
+      </figure>
+    );
+  }
+
   const max = Math.max(...data.map((d) => d.value), ...refLines.map((r) => r.value), 1);
   const w = 320,
     h = 160,
     pad = 24,
     bw = (w - pad) / Math.max(data.length, 1);
+  const textSummary =
+    summary || `${title}: ${data.map((d) => `${d.label} ${d.value}`).join(", ")}`;
+
   return (
     <figure>
       <svg
         viewBox={`0 0 ${w} ${h + 28}`}
         role="img"
-        aria-label={`${title}: ${data.map((d) => `${d.label} ${d.value}`).join(", ")}`}
+        aria-label={textSummary}
         className="w-full"
       >
         {refLines.map((r) => {
@@ -64,7 +76,7 @@ export function BarChart({ data, title, refLines = [] }) {
           );
         })}
       </svg>
-      <figcaption className="sr-only">{title}</figcaption>
+      <figcaption className="sr-only">{textSummary}</figcaption>
     </figure>
   );
 }

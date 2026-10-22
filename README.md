@@ -19,6 +19,15 @@ Saheli is a free, private, local-first menstrual health companion Progressive We
   - Service worker updates trigger a polite, non-intrusive notification ("A new version is ready") with explicit user approval to refresh, preventing mid-session disruption or unsaved data loss.
   - Obsolete cache versions are purged automatically upon activation.
 
+## Personalised Cycle Insights & Health Guidance (Saheli 2.1)
+
+- **Local Cycle-History Analysis**: Computes recorded cycle lengths, median duration, personal range, and spread across available cycles. Features cycle-by-cycle comparisons against personal medians.
+- **Cautious Predictions & Uncertainty Representation**: Enforces a strict 3-cycle minimum history before generating estimates; represents future predictions as date intervals/windows; widens windows dynamically for irregular cycles; and explicitly states that estimates are not for contraception.
+- **Bleeding Patterns**: Tracks recorded period durations, flow intensity distributions (spotting, light, medium, heavy), and flags heavy bleeding signs (pad changes every 1–2 hours, clots larger than ₹10 coin, periods > 7 days).
+- **Symptom Patterns & Well-being Trends**: Identifies symptoms recurring across cycles, timing associations (premenstrual, during period, other days), and pain/mood/sleep trends without treating unlogged days as confirmed symptom-free.
+- **Supportive Health Guidance**: Provides contextual links to medical guidance (`/doctor`), relevant lessons (`/learn`), doctor visit summaries (`/visit`), and national helplines (112, 108, Tele-MANAS 14416).
+- **Accessibility & Bilingual Localization**: Fully screen-reader accessible with semantic data tables, SVG chart summaries, high-contrast support, and 100% matched English and Hindi coverage.
+
 ---
 
 # SAHELI — HACKCACHE STAGE 1: COMPLETE BUILD PROMPT
