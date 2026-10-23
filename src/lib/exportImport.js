@@ -224,9 +224,14 @@ export function exportJSON(record) {
 }
 
 const csvCell = (v) => {
-  const s = v == null ? "" : String(v);
+  let s = v == null ? "" : String(v);
+  // Protect against spreadsheet formula injection (CSV Injection / DDE)
+  if (/^[=+\-@\t\r]/.test(s)) {
+    s = `'${s}`;
+  }
   return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 };
+
 export function exportCSV(record) {
   const cols = [
     "date",
@@ -251,6 +256,321 @@ export function exportCSV(record) {
       return cols.map((c) => csvCell(c === "symptoms" ? d.symptoms.join(";") : d[c])).join(",");
     });
   return [cols.join(","), ...rows].join("\n");
+}
+
+/**
+ * Robust CSV parser supporting quotes, multiline values, and formula sanitization.
+ */
+export function parseCSVText(csvText) {
+  const rows = [];
+  let currentRow = [];
+  let currentField = "";
+  let inQuotes = false;
+
+  for (let i = 0; i < csvText.length; i++) {
+    const char = csvText[i];
+    const nextChar = csvText[i + 1];
+
+    if (inQuotes) {
+      if (char === '"' && nextChar === '"') {
+        currentField += '"';
+        i++; // skip escaped quote
+      } else if (char === '"') {
+        inQuotes = false;
+      } else {
+        currentField += char;
+      }
+    } else {
+      if (char === '"') {
+        inQuotes = true;
+      } else if (char === ",") {
+        currentRow.push(currentField);
+        currentField = "";
+      } else if (char === "\r") {
+        // ignore carriage returns
+      } else if (char === "\n") {
+        currentRow.push(currentField);
+        rows.push(currentRow);
+        currentRow = [];
+        currentField = "";
+      } else {
+        currentField += char;
+      }
+    }
+  }
+
+  if (currentField || currentRow.length > 0) {
+    currentRow.push(currentField);
+    rows.push(currentRow);
+  }
+
+  return rows;
+}
+
+/**
+ * Parse date from ISO YYYY-MM-DD or DD/MM/YYYY or MM/DD/YYYY
+ */
+function normalizeCsvDate(rawDate) {
+  if (!rawDate) return null;
+  const trimmed = rawDate.trim().replace(/^['"]|['"]$/g, "");
+  // YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    return isValidDate(trimmed) ? trimmed : null;
+  }
+  // DD/MM/YYYY or DD-MM-YYYY
+  const dmyMatch = trimmed.match(/^(\d{1,2})[/\-](\d{1,2})[/\-](\d{4})$/);
+  if (dmyMatch) {
+    const [, d, m, y] = dmyMatch;
+    const iso = `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+    return isValidDate(iso) ? iso : null;
+  }
+  return null;
+}
+
+/**
+ * Sanitizes cell input by stripping formula injection prefix
+ */
+function sanitizeCsvValue(val) {
+  if (typeof val !== "string") return val;
+  let s = val.trim();
+  if (s.startsWith("'") && /^[=+\-@\t\r]/.test(s.slice(1))) {
+    s = s.slice(1);
+  }
+  return s;
+}
+
+/**
+ * Validates and imports CSV data into a clean Saheli record
+ */
+export function parseCSVImport(csvText) {
+  if (!csvText || typeof csvText !== "string") {
+    return { ok: false, error: "imp.csvEmpty" };
+  }
+
+  const rows = parseCSVText(csvText);
+  if (rows.length < 2) {
+    return { ok: false, error: "imp.csvNoData" };
+  }
+
+  const rawHeaders = rows[0].map((h) => sanitizeCsvValue(h).toLowerCase());
+  const headerMap = {};
+  rawHeaders.forEach((h, idx) => {
+    headerMap[h] = idx;
+  });
+
+  const dateIdx = headerMap["date"];
+  if (dateIdx === undefined) {
+    return { ok: false, error: "imp.csvMissingDateHeader" };
+  }
+
+  const rec = emptyRecord();
+  const errors = [];
+  let validCount = 0;
+
+  for (let r = 1; r < rows.length; r++) {
+    const row = rows[r];
+    if (row.length === 1 && !row[0].trim()) continue; // skip blank lines
+
+    const rawDate = row[dateIdx];
+    const normalizedDate = normalizeCsvDate(rawDate);
+
+    if (!normalizedDate) {
+      errors.push({ row: r + 1, error: "imp.badEntry", date: rawDate });
+      continue;
+    }
+
+    const day = blankDay(normalizedDate);
+
+    // period
+    if (headerMap["period"] !== undefined) {
+      const v = sanitizeCsvValue(row[headerMap["period"]]).toLowerCase();
+      day.period = v === "true" || v === "1" || v === "yes";
+    }
+
+    // flow
+    if (headerMap["flow"] !== undefined) {
+      const f = sanitizeCsvValue(row[headerMap["flow"]]).toLowerCase();
+      if (["spotting", "light", "medium", "heavy"].includes(f)) {
+        day.flow = f;
+      }
+    }
+
+    // pain
+    if (headerMap["pain"] !== undefined) {
+      const p = parseInt(sanitizeCsvValue(row[headerMap["pain"]]), 10);
+      if (!isNaN(p) && p >= 0 && p <= 5) {
+        day.pain = p;
+      }
+    }
+
+    // symptoms
+    if (headerMap["symptoms"] !== undefined) {
+      const symStr = sanitizeCsvValue(row[headerMap["symptoms"]]);
+      if (symStr) {
+        day.symptoms = symStr
+          .split(/[;,]/)
+          .map((s) => s.trim())
+          .filter((s) => SYMPTOM_IDS.includes(s));
+      }
+    }
+
+    // mood
+    if (headerMap["mood"] !== undefined) {
+      const m = sanitizeCsvValue(row[headerMap["mood"]]).toLowerCase();
+      if (MOODS.includes(m)) day.mood = m;
+    }
+
+    // energy
+    if (headerMap["energy"] !== undefined) {
+      const e = sanitizeCsvValue(row[headerMap["energy"]]).toLowerCase();
+      if (ENERGY.includes(e)) day.energy = e;
+    }
+
+    // note & medicines
+    if (headerMap["note"] !== undefined) {
+      day.note = sanitizeCsvValue(row[headerMap["note"]]).substring(0, 2000);
+    }
+    if (headerMap["medicines"] !== undefined) {
+      day.medicines = sanitizeCsvValue(row[headerMap["medicines"]]).substring(0, 300);
+    }
+
+    rec.days[normalizedDate] = day;
+    validCount++;
+  }
+
+  if (validCount === 0) {
+    return { ok: false, error: "imp.csvNoValidEntries", errors };
+  }
+
+  return { ok: true, record: rec, validCount, totalRows: rows.length - 1, errors };
+}
+
+/**
+ * Generate a printable / PDF document with embedded machine-readable payload
+ */
+export function generateDoctorSummaryPDF(record, analysis, options = {}) {
+  const jsonPayload = exportJSON(record);
+  let base64Payload = "";
+  try {
+    if (typeof Buffer !== "undefined") {
+      base64Payload = Buffer.from(jsonPayload, "utf-8").toString("base64");
+    } else if (typeof btoa !== "undefined") {
+      base64Payload = btoa(unescape(encodeURIComponent(jsonPayload)));
+    }
+  } catch {}
+
+  const periodDays = Object.values(record.days).filter((d) => d.period);
+  const cycleCount = analysis?.cycles?.length || 0;
+  const avgLength = analysis?.stats?.meanLength ? Math.round(analysis.stats.meanLength) : "N/A";
+  const exportedAt = new Date().toLocaleDateString();
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Saheli Menstrual Health Summary</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 40px; color: #1f2937; line-height: 1.5; }
+    h1 { color: #831843; margin-bottom: 4px; font-size: 24px; }
+    .subtitle { color: #6b7280; font-size: 14px; margin-bottom: 24px; }
+    .stat-grid { display: flex; gap: 16px; margin-bottom: 24px; }
+    .stat-box { background: #fdf2f8; border: 1px solid #fbcfe8; border-radius: 12px; padding: 12px 16px; flex: 1; }
+    .stat-val { font-size: 20px; font-weight: bold; color: #9d174d; }
+    .stat-lbl { font-size: 11px; text-transform: uppercase; color: #6b7280; font-weight: bold; }
+    table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 13px; }
+    th { background: #f3f4f6; text-align: left; padding: 10px; border-bottom: 2px solid #e5e7eb; font-weight: bold; }
+    td { padding: 8px 10px; border-bottom: 1px solid #f3f4f6; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: bold; background: #fce7f3; color: #be185d; }
+    .disclaimer { margin-top: 32px; padding: 16px; border-radius: 12px; background: #f9fafb; border: 1px solid #e5e7eb; font-size: 12px; color: #4b5563; }
+  </style>
+</head>
+<body>
+  <!-- SAHELI_RECORD_PAYLOAD_V1:${base64Payload} -->
+  <h1>Saheli · Clinical Health Summary</h1>
+  <div class="subtitle">Generated on ${exportedAt} · Private On-Device Record</div>
+
+  <div class="stat-grid">
+    <div class="stat-box">
+      <div class="stat-lbl">Completed Cycles</div>
+      <div class="stat-val">${cycleCount}</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-lbl">Average Cycle Length</div>
+      <div class="stat-val">${avgLength} days</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-lbl">Total Period Days Logged</div>
+      <div class="stat-val">${periodDays.length}</div>
+    </div>
+  </div>
+
+  <h2>Recent Period & Symptom Log</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Period</th>
+        <th>Flow</th>
+        <th>Pain (0-5)</th>
+        <th>Symptoms</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${Object.keys(record.days)
+        .sort()
+        .reverse()
+        .slice(0, 30)
+        .map((k) => {
+          const d = record.days[k];
+          return `<tr>
+            <td><strong>${k}</strong></td>
+            <td>${d.period ? '<span class="badge">Period</span>' : "-"}</td>
+            <td>${d.flow || "-"}</td>
+            <td>${d.pain > 0 ? d.pain : "0"}</td>
+            <td>${d.symptoms?.length ? d.symptoms.join(", ") : "-"}</td>
+          </tr>`;
+        })
+        .join("")}
+    </tbody>
+  </table>
+
+  <div class="disclaimer">
+    <strong>Clinical Notice:</strong> This summary was generated from patient-recorded observations in the Saheli Menstrual Health Companion. Saheli operates 100% locally on-device. Ovulation estimates are educational and strictly suppressed when cycle variability exceeds clinical thresholds.
+  </div>
+</body>
+</html>`;
+}
+
+/**
+ * Extracts and validates embedded Saheli payload from an exported PDF/HTML file
+ */
+export function parsePDFImport(content) {
+  if (!content || typeof content !== "string") {
+    return { ok: false, error: "imp.unsupportedPdfNoPayload" };
+  }
+
+  // Look for the versioned embedded payload
+  const match = content.match(/<!--\s*SAHELI_RECORD_PAYLOAD_V1:([A-Za-z0-9+/=]+)\s*-->/);
+  if (!match || !match[1]) {
+    return {
+      ok: false,
+      error: "imp.unsupportedPdfNoPayload",
+      explanation:
+        "This PDF does not contain an embedded Saheli backup payload. To protect your data, only Saheli-generated PDFs can be imported automatically.",
+    };
+  }
+
+  try {
+    let rawJson = "";
+    if (typeof Buffer !== "undefined") {
+      rawJson = Buffer.from(match[1], "base64").toString("utf-8");
+    } else if (typeof atob !== "undefined") {
+      rawJson = decodeURIComponent(escape(atob(match[1])));
+    }
+    return parseImport(rawJson);
+  } catch {
+    return { ok: false, error: "imp.corruptedPdfPayload" };
+  }
 }
 
 // Returns { ok, record?, error? }. Never mutates storage.

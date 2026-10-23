@@ -13,6 +13,9 @@ import {
   Lock,
   BookOpen,
   Sparkles,
+  Compass,
+  ShoppingBag,
+  MessageSquareWarning,
 } from "lucide-react";
 import { useApp } from "@/App.jsx";
 import { PageTitle } from "@/components/common/ui.jsx";
@@ -24,6 +27,18 @@ export default function More() {
     {
       title: t("ins.title"),
       items: [
+        {
+          to: "/discover",
+          key: "nav.discover",
+          icon: Compass,
+          color: "text-primary bg-primary/10",
+        },
+        {
+          to: "/flash",
+          key: "nav.flash",
+          icon: ShoppingBag,
+          color: "text-accent-foreground bg-accent",
+        },
         {
           to: "/selfcare",
           key: "nav.selfCare",
@@ -78,6 +93,12 @@ export default function More() {
       title: t("nav.settings"),
       items: [
         { to: "/settings", key: "nav.settings", icon: Settings, color: "text-foreground bg-muted" },
+        {
+          to: "/feedback",
+          key: "feedback.navReport",
+          icon: MessageSquareWarning,
+          color: "text-primary bg-primary/10",
+        },
       ],
     },
   ];

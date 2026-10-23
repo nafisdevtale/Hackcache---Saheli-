@@ -13,7 +13,10 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AskRouteImport } from './routes/ask'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as CommunityRouteImport } from './routes/community'
+import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as DoctorRouteImport } from './routes/doctor'
+import { Route as FeedbackRouteImport } from './routes/feedback'
+import { Route as FlashRouteImport } from './routes/flash'
 import { Route as InsightsRouteImport } from './routes/insights'
 import { Route as LearnRouteImport } from './routes/learn'
 import { Route as LogRouteImport } from './routes/log'
@@ -44,9 +47,24 @@ const CommunityRoute = CommunityRouteImport.update({
   path: '/community',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DiscoverRoute = DiscoverRouteImport.update({
+  id: '/discover',
+  path: '/discover',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DoctorRoute = DoctorRouteImport.update({
   id: '/doctor',
   path: '/doctor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeedbackRoute = FeedbackRouteImport.update({
+  id: '/feedback',
+  path: '/feedback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FlashRoute = FlashRouteImport.update({
+  id: '/flash',
+  path: '/flash',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InsightsRoute = InsightsRouteImport.update({
@@ -100,7 +118,10 @@ export interface FileRoutesByFullPath {
   '/ask': typeof AskRoute
   '/calendar': typeof CalendarRoute
   '/community': typeof CommunityRoute
+  '/discover': typeof DiscoverRoute
   '/doctor': typeof DoctorRoute
+  '/feedback': typeof FeedbackRoute
+  '/flash': typeof FlashRoute
   '/insights': typeof InsightsRoute
   '/learn': typeof LearnRoute
   '/log': typeof LogRoute
@@ -116,7 +137,10 @@ export interface FileRoutesByTo {
   '/ask': typeof AskRoute
   '/calendar': typeof CalendarRoute
   '/community': typeof CommunityRoute
+  '/discover': typeof DiscoverRoute
   '/doctor': typeof DoctorRoute
+  '/feedback': typeof FeedbackRoute
+  '/flash': typeof FlashRoute
   '/insights': typeof InsightsRoute
   '/learn': typeof LearnRoute
   '/log': typeof LogRoute
@@ -133,7 +157,10 @@ export interface FileRoutesById {
   '/ask': typeof AskRoute
   '/calendar': typeof CalendarRoute
   '/community': typeof CommunityRoute
+  '/discover': typeof DiscoverRoute
   '/doctor': typeof DoctorRoute
+  '/feedback': typeof FeedbackRoute
+  '/flash': typeof FlashRoute
   '/insights': typeof InsightsRoute
   '/learn': typeof LearnRoute
   '/log': typeof LogRoute
@@ -151,7 +178,10 @@ export interface FileRouteTypes {
     | '/ask'
     | '/calendar'
     | '/community'
+    | '/discover'
     | '/doctor'
+    | '/feedback'
+    | '/flash'
     | '/insights'
     | '/learn'
     | '/log'
@@ -167,7 +197,10 @@ export interface FileRouteTypes {
     | '/ask'
     | '/calendar'
     | '/community'
+    | '/discover'
     | '/doctor'
+    | '/feedback'
+    | '/flash'
     | '/insights'
     | '/learn'
     | '/log'
@@ -183,7 +216,10 @@ export interface FileRouteTypes {
     | '/ask'
     | '/calendar'
     | '/community'
+    | '/discover'
     | '/doctor'
+    | '/feedback'
+    | '/flash'
     | '/insights'
     | '/learn'
     | '/log'
@@ -200,7 +236,10 @@ export interface RootRouteChildren {
   AskRoute: typeof AskRoute
   CalendarRoute: typeof CalendarRoute
   CommunityRoute: typeof CommunityRoute
+  DiscoverRoute: typeof DiscoverRoute
   DoctorRoute: typeof DoctorRoute
+  FeedbackRoute: typeof FeedbackRoute
+  FlashRoute: typeof FlashRoute
   InsightsRoute: typeof InsightsRoute
   LearnRoute: typeof LearnRoute
   LogRoute: typeof LogRoute
@@ -242,11 +281,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommunityRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/discover': {
+      id: '/discover'
+      path: '/discover'
+      fullPath: '/discover'
+      preLoaderRoute: typeof DiscoverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/doctor': {
       id: '/doctor'
       path: '/doctor'
       fullPath: '/doctor'
       preLoaderRoute: typeof DoctorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feedback': {
+      id: '/feedback'
+      path: '/feedback'
+      fullPath: '/feedback'
+      preLoaderRoute: typeof FeedbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/flash': {
+      id: '/flash'
+      path: '/flash'
+      fullPath: '/flash'
+      preLoaderRoute: typeof FlashRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/insights': {
@@ -320,7 +380,10 @@ const rootRouteChildren: RootRouteChildren = {
   AskRoute: AskRoute,
   CalendarRoute: CalendarRoute,
   CommunityRoute: CommunityRoute,
+  DiscoverRoute: DiscoverRoute,
   DoctorRoute: DoctorRoute,
+  FeedbackRoute: FeedbackRoute,
+  FlashRoute: FlashRoute,
   InsightsRoute: InsightsRoute,
   LearnRoute: LearnRoute,
   LogRoute: LogRoute,

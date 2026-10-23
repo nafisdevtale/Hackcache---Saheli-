@@ -370,4 +370,13 @@ export const SOURCES = {
     status: "Verified national clinical guideline",
     url: "https://www.fogsi.org/wp-content/uploads/committee-2020-activities/fogsi-faq-for-adolescent.pdf",
   },
+  unicef_hygiene: {
+    name: "UNICEF – Guidance on Menstrual Health and Hygiene",
+    title: "UNICEF Guidance on Menstrual Health & Hygiene Management",
+    organization: "United Nations Children's Fund (UNICEF)",
+    topic: "Global evidence and school-based dignity guidelines for menstrual hygiene management",
+    accessed: "October 2026",
+    status: "Verified international UN guideline",
+    url: "https://www.unicef.org/wash/menstrual-hygiene",
+  },
 };

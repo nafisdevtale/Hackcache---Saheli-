@@ -15,7 +15,13 @@ import {
   Check,
   Plus,
   RefreshCw,
+  FileText,
+  Volume2,
+  Bell,
+  MessageSquareWarning,
+  Play,
 } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { useApp } from "@/App.jsx";
 import {
   Btn,
@@ -28,7 +34,16 @@ import {
   cx,
 } from "@/components/common/ui.jsx";
 import { SYMPTOMS } from "@/data/symptoms.js";
-import { exportJSON, exportCSV, parseImport, importPreview } from "@/lib/exportImport.js";
+import {
+  exportJSON,
+  exportCSV,
+  parseImport,
+  importPreview,
+  parseCSVImport,
+  generateDoctorSummaryPDF,
+  parsePDFImport,
+} from "@/lib/exportImport.js";
+import { loadChimeSettings, saveChimeSettings, playSaheliChime } from "@/lib/chime.js";
 import { isValidPin, isValidPassphrase, isValidSecret } from "@/lib/encryption.js";
 import { todayStr } from "@/lib/localDate.js";
 import { LANGUAGES } from "@/i18n/languages.js";
@@ -68,12 +83,12 @@ function PinInput({ id, label, value, onChange, isPassphrase = false }) {
 }
 
 function ExportBlock() {
-  const { t, record, prefs } = useApp();
+  const { t, record, prefs, analysis } = useApp();
   const [pending, setPending] = useState(null);
   const base = `${prefs.discreet ? "diary" : "saheli"}-${todayStr()}`;
   return (
     <div className="space-y-3">
-      <div className="grid gap-2.5 sm:grid-cols-2">
+      <div className="grid gap-2.5 sm:grid-cols-3">
         <Btn
           variant="outline"
           className="min-h-12 rounded-2xl flex items-center justify-center gap-2 font-bold text-xs"
@@ -90,6 +105,14 @@ function ExportBlock() {
           <Download className="h-4 w-4" />
           <span>{t("set.exportCsv")}</span>
         </Btn>
+        <Btn
+          variant="outline"
+          className="min-h-12 rounded-2xl flex items-center justify-center gap-2 font-bold text-xs"
+          onClick={() => setPending("pdf")}
+        >
+          <FileText className="h-4 w-4" />
+          <span>{t("set.exportPdf")}</span>
+        </Btn>
       </div>
       {pending && (
         <div
@@ -102,9 +125,17 @@ function ExportBlock() {
             <Btn
               size="sm"
               onClick={() => {
-                pending === "json"
-                  ? download(`${base}.json`, exportJSON(record), "application/json")
-                  : download(`${base}.csv`, exportCSV(record), "text/csv");
+                if (pending === "json") {
+                  download(`${base}.json`, exportJSON(record), "application/json");
+                } else if (pending === "csv") {
+                  download(`${base}.csv`, exportCSV(record), "text/csv");
+                } else if (pending === "pdf") {
+                  download(
+                    `${base}-health-summary.html`,
+                    generateDoctorSummaryPDF(record, analysis),
+                    "text/html",
+                  );
+                }
                 setPending(null);
               }}
             >
@@ -359,6 +390,13 @@ export default function Settings() {
   const [confirmWipe, setConfirmWipe] = useState(false);
   const [importState, setImportState] = useState(null);
   const [importErr, setImportErr] = useState(null);
+  const [chimeSettings, setChimeSettings] = useState(() => loadChimeSettings());
+
+  const updateChime = (patch) => {
+    const next = { ...chimeSettings, ...patch };
+    setChimeSettings(next);
+    saveChimeSettings(next);
+  };
 
   const setSettings = (patch) => update((r) => ({ ...r, settings: { ...r.settings, ...patch } }));
 
@@ -423,9 +461,21 @@ export default function Settings() {
     setImportErr(null);
     try {
       const text = await file.text();
-      const parsed = parseImport(text);
-      const preview = importPreview(record, parsed);
-      setImportState({ parsed, preview });
+      let parseResult;
+      const fileName = file.name.toLowerCase();
+      if (fileName.endsWith(".csv") || file.type === "text/csv") {
+        parseResult = parseCSVImport(text);
+      } else if (fileName.endsWith(".pdf") || fileName.endsWith(".html")) {
+        parseResult = parsePDFImport(text);
+      } else {
+        parseResult = parseImport(text);
+      }
+
+      if (!parseResult.ok) {
+        throw new Error(parseResult.error || "set.importCorrupt");
+      }
+      const preview = importPreview(record, parseResult.record);
+      setImportState({ parsed: parseResult.record, preview });
     } catch (err) {
       setImportErr(err.message || "set.importCorrupt");
     }
@@ -446,6 +496,7 @@ export default function Settings() {
     { id: "cycle", label: t("set.health"), icon: Activity },
     { id: "privacy", label: t("set.privacy"), icon: Shield },
     { id: "data", label: t("set.data"), icon: Database },
+    { id: "feedback", label: t("set.feedback"), icon: MessageSquareWarning },
   ];
 
   return (
@@ -563,6 +614,77 @@ export default function Settings() {
                 checked={!!prefs.readAloud}
                 onChange={(v) => setPrefs({ readAloud: v })}
               />
+            </div>
+          </div>
+
+          {/* Saheli Chime & Notification Audio */}
+          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Volume2 className="h-5 w-5 text-primary" />
+                <h2 className="font-bold text-sm sm:text-base text-foreground">
+                  {t("chime.title")}
+                </h2>
+              </div>
+              <Btn
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  playSaheliChime({
+                    volume: chimeSettings.volume,
+                    reducedSensory: chimeSettings.reducedSensory,
+                    discreetMode: prefs.discreet,
+                  })
+                }
+                className="flex items-center gap-1.5 rounded-xl text-xs font-bold"
+              >
+                <Play className="h-3.5 w-3.5 text-primary" />
+                <span>{t("chime.preview")}</span>
+              </Btn>
+            </div>
+
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              {t("chime.description")}
+            </p>
+
+            <Toggle
+              label={t("chime.enableSound")}
+              desc={t("chime.enableSoundDesc")}
+              checked={chimeSettings.enabled}
+              onChange={(v) => updateChime({ enabled: v })}
+            />
+
+            {chimeSettings.enabled && (
+              <div className="space-y-3 pt-2 border-t border-border/40 text-xs">
+                <div>
+                  <div className="flex justify-between font-bold text-foreground mb-1">
+                    <span>{t("chime.volume")}</span>
+                    <span>{Math.round(chimeSettings.volume * 100)}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value={chimeSettings.volume}
+                    onChange={(e) => updateChime({ volume: parseFloat(e.target.value) })}
+                    className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                  />
+                </div>
+
+                <Toggle
+                  label={t("chime.reducedSensory")}
+                  desc={t("chime.reducedSensoryDesc")}
+                  checked={chimeSettings.reducedSensory}
+                  onChange={(v) => updateChime({ reducedSensory: v })}
+                />
+              </div>
+            )}
+
+            <div className="rounded-2xl bg-muted/40 p-3 text-[11px] text-muted-foreground leading-relaxed border border-border/50">
+              <span className="font-bold text-foreground">{t("chime.platformNoticeTitle")}: </span>
+              <span>{t("chime.platformNotice")}</span>
             </div>
           </div>
         </div>
@@ -831,7 +953,12 @@ export default function Settings() {
             <label className="flex min-h-[48px] cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-muted/30 px-4 text-xs font-bold text-primary hover:bg-muted transition-all">
               <Upload className="h-4 w-4" />
               <span>{t("set.chooseFile")}</span>
-              <input type="file" accept=".json" onChange={handleFile} className="sr-only" />
+              <input
+                type="file"
+                accept=".json,.csv,.pdf,.html,text/csv,text/html,application/json"
+                onChange={handleFile}
+                className="sr-only"
+              />
             </label>
 
             {importErr && (
@@ -930,6 +1057,35 @@ export default function Settings() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* TAB 5: HELP & BUG REPORTING */}
+      {activeTab === "feedback" && (
+        <div className="space-y-6 animate-fade-in">
+          <div className="rounded-3xl border border-border/70 bg-card p-6 shadow-soft space-y-4">
+            <div className="flex items-center gap-2.5">
+              <MessageSquareWarning className="h-6 w-6 text-primary" />
+              <div>
+                <h2 className="font-bold text-base text-foreground">{t("feedback.centerTitle")}</h2>
+                <p className="text-xs text-muted-foreground">{t("feedback.centerSubtitle")}</p>
+              </div>
+            </div>
+
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              {t("feedback.centerDesc")}
+            </p>
+
+            <div className="pt-2">
+              <Link
+                to="/feedback"
+                className="inline-flex items-center gap-2 rounded-2xl bg-primary px-4 py-2.5 text-xs font-bold text-primary-foreground shadow-xs hover:bg-primary/90 transition-all"
+              >
+                <span>{t("feedback.openReporter")}</span>
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            </div>
           </div>
         </div>
       )}
