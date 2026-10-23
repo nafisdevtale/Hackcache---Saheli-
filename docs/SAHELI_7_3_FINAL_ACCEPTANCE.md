@@ -59,6 +59,7 @@
 | Internationalization Audit | `bun run i18n:check`       | **PASS** | 13/13 languages at 100% parity (1329 keys), 0 cross-contamination   |
 | Code Formatting            | `bun x prettier --check .` | **PASS** | All matched files use Prettier code style                           |
 | Static Analysis / Linter   | `bun run lint`             | **PASS** | ESLint passed with 0 errors and 0 warnings                          |
+| Test Runner Compatibility  | `vitest run`               | **PASS** | Migrated all Saheli 7.3 test suites to `vitest` imports             |
 | Production Build           | `bun run build`            | **PASS** | Nitro/Vite build generated clean client and server bundles          |
 
 ---
