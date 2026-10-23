@@ -71,6 +71,7 @@ export default {
   "cal.logged": "Logged period (filled with drop)",
   "cal.nextMonth": "Next month",
   "cal.noEntry": "Nothing logged on this day.",
+  "cal.obsDay": "Ovulation Observation Recorded",
   "cal.periodDay": "period",
   "cal.predicted": "Estimated period (dashed outline)",
   "cal.prevMonth": "Previous month",
@@ -679,6 +680,8 @@ export default {
   "ins.notContraception":
     "Important: Not for contraception. Cycle estimates are never reliable for preventing pregnancy.",
   "ins.notDiagnosis": "Patterns describe your logs only. They are not a diagnosis.",
+  "ins.observationHistory": "Observation History",
+  "ins.observationsLogged": "{count} observation(s) recorded",
   "ins.painOverview": "Pain and comfort",
   "ins.patternDisruptivePain":
     "Disruptive pain was logged during {n} of your last {total} periods.",
@@ -693,6 +696,7 @@ export default {
   "ins.periodChart": "Period length (days)",
   "ins.periodLen": "Period",
   "ins.phaseAssociation": "Associated with: {phase}",
+  "ins.phaseInsightsTitle": "Cycle Phase & Ovulation Insights",
   "ins.phaseOther": "Other cycle days",
   "ins.phasePeriod": "During period",
   "ins.phasePremenstrual": "Premenstrual phase (5 days before period)",
@@ -868,13 +872,26 @@ export default {
   "onb.unlockData": "Unlock my data",
   "onb.welcomeTodayDesc": "Welcome to your personal diary. Let's see your dashboard for today.",
   "onb.welcomeTodayTitle": "You're all set!",
+  "phase.bbt": "Basal Body Temperature",
+  "phase.bleeding": "Bleeding Logged",
+  "phase.cervicalFluid": "Cervical Fluid",
   "phase.clinicalSources": "Clinical Reference Guidelines",
+  "phase.confidenceTitle": "Cycle Prediction Status",
   "phase.current": "Current Phase",
+  "phase.currentCycleDay": "Cycle Day {day}",
+  "phase.cycleDayCard": "Cycle Day",
   "phase.dayOnly": "Log a few more periods and I'll describe your cycle in more detail.",
   "phase.daysRange": "Estimated Days {start} – {end}",
+  "phase.deleteObservation": "Delete Observation",
   "phase.disclaimer":
     "Educational only. Phase timelines are mathematical approximations and must never be used as contraception or fertility control.",
   "phase.eduBadge": "Educational Overview",
+  "phase.excludeFromCalc": "Exclude from cycle calculations",
+  "phase.fluidCreamy": "Creamy / Lotion-like",
+  "phase.fluidDry": "Dry / None",
+  "phase.fluidEggwhite": "Egg-white / Stretchy (Peak Fertile Sign)",
+  "phase.fluidSticky": "Sticky / Tacky",
+  "phase.fluidWatery": "Watery / Slippery",
   "phase.follicular":
     "Your period has ended. Many people feel more energy in this part of the cycle.",
   "phase.follicular.biology":
@@ -895,10 +912,17 @@ export default {
   "phase.follicular.title": "Follicular Phase",
   "phase.follicular.variation":
     "Follicular phase length is the most variable part of the menstrual cycle across different people and cycles. A universal 'Day 14 ovulation' is a clinical oversimplification.",
+  "phase.follicularBoundary":
+    "Biological boundary: The follicular phase varies widely between cycles. Ovulation date cannot be predicted with certainty.",
   "phase.hormoneTitle": "Key Hormones",
   "phase.irregular": "Your cycles vary a lot, so the current phase is hard to estimate.",
   "phase.late":
     "Your period is later than the estimate. Cycles vary — stress, illness and other things can delay it.",
+  "phase.lhFaint": "Faint / Baseline",
+  "phase.lhNegative": "Negative (Low LH)",
+  "phase.lhNone": "Not Tested",
+  "phase.lhPositive": "Positive (LH Surge Detected)",
+  "phase.lhTest": "Ovulation Test (LH/OPK)",
   "phase.luteal.biology":
     "Begins after ovulation when the ruptured follicle transforms into the corpus luteum, producing progesterone. If pregnancy does not occur, hormone levels drop, triggering menstruation.",
   "phase.luteal.hormones":
@@ -917,13 +941,34 @@ export default {
   "phase.luteal.title": "Luteal Phase",
   "phase.luteal.variation":
     "The luteal phase typically lasts 11 to 17 days (mean 14 days in clinical benchmarks). Significant shortening (<10 days) or absence should be evaluated by a healthcare professional.",
+  "phase.lutealBoundary":
+    "Biological boundary: Luteal phase length typically lasts 11-17 days (mean 14 days) and is relatively stable once ovulation occurs.",
+  "phase.method.calendar": "Calendar Estimate",
+  "phase.method.educational": "Educational Overview",
+  "phase.method.menstrual": "Menstrual Bleeding Recorded",
   "phase.middle": "You're around the middle of your cycle.",
+  "phase.myCyclePhases": "My Cycle Phases",
+  "phase.myCyclePhasesSubtitle":
+    "Evidence-based biological phases, daily observations, and uncertainty boundaries",
+  "phase.noCycleDay": "No cycle start recorded",
+  "phase.noObservations": "No ovulation observations recorded yet for this cycle.",
+  "phase.noPeriodHistory": "Log your period start dates to calculate your current cycle day.",
+  "phase.noSymptomsRecorded": "No symptom patterns observed in past cycles yet.",
+  "phase.notBleeding": "No Bleeding Logged",
+  "phase.obsDisclaimer":
+    "Ovulation test strips and body observations reflect hormonal activity or physiological changes, but cannot guarantee that ovulation has occurred or pinpoint an exact ovulation day. Never use these observations as contraception.",
+  "phase.ovulationCardSubtitle":
+    "Track body signs like LH test strips, basal body temperature, and cervical fluid",
+  "phase.ovulationCardTitle": "Ovulation & Fertility Observations",
   "phase.period": "You're on your period. Rest when you need to.",
   "phase.premenstrual": "Your next period may come in the next few days (estimate).",
+  "phase.recordObservation": "Record Observation",
   "phase.sectionSubtitle":
     "Understand your body's natural rhythms, hormonal shifts, and evidence-based self-care",
   "phase.sectionTitle": "Menstrual Cycle Phases",
   "phase.selfCareHeader": "Self-Care & Daily Comfort Tips",
+  "phase.spotting": "Spotting Logged",
+  "phase.startedOn": "Started {date}",
   "phase.suppressed.adolescent":
     "Adolescent guidance: Cycle phases are naturally variable during puberty and maturation.",
   "phase.suppressed.insufficient":
@@ -932,6 +977,7 @@ export default {
     "Natural variation: Phase day markers are paused when cycle length fluctuates by more than 7 days.",
   "phase.suppressed.paused": "Tracking paused: Phase estimates are temporarily held.",
   "phase.suppressed.pregnancy": "Pregnancy mode active: Menstrual phase estimation is paused.",
+  "phase.symptomPatternsTitle": "Symptoms Typically Observed Around This Phase",
   "phase.unknown": "Log your periods so I can describe your cycle.",
   "phase.variationTitle": "Individual Variation & Myth Busting",
   "pk.na": "Didn't take one",

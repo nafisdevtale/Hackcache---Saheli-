@@ -26,7 +26,7 @@ import {
   isValidPin,
   isValidSecret,
 } from "./lib/encryption.js";
-import { analyze } from "./lib/cycle.js";
+import { analyze, getAuthoritativeCycleState } from "./lib/cycle.js";
 import { evaluateSafety } from "./lib/safetyRules.js";
 import { buildDemo } from "./data/demo.js";
 import {
@@ -35,6 +35,7 @@ import {
   mergeRecords,
   blankDay,
   defaultHealthConditions,
+  defaultOvulationObservation,
 } from "./lib/exportImport.js";
 import { todayStr, formatDate, formatRange, addDays, isValidDate } from "./lib/localDate.js";
 import { translate, pick } from "./i18n/index.js";
@@ -222,6 +223,27 @@ export function AppProvider({ children }) {
         const days = { ...r.days };
         delete days[date];
         return writeRecord({ ...r, days }, m);
+      });
+    },
+    async saveOvulationObservation(date, obs) {
+      return mutate(({ record: r, meta: m }) => {
+        const prev = r.ovulationObservations || {};
+        const updated = {
+          ...prev,
+          [date]: {
+            ...(prev[date] || defaultOvulationObservation(date)),
+            ...obs,
+            date,
+          },
+        };
+        return writeRecord({ ...r, ovulationObservations: updated }, m);
+      });
+    },
+    async deleteOvulationObservation(date) {
+      return mutate(({ record: r, meta: m }) => {
+        const observations = { ...(r.ovulationObservations || {}) };
+        delete observations[date];
+        return writeRecord({ ...r, ovulationObservations: observations }, m);
       });
     },
     async update(fn) {
@@ -442,6 +464,10 @@ export function AppProvider({ children }) {
         : null,
     [record, today],
   );
+  const cycleState = useMemo(
+    () => (record ? getAuthoritativeCycleState(record, today) : null),
+    [record, today],
+  );
   const safety = useMemo(
     () => (record && analysis ? evaluateSafety({ record, analysis, today }) : null),
     [record, analysis, today],
@@ -537,6 +563,7 @@ export function AppProvider({ children }) {
     meta,
     record,
     analysis,
+    cycleState,
     safety,
     fertilityVisible,
     pregnancyVisible,

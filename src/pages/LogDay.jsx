@@ -14,12 +14,21 @@ import {
   cx,
 } from "@/components/common/ui.jsx";
 import { SYMPTOMS, FLOWS, MOODS, ENERGY } from "@/data/symptoms.js";
-import { blankDay, validateDay } from "@/lib/exportImport.js";
+import { blankDay, validateDay, defaultOvulationObservation } from "@/lib/exportImport.js";
 import { addDays, isValidDate } from "@/lib/localDate.js";
 import { DailyJournalMotif } from "@/components/brand/SaheliArt.jsx";
 
 export default function LogDay() {
-  const { t, fmt, record, today, saveDay, deleteDay } = useApp();
+  const {
+    t,
+    fmt,
+    record,
+    today,
+    saveDay,
+    deleteDay,
+    saveOvulationObservation,
+    deleteOvulationObservation,
+  } = useApp();
   const search = useSearch({ strict: false });
   const navigate = useNavigate();
   const initial = isValidDate(search?.date) && search.date <= today ? search.date : today;
@@ -27,6 +36,10 @@ export default function LogDay() {
   const [form, setForm] = useState(() => ({
     ...blankDay(initial),
     ...(record.days[initial] || {}),
+  }));
+  const [obsForm, setObsForm] = useState(() => ({
+    ...defaultOvulationObservation(initial),
+    ...(record.ovulationObservations?.[initial] || {}),
   }));
   const [errors, setErrors] = useState([]);
   const [msg, setMsg] = useState(null);
@@ -37,6 +50,10 @@ export default function LogDay() {
 
   useEffect(() => {
     setForm({ ...blankDay(date), ...(record.days[date] || {}) });
+    setObsForm({
+      ...defaultOvulationObservation(date),
+      ...(record.ovulationObservations?.[date] || {}),
+    });
     setErrors([]);
   }, [date]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -118,6 +135,17 @@ export default function LogDay() {
     if (errs.length) return;
     try {
       await saveDay(entry);
+      const hasObs =
+        (obsForm.testResult && obsForm.testResult !== "none") ||
+        obsForm.bbt != null ||
+        (obsForm.cervicalFluid && obsForm.cervicalFluid !== "none") ||
+        (obsForm.notes && obsForm.notes.trim());
+
+      if (hasObs) {
+        await saveOvulationObservation(date, { ...obsForm, date });
+      } else if (record.ovulationObservations?.[date]) {
+        await deleteOvulationObservation(date);
+      }
       setMsg({ key: "log.saved" });
     } catch {
       setMsg({ key: "log.saveFailed", tone: "err" });
@@ -483,6 +511,115 @@ export default function LogDay() {
                   className={inputCls}
                 />
               </Field>
+            </div>
+
+            {/* Optional Ovulation Observations */}
+            <div className="rounded-2xl border border-secondary/30 bg-secondary/5 p-4 space-y-3">
+              <span className="font-bold text-xs text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                ✨ {t("phase.ovulationCardTitle")} (Optional)
+              </span>
+
+              {/* LH Test */}
+              <div className="space-y-1">
+                <span className="text-[11px] font-semibold text-muted-foreground block">
+                  {t("phase.lhTest")}
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    ["none", "phase.lhNone"],
+                    ["negative", "phase.lhNegative"],
+                    ["faint", "phase.lhFaint"],
+                    ["positive", "phase.lhPositive"],
+                  ].map(([id, key]) => (
+                    <Chip
+                      key={id}
+                      selected={obsForm.testResult === id}
+                      onClick={() => setObsForm((f) => ({ ...f, testResult: id }))}
+                    >
+                      {t(key)}
+                    </Chip>
+                  ))}
+                </div>
+              </div>
+
+              {/* BBT & Fluid Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Field id="bbt" label={t("phase.bbt")}>
+                  <div className="flex gap-2">
+                    <input
+                      id="bbt"
+                      type="number"
+                      step="0.05"
+                      min={obsForm.bbtUnit === "F" ? 95 : 35}
+                      max={obsForm.bbtUnit === "F" ? 104 : 41}
+                      placeholder={obsForm.bbtUnit === "F" ? "97.8" : "36.6"}
+                      value={obsForm.bbt != null ? obsForm.bbt : ""}
+                      onChange={(e) =>
+                        setObsForm((f) => ({
+                          ...f,
+                          bbt: e.target.value === "" ? null : parseFloat(e.target.value),
+                        }))
+                      }
+                      className={inputCls}
+                    />
+                    <div className="flex rounded-xl border border-border overflow-hidden bg-muted/40">
+                      <button
+                        type="button"
+                        onClick={() => setObsForm((f) => ({ ...f, bbtUnit: "C" }))}
+                        className={cx(
+                          "px-2.5 py-1 text-xs font-bold transition-colors",
+                          obsForm.bbtUnit === "C"
+                            ? "bg-card text-foreground"
+                            : "text-muted-foreground",
+                        )}
+                      >
+                        °C
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setObsForm((f) => ({ ...f, bbtUnit: "F" }))}
+                        className={cx(
+                          "px-2.5 py-1 text-xs font-bold transition-colors",
+                          obsForm.bbtUnit === "F"
+                            ? "bg-card text-foreground"
+                            : "text-muted-foreground",
+                        )}
+                      >
+                        °F
+                      </button>
+                    </div>
+                  </div>
+                </Field>
+
+                <Field id="cervicalFluid" label={t("phase.cervicalFluid")}>
+                  <select
+                    id="cervicalFluid"
+                    value={obsForm.cervicalFluid || "none"}
+                    onChange={(e) => setObsForm((f) => ({ ...f, cervicalFluid: e.target.value }))}
+                    className={inputCls}
+                  >
+                    <option value="none">{t("phase.fluidDry")}</option>
+                    <option value="sticky">{t("phase.fluidSticky")}</option>
+                    <option value="creamy">{t("phase.fluidCreamy")}</option>
+                    <option value="eggwhite">{t("phase.fluidEggwhite")}</option>
+                    <option value="watery">{t("phase.fluidWatery")}</option>
+                  </select>
+                </Field>
+              </div>
+
+              <label className="flex items-center gap-2 cursor-pointer pt-1">
+                <input
+                  type="checkbox"
+                  checked={obsForm.excludedFromCalculations}
+                  onChange={(e) =>
+                    setObsForm((f) => ({ ...f, excludedFromCalculations: e.target.checked }))
+                  }
+                  className="rounded border-border text-primary focus:ring-primary"
+                />
+                <span className="text-[11px] text-muted-foreground">
+                  {t("phase.excludeFromCalc")}
+                </span>
+              </label>
             </div>
 
             <Field id="note" label={t("log.note")}>

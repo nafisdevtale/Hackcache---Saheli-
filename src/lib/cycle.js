@@ -498,3 +498,235 @@ export function getCyclePhaseDiagnostics(a, opts = {}, today = todayStr()) {
     luteal,
   };
 }
+
+/**
+ * Saheli 7.4 — Authoritative Derived Cycle-State Model
+ *
+ * Provides a single unified, authoritative cycle state for Today, Calendar,
+ * Rhythm Ring, and Insights. Works independently of fertility estimation so that
+ * cycle-day and bleeding status tracking remain functional even when fertility
+ * or phase estimates are suppressed.
+ */
+export function getAuthoritativeCycleState(record, targetDate = todayStr()) {
+  const days = record?.days || {};
+  const settings = record?.settings || {};
+  const pregnancy = record?.pregnancy || {};
+  const observations = record?.ovulationObservations || {};
+
+  const isPregnancyActive = !!(pregnancy.active || settings.pregnancyMode);
+  const isTrackingPaused = !!settings.trackingPaused;
+  const isUnder18 =
+    settings.ageGroup === "under18" ||
+    (settings.birthYear && new Date(targetDate).getFullYear() - Number(settings.birthYear) < 18);
+  const effectiveAgeGroup = isUnder18 ? "under18" : settings.ageGroup || "adult";
+
+  const a = analyze(days, {
+    ageGroup: effectiveAgeGroup,
+    today: targetDate,
+    paused: isTrackingPaused || isPregnancyActive,
+    pregnancyActive: isPregnancyActive,
+    pregnancyMode: isPregnancyActive,
+    trackingPaused: isTrackingPaused,
+    showFertility: settings.showFertility,
+    fertilityOptIn: settings.fertilityOptIn,
+  });
+
+  const phaseDiag = getCyclePhaseDiagnostics(
+    a,
+    {
+      ageGroup: effectiveAgeGroup,
+      paused: isTrackingPaused || isPregnancyActive,
+      pregnancyActive: isPregnancyActive,
+      pregnancyMode: isPregnancyActive,
+      trackingPaused: isTrackingPaused,
+    },
+    targetDate,
+  );
+
+  // Cycle Day & Menstrual Status Tracking (works independently of fertility)
+  const currentCycleStart = a.lastStart;
+  const previousCycleStarts = a.periods.slice(0, -1).map((p) => p.start);
+  const completedCycleCount = a.cycles ? a.cycles.length : 0;
+  const cycleLengthMedian = a.prediction?.median ?? a.stats?.median ?? null;
+  const cycleLengthVariability =
+    a.prediction?.spread ?? (a.stats ? a.stats.max - a.stats.min : null);
+
+  // Cycle day computation
+  let cycleDay = null;
+  let isLongCycleGap = false;
+  if (currentCycleStart && targetDate >= currentCycleStart) {
+    cycleDay = diffDays(currentCycleStart, targetDate) + 1;
+    if (cycleDay > 60) {
+      isLongCycleGap = true;
+    }
+  }
+
+  // Current bleeding status for targetDate
+  const targetDayEntry = days[targetDate];
+  let currentBleedingStatus = "none";
+  if (targetDayEntry?.period) {
+    currentBleedingStatus = targetDayEntry.flow === "spotting" ? "spotting" : "bleeding";
+  } else if (a.inPeriod) {
+    currentBleedingStatus = "bleeding";
+  }
+
+  // Phase status & estimation method
+  let phaseStatus = "uncertain";
+  let phaseLabel = "phase.uncertain";
+  let phaseEstimationMethod = "educational_only";
+  let phaseUncertainty = "phase.uncertainty.general";
+
+  if (isPregnancyActive) {
+    phaseStatus = "pregnancy";
+    phaseLabel = "phase.pregnancy";
+    phaseEstimationMethod = "suppressed";
+    phaseUncertainty = "phase.suppressed.pregnancy";
+  } else if (isTrackingPaused) {
+    phaseStatus = "paused";
+    phaseLabel = "phase.paused";
+    phaseEstimationMethod = "suppressed";
+    phaseUncertainty = "phase.suppressed.paused";
+  } else if (
+    currentBleedingStatus === "bleeding" ||
+    (a.inPeriod && cycleDay && cycleDay <= (a.lastPeriod?.length || 5))
+  ) {
+    phaseStatus = "menstrual";
+    phaseLabel = "phase.menstrual";
+    phaseEstimationMethod = "recorded_menstruation";
+    phaseUncertainty = "phase.uncertainty.menstrual";
+  } else if (phaseDiag.eligible && phaseDiag.status === "estimate_available") {
+    phaseStatus = phaseDiag.activePhase; // 'follicular' | 'luteal' | 'overdue'
+    phaseLabel = `phase.${phaseDiag.activePhase}`;
+    phaseEstimationMethod = "calendar_bounded";
+    phaseUncertainty = "phase.uncertainty.estimated";
+  } else {
+    // Educational phase mapping when calendar prediction is withheld/suppressed
+    phaseStatus =
+      phaseDiag.activePhase ||
+      (cycleDay != null
+        ? cycleDay <= 14
+          ? "follicular"
+          : "luteal"
+        : phaseDiag.reason || "uncertain");
+    phaseLabel = `phase.${phaseStatus}`;
+    phaseEstimationMethod = "educational_only";
+    phaseUncertainty = phaseDiag.uncertaintyNoteKey || "phase.uncertainty.general";
+  }
+
+  // Ovulation estimate availability status
+  const ovulationEstimateStatus = a.fertilityStatus;
+
+  // Ovulation observations in current cycle
+  const currentCycleObservations = Object.entries(observations)
+    .filter(([d, obs]) => {
+      if (obs?.excludedFromCalculations) return false;
+      if (currentCycleStart && d < currentCycleStart) return false;
+      return d <= targetDate;
+    })
+    .map(([d, obs]) => ({
+      ...obs,
+      date: d,
+      cycleDay: currentCycleStart ? diffDays(currentCycleStart, d) + 1 : null,
+    }))
+    .sort((x, y) => x.date.localeCompare(y.date));
+
+  const positiveLhObs = currentCycleObservations.find((o) => o.testResult === "positive");
+  const bbtObsList = currentCycleObservations.filter((o) => o.bbt != null);
+  const fluidObsList = currentCycleObservations.filter(
+    (o) => o.cervicalFluid && o.cervicalFluid !== "none",
+  );
+
+  const observationStatusCode = positiveLhObs
+    ? "positive_lh_recorded"
+    : currentCycleObservations.length > 0
+      ? "observations_recorded"
+      : "none_recorded";
+
+  const ovulationObservationStatus = {
+    status: observationStatusCode,
+    hasObservations: currentCycleObservations.length > 0,
+    observationCount: currentCycleObservations.length,
+    positiveLh: positiveLhObs || null,
+    bbtEntries: bbtObsList.length,
+    cervicalFluidEntries: fluidObsList.length,
+    latestObservation:
+      currentCycleObservations.length > 0
+        ? currentCycleObservations[currentCycleObservations.length - 1]
+        : null,
+    currentCycleObservations,
+    disclaimer:
+      "Ovulation observations indicate recorded biological signs but do not medically guarantee or prove ovulation date.",
+  };
+
+  // Plain-language explanation
+  let estimateExplanation = "";
+  if (isTrackingPaused) {
+    estimateExplanation =
+      "Tracking paused: Cycle phase and ovulation estimates are temporarily withheld.";
+  } else if (isPregnancyActive) {
+    estimateExplanation =
+      "Pregnancy mode active: Menstrual phase and ovulation estimates are paused.";
+  } else {
+    switch (ovulationEstimateStatus) {
+      case "adolescent_safeguard":
+        estimateExplanation =
+          "Adolescent guidance: Personalised calendar ovulation estimates are withheld for users under 18 in accordance with clinical safety guidelines.";
+        break;
+      case "irregular_cycles":
+        estimateExplanation =
+          "Irregular cycles: Ovulation estimates are withheld because cycle lengths vary by more than 7 days, making calendar predictions medically unreliable.";
+        break;
+      case "insufficient_history":
+        estimateExplanation =
+          "Insufficient history: At least 3 completed cycles are required to generate an estimated calendar cycle range.";
+        break;
+      case "disabled_by_user":
+        estimateExplanation = "Fertility and ovulation estimates are turned off in Settings.";
+        break;
+      case "estimate_available":
+        estimateExplanation = `Calendar estimate based on ${completedCycleCount} completed cycles (median length: ${cycleLengthMedian} days). All phase timing is an estimate, not a medical certainty.`;
+        break;
+      default:
+        estimateExplanation = "Record period dates to begin cycle-day and phase tracking.";
+    }
+  }
+
+  const relevantSourceDates = {
+    periodStart: currentCycleStart,
+    periodEnd: a.lastPeriod?.end || null,
+    predictedNextPeriodStart: a.prediction?.start || null,
+    predictedNextPeriodEnd: a.prediction?.end || null,
+    estimatedOvulationStart: a.fertility?.ovulation?.start || null,
+    estimatedOvulationEnd: a.fertility?.ovulation?.end || null,
+    observationDates: currentCycleObservations.map((o) => o.date),
+    estimatedFollicularRange: phaseDiag.follicular
+      ? { startDay: phaseDiag.follicular.startDay, endDay: phaseDiag.follicular.endDay }
+      : null,
+    estimatedLutealRange: phaseDiag.luteal
+      ? { startDay: phaseDiag.luteal.startDay, endDay: phaseDiag.luteal.endDay }
+      : null,
+  };
+
+  return {
+    cycleDay,
+    isLongCycleGap,
+    currentCycleStart,
+    previousCycleStarts,
+    completedCycleCount,
+    cycleLengthMedian,
+    cycleLengthVariability,
+    currentBleedingStatus,
+    phaseStatus,
+    phaseLabel,
+    phaseEstimationMethod,
+    phaseUncertainty,
+    ovulationEstimateStatus,
+    ovulationObservationStatus,
+    estimateExplanation,
+    relevantSourceDates,
+    phaseDiagnostics: phaseDiag,
+    analysis: a,
+    lastCalculatedAt: new Date().toISOString(),
+    calculationVersion: "7.4.0",
+  };
+}

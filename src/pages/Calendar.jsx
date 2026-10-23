@@ -135,6 +135,16 @@ export default function Calendar() {
                 </span>
                 <span className="font-medium">{t("cal.today")}</span>
               </div>
+
+              <div className="flex items-center gap-2">
+                <span
+                  aria-hidden
+                  className="flex h-6 w-6 shrink-0 items-center justify-center text-sm"
+                >
+                  ✨
+                </span>
+                <span className="font-medium">{t("cal.obsDay")}</span>
+              </div>
             </div>
             <p className="mt-3 text-[11px] text-muted-foreground">
               {t("common.fertilityDisclaimer").split(".")[0]}.
@@ -220,6 +230,42 @@ export default function Calendar() {
               <div className="py-6 text-center text-muted-foreground space-y-2 flex flex-col items-center">
                 <CalendarEmptyArt className="w-20 h-20 opacity-80" />
                 <p className="text-xs font-semibold">{t("cal.noEntry")}</p>
+              </div>
+            )}
+
+            {/* Ovulation Observation for Selected Date */}
+            {record?.ovulationObservations?.[sel] && (
+              <div className="rounded-2xl bg-secondary/10 border border-secondary/20 p-3 text-xs space-y-1">
+                <span className="font-bold text-secondary-strong flex items-center gap-1.5 text-[11px] uppercase tracking-wider">
+                  ✨ {t("phase.ovulationCardTitle")}
+                </span>
+                <div className="flex flex-wrap gap-2 text-[11px] text-muted-foreground pt-0.5">
+                  {record.ovulationObservations[sel].testResult !== "none" && (
+                    <span className="font-semibold text-primary">
+                      LH:{" "}
+                      {t(
+                        `phase.lh${record.ovulationObservations[sel].testResult.charAt(0).toUpperCase() + record.ovulationObservations[sel].testResult.slice(1)}`,
+                      )}
+                    </span>
+                  )}
+                  {record.ovulationObservations[sel].bbt != null && (
+                    <span>
+                      BBT: {record.ovulationObservations[sel].bbt} °
+                      {record.ovulationObservations[sel].bbtUnit || "C"}
+                    </span>
+                  )}
+                  {record.ovulationObservations[sel].cervicalFluid !== "none" && (
+                    <span>
+                      Fluid:{" "}
+                      {t(
+                        `phase.fluid${record.ovulationObservations[sel].cervicalFluid.charAt(0).toUpperCase() + record.ovulationObservations[sel].cervicalFluid.slice(1)}`,
+                      )}
+                    </span>
+                  )}
+                  {record.ovulationObservations[sel].notes && (
+                    <span className="italic">"{record.ovulationObservations[sel].notes}"</span>
+                  )}
+                </div>
               </div>
             )}
 

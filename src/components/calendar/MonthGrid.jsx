@@ -27,13 +27,22 @@ export function MonthGrid({ year, month, onSelect, selected }) {
         {cells.map((d, i) => {
           if (!d) return <div key={`e${i}`} />;
           const e = record.days[d];
+          const obs = record.ovulationObservations?.[d];
           const logged = !!e?.period;
           const predicted = !logged && p && d >= p.start && d <= p.end && d > today;
           const sym = !!(e && (e.symptoms?.length || e.pain > 0 || e.mood));
+          const hasObs = !!(
+            obs &&
+            !obs.excludedFromCalculations &&
+            (obs.testResult !== "none" ||
+              obs.bbt != null ||
+              (obs.cervicalFluid && obs.cervicalFluid !== "none"))
+          );
           const parts = [fmt(d, { day: "numeric", month: "long" })];
           if (logged) parts.push(t("cal.periodDay"));
           if (predicted) parts.push(t("cal.estDay"));
           if (sym) parts.push(t("cal.symDay"));
+          if (hasObs) parts.push(t("cal.obsDay"));
           return (
             <button
               key={d}
@@ -53,6 +62,15 @@ export function MonthGrid({ year, month, onSelect, selected }) {
             >
               <span>{Number(d.slice(8))}</span>
               {logged && <Droplet aria-hidden className="h-3 w-3" fill="currentColor" />}
+              {hasObs && (
+                <span
+                  aria-hidden
+                  className="absolute top-1 right-1 text-[9px] leading-none"
+                  title={t("cal.obsDay")}
+                >
+                  ✨
+                </span>
+              )}
               {sym && (
                 <span
                   aria-hidden

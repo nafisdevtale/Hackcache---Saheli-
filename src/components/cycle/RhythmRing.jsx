@@ -4,14 +4,15 @@ import { Droplet, Sparkles, ChevronRight, RotateCcw, Calendar, AlertCircle } fro
 import { useApp } from "@/App.jsx";
 import { cx } from "@/components/common/ui.jsx";
 import { diffDays, addDays, todayStr } from "@/lib/localDate.js";
-import { phaseKey } from "@/lib/cycle.js";
+import { phaseKey, getAuthoritativeCycleState } from "@/lib/cycle.js";
 
 export function RhythmRing({ analysis, record, onOpenLogger, className }) {
-  const { t, fmt, fmtRange, today } = useApp();
+  const { t, fmt, fmtRange, today, cycleState: appCycleState } = useApp();
   const patternId = useId();
 
-  const currentCycleDay = analysis?.currentCycleDay || 1;
-  const isInsufficient = analysis?.status === "insufficient";
+  const cycleState = appCycleState || (record ? getAuthoritativeCycleState(record, today) : null);
+  const currentCycleDay = cycleState?.cycleDay || analysis?.currentCycleDay || 1;
+  const isInsufficient = analysis?.status === "insufficient" && !cycleState?.cycleDay;
   const isPaused = analysis?.status === "paused";
   const hasPrediction = !!analysis?.prediction;
 
@@ -272,7 +273,9 @@ export function RhythmRing({ analysis, record, onOpenLogger, className }) {
                   ? `🩸 ${t("cal.periodDay")}`
                   : isEstimatedRange
                     ? `⏳ ${t("common.estimate")}`
-                    : t(phaseKey(analysis, inspectedDate))}
+                    : cycleState?.phaseLabel && cycleState.phaseLabel !== "phase.uncertain"
+                      ? t(cycleState.phaseLabel)
+                      : t(phaseKey(analysis, inspectedDate))}
               </p>
 
               {/* Reset to Today if looking at another day */}

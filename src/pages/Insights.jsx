@@ -684,6 +684,148 @@ export default function Insights() {
           </div>
         )}
 
+      {/* Section: Cycle Phase & Ovulation Insights */}
+      <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
+        <div className="flex items-center justify-between border-b border-border/40 pb-3">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-primary" />
+            <h2 className="text-base font-bold text-foreground">{t("ins.phaseInsightsTitle")}</h2>
+          </div>
+          <span className="text-xs text-muted-foreground">
+            {t("ins.basedOnCycles", { n: insights.activeCycles.length })}
+          </span>
+        </div>
+
+        {/* Metrics Grid: Median, Variability, Observation Count */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="rounded-2xl bg-muted/40 p-3 space-y-1 border border-border/40">
+            <span className="text-[10px] font-bold uppercase text-muted-foreground block">
+              {t("ins.medianCycle")}
+            </span>
+            <p className="font-extrabold text-xl text-foreground">
+              {insights.medianCycle ? `${insights.medianCycle} ${t("insights.days")}` : "N/A"}
+            </p>
+            <p className="text-[10px] text-muted-foreground">
+              {insights.minCycle && insights.maxCycle
+                ? `Range: ${insights.minCycle} – ${insights.maxCycle} d`
+                : ""}
+            </p>
+          </div>
+
+          <div className="rounded-2xl bg-muted/40 p-3 space-y-1 border border-border/40">
+            <span className="text-[10px] font-bold uppercase text-muted-foreground block">
+              {t("ins.variability")}
+            </span>
+            <p className="font-extrabold text-xl text-foreground">
+              ±{Math.round(spread / 2)} {t("insights.days")}
+            </p>
+            <p className="text-[10px] text-muted-foreground">
+              {spread > 7 ? t("today.fertility.irregular") : t("ins.regularVariability")}
+            </p>
+          </div>
+
+          <div className="rounded-2xl bg-muted/40 p-3 space-y-1 border border-border/40">
+            <span className="text-[10px] font-bold uppercase text-muted-foreground block">
+              {t("ins.observationsLogged")}
+            </span>
+            <p className="font-extrabold text-xl text-foreground">
+              {insights.scopedObservations ? insights.scopedObservations.length : 0}
+            </p>
+            <p className="text-[10px] text-muted-foreground">{t("phase.ovulationCardSubtitle")}</p>
+          </div>
+        </div>
+
+        {/* Cycle-Day Relative Symptom Frequency Patterns */}
+        <div className="space-y-2 pt-2 border-t border-border/40">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            {t("ins.cycleDaySymptomTitle")}
+          </h3>
+          {insights.cycleDaySymptomPatterns?.length ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+              {insights.cycleDaySymptomPatterns.slice(0, 6).map((pattern, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center justify-between rounded-xl bg-muted/30 border border-border/40 p-2.5"
+                >
+                  <div>
+                    <span className="font-semibold text-foreground">
+                      {t(`sym.${pattern.symptom}`)}
+                    </span>
+                    <span className="text-[11px] text-muted-foreground ml-1.5">
+                      ({t("phase.currentCycleDay", { day: pattern.cycleDay })})
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setInspectProvenance({
+                        title: `${t(`sym.${pattern.symptom}`)} (${t("phase.currentCycleDay", { day: pattern.cycleDay })})`,
+                        provenance: {
+                          type: "cycle_day_symptom",
+                          sampleDates: pattern.dates,
+                          totalOccurrences: pattern.count,
+                          cycleScopeText: `${pattern.count} recorded cycles`,
+                        },
+                      })
+                    }
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:underline"
+                  >
+                    <span>{pattern.count} cycles</span>
+                    <Search className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground italic">{t("ins.noCycleDayPatterns")}</p>
+          )}
+        </div>
+
+        {/* Observation History Table in Active Scope */}
+        {insights.scopedObservations?.length > 0 && (
+          <div className="space-y-2 pt-2 border-t border-border/40">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              {t("ins.observationHistory")}
+            </h3>
+            <div className="divide-y divide-border/40 rounded-2xl border border-border/60 overflow-hidden text-xs">
+              {insights.scopedObservations.slice(0, 5).map((obs) => (
+                <div key={obs.date} className="flex items-center justify-between p-2.5">
+                  <div>
+                    <span className="font-bold text-foreground">
+                      {fmt(obs.date, { month: "short", day: "numeric" })}
+                    </span>
+                    {obs.cycleDay && (
+                      <span className="text-muted-foreground ml-2 text-[11px]">
+                        (Day {obs.cycleDay})
+                      </span>
+                    )}
+                    <span className="text-primary font-semibold ml-2 text-[11px]">
+                      {obs.testResult && obs.testResult !== "none"
+                        ? `LH: ${obs.testResult}`
+                        : obs.bbt != null
+                          ? `BBT: ${obs.bbt} °${obs.bbtUnit || "C"}`
+                          : obs.cervicalFluid && obs.cervicalFluid !== "none"
+                            ? `Fluid: ${obs.cervicalFluid}`
+                            : ""}
+                    </span>
+                  </div>
+                  {obs.notes && (
+                    <span className="text-[11px] text-muted-foreground italic truncate max-w-[120px]">
+                      "{obs.notes}"
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="rounded-2xl bg-muted/40 p-3 text-[11px] text-muted-foreground flex items-start gap-2">
+          <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+          <p className="leading-relaxed">{t("ins.cycleRelativeNotice")}</p>
+        </div>
+      </div>
+
       {/* Menstrual Phase Education: Follicular & Luteal Deep Dive */}
       <PhaseCards showAll />
 

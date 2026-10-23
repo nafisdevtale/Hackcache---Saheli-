@@ -384,6 +384,71 @@ export function computeCycleInsights({
     });
   }
 
+  // Saheli 7.4: Scoped ovulation observations & cycle-day relative symptom patterns
+  const observations = record.ovulationObservations || {};
+  const activeCycleStarts = activeCycles.map((c) => c.start);
+  const earliestCycleStart = activeCycleStarts.length ? activeCycleStarts[0] : null;
+
+  const scopedObservations = Object.entries(observations)
+    .filter(
+      ([d, obs]) =>
+        (!earliestCycleStart || d >= earliestCycleStart) &&
+        d <= today &&
+        !obs?.excludedFromCalculations,
+    )
+    .map(([d, obs]) => {
+      let cDay = null;
+      for (const start of [...activeCycleStarts].reverse()) {
+        if (d >= start) {
+          cDay = diffDays(start, d) + 1;
+          break;
+        }
+      }
+      return {
+        ...obs,
+        date: d,
+        cycleDay: cDay,
+      };
+    })
+    .sort((a, b) => b.date.localeCompare(a.date));
+
+  // 7. Cycle-Day-Relative Symptom Patterns across all cycles (including ongoing cycle)
+  const cycleDaySymptomsMap = {};
+  const trackingIntervals = [...activeCycles.map((c) => ({ start: c.start, length: c.length }))];
+  if (analysis.lastStart && !activeCycles.some((c) => c.start === analysis.lastStart)) {
+    const ongoingDays = Math.max(1, diffDays(analysis.lastStart, today) + 1);
+    trackingIntervals.push({ start: analysis.lastStart, length: ongoingDays });
+  }
+
+  for (const c of trackingIntervals) {
+    const periodStart = c.start;
+    const cycleLen = c.length;
+    for (let dayOffset = 0; dayOffset < cycleLen; dayOffset++) {
+      const dateStr = addDays(periodStart, dayOffset);
+      const entry = days[dateStr];
+      if (entry?.symptoms?.length) {
+        const cDay = dayOffset + 1;
+        entry.symptoms.forEach((sym) => {
+          const key = `${sym}_${cDay}`;
+          if (!cycleDaySymptomsMap[key]) {
+            cycleDaySymptomsMap[key] = {
+              symptom: sym,
+              cycleDay: cDay,
+              count: 0,
+              dates: [],
+            };
+          }
+          cycleDaySymptomsMap[key].count++;
+          cycleDaySymptomsMap[key].dates.push(dateStr);
+        });
+      }
+    }
+  }
+
+  const cycleDaySymptomPatterns = Object.values(cycleDaySymptomsMap)
+    .filter((item) => item.count >= 2)
+    .sort((a, b) => b.count - a.count || a.cycleDay - b.cycleDay);
+
   return {
     scope,
     allCyclesCount: allCycles.length,
@@ -459,5 +524,9 @@ export function computeCycleInsights({
 
     // Supportive guidance
     supportiveCards,
+
+    // Saheli 7.4: Cycle-day relative patterns & observations
+    scopedObservations,
+    cycleDaySymptomPatterns,
   };
 }

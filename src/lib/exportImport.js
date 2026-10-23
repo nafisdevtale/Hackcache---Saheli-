@@ -22,6 +22,60 @@ export function defaultHealthConditions() {
   };
 }
 
+export function defaultOvulationObservation(date = "") {
+  return {
+    date,
+    testResult: "none", // "none" | "negative" | "faint" | "positive"
+    bbt: null, // number or null
+    bbtUnit: "C", // "C" | "F"
+    cervicalFluid: "none", // "none" | "dry" | "sticky" | "creamy" | "eggwhite" | "watery"
+    notes: "",
+    source: "manual", // "manual" | "kit" | "temp"
+    excludedFromCalculations: false,
+  };
+}
+
+export const ALLOWED_OBSERVATION_KEYS = [
+  "date",
+  "testResult",
+  "bbt",
+  "bbtUnit",
+  "cervicalFluid",
+  "notes",
+  "source",
+  "excludedFromCalculations",
+];
+
+export function validateObservation(obs) {
+  if (!obs || typeof obs !== "object") return false;
+  if (!Object.keys(obs).every((k) => ALLOWED_OBSERVATION_KEYS.includes(k))) return false;
+  if (obs.date && !isValidDate(obs.date)) return false;
+  if (obs.testResult && !["none", "negative", "faint", "positive"].includes(obs.testResult))
+    return false;
+  if (obs.bbt != null) {
+    if (typeof obs.bbt !== "number" || isNaN(obs.bbt)) return false;
+    if (obs.bbtUnit === "F") {
+      if (obs.bbt < 85 || obs.bbt > 110) return false;
+    } else {
+      if (obs.bbt < 30 || obs.bbt > 45) return false;
+    }
+  }
+  if (obs.bbtUnit && !["C", "F"].includes(obs.bbtUnit)) return false;
+  if (
+    obs.cervicalFluid &&
+    !["none", "dry", "sticky", "creamy", "eggwhite", "watery"].includes(obs.cervicalFluid)
+  )
+    return false;
+  if (obs.notes && (typeof obs.notes !== "string" || obs.notes.length > 500)) return false;
+  if (obs.source && (typeof obs.source !== "string" || obs.source.length > 50)) return false;
+  if (
+    obs.excludedFromCalculations !== undefined &&
+    typeof obs.excludedFromCalculations !== "boolean"
+  )
+    return false;
+  return true;
+}
+
 export function emptyRecord() {
   return {
     version: 1,
@@ -49,6 +103,7 @@ export function emptyRecord() {
       quietHours: { on: false, start: "22:00", end: "07:00" },
     },
     healthConditions: defaultHealthConditions(),
+    ovulationObservations: {},
   };
 }
 
@@ -122,6 +177,21 @@ export function normalizeRecord(r) {
       lastUpdated:
         typeof r.healthConditions?.lastUpdated === "string" ? r.healthConditions.lastUpdated : null,
     },
+    ovulationObservations:
+      r.ovulationObservations && typeof r.ovulationObservations === "object"
+        ? Object.fromEntries(
+            Object.entries(r.ovulationObservations)
+              .filter(([date, obs]) => isValidDate(date) && obs && typeof obs === "object")
+              .map(([date, obs]) => [
+                date,
+                {
+                  ...defaultOvulationObservation(date),
+                  ...obs,
+                  date,
+                },
+              ]),
+          )
+        : {},
   };
 }
 
@@ -169,6 +239,7 @@ const ALLOWED_ROOT_KEYS = [
   "pregnancy",
   "reminders",
   "healthConditions",
+  "ovulationObservations",
 ];
 const ALLOWED_HEALTH_CONDITIONS_KEYS = [
   "conditions",
@@ -208,6 +279,14 @@ const ALLOWED_QUIET_HOURS_KEYS = ["on", "start", "end"];
 const hasOnlyKeys = (obj, allowed) => {
   const keys = Object.keys(obj);
   return keys.length === allowed.length && keys.every((k) => allowed.includes(k));
+};
+
+const hasOnlyRootKeys = (obj) => {
+  const keys = Object.keys(obj);
+  const required = ["version", "days", "settings", "pregnancy", "reminders"];
+  return (
+    required.every((k) => keys.includes(k)) && keys.every((k) => ALLOWED_ROOT_KEYS.includes(k))
+  );
 };
 
 const hasOnlyRemindersKeys = (obj) => {
@@ -316,13 +395,31 @@ export function exportCSV(record) {
     "sleep",
     "medicines",
     "note",
+    "ovulationTest",
+    "bbt",
+    "cervicalFluid",
   ];
-  const rows = Object.keys(record.days)
-    .sort()
-    .map((k) => {
-      const d = { ...blankDay(k), ...record.days[k] };
-      return cols.map((c) => csvCell(c === "symptoms" ? d.symptoms.join(";") : d[c])).join(",");
-    });
+  const allDates = Array.from(
+    new Set([...Object.keys(record.days), ...Object.keys(record.ovulationObservations || {})]),
+  ).sort();
+
+  const rows = allDates.map((k) => {
+    const d = { ...blankDay(k), ...(record.days[k] || {}) };
+    const obs = record.ovulationObservations?.[k] || {};
+    return cols
+      .map((c) => {
+        if (c === "symptoms") return csvCell(d.symptoms.join(";"));
+        if (c === "ovulationTest")
+          return csvCell(obs.testResult && obs.testResult !== "none" ? obs.testResult : "");
+        if (c === "bbt") return csvCell(obs.bbt != null ? obs.bbt : "");
+        if (c === "cervicalFluid")
+          return csvCell(
+            obs.cervicalFluid && obs.cervicalFluid !== "none" ? obs.cervicalFluid : "",
+          );
+        return csvCell(d[c]);
+      })
+      .join(",");
+  });
   return [cols.join(","), ...rows].join("\n");
 }
 
@@ -502,6 +599,35 @@ export function parseCSVImport(csvText) {
       day.medicines = sanitizeCsvValue(row[headerMap["medicines"]]).substring(0, 300);
     }
 
+    // Ovulation Observations in CSV
+    let hasObs = false;
+    const obs = defaultOvulationObservation(normalizedDate);
+    if (headerMap["ovulationtest"] !== undefined) {
+      const ot = sanitizeCsvValue(row[headerMap["ovulationtest"]]).toLowerCase();
+      if (["positive", "negative", "faint", "none"].includes(ot)) {
+        obs.testResult = ot;
+        hasObs = true;
+      }
+    }
+    if (headerMap["bbt"] !== undefined) {
+      const bbtVal = parseFloat(sanitizeCsvValue(row[headerMap["bbt"]]));
+      if (!isNaN(bbtVal) && bbtVal >= 30 && bbtVal <= 110) {
+        obs.bbt = bbtVal;
+        obs.bbtUnit = bbtVal > 50 ? "F" : "C";
+        hasObs = true;
+      }
+    }
+    if (headerMap["cervicalfluid"] !== undefined) {
+      const cf = sanitizeCsvValue(row[headerMap["cervicalfluid"]]).toLowerCase();
+      if (["dry", "sticky", "creamy", "eggwhite", "watery", "none"].includes(cf)) {
+        obs.cervicalFluid = cf;
+        hasObs = true;
+      }
+    }
+    if (hasObs) {
+      rec.ovulationObservations[normalizedDate] = obs;
+    }
+
     rec.days[normalizedDate] = day;
     validCount++;
   }
@@ -613,6 +739,39 @@ export function generateDoctorSummaryPDF(record, analysis, options = {}) {
     </tbody>
   </table>
 
+  ${(() => {
+    const obsEntries = Object.entries(record.ovulationObservations || {})
+      .filter(([, o]) => o && !o.excludedFromCalculations)
+      .sort(([a], [b]) => b.localeCompare(a))
+      .slice(0, 15);
+    if (!obsEntries.length) return "";
+    return `<h2>Recorded Ovulation & Fertility Observations</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>LH / OPK Test</th>
+        <th>Basal Body Temp</th>
+        <th>Cervical Fluid</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${obsEntries
+        .map(
+          ([k, o]) => `<tr>
+          <td><strong>${k}</strong></td>
+          <td>${o.testResult && o.testResult !== "none" ? `<span class="badge">${o.testResult}</span>` : "-"}</td>
+          <td>${o.bbt != null ? `${o.bbt} °${o.bbtUnit || "C"}` : "-"}</td>
+          <td>${o.cervicalFluid && o.cervicalFluid !== "none" ? o.cervicalFluid : "-"}</td>
+          <td>${o.notes || "-"}</td>
+        </tr>`,
+        )
+        .join("")}
+    </tbody>
+  </table>`;
+  })()}
+
   <div class="disclaimer">
     <strong>Clinical Notice:</strong> This summary was generated from patient-recorded observations in the Saheli Menstrual Health Companion for healthcare consultations. Saheli operates 100% locally on-device. Ovulation estimates are educational and strictly suppressed when cycle variability exceeds clinical thresholds. For full two-way diary backup and lossless data restoration, always use an Encrypted JSON backup.
   </div>
@@ -666,7 +825,7 @@ export function parseImport(text) {
   const raw = obj.record;
   if (
     !object(raw) ||
-    !hasOnlyKeys(raw, ALLOWED_ROOT_KEYS) ||
+    !hasOnlyRootKeys(raw) ||
     raw.version !== 1 ||
     !object(raw.days) ||
     !object(raw.settings) ||
@@ -684,7 +843,8 @@ export function parseImport(text) {
         !hasOnlyKeys(raw.reminders.quietHours, ALLOWED_QUIET_HOURS_KEYS))) ||
     (raw.healthConditions &&
       (!object(raw.healthConditions) ||
-        !hasOnlyKeys(raw.healthConditions, ALLOWED_HEALTH_CONDITIONS_KEYS)))
+        !hasOnlyKeys(raw.healthConditions, ALLOWED_HEALTH_CONDITIONS_KEYS))) ||
+    (raw.ovulationObservations && !object(raw.ovulationObservations))
   )
     return { ok: false, error: "imp.wrongFormat" };
   const rec = normalizeRecord(obj.record);
@@ -790,6 +950,14 @@ export function parseImport(text) {
       return { ok: false, error: "imp.badEntry", date: k };
     rec.days[k] = day;
   }
+  if (raw.ovulationObservations) {
+    for (const [k, v] of Object.entries(raw.ovulationObservations)) {
+      if (!isValidDate(k) || !validateObservation(v)) {
+        return { ok: false, error: "imp.badEntry", date: k };
+      }
+      rec.ovulationObservations[k] = { ...defaultOvulationObservation(k), ...v, date: k };
+    }
+  }
   return { ok: true, record: rec };
 }
 
@@ -810,6 +978,11 @@ export function mergeRecords(existing, incoming, strategy) {
     if (!existingCondIds.has(c.id)) mergedConditions.push(c);
   });
 
+  const mergedObservations = {
+    ...(incoming.ovulationObservations || {}),
+    ...(existing.ovulationObservations || {}),
+  };
+
   return {
     ...existing,
     settings: {
@@ -823,6 +996,7 @@ export function mergeRecords(existing, incoming, strategy) {
       conditions: mergedConditions,
     },
     days: { ...incoming.days, ...existing.days },
+    ovulationObservations: mergedObservations,
   };
 }
 
