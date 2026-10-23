@@ -35,11 +35,35 @@ export default function Today() {
   const isPeriodToday = currentDayEntry?.period || a.currentCycleDay <= 5;
   const hasPain = (currentDayEntry?.pain || 0) > 0 || currentDayEntry?.symptoms?.includes("cramps");
 
+  const getGreetingKey = () => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) return "today.greetingMorning";
+    if (hour >= 12 && hour < 17) return "today.greetingAfternoon";
+    if (hour >= 17 && hour < 22) return "today.greetingEvening";
+    return "today.greetingGeneral";
+  };
+
+  const activeReminders = [];
+  if (record?.reminders?.daily?.on) {
+    activeReminders.push({ id: "daily", label: t("rem.daily"), time: record.reminders.daily.time });
+  }
+  if (record?.reminders?.nextPeriod) {
+    activeReminders.push({ id: "period", label: t("rem.nextPeriod") });
+  }
+
   return (
     <div className="space-y-4">
-      <PageTitle sub={fmt(today, { weekday: "long", day: "numeric", month: "long" })}>
-        {t("today.title")}
-      </PageTitle>
+      <div className="flex items-center justify-between border-b border-border/60 pb-2">
+        <div>
+          <span className="text-xs font-semibold uppercase tracking-wider text-primary">
+            {t(getGreetingKey())}
+          </span>
+          <h1 className="font-display text-2xl font-bold text-foreground">{t("today.title")}</h1>
+        </div>
+        <span className="text-xs font-medium text-muted-foreground">
+          {fmt(today, { weekday: "short", day: "numeric", month: "short" })}
+        </span>
+      </div>
 
       {safety.urgent.map((c) => (
         <UrgentCard key={c.id} card={c} />
@@ -114,6 +138,77 @@ export default function Today() {
               <PenLine aria-hidden className="h-6 w-6" /> {t("today.logToday")}
             </Link>
           </Card>
+
+          {/* Today's Logged Summary Card */}
+          <Card className="space-y-2.5">
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-bold text-foreground">{t("today.loggedToday")}</h2>
+              <Link to="/log" className="text-xs font-semibold text-primary hover:underline">
+                {currentDayEntry ? t("log.editing") : t("today.logToday")}
+              </Link>
+            </div>
+            {currentDayEntry ? (
+              <div className="space-y-2">
+                <div className="flex flex-wrap gap-2 text-xs">
+                  {currentDayEntry.period && (
+                    <span className="inline-flex items-center gap-1 rounded-lg bg-period/15 px-2.5 py-1 font-bold text-period">
+                      🩸 {t(`flow.${currentDayEntry.flow || "medium"}`)}
+                    </span>
+                  )}
+                  {currentDayEntry.pain > 0 && (
+                    <span className="inline-flex items-center gap-1 rounded-lg bg-destructive/15 px-2.5 py-1 font-semibold text-destructive">
+                      ⚡ {t("today.painLevel", { n: currentDayEntry.pain })}
+                    </span>
+                  )}
+                  {currentDayEntry.mood && (
+                    <span className="inline-flex items-center gap-1 rounded-lg bg-secondary px-2.5 py-1 font-semibold text-secondary-foreground">
+                      ✨ {t(`mood.${currentDayEntry.mood}`)}
+                    </span>
+                  )}
+                </div>
+                {currentDayEntry.symptoms?.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {currentDayEntry.symptoms.map((s) => (
+                      <span
+                        key={s}
+                        className="rounded-md border border-border bg-muted/60 px-2 py-0.5 text-xs text-muted-foreground"
+                      >
+                        {t(`sym.${s}`)}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {currentDayEntry.note && (
+                  <p className="border-l-2 border-primary/40 pl-2 text-xs italic text-muted-foreground">
+                    "{currentDayEntry.note}"
+                  </p>
+                )}
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground">{t("today.notLoggedToday")}</p>
+            )}
+          </Card>
+
+          {/* Upcoming Active Reminders */}
+          {activeReminders.length > 0 && (
+            <Card className="space-y-2">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                {t("today.upcomingReminders")}
+              </h2>
+              <div className="space-y-1 text-xs">
+                {activeReminders.map((r) => (
+                  <div key={r.id} className="flex items-center justify-between py-1">
+                    <span className="font-medium text-foreground">{r.label}</span>
+                    {r.time && (
+                      <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-muted-foreground">
+                        {r.time}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
 
           {/* Next Period & Cycle Progress Card */}
           <Card>

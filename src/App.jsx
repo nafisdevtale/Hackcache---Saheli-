@@ -137,12 +137,35 @@ export function AppProvider({ children }) {
     };
   }, []);
 
-  // Apply display prefs
+  // Apply display prefs & theme
   useEffect(() => {
     const h = document.documentElement;
-    h.dataset.text = prefs.textSize;
+    h.dataset.text = prefs.textSize || "md";
     h.classList.toggle("hc", !!prefs.contrast);
     h.lang = prefs.lang === "hi" ? "hi" : "en";
+
+    const updateTheme = () => {
+      const mode = prefs.theme || "system";
+      const isDark =
+        mode === "dark" ||
+        (mode === "system" &&
+          typeof window !== "undefined" &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches);
+      h.classList.toggle("dark", isDark);
+    };
+
+    updateTheme();
+
+    if (typeof window !== "undefined" && window.matchMedia) {
+      const mq = window.matchMedia("(prefers-color-scheme: dark)");
+      const listener = () => {
+        if (!prefs.theme || prefs.theme === "system") {
+          updateTheme();
+        }
+      };
+      mq.addEventListener("change", listener);
+      return () => mq.removeEventListener("change", listener);
+    }
   }, [prefs]);
 
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -354,6 +377,13 @@ export function AppProvider({ children }) {
       return mutate(({ record: r, meta: m }) =>
         writeRecord(mergeRecords(r, incoming, strategy), m),
       );
+    },
+    async restoreFromBackup(importedRecord) {
+      const normalized = normalizeRecord(importedRecord);
+      const m = { onboarded: true, mode: "real", pin: { enabled: false } };
+      keyRef.current = null;
+      await writeRecord(normalized, m, ["demo"]);
+      setStatus("ready");
     },
     async installApp() {
       const res = await promptPwaInstall();

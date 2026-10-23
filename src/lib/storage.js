@@ -62,6 +62,7 @@ export const DEFAULT_PREFS = {
   lang: "en",
   textSize: "md",
   contrast: false,
+  theme: "system", // "light" | "dark" | "system"
   readAloud: false,
   discreet: false,
 };

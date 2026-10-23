@@ -205,5 +205,33 @@ describe("Saheli 3.0: First-Run Onboarding, Dashboard & Shared Privacy", () => {
       expect(missingInHi).toEqual([]);
       expect(missingInEn).toEqual([]);
     });
+
+    it("supports theme customization (system, light, dark) and UI preferences", () => {
+      expect(en["set.theme"]).toBe("Theme");
+      expect(hi["set.theme"]).toBe("थीम");
+      expect(en["theme.system"]).toBe("System default");
+      expect(hi["theme.system"]).toBe("सिस्टम डिफ़ॉल्ट");
+      expect(en["theme.dark"]).toBe("Dark");
+      expect(hi["theme.dark"]).toBe("डार्क");
+    });
+
+    it("supports doctor visit summary customization controls", () => {
+      expect(en["visit.customize"]).toBeDefined();
+      expect(en["visit.includeCycles"]).toBeDefined();
+      expect(en["visit.includeSymptoms"]).toBeDefined();
+      expect(en["visit.includePain"]).toBeDefined();
+      expect(en["visit.includeMeds"]).toBeDefined();
+      expect(en["visit.includeGuidance"]).toBeDefined();
+      expect(en["visit.localOnlyNotice"]).toContain("device");
+    });
+
+    it("supports educational topic categories and search placeholders", () => {
+      expect(en["learn.catAll"]).toBe("All topics");
+      expect(hi["learn.catAll"]).toBe("सभी विषय");
+      expect(en["learn.catBiology"]).toBeDefined();
+      expect(en["learn.catConditions"]).toBeDefined();
+      expect(en["learn.catHygiene"]).toBeDefined();
+      expect(en["learn.searchPlaceholder"]).toBeDefined();
+    });
   });
 });

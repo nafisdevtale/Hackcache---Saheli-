@@ -349,6 +349,20 @@ export default function Settings() {
           </div>
         </fieldset>
         <fieldset>
+          <legend className="font-semibold">{t("set.theme")}</legend>
+          <div className="mt-1 flex flex-wrap gap-2">
+            {["system", "light", "dark"].map((m) => (
+              <Chip
+                key={m}
+                selected={(prefs.theme || "system") === m}
+                onClick={() => setPrefs({ theme: m })}
+              >
+                {t(`theme.${m}`)}
+              </Chip>
+            ))}
+          </div>
+        </fieldset>
+        <fieldset>
           <legend className="font-semibold">{t("set.textSize")}</legend>
           <div className="mt-1 flex flex-wrap gap-2">
             {["md", "lg", "xl"].map((v) => (
