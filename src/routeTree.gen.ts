@@ -20,6 +20,7 @@ import { Route as LogRouteImport } from './routes/log'
 import { Route as MoreRouteImport } from './routes/more'
 import { Route as PregnancyRouteImport } from './routes/pregnancy'
 import { Route as RemindersRouteImport } from './routes/reminders'
+import { Route as SelfcareRouteImport } from './routes/selfcare'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as VisitRouteImport } from './routes/visit'
 
@@ -78,6 +79,11 @@ const RemindersRoute = RemindersRouteImport.update({
   path: '/reminders',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SelfcareRoute = SelfcareRouteImport.update({
+  id: '/selfcare',
+  path: '/selfcare',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -101,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/more': typeof MoreRoute
   '/pregnancy': typeof PregnancyRoute
   '/reminders': typeof RemindersRoute
+  '/selfcare': typeof SelfcareRoute
   '/settings': typeof SettingsRoute
   '/visit': typeof VisitRoute
 }
@@ -116,6 +123,7 @@ export interface FileRoutesByTo {
   '/more': typeof MoreRoute
   '/pregnancy': typeof PregnancyRoute
   '/reminders': typeof RemindersRoute
+  '/selfcare': typeof SelfcareRoute
   '/settings': typeof SettingsRoute
   '/visit': typeof VisitRoute
 }
@@ -132,6 +140,7 @@ export interface FileRoutesById {
   '/more': typeof MoreRoute
   '/pregnancy': typeof PregnancyRoute
   '/reminders': typeof RemindersRoute
+  '/selfcare': typeof SelfcareRoute
   '/settings': typeof SettingsRoute
   '/visit': typeof VisitRoute
 }
@@ -149,6 +158,7 @@ export interface FileRouteTypes {
     | '/more'
     | '/pregnancy'
     | '/reminders'
+    | '/selfcare'
     | '/settings'
     | '/visit'
   fileRoutesByTo: FileRoutesByTo
@@ -164,6 +174,7 @@ export interface FileRouteTypes {
     | '/more'
     | '/pregnancy'
     | '/reminders'
+    | '/selfcare'
     | '/settings'
     | '/visit'
   id:
@@ -179,6 +190,7 @@ export interface FileRouteTypes {
     | '/more'
     | '/pregnancy'
     | '/reminders'
+    | '/selfcare'
     | '/settings'
     | '/visit'
   fileRoutesById: FileRoutesById
@@ -195,6 +207,7 @@ export interface RootRouteChildren {
   MoreRoute: typeof MoreRoute
   PregnancyRoute: typeof PregnancyRoute
   RemindersRoute: typeof RemindersRoute
+  SelfcareRoute: typeof SelfcareRoute
   SettingsRoute: typeof SettingsRoute
   VisitRoute: typeof VisitRoute
 }
@@ -278,6 +291,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RemindersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/selfcare': {
+      id: '/selfcare'
+      path: '/selfcare'
+      fullPath: '/selfcare'
+      preLoaderRoute: typeof SelfcareRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings': {
       id: '/settings'
       path: '/settings'
@@ -307,6 +327,7 @@ const rootRouteChildren: RootRouteChildren = {
   MoreRoute: MoreRoute,
   PregnancyRoute: PregnancyRoute,
   RemindersRoute: RemindersRoute,
+  SelfcareRoute: SelfcareRoute,
   SettingsRoute: SettingsRoute,
   VisitRoute: VisitRoute,
 }

@@ -814,4 +814,259 @@ export default {
   "today.fertility.eduNote":
     "అండోత్సర్గము అంటే అండాశయం నుండి అండం విడుదల కావడం, సాధారణంగా తర్వాతి పీరియడ్ ప్రారంభానికి 12 నుండి 16 రోజుల ముందు జరుగుతుంది. క్యాలెండర్ అంచనాలను గర్భనిరోధకంగా ఎప్పుడూ ఉపయోగించకూడదు.",
   "common.uncertainty": "అనిశ్చితి",
+  // --- Saheli 7.1 Self Care Studio ---
+  "nav.selfCare": "స్వీయ సంరక్షణ",
+  "selfcare.title": "స్వీయ సంరక్షణ & వెల్‌నెస్ స్టూడియో",
+  "selfcare.subtitle": "ఆధారిత విశ్రాంతి, తేలికపాటి వ్యాయామం మరియు ప్రశాంతమైన ధ్వనులు",
+  "selfcare.bannerNotice":
+    "Free, gentle wellness practices. These routines do not replace medical care.",
+  "selfcare.cat.all": "అన్నీ",
+  "selfcare.cat.comfort": "విశ్రాంతి",
+  "selfcare.cat.movement": "వ్యాయామం",
+  "selfcare.cat.breathing": "శ్వాసక్రియ",
+  "selfcare.cat.soundscapes": "శాంత ధ్వనులు",
+  "selfcare.cat.hygiene": "పరిశుభ్రత",
+  "selfcare.cat.mycare": "నా సంరక్షణ",
+  "selfcare.evidence.informed": "Evidence-Informed",
+  "selfcare.evidence.informedDesc":
+    "Supported by recognized clinical guidelines (NHS, WHO, ACOG, FOGSI)",
+  "selfcare.evidence.wellbeing": "Wellbeing Practice",
+  "selfcare.evidence.wellbeingDesc": "General supportive habit for comfort and rest",
+  "selfcare.evidence.preference": "Personal Preference",
+  "selfcare.evidence.preferenceDesc": "Relaxation or ambient sound chosen for personal comfort",
+  "selfcare.today.title": "Today's Self-Care Suggestion",
+  "selfcare.today.urgentTitle": "Medical Attention Recommended",
+  "selfcare.today.urgentDesc":
+    "Severe or worsening symptoms require in-person clinical care rather than exercise.",
+  "selfcare.today.crampsTitle": "Feeling Cramps or Discomfort?",
+  "selfcare.today.crampsDesc":
+    "Explore gentle warmth, supportive posture, and calming comfort measures.",
+  "selfcare.today.energyTitle": "Feeling Low Energy or Fatigue?",
+  "selfcare.today.energyDesc":
+    "A quiet rest or gentle relaxation break can help you recharge comfortably.",
+  "selfcare.today.moodTitle": "Seeking Calm or Stress Relief?",
+  "selfcare.today.moodDesc":
+    "Take a pause with NHS-supported calm breathing or soothing soundscapes.",
+  "selfcare.today.sleepTitle": "Preparing for Restful Sleep?",
+  "selfcare.today.sleepDesc":
+    "Dim lighting, quiet sounds, and wind-down routines support natural sleep.",
+  "selfcare.today.generalTitle": "Gentle Daily Wellness Break",
+  "selfcare.today.generalDesc":
+    "Take a few minutes for light stretching or quiet personal relaxation.",
+  "selfcare.today.viewDetails": "Explore Suggestion",
+  "selfcare.quick.title": "Quick Self Care",
+  "selfcare.quick.calm": "Calm Down",
+  "selfcare.quick.cramps": "Ease Discomfort",
+  "selfcare.quick.sleep": "Relax for Sleep",
+  "selfcare.quick.move": "Gentle Movement",
+  "selfcare.quick.quiet": "Quiet Break",
+  "selfcare.quick.hygiene": "Period Hygiene",
+  "selfcare.quick.emotional": "Emotional Wellbeing",
+  "selfcare.prog.title": "Programmes for You",
+  "selfcare.prog.start": "Start Routine",
+  "selfcare.prog.pause": "Pause",
+  "selfcare.prog.resume": "Resume",
+  "selfcare.prog.next": "Next Step",
+  "selfcare.prog.prev": "Previous",
+  "selfcare.prog.finish": "Finish",
+  "selfcare.prog.completed": "Completed",
+  "selfcare.prog.mins": "{n} నిమిషాలు",
+  "selfcare.prog.stepCounter": "దశ {current} / {total}",
+  "selfcare.prog.precautions": "Precautions",
+  "selfcare.prog.stopCondition": "When to Stop",
+  "selfcare.prog.sources": "Clinical Sources",
+  "selfcare.prog.favorite": "Favorite",
+  "selfcare.prog.unfavorite": "Remove Favorite",
+  "selfcare.prog.disclaimer":
+    "Non-medical comfort guidance. Stop immediately if you feel pain, dizziness, or distress.",
+  "selfcare.prog.warmth.title": "Gentle Warmth & Rest",
+  "selfcare.prog.warmth.desc":
+    "Comforting heat, hydration, and restful reclined posture for everyday cramps.",
+  "selfcare.prog.warmth.precautions":
+    "Wrap hot water bags in a cloth to prevent burns. Do not apply scalding heat.",
+  "selfcare.prog.warmth.stop":
+    "Stop immediately if abdominal pain is sudden, sharp, or accompanied by dizziness.",
+  "selfcare.prog.warmth.s1.title": "Find a Supported Reclined Position",
+  "selfcare.prog.warmth.s1.text":
+    "Lie back comfortably with a soft pillow beneath your knees to relax lower abdominal muscles.",
+  "selfcare.prog.warmth.s2.title": "Apply Gentle, Safe Warmth",
+  "selfcare.prog.warmth.s2.text":
+    "Place a warm heating pad or warm towel across your lower abdomen or lower back for soothing comfort.",
+  "selfcare.prog.warmth.s3.title": "Warm Hydration & Quiet Breaths",
+  "selfcare.prog.warmth.s3.text":
+    "Sip warm water or ginger tea and take slow, unhurried breaths while resting.",
+  "selfcare.prog.rest.title": "Rest & Recharge",
+  "selfcare.prog.rest.desc":
+    "A quiet pause focusing on restorative rest without pressure or guilt.",
+  "selfcare.prog.rest.precautions":
+    "Rest is a natural restorative choice, not an obligation to prove recovery.",
+  "selfcare.prog.rest.stop":
+    "If fatigue is chronic, unremitting, or joined by shortness of breath, consult a doctor.",
+  "selfcare.prog.rest.s1.title": "Step Away from Screens",
+  "selfcare.prog.rest.s1.text":
+    "Place your phone on silent or dim the display to reduce sensory stimulation.",
+  "selfcare.prog.rest.s2.title": "Release Physical Tension",
+  "selfcare.prog.rest.s2.text":
+    "Close your eyes, unclench your jaw, and let your shoulders drop away from your ears.",
+  "selfcare.prog.rest.s3.title": "Allow Mindful Stillness",
+  "selfcare.prog.rest.s3.text":
+    "Give yourself permission to simply do nothing for the next few minutes.",
+  "selfcare.prog.hygiene.title": "Period Care Essentials",
+  "selfcare.prog.hygiene.desc":
+    "Evidence-informed menstrual hygiene, comfortable product changing, and safe disposal.",
+  "selfcare.prog.hygiene.precautions":
+    "Always wash hands before and after changing menstrual products.",
+  "selfcare.prog.hygiene.stop":
+    "Consult a doctor if you notice persistent foul-smelling discharge or fever.",
+  "selfcare.prog.hygiene.s1.title": "Regular Product Changing",
+  "selfcare.prog.hygiene.s1.text":
+    "Change pads every 4 to 6 hours or as needed to maintain skin dryness and comfort.",
+  "selfcare.prog.hygiene.s2.title": "Gentle External Cleansing",
+  "selfcare.prog.hygiene.s2.text":
+    "Wash the external genital area with clean plain water from front to back. Avoid internal douching or scented soaps.",
+  "selfcare.prog.hygiene.s3.title": "Responsible & Safe Disposal",
+  "selfcare.prog.hygiene.s3.text":
+    "Wrap used pads in paper and place in a waste bin. Never flush pads down the toilet.",
+  "selfcare.prog.stretch.title": "Comfortable Pelvic & Back Stretch",
+  "selfcare.prog.stretch.desc": "Gentle beginner mobility for lower back and pelvic ease.",
+  "selfcare.prog.stretch.precautions":
+    "Never force a stretch or bounce. Move smoothly and breathe naturally.",
+  "selfcare.prog.stretch.stop":
+    "Stop immediately if you experience sharp shooting pain or dizziness.",
+  "selfcare.prog.stretch.s1.title": "Supported Child's Pose",
+  "selfcare.prog.stretch.s1.text":
+    "Kneel comfortably with knees wide, sitting back toward your heels and resting your forehead on a cushion.",
+  "selfcare.prog.stretch.s2.title": "Gentle Cat-Cow Mobility",
+  "selfcare.prog.stretch.s2.text":
+    "On hands and knees, slowly round your spine upward on an exhale, then gently release downward on an inhale.",
+  "selfcare.prog.stretch.s3.title": "Reclined Knee-to-Chest Relief",
+  "selfcare.prog.stretch.s3.text":
+    "Lie on your back and gently draw one or both knees toward your chest, feeling mild lower back decompression.",
+  "selfcare.prog.walk.title": "Easy Mobility Walk",
+  "selfcare.prog.walk.desc":
+    "An accessible 10-minute stroll to promote blood circulation and endorphin release.",
+  "selfcare.prog.walk.precautions":
+    "Wear supportive flat footwear and stay hydrated in warm weather.",
+  "selfcare.prog.walk.stop": "Stop and rest if you feel fatigued, breathless, or faint.",
+  "selfcare.prog.walk.s1.title": "Comfortable Pacing",
+  "selfcare.prog.walk.s1.text":
+    "Walk at an easy, unhurried pace where you can comfortably carry on a conversation.",
+  "selfcare.prog.walk.s2.title": "Relaxed Shoulder Stride",
+  "selfcare.prog.walk.s2.text": "Keep your shoulders loose and arms swinging gently by your sides.",
+  "selfcare.prog.walk.s3.title": "Gentle Cool Down",
+  "selfcare.prog.walk.s3.text":
+    "Slow your steps for the final two minutes and enjoy a sip of water.",
+  "selfcare.prog.pelvic.title": "Pelvic Floor Education & Relaxation",
+  "selfcare.prog.pelvic.desc":
+    "Understanding pelvic floor muscles, conscious relaxation, and when to seek specialist advice.",
+  "selfcare.prog.pelvic.precautions":
+    "Kegel exercises are not suitable for tight or hypertonic pelvic floors. Consult a doctor or physiotherapist.",
+  "selfcare.prog.pelvic.stop":
+    "Do not perform contracting exercises if they worsen pelvic or menstrual pain.",
+  "selfcare.prog.pelvic.s1.title": "What is the Pelvic Floor?",
+  "selfcare.prog.pelvic.s1.text":
+    "The pelvic floor is a sling of muscles supporting your bladder, uterus, and bowel. Like any muscle, they need relaxation as well as tone.",
+  "selfcare.prog.pelvic.s2.title": "Conscious Pelvic Release",
+  "selfcare.prog.pelvic.s2.text":
+    "Lie down comfortably. Take a slow inhale and imagine your pelvic muscles softening and releasing downward without pushing.",
+  "selfcare.prog.pelvic.s3.title": "When to Consult a Specialist",
+  "selfcare.prog.pelvic.s3.text":
+    "If you have pain during urination, intercourse, or persistent pelvic ache, consult a gynaecologist or pelvic health physiotherapist.",
+  "selfcare.prog.breathing.title": "NHS Calm Breathing",
+  "selfcare.prog.breathing.desc":
+    "Gentle 4-4 diaphragmatic breathing supported by the NHS for stress and anxiety.",
+  "selfcare.prog.breathing.precautions":
+    "Never force your breath or hold until uncomfortable. Breathe at your own comfortable rhythm.",
+  "selfcare.prog.breathing.stop": "Return to regular breathing if you feel lightheaded.",
+  "selfcare.prog.breathing.s1.title": "Sit or Lie Comfortably",
+  "selfcare.prog.breathing.s1.text":
+    "Place one hand on your chest and one on your belly. Allow your breath to flow naturally.",
+  "selfcare.prog.breathing.s2.title": "Gentle 4-Second Inhale & Exhale",
+  "selfcare.prog.breathing.s2.text":
+    "Inhale gently through your nose for 4 seconds, feeling your belly expand. Exhale softly through your mouth for 4 seconds.",
+  "selfcare.prog.breathing.s3.title": "Rest in Calm Balance",
+  "selfcare.prog.breathing.s3.text":
+    "Notice the calm settling in your body. Continue at this gentle, unhurried pace.",
+  "selfcare.prog.grounding.title": "5-4-3-2-1 Sensory Grounding",
+  "selfcare.prog.grounding.desc":
+    "A simple WHO-supported grounding exercise to anchor your senses when overwhelmed.",
+  "selfcare.prog.grounding.precautions":
+    "This is an emotional grounding tool, not a treatment for clinical disorders.",
+  "selfcare.prog.grounding.stop":
+    "If any memory feels upsetting, open your eyes and focus on your breathing.",
+  "selfcare.prog.grounding.s1.title": "Notice 5 Things You Can See",
+  "selfcare.prog.grounding.s1.text":
+    "Look around your space and silently acknowledge 5 distinct objects or colors.",
+  "selfcare.prog.grounding.s2.title": "Notice 4 Things You Can Touch & 3 You Can Hear",
+  "selfcare.prog.grounding.s2.text":
+    "Feel 4 textures (your clothes, the floor, a blanket) and tune in to 3 ambient sounds.",
+  "selfcare.prog.grounding.s3.title": "Notice 2 Scents & 1 Positive Thought",
+  "selfcare.prog.grounding.s3.text":
+    "Notice 2 scents around you, and speak one kind, supportive sentence to yourself.",
+  "selfcare.prog.sleep.title": "Peaceful Sleep Preparation",
+  "selfcare.prog.sleep.desc":
+    "A gentle wind-down routine for evening comfort and consistent sleep habits.",
+  "selfcare.prog.sleep.precautions": "Avoid caffeine and heavy meals right before bedtime.",
+  "selfcare.prog.sleep.stop": "If insomnia persists for weeks, talk to a healthcare professional.",
+  "selfcare.prog.sleep.s1.title": "Dim Lights & Quiet Notifications",
+  "selfcare.prog.sleep.s1.text":
+    "Lower ambient lighting 30 minutes before bed and silence non-essential device notifications.",
+  "selfcare.prog.sleep.s2.title": "Light Nighttime Hydration",
+  "selfcare.prog.sleep.s2.text":
+    "Drink a small glass of warm water or herbal infusion if comfortable.",
+  "selfcare.prog.sleep.s3.title": "Settle into Calm Comfort",
+  "selfcare.prog.sleep.s3.text":
+    "Choose a soothing soundscape or enjoy quiet silence as you drift off to sleep.",
+  "selfcare.sound.title": "Soothing Soundscapes",
+  "selfcare.sound.desc":
+    "Procedural offline ambient sounds for calm and relaxation. Zero external streaming.",
+  "selfcare.sound.nowPlaying": "Now Playing",
+  "selfcare.sound.timer": "Sleep Timer",
+  "selfcare.sound.timerMins": "{n} నిమిషాలు",
+  "selfcare.sound.noTimer": "No Timer",
+  "selfcare.sound.stopAll": "Stop Sound",
+  "selfcare.sound.volume": "Volume",
+  "selfcare.sound.mix": "Ambient Mix",
+  "selfcare.sound.rain.title": "Gentle Rain",
+  "selfcare.sound.rain.desc": "Soft, steady rainfall for peaceful focus or sleep.",
+  "selfcare.sound.waves.title": "Ocean Waves",
+  "selfcare.sound.waves.desc": "Rhythmic ocean swells rolling against a quiet shore.",
+  "selfcare.sound.forest.title": "Forest Ambience",
+  "selfcare.sound.forest.desc": "Calming breeze and rustling leaves in a serene woodland.",
+  "selfcare.sound.stream.title": "Flowing Stream",
+  "selfcare.sound.stream.desc": "Gentle flowing brook water over smooth stones.",
+  "selfcare.sound.wind.title": "Soft Wind",
+  "selfcare.sound.wind.desc": "Gentle mountain breeze whispering through open air.",
+  "selfcare.sound.night.title": "Peaceful Night",
+  "selfcare.sound.night.desc": "Warm nocturnal drone with subtle, rhythmic evening crickets.",
+  "selfcare.sound.birds.title": "Morning Birdsong",
+  "selfcare.sound.birds.desc": "Delicate natural birdsong chimes in a quiet garden.",
+  "selfcare.sound.instrumental.title": "Soft Ambient Chords",
+  "selfcare.sound.instrumental.desc":
+    "Warm harmonic chord swells designed for peaceful relaxation.",
+  "selfcare.sound.whitenoise.title": "Calibrated Pink Noise",
+  "selfcare.sound.whitenoise.desc": "Smooth, balanced acoustic masking for rest and focus.",
+  "selfcare.sound.breathing.title": "Breath Pacer Sound",
+  "selfcare.sound.breathing.desc": "Gentle harmonic swell synchronized to a 4-second breath pace.",
+  "selfcare.mycare.title": "My Self Care",
+  "selfcare.mycare.favorites": "Saved Favourites",
+  "selfcare.mycare.noFavorites":
+    "No favourites saved yet. Tap the heart on any routine to save it here.",
+  "selfcare.mycare.recent": "Recently Completed",
+  "selfcare.mycare.noRecent": "No completed routines yet. Take your time and explore when ready.",
+  "selfcare.mycare.notes": "Personal Wellbeing Notes",
+  "selfcare.mycare.notesPh":
+    "Write down what helped you feel more comfortable today (stored privately on your phone)...",
+  "selfcare.mycare.saveNotes": "Save Note",
+  "selfcare.mycare.notesSaved": "Note saved privately",
+  "selfcare.mycare.clearHistory": "Clear History",
+  "selfcare.mycare.clearConfirm":
+    "Are you sure you want to clear your completed self-care history?",
+  "selfcare.mycare.noPressureNotice":
+    "Self-care is a supportive resource, not an obligation. There are no streaks, scores, or targets.",
+  "selfcare.breathing.inhale": "Inhale gently...",
+  "selfcare.breathing.exhale": "Exhale softly...",
+  "selfcare.breathing.hold": "Rest gently...",
+  "selfcare.breathing.paceInfo": "4 seconds in, 4 seconds out. Follow your own comfortable rhythm.",
+  "selfcare.breathing.reducedMotion": "Reduced motion text guide",
 };

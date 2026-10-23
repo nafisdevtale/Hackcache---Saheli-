@@ -330,6 +330,7 @@ const DESKTOP_NAV = [
   { to: "/calendar", key: "nav.calendar", icon: CalendarDays },
   { to: "/log", key: "nav.log", icon: Droplet },
   { to: "/insights", key: "nav.insights", icon: BarChart3 },
+  { to: "/selfcare", key: "nav.selfCare", icon: Sparkles },
   { to: "/learn", key: "nav.learn", icon: BookOpen },
   { to: "/community", key: "nav.community", icon: Users },
   { to: "/ask", key: "nav.ask", icon: MessageCircle },

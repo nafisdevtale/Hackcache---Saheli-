@@ -482,6 +482,28 @@ export default function Today() {
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
               </Link>
             )}
+
+            <Link
+              to="/selfcare"
+              className="group flex items-center justify-between gap-3 rounded-3xl border border-primary/20 bg-gradient-to-r from-primary/10 via-card to-secondary/15 p-4 text-xs shadow-xs hover:border-primary/40 hover:bg-muted/40 transition-all"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/15 text-primary">
+                  <Sparkles className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-foreground text-sm flex items-center gap-1.5">
+                    {t("selfcare.title")}
+                  </h3>
+                  <p className="text-muted-foreground text-xs line-clamp-1">
+                    {t("selfcare.subtitle")}
+                  </p>
+                </div>
+              </div>
+              <span className="shrink-0 rounded-xl bg-primary px-3 py-1.5 font-bold text-primary-foreground shadow-2xs group-hover:scale-102 transition-transform">
+                {t("selfcare.exploreAll")}
+              </span>
+            </Link>
           </div>
         );
 

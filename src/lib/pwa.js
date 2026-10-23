@@ -5,11 +5,11 @@ let deferredPrompt = null;
 let swRegistration = null;
 
 export function isStandalone() {
-  if (typeof window === "undefined") return false;
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") return false;
   return (
     window.matchMedia("(display-mode: standalone)").matches ||
     // iOS Safari standalone flag
-    !!("standalone" in window.navigator && window.navigator.standalone)
+    !!(window.navigator && "standalone" in window.navigator && window.navigator.standalone)
   );
 }
 

@@ -12,6 +12,7 @@ import {
   FileText,
   Lock,
   BookOpen,
+  Sparkles,
 } from "lucide-react";
 import { useApp } from "@/App.jsx";
 import { PageTitle } from "@/components/common/ui.jsx";
@@ -23,6 +24,12 @@ export default function More() {
     {
       title: t("ins.title"),
       items: [
+        {
+          to: "/selfcare",
+          key: "nav.selfCare",
+          icon: Sparkles,
+          color: "text-accent-foreground bg-accent",
+        },
         {
           to: "/learn",
           key: "nav.learn",
