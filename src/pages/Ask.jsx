@@ -6,6 +6,12 @@ import {
   AlertTriangle,
   ShieldCheck,
   HeartHandshake,
+  Search,
+  HelpCircle,
+  ArrowRight,
+  CheckCircle2,
+  X,
+  Stethoscope,
 } from "lucide-react";
 import { useApp } from "@/App.jsx";
 import { Btn, Card, PageTitle, Sources, inputCls, Chip } from "@/components/common/ui.jsx";
@@ -106,344 +112,462 @@ export default function Ask() {
   };
 
   return (
-    <div className="space-y-4">
-      <PageTitle sub={t("ask.intro")}>{t("ask.title")}</PageTitle>
+    <div className="space-y-6">
+      {/* Header & Mode Switcher */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/60 pb-4">
+        <div>
+          <span className="text-xs font-bold uppercase tracking-wider text-primary">
+            {t("ask.title")}
+          </span>
+          <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+            {t("ask.title")}
+          </h1>
+          <p className="text-sm text-muted-foreground mt-0.5">{t("ask.intro")}</p>
+        </div>
 
-      {/* Mode Switcher */}
-      <div className="grid grid-cols-2 gap-2 rounded-2xl bg-muted p-1">
-        <button
-          type="button"
-          onClick={() => setActiveTab("faq")}
-          className={`flex min-h-12 items-center justify-center gap-2 rounded-xl text-sm font-semibold transition-all ${
-            activeTab === "faq"
-              ? "bg-card text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <BookOpen aria-hidden className="h-4 w-4" />
-          {t("ai.tabFaq") || "Verified FAQ (Offline)"}
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab("ai")}
-          className={`flex min-h-12 items-center justify-center gap-2 rounded-xl text-sm font-semibold transition-all ${
-            activeTab === "ai"
-              ? "bg-card text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <Sparkles aria-hidden className="h-4 w-4 text-primary" />
-          {t("ai.tabAi") || "AI Assistant"}
-        </button>
+        {/* Tab Switcher */}
+        <div className="inline-flex rounded-2xl bg-muted p-1 border border-border/40 shadow-xs">
+          <button
+            type="button"
+            onClick={() => setActiveTab("faq")}
+            className={`flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 text-xs font-bold transition-all ${
+              activeTab === "faq"
+                ? "bg-card text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <BookOpen aria-hidden className="h-4 w-4 text-secondary-strong" />
+            {t("ai.tabFaq") || "Verified Medical FAQ"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("ai")}
+            className={`flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 text-xs font-bold transition-all ${
+              activeTab === "ai"
+                ? "bg-card text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Sparkles aria-hidden className="h-4 w-4 text-primary" />
+            {t("ai.tabAi") || "AI Assistant"}
+          </button>
+        </div>
       </div>
 
       {activeTab === "faq" ? (
         /* OFFLINE VERIFIED FAQ MODE */
-        <div className="space-y-4">
-          <p className="rounded-xl bg-muted p-3 text-sm">{t("ask.notAi")}</p>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              askFaq(q);
-            }}
-            className="space-y-2"
-          >
-            <label htmlFor="q" className="font-semibold">
-              {t("ask.label")}
-            </label>
-            <input
-              id="q"
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder={t("ask.ph")}
-              className={inputCls}
-              maxLength={300}
-            />
-            <Btn type="submit" className="w-full">
-              {t("ask.submit")}
-            </Btn>
-          </form>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {/* Left Column: Search & Questions List */}
+          <div className="lg:col-span-5 space-y-4">
+            <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-secondary-strong">
+                <ShieldCheck className="h-4 w-4" />
+                <span>Verified Offline Medical Knowledge</span>
+              </div>
 
-          <div aria-live="polite">
-            {res?.type === "urgent" && (
-              <Card className="border-4 border-urgent bg-urgent-soft">
-                <h2 className="font-bold text-urgent">{t("doc.urgentTitle")}</h2>
-                <p>{t("doc.urgentNotApp")}</p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <a
-                    href="tel:112"
-                    className="inline-flex min-h-12 items-center rounded-xl bg-urgent px-4 font-semibold text-urgent-foreground"
-                  >
-                    {t("doc.call112")}
-                  </a>
-                  <a
-                    href="tel:108"
-                    className="inline-flex min-h-12 items-center rounded-xl bg-urgent px-4 font-semibold text-urgent-foreground"
-                  >
-                    {t("doc.call108")}
-                  </a>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  askFaq(q);
+                }}
+                className="space-y-3"
+              >
+                <div className="relative">
+                  <input
+                    id="q"
+                    value={q}
+                    onChange={(e) => setQ(e.target.value)}
+                    placeholder={t("ask.ph")}
+                    className={`${inputCls} pl-10 pr-10`}
+                    maxLength={300}
+                  />
+                  <Search className="absolute left-3.5 top-3.5 h-4 w-4 text-muted-foreground" />
+                  {q && (
+                    <button
+                      type="button"
+                      onClick={() => setQ("")}
+                      className="absolute right-3.5 top-3.5 text-muted-foreground hover:text-foreground"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
                 </div>
-                <Sources ids={["nhs_heavy", "nhs_preg_bleeding", "nhs_pain", "india_112"]} />
-              </Card>
-            )}
+                <Btn type="submit" className="w-full">
+                  {t("ask.submit")}
+                </Btn>
+              </form>
 
-            {res?.type === "selfharm" && (
-              <Card className="border-l-8 border-l-urgent">
-                <p>{t("ask.selfharm")}</p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <a
-                    href="tel:14416"
-                    className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-primary px-4 font-semibold text-primary-foreground"
-                  >
-                    <Phone aria-hidden className="h-5 w-5" /> 14416
-                  </a>
-                  <a
-                    href="tel:112"
-                    className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-urgent px-4 font-semibold text-urgent-foreground"
-                  >
-                    <Phone aria-hidden className="h-5 w-5" /> 112
-                  </a>
-                </div>
-                <Sources ids={["telemanas", "india_112"]} />
-              </Card>
-            )}
+              <p className="text-xs text-muted-foreground leading-relaxed">{t("ask.notAi")}</p>
+            </div>
 
-            {res?.type === "none" && (
-              <Card>
-                <p className="text-lg font-semibold">{t("ask.none")}</p>
-              </Card>
-            )}
+            {/* Suggested Common Topics */}
+            <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-3">
+              <h2 className="font-bold text-xs uppercase tracking-wider text-muted-foreground">
+                {t("ask.suggested")}
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                {SUGGESTED.map((id) => FAQ.find((f) => f.id === id))
+                  .filter(Boolean)
+                  .map((f) => (
+                    <Chip key={f.id} onClick={() => showItem(f)}>
+                      {L(f.q)}
+                    </Chip>
+                  ))}
+              </div>
+            </div>
 
-            {res?.type === "match" && (
-              <Card>
-                <h2 className="text-lg font-bold">{L(res.item.q)}</h2>
-                <p className="mt-1">{L(res.item.a)}</p>
-                {res.item.concerning && (
-                  <p className="mt-2 rounded-lg bg-secondary p-2 text-secondary-foreground">
-                    {t("ask.seekHelp")}
-                  </p>
-                )}
-                {res.hits.length > 0 && (
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {t("ask.matched", { k: res.hits.join(", ") })}
-                  </p>
-                )}
-                <Sources ids={res.item.src} />
-              </Card>
-            )}
+            {/* Full FAQ Library Drawer / Details */}
+            <details className="rounded-3xl border border-border/70 bg-card p-4 shadow-soft">
+              <summary className="min-h-11 cursor-pointer font-bold text-sm text-foreground flex items-center justify-between">
+                <span>{t("ask.allFaq", { n: FAQ.length })}</span>
+                <span className="text-xs font-normal text-muted-foreground">
+                  Browse {FAQ.length} answers
+                </span>
+              </summary>
+              <ul className="mt-3 divide-y divide-border/50 max-h-96 overflow-y-auto pr-1 text-xs">
+                {FAQ.map((f) => (
+                  <li key={f.id}>
+                    <button
+                      type="button"
+                      className="w-full py-2.5 text-left text-foreground hover:text-primary transition-colors flex items-center justify-between group"
+                      onClick={() => showItem(f)}
+                    >
+                      <span className="font-medium pr-2">{L(f.q)}</span>
+                      <ArrowRight className="h-3 w-3 shrink-0 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </details>
           </div>
 
-          <section>
-            <h2 className="mb-2 font-bold">{t("ask.suggested")}</h2>
-            <div className="flex flex-wrap gap-2">
-              {SUGGESTED.map((id) => FAQ.find((f) => f.id === id)).map((f) => (
-                <Chip key={f.id} onClick={() => showItem(f)}>
-                  {L(f.q)}
-                </Chip>
-              ))}
-            </div>
-          </section>
+          {/* Right Column: Matched Answer Display or Editorial Guidance */}
+          <div className="lg:col-span-7 space-y-4">
+            <div aria-live="polite">
+              {res?.type === "urgent" && (
+                <div className="rounded-3xl border-2 border-urgent/60 bg-urgent-soft/40 p-6 shadow-soft space-y-4">
+                  <div className="flex items-center gap-2 text-urgent font-bold text-lg">
+                    <AlertTriangle className="h-6 w-6" />
+                    <h2>{t("doc.urgentTitle")}</h2>
+                  </div>
+                  <p className="text-foreground leading-relaxed">{t("doc.urgentNotApp")}</p>
+                  <div className="flex flex-wrap gap-3 pt-2">
+                    <a
+                      href="tel:112"
+                      className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-urgent px-5 font-bold text-urgent-foreground shadow-sm hover:opacity-95"
+                    >
+                      <Phone className="h-4 w-4" /> {t("doc.call112")}
+                    </a>
+                    <a
+                      href="tel:108"
+                      className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-urgent px-5 font-bold text-urgent-foreground shadow-sm hover:opacity-95"
+                    >
+                      <Phone className="h-4 w-4" /> {t("doc.call108")}
+                    </a>
+                  </div>
+                  <Sources ids={["nhs_heavy", "nhs_preg_bleeding", "nhs_pain", "india_112"]} />
+                </div>
+              )}
 
-          <details className="rounded-2xl border border-border bg-card p-4">
-            <summary className="min-h-12 cursor-pointer font-bold">
-              {t("ask.allFaq", { n: FAQ.length })}
-            </summary>
-            <ul className="mt-2 space-y-1">
-              {FAQ.map((f) => (
-                <li key={f.id}>
-                  <button
-                    type="button"
-                    className="min-h-12 text-left underline"
-                    onClick={() => showItem(f)}
-                  >
-                    {L(f.q)}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </details>
+              {res?.type === "selfharm" && (
+                <div className="rounded-3xl border-2 border-urgent/60 bg-urgent-soft/40 p-6 shadow-soft space-y-4">
+                  <div className="flex items-center gap-2 text-urgent font-bold text-lg">
+                    <HeartHandshake className="h-6 w-6" />
+                    <h2>You Are Not Alone</h2>
+                  </div>
+                  <p className="text-foreground leading-relaxed">{t("ask.selfharm")}</p>
+                  <div className="flex flex-wrap gap-3 pt-2">
+                    <a
+                      href="tel:14416"
+                      className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-primary px-5 font-bold text-primary-foreground shadow-sm hover:opacity-95"
+                    >
+                      <Phone className="h-4 w-4" /> Tele-MANAS: 14416
+                    </a>
+                    <a
+                      href="tel:112"
+                      className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-urgent px-5 font-bold text-urgent-foreground shadow-sm hover:opacity-95"
+                    >
+                      <Phone className="h-4 w-4" /> 112
+                    </a>
+                  </div>
+                  <Sources ids={["telemanas", "india_112"]} />
+                </div>
+              )}
+
+              {res?.type === "none" && (
+                <div className="rounded-3xl border border-border/70 bg-card p-6 shadow-soft space-y-3 text-center">
+                  <HelpCircle className="mx-auto h-8 w-8 text-muted-foreground" />
+                  <p className="text-base font-bold text-foreground">{t("ask.none")}</p>
+                  <p className="text-xs text-muted-foreground max-w-md mx-auto">
+                    Try searching with simpler terms like "cramps", "heavy bleeding", "cycle
+                    length", or browse the suggested questions on the left.
+                  </p>
+                </div>
+              )}
+
+              {res?.type === "match" && (
+                <div className="rounded-3xl border border-primary/20 bg-card p-6 shadow-soft space-y-4">
+                  <div className="flex items-center justify-between pb-2 border-b border-border/60">
+                    <span className="text-xs font-bold uppercase tracking-wider text-primary">
+                      Verified Clinical Answer
+                    </span>
+                    {res.hits.length > 0 && (
+                      <span className="text-[11px] text-muted-foreground">
+                        {t("ask.matched", { k: res.hits.join(", ") })}
+                      </span>
+                    )}
+                  </div>
+                  <h2 className="text-xl font-bold font-display text-foreground leading-snug">
+                    {L(res.item.q)}
+                  </h2>
+                  <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-line">
+                    {L(res.item.a)}
+                  </p>
+                  {res.item.concerning && (
+                    <div className="rounded-2xl border border-secondary-strong/30 bg-secondary/20 p-3 text-xs text-secondary-strong font-semibold">
+                      {t("ask.seekHelp")}
+                    </div>
+                  )}
+                  <div className="pt-2 border-t border-border/50">
+                    <Sources ids={res.item.src} />
+                  </div>
+                </div>
+              )}
+
+              {/* Default Featured Question if nothing searched yet */}
+              {!res && (
+                <div className="rounded-3xl border border-border/70 bg-hero p-6 shadow-soft space-y-4">
+                  <div className="flex items-center gap-2 text-primary font-bold text-sm">
+                    <Stethoscope className="h-5 w-5" />
+                    <span>How to use the Verified Medical FAQ</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Search above or pick any question from the categories. All answers in this
+                    section are curated by healthcare professionals and available completely offline
+                    without needing an internet connection.
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                    <div className="rounded-2xl border border-border/60 bg-card p-4 space-y-1">
+                      <p className="font-bold text-xs text-foreground">100% Offline & Private</p>
+                      <p className="text-[11px] text-muted-foreground">
+                        No search queries or reading logs are transmitted outside your phone.
+                      </p>
+                    </div>
+                    <div className="rounded-2xl border border-border/60 bg-card p-4 space-y-1">
+                      <p className="font-bold text-xs text-foreground">Peer-Reviewed Guidance</p>
+                      <p className="text-[11px] text-muted-foreground">
+                        Sourced from NHS, WHO, FOGSI, and Ministry of Health (MoHFW) standards.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       ) : (
         /* AI HEALTH ASSISTANT MODE */
-        <div className="space-y-4">
-          {!aiConsent ? (
-            <Card className="border-2 border-primary/30 bg-primary-soft/20 p-5 space-y-3">
-              <div className="flex items-center gap-2 text-primary font-bold text-lg">
-                <Sparkles className="h-5 w-5" />
-                {t("ai.consentTitle") || "Saheli AI Health Assistant"}
-              </div>
-              <p className="text-sm leading-relaxed text-muted-foreground">
-                {t("ai.consentDesc") ||
-                  "Saheli AI provides supportive, culturally-sensitive menstrual health information powered by Google Gemini. It is an educational tool, NOT a doctor or medical diagnosis system. Emergency red flags and mental health crises are screened locally."}
-              </p>
-              <div className="space-y-2 text-xs text-muted-foreground">
-                <div className="flex items-start gap-2">
-                  <ShieldCheck className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                  <span>
-                    {t("ai.privacyNotice") ||
-                      "Zero personal identifiers or account credentials are sent to AI servers."}
-                  </span>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {/* Left Column: Context, Consent & AI Question Box */}
+          <div className="lg:col-span-6 space-y-4">
+            {!aiConsent ? (
+              <div className="rounded-3xl border-2 border-primary/30 bg-hero p-6 shadow-soft space-y-4">
+                <div className="flex items-center gap-2 text-primary font-bold text-lg">
+                  <Sparkles className="h-6 w-6" />
+                  <h2>{t("ai.consentTitle") || "Saheli AI Health Assistant"}</h2>
                 </div>
-                <div className="flex items-start gap-2">
-                  <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
-                  <span>
-                    {t("ai.emergencyNotice") ||
-                      "In case of severe acute pain, heavy hemorrhaging, or thoughts of self-harm, deterministic emergency helplines are provided instantly."}
-                  </span>
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  {t("ai.consentDesc") ||
+                    "Saheli AI provides supportive, culturally-sensitive menstrual health information powered by Google Gemini. It is an educational tool, NOT a doctor or medical diagnosis system. Emergency red flags and mental health crises are screened locally."}
+                </p>
+                <div className="space-y-2 text-xs text-muted-foreground">
+                  <div className="flex items-start gap-2">
+                    <ShieldCheck className="h-4 w-4 text-secondary-strong shrink-0 mt-0.5" />
+                    <span>
+                      {t("ai.privacyNotice") ||
+                        "Zero personal identifiers or account credentials are sent to AI servers."}
+                    </span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
+                    <span>
+                      {t("ai.emergencyNotice") ||
+                        "In case of severe acute pain, heavy hemorrhaging, or thoughts of self-harm, deterministic emergency helplines are provided instantly."}
+                    </span>
+                  </div>
                 </div>
+                <Btn onClick={handleConsentAccept} className="w-full mt-2">
+                  {t("ai.acceptConsent") || "I Understand and Accept"}
+                </Btn>
               </div>
-              <Btn onClick={handleConsentAccept} className="w-full mt-2">
-                {t("ai.acceptConsent") || "I Understand and Accept"}
-              </Btn>
-            </Card>
-          ) : (
-            <form onSubmit={askAi} className="space-y-3">
-              <div>
-                <label htmlFor="ai-q" className="font-semibold block mb-1">
-                  {t("ai.inputLabel") || "Ask Saheli Health Assistant"}
-                </label>
-                <textarea
-                  id="ai-q"
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  placeholder={
-                    t("ai.inputPlaceholder") ||
-                    "e.g., Is it normal to have cramps 3 days before bleeding starts?"
-                  }
-                  className={`${inputCls} min-h-24 py-2 resize-none`}
-                  maxLength={500}
-                />
-              </div>
-
-              {/* Optional cycle context toggle (Default OFF) */}
-              <label className="flex items-center gap-2 cursor-pointer text-sm p-2 rounded-xl bg-muted/60">
-                <input
-                  type="checkbox"
-                  checked={includeCycleContext}
-                  onChange={(e) => setIncludeCycleContext(e.target.checked)}
-                  className="h-4 w-4 rounded border-border text-primary"
-                />
-                <span>
-                  {t("ai.includeContext") ||
-                    "Include my anonymized cycle summary (last period timing only)"}
-                </span>
-              </label>
-
-              <Btn
-                type="submit"
-                className="w-full flex items-center justify-center gap-2"
-                disabled={aiLoading || !q.trim()}
+            ) : (
+              <form
+                onSubmit={askAi}
+                className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4"
               >
-                <Sparkles className="h-4 w-4" />
-                {aiLoading
-                  ? t("ai.thinking") || "Consulting medical sources..."
-                  : t("ai.askBtn") || "Ask Assistant"}
-              </Btn>
-            </form>
-          )}
+                <div>
+                  <label htmlFor="ai-q" className="font-bold text-sm block mb-1 text-foreground">
+                    {t("ai.inputLabel") || "Ask Saheli Health Assistant"}
+                  </label>
+                  <textarea
+                    id="ai-q"
+                    value={q}
+                    onChange={(e) => setQ(e.target.value)}
+                    placeholder={
+                      t("ai.inputPlaceholder") ||
+                      "e.g., Is it normal to have cramps 3 days before bleeding starts?"
+                    }
+                    className={`${inputCls} min-h-28 py-3 resize-none`}
+                    maxLength={500}
+                  />
+                </div>
 
-          {aiError && (
-            <div className="rounded-xl bg-destructive/10 p-3 text-sm text-destructive font-semibold">
-              {aiError}
-            </div>
-          )}
+                {/* Optional cycle context toggle (Default OFF) */}
+                <label className="flex items-center gap-3 cursor-pointer text-xs p-3 rounded-2xl bg-muted/60 border border-border/50">
+                  <input
+                    type="checkbox"
+                    checked={includeCycleContext}
+                    onChange={(e) => setIncludeCycleContext(e.target.checked)}
+                    className="h-4 w-4 rounded border-border accent-primary"
+                  />
+                  <span className="text-foreground">
+                    {t("ai.includeContext") ||
+                      "Include my anonymized cycle summary (last period timing only)"}
+                  </span>
+                </label>
 
-          {/* AI Response Display */}
-          <div aria-live="polite">
-            {aiRes && (
-              <div className="space-y-3">
-                {/* Crisis helpline card */}
-                {aiRes.type === "crisis" && (
-                  <Card className="border-4 border-urgent bg-urgent-soft space-y-3">
-                    <div className="flex items-center gap-2 text-urgent font-bold text-lg">
-                      <HeartHandshake className="h-6 w-6" />
-                      <span>{t("ai.crisisTitle") || "You Are Not Alone"}</span>
-                    </div>
-                    <p className="font-medium text-urgent-foreground">{aiRes.answer}</p>
-                    <div className="flex flex-wrap gap-2 pt-1">
-                      {aiRes.helplines?.map((h) => (
-                        <a
-                          key={h.number}
-                          href={`tel:${h.number.replace(/-/g, "")}`}
-                          className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-urgent px-4 font-semibold text-urgent-foreground shadow-sm"
-                        >
-                          <Phone className="h-4 w-4" /> {h.name}: {h.number}
-                        </a>
-                      ))}
-                    </div>
-                  </Card>
-                )}
+                <Btn
+                  type="submit"
+                  className="w-full flex items-center justify-center gap-2 min-h-12"
+                  disabled={aiLoading || !q.trim()}
+                >
+                  <Sparkles className="h-4 w-4" />
+                  {aiLoading
+                    ? t("ai.thinking") || "Consulting medical sources..."
+                    : t("ai.askBtn") || "Ask Assistant"}
+                </Btn>
+              </form>
+            )}
 
-                {/* Urgent medical red flag card */}
-                {aiRes.type === "urgent" && (
-                  <Card className="border-4 border-urgent bg-urgent-soft space-y-3">
-                    <div className="flex items-center gap-2 text-urgent font-bold text-lg">
-                      <AlertTriangle className="h-6 w-6" />
-                      <span>{t("doc.urgentTitle")}</span>
-                    </div>
-                    <p className="font-medium text-urgent-foreground">{aiRes.answer}</p>
-                    <div className="flex flex-wrap gap-2 pt-1">
-                      <a
-                        href="tel:112"
-                        className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-urgent px-4 font-semibold text-urgent-foreground shadow-sm"
-                      >
-                        <Phone className="h-4 w-4" /> {t("doc.call112")}
-                      </a>
-                      <a
-                        href="tel:108"
-                        className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-urgent px-4 font-semibold text-urgent-foreground shadow-sm"
-                      >
-                        <Phone className="h-4 w-4" /> {t("doc.call108")}
-                      </a>
-                    </div>
-                  </Card>
-                )}
-
-                {/* Normal AI Answer */}
-                {!aiRes.red_flag && !aiRes.fallback && (
-                  <Card className="space-y-3 border-2 border-primary/20">
-                    <div className="flex items-center justify-between text-xs text-muted-foreground pb-1 border-b border-border">
-                      <span className="flex items-center gap-1 text-primary font-semibold">
-                        <Sparkles className="h-3.5 w-3.5" /> Saheli Health Guidance
-                      </span>
-                      {includeCycleContext && (
-                        <span className="bg-primary-soft/50 px-2 py-0.5 rounded text-primary">
-                          Cycle summary included
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-foreground leading-relaxed whitespace-pre-line">
-                      {aiRes.answer}
-                    </div>
-                    <div className="pt-2 text-xs text-muted-foreground border-t border-border">
-                      {aiRes.disclaimer}
-                    </div>
-                  </Card>
-                )}
-
-                {/* Graceful Fallback to Local Verified FAQ */}
-                {aiRes.fallback && (
-                  <Card className="space-y-3 border-2 border-warning/40">
-                    <div className="flex items-center gap-2 text-warning-foreground font-semibold text-sm">
-                      <AlertTriangle className="h-4 w-4 text-warning" />
-                      <span>
-                        {t("ai.fallbackNotice") ||
-                          "AI service offline or unconfigured. Showing matched verified guide from Saheli offline medical library:"}
-                      </span>
-                    </div>
-                    {aiRes.matched?.type === "match" ? (
-                      <div className="pt-2 space-y-1">
-                        <h3 className="font-bold text-base">{L(aiRes.matched.item.q)}</h3>
-                        <p className="text-sm">{L(aiRes.matched.item.a)}</p>
-                        <Sources ids={aiRes.matched.item.src} />
-                      </div>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">{t("ask.none")}</p>
-                    )}
-                  </Card>
-                )}
+            {aiError && (
+              <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-xs text-destructive font-semibold">
+                {aiError}
               </div>
             )}
+          </div>
+
+          {/* Right Column: AI Response Display or Guidance */}
+          <div className="lg:col-span-6 space-y-4">
+            <div aria-live="polite">
+              {aiRes ? (
+                <div className="space-y-4">
+                  {/* Crisis helpline card */}
+                  {aiRes.type === "crisis" && (
+                    <div className="rounded-3xl border-2 border-urgent/60 bg-urgent-soft/40 p-6 shadow-soft space-y-3">
+                      <div className="flex items-center gap-2 text-urgent font-bold text-lg">
+                        <HeartHandshake className="h-6 w-6" />
+                        <span>{t("ai.crisisTitle") || "You Are Not Alone"}</span>
+                      </div>
+                      <p className="font-medium text-urgent-foreground">{aiRes.answer}</p>
+                      <div className="flex flex-wrap gap-2 pt-1">
+                        {aiRes.helplines?.map((h) => (
+                          <a
+                            key={h.number}
+                            href={`tel:${h.number.replace(/-/g, "")}`}
+                            className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-urgent px-4 font-bold text-urgent-foreground shadow-sm"
+                          >
+                            <Phone className="h-4 w-4" /> {h.name}: {h.number}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Urgent medical red flag card */}
+                  {aiRes.type === "urgent" && (
+                    <div className="rounded-3xl border-2 border-urgent/60 bg-urgent-soft/40 p-6 shadow-soft space-y-3">
+                      <div className="flex items-center gap-2 text-urgent font-bold text-lg">
+                        <AlertTriangle className="h-6 w-6" />
+                        <span>{t("doc.urgentTitle")}</span>
+                      </div>
+                      <p className="font-medium text-urgent-foreground">{aiRes.answer}</p>
+                      <div className="flex flex-wrap gap-2 pt-1">
+                        <a
+                          href="tel:112"
+                          className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-urgent px-4 font-bold text-urgent-foreground shadow-sm"
+                        >
+                          <Phone className="h-4 w-4" /> {t("doc.call112")}
+                        </a>
+                        <a
+                          href="tel:108"
+                          className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-urgent px-4 font-bold text-urgent-foreground shadow-sm"
+                        >
+                          <Phone className="h-4 w-4" /> {t("doc.call108")}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Normal AI Answer */}
+                  {!aiRes.red_flag && !aiRes.fallback && (
+                    <div className="rounded-3xl border border-primary/20 bg-card p-6 shadow-soft space-y-3">
+                      <div className="flex items-center justify-between text-xs text-muted-foreground pb-2 border-b border-border/60">
+                        <span className="flex items-center gap-1.5 text-primary font-bold">
+                          <Sparkles className="h-4 w-4" /> Saheli Health Guidance
+                        </span>
+                        {includeCycleContext && (
+                          <span className="bg-primary/10 text-primary px-2.5 py-0.5 rounded-full text-[10px] font-semibold">
+                            Cycle summary included
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-foreground text-sm leading-relaxed whitespace-pre-line">
+                        {aiRes.answer}
+                      </div>
+                      <div className="pt-2 text-xs text-muted-foreground border-t border-border/50">
+                        {aiRes.disclaimer}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Graceful Fallback to Local Verified FAQ */}
+                  {aiRes.fallback && (
+                    <div className="rounded-3xl border border-warning/40 bg-card p-6 shadow-soft space-y-3">
+                      <div className="flex items-center gap-2 text-warning-foreground font-semibold text-sm">
+                        <AlertTriangle className="h-4 w-4 text-warning" />
+                        <span>
+                          {t("ai.fallbackNotice") ||
+                            "AI service offline or unconfigured. Showing matched verified guide from Saheli offline medical library:"}
+                        </span>
+                      </div>
+                      {aiRes.matched?.type === "match" ? (
+                        <div className="pt-2 space-y-2">
+                          <h3 className="font-bold text-base text-foreground">
+                            {L(aiRes.matched.item.q)}
+                          </h3>
+                          <p className="text-sm text-foreground/90">{L(aiRes.matched.item.a)}</p>
+                          <Sources ids={aiRes.matched.item.src} />
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">{t("ask.none")}</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="rounded-3xl border border-border/70 bg-hero p-6 shadow-soft space-y-3">
+                  <div className="flex items-center gap-2 text-primary font-bold text-sm">
+                    <Sparkles className="h-5 w-5" />
+                    <span>Personalized Health Q&A</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Type any menstrual or adolescent health question. Saheli uses clinical reference
+                    data to explain symptoms, answer timing questions, and reassure you with
+                    evidence-backed guidance.
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

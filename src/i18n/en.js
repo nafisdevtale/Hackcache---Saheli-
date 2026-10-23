@@ -632,19 +632,43 @@ export default {
     "To install on iPhone or iPad: tap the Share button in Safari, then select 'Add to Home Screen'.",
   "pwa.offlineTitle": "Offline Access",
 
+  "common.more": "Full Journal",
+  "common.optional": "Optional",
+  "common.noEntries": "No entries found.",
+  "onb.privacyExplainTitle": "Complete Privacy Guarantee",
+  "onb.privacyExplainDesc":
+    "Your personal health data stays securely on this device only. Protected with client-side encryption.",
+  "sym.fatigue": "Tiredness / Fatigue",
+  "sym.backache": "Back pain",
+  "sym.tenderBreasts": "Sore breasts",
+
   "ai.title": "AI Health Assistant",
   "ai.badge": "Informational AI",
+  "ai.tabFaq": "Verified FAQ",
+  "ai.tabAi": "Health Assistant",
+  "ai.consentReq": "Please review and accept the privacy & safety notice to continue.",
   "ai.intro":
     "Ask confidential menstrual health questions. Answers are based on verified medical resources.",
-  "ai.consentTitle": "AI Data & Privacy Notice",
+  "ai.consentTitle": "Saheli AI Health Assistant",
   "ai.consentDesc":
     "When you submit a question, it is processed on our secure server. Your personal diary records, private notes, and device identity are never sent.",
+  "ai.privacyNotice":
+    "When you submit a question, it is processed on our secure server. Your personal diary records, private notes, and device identity are never sent.",
+  "ai.emergencyNotice":
+    "For medical emergencies, severe pain, or heavy bleeding, contact 112 or visit a hospital immediately. AI cannot replace urgent medical care.",
+  "ai.acceptConsent": "I Understand and Accept",
   "ai.consentBtn": "I understand & continue",
   "ai.includeSummary": "Include my cycle summary",
   "ai.includeSummaryDesc":
     "Shares only anonymous cycle length and irregularity status to provide more relevant answers. (Default: Off)",
+  "ai.includeContext": "Include my cycle summary for personalized answers",
+  "ai.inputLabel": "Ask Saheli Health Assistant",
+  "ai.inputPlaceholder": "e.g. Why might a period be late?",
   "ai.placeholder": "Ask a question about your cycle, symptoms, or health...",
   "ai.askBtn": "Ask Assistant",
+  "ai.thinking": "Consulting verified medical sources...",
+  "ai.crisisTitle": "You Are Not Alone — Immediate Help Available",
+  "ai.suggestDoctor": "When to consult a doctor",
   "ai.disclaimer":
     "Saheli AI provides general health information only and cannot diagnose conditions, prescribe medications, or replace a qualified healthcare professional.",
   "ai.fallbackNotice":
@@ -658,6 +682,7 @@ export default {
 
   "comm.title": "Community Support",
   "comm.badge": "Moderated & Pseudonymous",
+  "comm.postingAs": "Your alias:",
   "comm.intro":
     "A supportive, judgment-free space to ask questions and share menstrual experiences with other women and teens.",
   "comm.privacyNotice":
@@ -668,13 +693,30 @@ export default {
   "comm.rule3": "No personal contact information, phone numbers, or private messaging.",
   "comm.rule4": "Under-18 and adult spaces are strictly separated for safety.",
   "comm.tabFeed": "Discussions",
+  "comm.tabNewPost": "New Post",
   "comm.tabMyPosts": "My Activity",
+  "comm.tabMyActivity": "My Activity",
+  "comm.loading": "Loading community discussions...",
+  "comm.empty": "No discussions in this topic yet. Be the first to share!",
   "comm.categoryAll": "All topics",
   "comm.categoryPeriods": "Period basics",
   "comm.categoryPcos": "PCOS / PCOD",
   "comm.categoryHygiene": "Hygiene & Products",
   "comm.categorySupport": "Pain & Wellness",
+  "comm.topicAll": "All topics",
+  "comm.topicCycles": "Cycle & Periods",
+  "comm.topicPcos": "PCOS / PCOD",
+  "comm.topicFirstPeriod": "First Period",
+  "comm.topicPain": "Pain & Cramps",
+  "comm.topicHygiene": "Hygiene & Products",
+  "comm.topicGeneral": "General Wellness",
   "comm.newPost": "Ask the Community",
+  "comm.newPostTitle": "Create a Community Post",
+  "comm.newPostDesc":
+    "Share your experience or ask a question. Posts are reviewed by moderators before appearing.",
+  "comm.moderationNotice":
+    "Your post will be reviewed for safety and kindness before being published.",
+  "comm.submitPost": "Submit Post for Review",
   "comm.postTitle": "Topic title",
   "comm.postTitlePh": "What is on your mind?",
   "comm.postBody": "Your question or experience",
@@ -690,6 +732,12 @@ export default {
   "comm.report": "Report",
   "comm.reportConfirm": "Report this post for moderator review?",
   "comm.reportSuccess": "Thank you. Our moderators will review this.",
+  "comm.myPostsTitle": "My Community Submissions",
+  "comm.wipeTitle": "Delete All My Community Data",
+  "comm.wipeDesc": "This permanently removes all posts and comments submitted from this device.",
+  "comm.wipeBtn": "Wipe my community posts",
+  "comm.networkError":
+    "Community connection is currently offline. Your private diary remains safe on this device.",
   "comm.deleteAll": "Delete all my community posts",
   "comm.deleteAllConfirm":
     "Are you sure? This will permanently delete all your community posts and replies from the server.",
@@ -700,6 +748,7 @@ export default {
   "comm.modReject": "Reject",
   "comm.modRemove": "Remove",
   "comm.minorSpace": "Teen Community (Under 18)",
+  "comm.teenSpace": "Teen Space (Under 18)",
   "comm.adultSpace": "Adult Community (18+)",
 
   "push.title": "Background Reminders",

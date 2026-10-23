@@ -1,6 +1,32 @@
 import { useState } from "react";
+import {
+  Palette,
+  Shield,
+  Activity,
+  Database,
+  Globe,
+  Lock,
+  Eye,
+  EyeOff,
+  Trash2,
+  Download,
+  Upload,
+  AlertTriangle,
+  Check,
+  Plus,
+  RefreshCw,
+} from "lucide-react";
 import { useApp } from "@/App.jsx";
-import { Btn, Card, PageTitle, Toggle, Chip, inputCls, Status } from "@/components/common/ui.jsx";
+import {
+  Btn,
+  Card,
+  PageTitle,
+  Toggle,
+  Chip,
+  inputCls,
+  Status,
+  cx,
+} from "@/components/common/ui.jsx";
 import { SYMPTOMS } from "@/data/symptoms.js";
 import { exportJSON, exportCSV, parseImport, importPreview } from "@/lib/exportImport.js";
 import { isValidPin } from "@/lib/encryption.js";
@@ -18,7 +44,7 @@ function download(name, text, type) {
 
 function PinInput({ id, label, value, onChange }) {
   return (
-    <label htmlFor={id} className="block font-semibold">
+    <label htmlFor={id} className="block font-semibold text-xs text-foreground mb-1">
       {label}
       <input
         id={id}
@@ -28,7 +54,7 @@ function PinInput({ id, label, value, onChange }) {
         autoComplete="off"
         value={value}
         onChange={(e) => onChange(e.target.value.replace(/\D/g, ""))}
-        className={inputCls}
+        className={cx(inputCls, "h-11 rounded-2xl tracking-[0.4em] text-center text-lg")}
       />
     </label>
   );
@@ -39,24 +65,35 @@ function ExportBlock() {
   const [pending, setPending] = useState(null);
   const base = `${prefs.discreet ? "diary" : "saheli"}-${todayStr()}`;
   return (
-    <div className="space-y-2">
-      <div className="grid gap-2 sm:grid-cols-2">
-        <Btn variant="outline" onClick={() => setPending("json")}>
-          {t("set.exportJson")}
+    <div className="space-y-3">
+      <div className="grid gap-2.5 sm:grid-cols-2">
+        <Btn
+          variant="outline"
+          className="min-h-12 rounded-2xl flex items-center justify-center gap-2 font-bold text-xs"
+          onClick={() => setPending("json")}
+        >
+          <Download className="h-4 w-4" />
+          <span>{t("set.exportJson")}</span>
         </Btn>
-        <Btn variant="outline" onClick={() => setPending("csv")}>
-          {t("set.exportCsv")}
+        <Btn
+          variant="outline"
+          className="min-h-12 rounded-2xl flex items-center justify-center gap-2 font-bold text-xs"
+          onClick={() => setPending("csv")}
+        >
+          <Download className="h-4 w-4" />
+          <span>{t("set.exportCsv")}</span>
         </Btn>
       </div>
       {pending && (
         <div
           role="alertdialog"
           aria-label={t("set.exportWarn")}
-          className="rounded-xl bg-accent p-3 text-accent-foreground"
+          className="rounded-3xl border border-accent bg-accent/90 p-4 text-accent-foreground text-xs space-y-2.5 animate-fade-in"
         >
-          <p>{t("set.exportWarn")}</p>
-          <div className="mt-2 flex flex-wrap gap-2">
+          <p className="leading-relaxed font-medium">{t("set.exportWarn")}</p>
+          <div className="flex flex-wrap gap-2 pt-1">
             <Btn
+              size="sm"
               onClick={() => {
                 pending === "json"
                   ? download(`${base}.json`, exportJSON(record), "application/json")
@@ -66,7 +103,7 @@ function ExportBlock() {
             >
               {t("set.exportConfirm")}
             </Btn>
-            <Btn variant="outline" onClick={() => setPending(null)}>
+            <Btn size="sm" variant="ghost" onClick={() => setPending(null)}>
               {t("common.cancel")}
             </Btn>
           </div>
@@ -90,508 +127,590 @@ function PinSection() {
     setA("");
     setB("");
     setC("");
-    setOk(false);
     setMode(null);
+    setOk(false);
+    setMsg(null);
   };
-  async function run(fn, success) {
+
+  async function submit(e) {
+    e.preventDefault();
     setBusy(true);
-    setMsg({ text: t("set.working") });
+    setMsg(null);
     try {
-      await fn();
-      setMsg({ text: t(success) });
-      reset();
-    } catch (e) {
-      setMsg({
-        text: t(e?.name === "OperationError" ? "set.pinWrong" : "set.failed"),
-        tone: "err",
-      });
+      if (mode === "enable") {
+        if (!isValidPin(a)) throw new Error("set.pinInvalid");
+        if (a !== b) throw new Error("set.pinMismatch");
+        await enablePin(a);
+        reset();
+      } else if (mode === "disable") {
+        await disablePin(a);
+        reset();
+      } else if (mode === "change") {
+        if (!isValidPin(b)) throw new Error("set.pinInvalid");
+        if (b !== c) throw new Error("set.pinMismatch");
+        await changePin(a, b);
+        reset();
+      }
+    } catch (err) {
+      setMsg({ key: err.message || "set.failed", tone: "err" });
     }
     setBusy(false);
   }
+
   return (
-    <div className="space-y-3">
-      <p className="font-semibold">{enabled ? t("set.pinOn") : t("set.pinOff")}</p>
-      {!enabled && mode !== "enable" && (
-        <Btn onClick={() => setMode("enable")}>{t("set.pinEnable")}</Btn>
-      )}
-      {mode === "enable" && (
-        <div className="space-y-2 rounded-xl bg-muted p-3">
-          <p className="font-semibold">{t("set.pinWarn")}</p>
-          <p>{t("set.pinExportFirst")}</p>
-          <ExportBlock />
-          <PinInput id="p1" label={t("set.pinNew")} value={a} onChange={setA} />
-          <PinInput id="p2" label={t("set.pinConfirm")} value={b} onChange={setB} />
-          <label className="flex min-h-12 items-center gap-3">
-            <input
-              type="checkbox"
-              className="h-6 w-6 accent-primary"
-              checked={ok}
-              onChange={(e) => setOk(e.target.checked)}
-            />{" "}
-            {t("set.pinUnderstand")}
-          </label>
-          <div className="flex flex-wrap gap-2">
-            <Btn
-              disabled={busy || !ok}
-              onClick={() => {
-                if (!isValidPin(a)) return setMsg({ text: t("set.pinInvalid"), tone: "err" });
-                if (a !== b) return setMsg({ text: t("set.pinMismatch"), tone: "err" });
-                run(() => enablePin(a), "set.pinEnabled");
-              }}
-            >
-              {t("set.pinEnable")}
-            </Btn>
-            <Btn variant="outline" onClick={reset}>
-              {t("common.cancel")}
-            </Btn>
-          </div>
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h3 className="font-bold text-sm text-foreground">{t("set.pin")}</h3>
+          <p className="text-xs text-muted-foreground">
+            {enabled ? t("set.pinOn") : t("set.pinOff")}
+          </p>
         </div>
-      )}
-      {enabled && !mode && (
-        <div className="flex flex-wrap gap-2">
-          <Btn variant="outline" onClick={() => setMode("change")}>
-            {t("set.pinChange")}
-          </Btn>
-          <Btn variant="outline" onClick={() => setMode("disable")}>
-            {t("set.pinDisable")}
-          </Btn>
-          <Btn variant="secondary" onClick={lock}>
+        {enabled && (
+          <Btn size="sm" variant="outline" className="rounded-xl text-xs font-bold" onClick={lock}>
+            <Lock className="h-3 w-3 mr-1" />
             {t("set.lockNow")}
           </Btn>
+        )}
+      </div>
+
+      {!mode && (
+        <div className="flex flex-wrap gap-2 pt-1">
+          {!enabled ? (
+            <Btn size="sm" className="rounded-xl" onClick={() => setMode("enable")}>
+              {t("set.pinEnable")}
+            </Btn>
+          ) : (
+            <>
+              <Btn
+                size="sm"
+                variant="outline"
+                className="rounded-xl"
+                onClick={() => setMode("change")}
+              >
+                {t("set.pinChange")}
+              </Btn>
+              <Btn
+                size="sm"
+                variant="outline"
+                className="rounded-xl"
+                onClick={() => setMode("disable")}
+              >
+                {t("set.pinDisable")}
+              </Btn>
+            </>
+          )}
         </div>
       )}
-      {mode === "change" && (
-        <div className="space-y-2 rounded-xl bg-muted p-3">
-          <PinInput id="pc" label={t("set.pinCurrent")} value={c} onChange={setC} />
-          <PinInput id="pn" label={t("set.pinNew")} value={a} onChange={setA} />
-          <PinInput id="pn2" label={t("set.pinConfirm")} value={b} onChange={setB} />
-          <div className="flex flex-wrap gap-2">
-            <Btn
-              disabled={busy}
-              onClick={() => {
-                if (!isValidPin(a) || !isValidPin(c))
-                  return setMsg({ text: t("set.pinInvalid"), tone: "err" });
-                if (a !== b) return setMsg({ text: t("set.pinMismatch"), tone: "err" });
-                run(() => changePin(c, a), "set.pinChanged");
-              }}
-            >
-              {t("set.pinChange")}
+
+      {mode && (
+        <form
+          onSubmit={submit}
+          className="space-y-3 rounded-2xl border border-border/70 bg-muted/30 p-4 animate-fade-in"
+        >
+          {mode === "enable" && (
+            <>
+              <PinInput id="new" label={t("set.pinNew")} value={a} onChange={setA} />
+              <PinInput id="confirm" label={t("set.pinConfirm")} value={b} onChange={setB} />
+              <label className="flex items-start gap-2 text-xs text-muted-foreground cursor-pointer pt-1">
+                <input
+                  type="checkbox"
+                  checked={ok}
+                  onChange={(e) => setOk(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded border-border text-primary"
+                />
+                <span>{t("set.pinWarn")}</span>
+              </label>
+            </>
+          )}
+          {mode === "disable" && (
+            <PinInput id="curr" label={t("set.pinCurrent")} value={a} onChange={setA} />
+          )}
+          {mode === "change" && (
+            <>
+              <PinInput id="curr" label={t("set.pinCurrent")} value={a} onChange={setA} />
+              <PinInput id="new" label={t("set.pinNew")} value={b} onChange={setB} />
+              <PinInput id="confirm" label={t("set.pinConfirm")} value={c} onChange={setC} />
+            </>
+          )}
+          <div className="flex gap-2 pt-2">
+            <Btn type="submit" disabled={busy || (mode === "enable" && !ok)}>
+              {busy ? t("set.working") : t("common.save")}
             </Btn>
-            <Btn variant="outline" onClick={reset}>
+            <Btn type="button" variant="outline" onClick={reset}>
               {t("common.cancel")}
             </Btn>
           </div>
-        </div>
+          <Status msg={msg?.key && t(msg.key)} tone={msg?.tone} />
+        </form>
       )}
-      {mode === "disable" && (
-        <div className="space-y-2 rounded-xl bg-muted p-3">
-          <PinInput id="pd" label={t("set.pinCurrent")} value={c} onChange={setC} />
-          <div className="flex flex-wrap gap-2">
-            <Btn
-              disabled={busy}
-              onClick={() =>
-                isValidPin(c)
-                  ? run(() => disablePin(c), "set.pinDisabled")
-                  : setMsg({ text: t("set.pinInvalid"), tone: "err" })
-              }
-            >
-              {t("set.pinDisable")}
-            </Btn>
-            <Btn variant="outline" onClick={reset}>
-              {t("common.cancel")}
-            </Btn>
-          </div>
-        </div>
-      )}
-      <Status msg={msg?.text} tone={msg?.tone} />
     </div>
-  );
-}
-
-function ImportBlock() {
-  const { t, record, importRecord, isDemo } = useApp();
-  const [parsed, setParsed] = useState(null);
-  const [msg, setMsg] = useState(null);
-  if (isDemo) return <p className="text-sm">{t("set.importDemoBlock")}</p>;
-  async function onFile(e) {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-    const res = parseImport(await file.text());
-    if (!res.ok) {
-      setParsed(null);
-      return setMsg({ text: t(res.error), tone: "err" });
-    }
-    setMsg(null);
-    setParsed({ rec: res.record, preview: importPreview(record, res.record) });
-  }
-  async function apply(strategy) {
-    try {
-      await importRecord(parsed.rec, strategy);
-      setMsg({ text: t("set.importDone") });
-      setParsed(null);
-    } catch {
-      setMsg({ text: t("set.failed"), tone: "err" });
-    }
-  }
-  return (
-    <div className="space-y-2">
-      <label className="block font-semibold">
-        {t("set.import")}
-        <input
-          type="file"
-          accept="application/json,.json"
-          onChange={onFile}
-          className={`${inputCls} file:mr-3 file:rounded-lg file:border-0 file:bg-secondary file:px-3 file:py-2`}
-        />
-      </label>
-      {parsed && (
-        <div className="rounded-xl bg-muted p-3">
-          <p>{t("set.importPreview", parsed.preview)}</p>
-          <div className="mt-2 grid gap-2">
-            <Btn onClick={() => apply("merge")}>{t("set.importMerge")}</Btn>
-            <Btn variant="outline" onClick={() => apply("replace")}>
-              {t("set.importReplace")}
-            </Btn>
-            <Btn variant="ghost" onClick={() => setParsed(null)}>
-              {t("common.cancel")}
-            </Btn>
-          </div>
-        </div>
-      )}
-      <Status msg={msg?.text} tone={msg?.tone} />
-    </div>
-  );
-}
-
-function PwaSection() {
-  const { t, prefs, isInstalled, canInstall, installApp } = useApp();
-  const [installMsg, setInstallMsg] = useState(null);
-
-  const isIos =
-    typeof navigator !== "undefined" &&
-    /iPad|iPhone|iPod/.test(navigator.userAgent || "") &&
-    !("MSStream" in window);
-
-  return (
-    <Card className="space-y-3">
-      <h2 className="text-lg font-bold">{t("pwa.offlineTitle")}</h2>
-      <p className="text-sm text-muted-foreground">
-        {prefs.discreet ? t("pwa.installDescDiscreet") : t("pwa.installDesc")}
-      </p>
-
-      {isInstalled ? (
-        <div className="flex items-center gap-2 rounded-xl bg-muted p-3 text-sm font-semibold">
-          <p>{t("pwa.installed")}</p>
-        </div>
-      ) : canInstall ? (
-        <div className="space-y-2">
-          <Btn
-            onClick={async () => {
-              const res = await installApp();
-              if (res?.outcome === "dismissed") {
-                setInstallMsg(t("common.cancel"));
-              }
-            }}
-          >
-            {prefs.discreet ? t("pwa.installDiscreet") : t("pwa.install")}
-          </Btn>
-          {installMsg && <p className="text-xs text-muted-foreground">{installMsg}</p>}
-        </div>
-      ) : isIos ? (
-        <div className="rounded-xl bg-muted p-3 text-sm">
-          <p>{t("pwa.iosGuide")}</p>
-        </div>
-      ) : (
-        <p className="text-xs text-muted-foreground">{t("pwa.installedDesc")}</p>
-      )}
-    </Card>
   );
 }
 
 export default function Settings() {
-  const app = useApp();
-  const { t, prefs, setPrefs, record, update, isDemo, exitDemo, tryDemo, deleteAll } = app;
-  const s = record.settings;
-  const [confirmDel, setConfirmDel] = useState(false);
-  const [failure, setFailure] = useState("");
-  const [newCustomSym, setNewCustomSym] = useState("");
-  const act = async (fn) => {
+  const {
+    t,
+    record,
+    update,
+    meta,
+    prefs,
+    setPrefs,
+    isDemo,
+    exitDemo,
+    tryDemo,
+    importRecord,
+    wipeAllData,
+  } = useApp();
+
+  const [activeTab, setActiveTab] = useState("display"); // 'display' | 'cycle' | 'privacy' | 'data'
+  const [customInput, setCustomInput] = useState("");
+  const [confirmWipe, setConfirmWipe] = useState(false);
+  const [importState, setImportState] = useState(null);
+  const [importErr, setImportErr] = useState(null);
+
+  const setSettings = (patch) => update((r) => ({ ...r, settings: { ...r.settings, ...patch } }));
+
+  const toggleSymptom = (id) => {
+    const list = record.settings.trackedSymptoms || [];
+    setSettings({
+      trackedSymptoms: list.includes(id) ? list.filter((x) => x !== id) : [...list, id],
+    });
+  };
+
+  const addCustomSymptom = (e) => {
+    e.preventDefault();
+    if (!customInput.trim()) return;
+    const current = record.settings?.customSymptoms || [];
+    const newSym = {
+      id: `custom_${Date.now()}`,
+      label: customInput.trim(),
+    };
+    setSettings({ customSymptoms: [...current, newSym] });
+    setCustomInput("");
+  };
+
+  const removeCustomSymptom = (id) => {
+    const current = record.settings?.customSymptoms || [];
+    setSettings({ customSymptoms: current.filter((s) => s.id !== id) });
+  };
+
+  const handleFile = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImportErr(null);
     try {
-      await fn();
-      setFailure("");
-    } catch {
-      setFailure(t("set.failed"));
+      const text = await file.text();
+      const parsed = parseImport(text);
+      const preview = importPreview(record, parsed);
+      setImportState({ parsed, preview });
+    } catch (err) {
+      setImportErr(err.message || "set.importCorrupt");
     }
   };
-  const setS = (patch) =>
-    act(() => update((r) => ({ ...r, settings: { ...r.settings, ...patch } })));
-  const realEmpty = Object.keys(record.days).length === 0;
+
+  const applyImport = async (strategy) => {
+    if (!importState) return;
+    try {
+      await importRecord(importState.parsed, strategy);
+      setImportState(null);
+    } catch (err) {
+      setImportErr(err.message || "set.importCorrupt");
+    }
+  };
+
+  const TABS = [
+    { id: "display", label: t("set.display"), icon: Palette },
+    { id: "cycle", label: t("set.health"), icon: Activity },
+    { id: "privacy", label: t("set.privacy"), icon: Shield },
+    { id: "data", label: t("set.data"), icon: Database },
+  ];
+
   return (
-    <div className="space-y-4">
-      <PageTitle>{t("set.title")}</PageTitle>
-      <Status msg={failure} tone="err" />
+    <div className="space-y-6">
+      <div className="border-b border-border/60 pb-3">
+        <span className="text-xs font-bold uppercase tracking-wider text-primary">
+          {prefs.discreet ? t("app.discreetName") : t("app.name")}
+        </span>
+        <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+          {t("set.title")}
+        </h1>
+      </div>
 
-      <Card className="space-y-3">
-        <h2 className="text-lg font-bold">{t("set.display")}</h2>
-        <fieldset>
-          <legend className="font-semibold">{t("set.language")}</legend>
-          <div className="mt-1 flex flex-wrap gap-2">
-            {LANGUAGES.map((l) => (
-              <Chip
-                key={l.code}
-                selected={prefs.lang === l.code}
-                onClick={() => setPrefs({ lang: l.code })}
-              >
-                {l.nativeName}
-              </Chip>
-            ))}
-          </div>
-        </fieldset>
-        <fieldset>
-          <legend className="font-semibold">{t("set.theme")}</legend>
-          <div className="mt-1 flex flex-wrap gap-2">
-            {["system", "light", "dark"].map((m) => (
-              <Chip
-                key={m}
-                selected={(prefs.theme || "system") === m}
-                onClick={() => setPrefs({ theme: m })}
-              >
-                {t(`theme.${m}`)}
-              </Chip>
-            ))}
-          </div>
-        </fieldset>
-        <fieldset>
-          <legend className="font-semibold">{t("set.textSize")}</legend>
-          <div className="mt-1 flex flex-wrap gap-2">
-            {["md", "lg", "xl"].map((v) => (
-              <Chip
-                key={v}
-                selected={prefs.textSize === v}
-                onClick={() => setPrefs({ textSize: v })}
-              >
-                {t(`ts.${v}`)}
-              </Chip>
-            ))}
-          </div>
-        </fieldset>
-        <Toggle
-          label={t("set.contrast")}
-          checked={prefs.contrast}
-          onChange={(v) => setPrefs({ contrast: v })}
-        />
-        <Toggle
-          label={t("set.readAloud")}
-          checked={prefs.readAloud}
-          onChange={(v) => setPrefs({ readAloud: v })}
-        />
-      </Card>
+      {/* Settings Navigation Tabs */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 rounded-2xl bg-muted/60 p-1.5 border border-border/60">
+        {TABS.map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => setActiveTab(id)}
+            className={cx(
+              "flex min-h-[44px] items-center justify-center gap-2 rounded-xl text-xs font-bold transition-all",
+              activeTab === id
+                ? "bg-card text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            <Icon className="h-4 w-4" />
+            <span>{label}</span>
+          </button>
+        ))}
+      </div>
 
-      <Card className="space-y-3">
-        <h2 className="text-lg font-bold">{t("set.health")}</h2>
-        <fieldset>
-          <legend className="font-semibold">{t("set.age")}</legend>
-          <div className="mt-1 flex flex-wrap gap-2">
-            {["under18", "adult"].map((v) => (
-              <Chip key={v} selected={s.ageGroup === v} onClick={() => setS({ ageGroup: v })}>
-                {t(`age.${v}`)}
-              </Chip>
-            ))}
-          </div>
-        </fieldset>
-        {s.ageGroup === "adult" ? (
-          <Toggle
-            label={t("set.fertility")}
-            checked={s.showFertility !== false}
-            onChange={(v) => setS({ showFertility: v })}
-          />
-        ) : (
-          <>
-            <Toggle
-              label={t("set.fertility")}
-              desc={t("set.fertilityDesc")}
-              checked={s.fertilityOptIn}
-              onChange={(v) => setS({ fertilityOptIn: v })}
-            />
-            <Toggle
-              label={t("set.pregOptIn")}
-              desc={t("set.fertilityDesc")}
-              checked={s.pregnancyOptIn}
-              onChange={(v) => setS({ pregnancyOptIn: v })}
-            />
-          </>
-        )}
-        {s.trackingPaused && !record.pregnancy.active && (
-          <div>
-            <p>{t("set.tracking")}</p>
-            <Btn variant="secondary" onClick={() => setS({ trackingPaused: false })}>
-              {t("set.resumeTracking")}
-            </Btn>
-          </div>
-        )}
-        <fieldset>
-          <legend className="font-semibold">{t("set.symptoms")}</legend>
-          <p className="text-sm text-muted-foreground">{t("set.symptomsDesc")}</p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {SYMPTOMS.filter((x) => !x.safety).map((x) => {
-              const on = s.trackedSymptoms.includes(x.id);
-              return (
-                <Chip
-                  key={x.id}
-                  icon={x.icon}
-                  selected={on}
-                  onClick={() =>
-                    setS({
-                      trackedSymptoms: on
-                        ? s.trackedSymptoms.filter((y) => y !== x.id)
-                        : [...s.trackedSymptoms, x.id],
-                    })
-                  }
-                >
-                  {t(`sym.${x.id}`)}
-                </Chip>
-              );
-            })}
-          </div>
-        </fieldset>
-
-        <div className="space-y-3 border-t border-border pt-4">
-          <h3 className="font-bold">{t("set.customSymptomsTitle")}</h3>
-          <p className="text-xs text-muted-foreground">{t("set.customSymptomsDesc")}</p>
-
-          {(s.customSymptoms || []).length > 0 && (
-            <div className="space-y-2">
-              {s.customSymptoms.map((cs) => (
-                <div
-                  key={cs.id}
-                  className="flex items-center justify-between rounded-xl border border-border p-2.5 text-sm"
-                >
-                  <span className="font-medium">{cs.label}</span>
-                  <Btn
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setS({
-                        customSymptoms: (s.customSymptoms || []).filter((c) => c.id !== cs.id),
-                      });
-                    }}
-                    aria-label={`${t("common.delete")} ${cs.label}`}
-                    className="text-destructive hover:bg-destructive/10"
+      {/* TAB 1: DISPLAY & LANGUAGE */}
+      {activeTab === "display" && (
+        <div className="space-y-6 animate-fade-in">
+          {/* Language Selector Grid with Native Scripts */}
+          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
+            <div className="flex items-center gap-2">
+              <Globe className="h-5 w-5 text-primary" />
+              <h2 className="font-bold text-sm sm:text-base text-foreground">
+                {t("set.language")}
+              </h2>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+              {LANGUAGES.map((l) => {
+                const isSelected = prefs.lang === l.code;
+                return (
+                  <button
+                    key={l.code}
+                    type="button"
+                    onClick={() => setPrefs({ lang: l.code })}
+                    className={cx(
+                      "flex flex-col items-start justify-center rounded-2xl p-3 text-left transition-all border",
+                      isSelected
+                        ? "border-primary bg-primary/10 text-primary font-bold shadow-xs ring-1 ring-primary/30"
+                        : "border-border/60 bg-muted/20 hover:bg-muted text-foreground",
+                    )}
                   >
-                    {t("common.delete")}
-                  </Btn>
-                </div>
+                    <span className="text-sm font-semibold">{l.nativeName}</span>
+                    <span className="text-[10px] text-muted-foreground capitalize mt-0.5">
+                      {l.name}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Theme, Text Size & Accessibility */}
+          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
+            <div className="flex items-center gap-2">
+              <Palette className="h-5 w-5 text-primary" />
+              <h2 className="font-bold text-sm sm:text-base text-foreground">{t("set.theme")}</h2>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {["system", "light", "dark"].map((themeKey) => (
+                <Chip
+                  key={themeKey}
+                  selected={(prefs.theme || "system") === themeKey}
+                  onClick={() => setPrefs({ theme: themeKey })}
+                  className="rounded-xl px-4 py-2 text-xs font-bold"
+                >
+                  {t(`theme.${themeKey}`)}
+                </Chip>
               ))}
             </div>
-          )}
 
-          <div className="flex gap-2">
-            <input
-              type="text"
-              maxLength={30}
-              placeholder={t("set.customSymptomPh")}
-              value={newCustomSym}
-              onChange={(e) => setNewCustomSym(e.target.value)}
-              className={inputCls}
+            <div className="pt-3 border-t border-border/50 space-y-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                {t("set.textSize")}
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {["sm", "md", "lg"].map((size) => (
+                  <Chip
+                    key={size}
+                    selected={(prefs.textSize || "md") === size}
+                    onClick={() => setPrefs({ textSize: size })}
+                    className="rounded-xl px-4 py-2 text-xs font-bold"
+                  >
+                    {t(`text.${size}`)}
+                  </Chip>
+                ))}
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-border/50 space-y-3">
+              <Toggle
+                label={t("set.contrast")}
+                checked={!!prefs.contrast}
+                onChange={(v) => setPrefs({ contrast: v })}
+              />
+              <Toggle
+                label={t("set.readAloud")}
+                checked={!!prefs.readAloud}
+                onChange={(v) => setPrefs({ readAloud: v })}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 2: CYCLE & HEALTH PREFERENCES */}
+      {activeTab === "cycle" && (
+        <div className="space-y-6 animate-fade-in">
+          {/* Age Group & Clinical Thresholds */}
+          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
+            <div>
+              <h2 className="font-bold text-sm sm:text-base text-foreground">{t("set.age")}</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">{t("set.ageHelp")}</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {["under18", "adult"].map((age) => (
+                <Chip
+                  key={age}
+                  selected={record.settings.ageGroup === age}
+                  onClick={() => setSettings({ ageGroup: age })}
+                  className="rounded-xl px-4 py-2 text-xs font-bold"
+                >
+                  {t(`age.${age}`)}
+                </Chip>
+              ))}
+            </div>
+
+            <div className="pt-3 border-t border-border/50 space-y-3">
+              <Toggle
+                label={t("set.fertility")}
+                desc={t("set.fertilityDesc")}
+                checked={record.settings.showFertility}
+                onChange={(v) => setSettings({ showFertility: v })}
+              />
+              <Toggle
+                label={t("set.pregnancyMode")}
+                desc={t("set.pregnancyDesc")}
+                checked={record.settings.showPregnancy}
+                onChange={(v) => setSettings({ showPregnancy: v })}
+              />
+            </div>
+          </div>
+
+          {/* Tracked Symptoms Selection */}
+          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
+            <div>
+              <h2 className="font-bold text-sm sm:text-base text-foreground">
+                {t("set.trackedSymptoms")}
+              </h2>
+              <p className="text-xs text-muted-foreground mt-0.5">{t("set.trackedDesc")}</p>
+            </div>
+
+            <div className="flex flex-wrap gap-1.5">
+              {SYMPTOMS.map((s) => (
+                <Chip
+                  key={s.id}
+                  icon={s.icon}
+                  selected={record.settings.trackedSymptoms.includes(s.id)}
+                  onClick={() => toggleSymptom(s.id)}
+                  className="rounded-xl"
+                >
+                  {t(`sym.${s.id}`)}
+                </Chip>
+              ))}
+            </div>
+
+            {/* Custom Symptoms Input */}
+            <div className="pt-4 border-t border-border/50 space-y-3">
+              <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                {t("set.customSymptoms")}
+              </span>
+              <form onSubmit={addCustomSymptom} className="flex gap-2">
+                <input
+                  type="text"
+                  maxLength={40}
+                  value={customInput}
+                  onChange={(e) => setCustomInput(e.target.value)}
+                  placeholder={t("set.customPh")}
+                  className={cx(inputCls, "h-11 rounded-2xl text-xs")}
+                />
+                <Btn type="submit" size="sm" className="rounded-2xl px-4">
+                  <Plus className="h-4 w-4 mr-1" />
+                  {t("common.add")}
+                </Btn>
+              </form>
+
+              {(record.settings?.customSymptoms || []).length > 0 && (
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {record.settings.customSymptoms.map((cs) => (
+                    <div
+                      key={cs.id}
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-1 text-xs font-semibold text-foreground"
+                    >
+                      <span>{cs.label}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeCustomSymptom(cs.id)}
+                        className="text-muted-foreground hover:text-destructive"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 3: PRIVACY & SECURITY */}
+      {activeTab === "privacy" && (
+        <div className="space-y-6 animate-fade-in">
+          {/* PIN Lock Management */}
+          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft">
+            <PinSection />
+          </div>
+
+          {/* Discreet Mode Configuration */}
+          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-3">
+            <Toggle
+              label={t("set.discreet")}
+              desc={t("set.discreetDesc")}
+              checked={prefs.discreet}
+              onChange={(v) => setPrefs({ discreet: v })}
             />
-            <Btn
-              type="button"
-              disabled={!newCustomSym.trim() || (s.customSymptoms || []).length >= 20}
-              onClick={() => {
-                const label = newCustomSym.trim();
-                if (!label) return;
-                const existing = s.customSymptoms || [];
-                if (existing.some((c) => c.label.toLowerCase() === label.toLowerCase())) return;
-                const id = `c_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
-                setS({
-                  customSymptoms: [...existing, { id, label }],
-                });
-                setNewCustomSym("");
-              }}
-            >
-              {t("set.addCustomSymptom")}
-            </Btn>
           </div>
-        </div>
-      </Card>
 
-      <Card className="space-y-3">
-        <h2 className="text-lg font-bold">{t("set.privacy")}</h2>
-        <h3 className="font-bold">{t("set.pin")}</h3>
-        <PinSection />
-        <Toggle
-          label={t("set.discreet")}
-          desc={t("set.discreetDesc")}
-          checked={prefs.discreet}
-          onChange={(v) => setPrefs({ discreet: v })}
-        />
-
-        {/* Shared Device Privacy Guide */}
-        <div className="space-y-2 border-t border-border pt-3">
-          <h3 className="font-bold">{t("set.sharedPhone")}</h3>
-          <p className="text-xs text-muted-foreground">{t("set.sharedPhoneDesc")}</p>
-
-          <div className="space-y-2 rounded-xl bg-muted/60 p-3 text-xs">
-            <div>
-              <p className="font-semibold text-foreground">{t("set.sharedWhatProtected")}</p>
-              <p className="text-muted-foreground">{t("set.sharedWhatProtectedDesc")}</p>
-            </div>
-            <div>
-              <p className="font-semibold text-foreground">{t("set.sharedLimitations")}</p>
-              <p className="text-muted-foreground">{t("set.sharedLimitationsDesc")}</p>
-            </div>
-            <div>
-              <p className="font-semibold text-foreground">{t("set.sharedTips")}</p>
-              <p className="text-muted-foreground">{t("set.sharedTipsDesc")}</p>
+          {/* Shared Phone Privacy Guide */}
+          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-3">
+            <h2 className="font-bold text-sm sm:text-base text-foreground">{t("guide.title")}</h2>
+            <p className="text-xs text-muted-foreground leading-relaxed">{t("guide.intro")}</p>
+            <div className="space-y-2 pt-2 border-t border-border/50 text-xs">
+              <div className="rounded-2xl bg-muted/40 p-3 space-y-1">
+                <span className="font-bold text-foreground">{t("guide.storage")}</span>
+                <p className="text-muted-foreground leading-relaxed">{t("guide.storageDesc")}</p>
+              </div>
+              <div className="rounded-2xl bg-muted/40 p-3 space-y-1">
+                <span className="font-bold text-foreground">{t("guide.clearing")}</span>
+                <p className="text-muted-foreground leading-relaxed">{t("guide.clearingDesc")}</p>
+              </div>
             </div>
           </div>
         </div>
-      </Card>
+      )}
 
-      <PwaSection />
-
-      <Card className="space-y-3">
-        <h2 className="text-lg font-bold">{t("set.data")}</h2>
-        <ExportBlock />
-        <ImportBlock />
-      </Card>
-
-      <Card className="space-y-2">
-        <h2 className="text-lg font-bold">{t("set.demo")}</h2>
-        {isDemo ? (
-          <>
-            <p>{t("set.demoActive")}</p>
-            <Btn onClick={() => act(exitDemo)}>{t("set.exitDemo")}</Btn>
-          </>
-        ) : realEmpty ? (
-          <Btn variant="outline" onClick={() => act(tryDemo)}>
-            {t("set.tryDemo")}
-          </Btn>
-        ) : (
-          <p className="text-sm">{t("set.tryDemoBlocked")}</p>
-        )}
-      </Card>
-
-      <Card className="space-y-2 border-destructive">
-        <h2 className="text-lg font-bold text-destructive">{t("set.delete")}</h2>
-        <p>{t("set.deleteWarn")}</p>
-        {!confirmDel ? (
-          <Btn variant="danger" onClick={() => setConfirmDel(true)}>
-            {t("set.delete")}
-          </Btn>
-        ) : (
-          <div role="alertdialog" aria-label={t("set.deleteWarn")} className="flex flex-wrap gap-2">
-            <Btn variant="danger" onClick={() => act(deleteAll)}>
-              {t("set.deleteConfirm")}
-            </Btn>
-            <Btn variant="outline" onClick={() => setConfirmDel(false)}>
-              {t("common.cancel")}
-            </Btn>
+      {/* TAB 4: DATA, BACKUP & DANGER ZONE */}
+      {activeTab === "data" && (
+        <div className="space-y-6 animate-fade-in">
+          {/* Export Records */}
+          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-3">
+            <div>
+              <h2 className="font-bold text-sm sm:text-base text-foreground">{t("set.export")}</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">{t("set.exportDesc")}</p>
+            </div>
+            <ExportBlock />
           </div>
-        )}
-      </Card>
-      <p className="text-sm text-muted-foreground">{t("common.disclaimer")}</p>
+
+          {/* Import Records */}
+          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-3">
+            <div>
+              <h2 className="font-bold text-sm sm:text-base text-foreground">{t("set.import")}</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">{t("set.importDesc")}</p>
+            </div>
+
+            <label className="flex min-h-[48px] cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-muted/30 px-4 text-xs font-bold text-primary hover:bg-muted transition-all">
+              <Upload className="h-4 w-4" />
+              <span>{t("set.chooseFile")}</span>
+              <input type="file" accept=".json" onChange={handleFile} className="sr-only" />
+            </label>
+
+            {importErr && (
+              <p
+                role="alert"
+                className="rounded-xl bg-destructive/10 p-2 text-xs font-semibold text-destructive"
+              >
+                {t(importErr)}
+              </p>
+            )}
+
+            {importState && (
+              <div className="space-y-3 rounded-2xl border border-border/70 bg-muted/40 p-4 text-xs animate-fade-in">
+                <p className="font-bold text-foreground">{t("set.importPreview")}</p>
+                <div className="grid grid-cols-2 gap-2 text-muted-foreground">
+                  <div>
+                    <span>{t("set.previewDays")}: </span>
+                    <strong className="text-foreground">{importState.preview.incomingDays}</strong>
+                  </div>
+                  <div>
+                    <span>{t("set.previewConflicts")}: </span>
+                    <strong className="text-foreground">{importState.preview.conflicts}</strong>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2 pt-2 border-t border-border/50">
+                  <Btn size="sm" onClick={() => applyImport("merge")}>
+                    {t("set.importMerge")}
+                  </Btn>
+                  <Btn size="sm" variant="outline" onClick={() => applyImport("replace")}>
+                    {t("set.importReplace")}
+                  </Btn>
+                  <Btn size="sm" variant="ghost" onClick={() => setImportState(null)}>
+                    {t("common.cancel")}
+                  </Btn>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Demo Controls */}
+          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-3">
+            <h2 className="font-bold text-sm sm:text-base text-foreground">
+              {isDemo ? t("set.demoActive") : t("set.tryDemo")}
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              {isDemo ? t("set.demoActiveDesc") : t("set.tryDemoDesc")}
+            </p>
+            <div className="pt-1">
+              {isDemo ? (
+                <Btn variant="outline" className="rounded-2xl text-xs font-bold" onClick={exitDemo}>
+                  {t("set.exitDemo")}
+                </Btn>
+              ) : (
+                <Btn
+                  variant="outline"
+                  className="rounded-2xl text-xs font-bold"
+                  disabled={Object.keys(record.days).length > 0}
+                  onClick={tryDemo}
+                >
+                  <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+                  {t("set.startDemo")}
+                </Btn>
+              )}
+            </div>
+          </div>
+
+          {/* Danger Zone: Wipe All Data */}
+          <div className="rounded-3xl border border-destructive/30 bg-destructive/5 p-5 space-y-3">
+            <div>
+              <h2 className="font-bold text-sm text-destructive">{t("set.wipe")}</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">{t("set.wipeDesc")}</p>
+            </div>
+            {!confirmWipe ? (
+              <Btn
+                variant="outline"
+                className="rounded-2xl border-destructive/40 text-destructive hover:bg-destructive/10 text-xs font-bold"
+                onClick={() => setConfirmWipe(true)}
+              >
+                <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                {t("set.wipeBtn")}
+              </Btn>
+            ) : (
+              <div className="space-y-2 rounded-2xl bg-destructive/10 p-3 text-xs animate-fade-in">
+                <p className="font-bold text-destructive">{t("set.wipeConfirm")}</p>
+                <div className="flex gap-2 pt-1">
+                  <Btn
+                    size="sm"
+                    className="bg-destructive hover:bg-destructive/90 text-white"
+                    onClick={wipeAllData}
+                  >
+                    {t("set.wipeYes")}
+                  </Btn>
+                  <Btn size="sm" variant="ghost" onClick={() => setConfirmWipe(false)}>
+                    {t("common.cancel")}
+                  </Btn>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -26,11 +26,11 @@ export function RhythmRing({ analysis, record, onOpenLogger, className }) {
   const inspectedDate = lastStart ? addDays(lastStart, selectedDayNum - 1) : today;
   const isInspectingToday = selectedDayNum === currentCycleDay;
 
-  // Center & Dimensions for SVG
-  const size = 300;
+  // Center & Dimensions for SVG (responsive 340px canvas)
+  const size = 340;
   const center = size / 2;
-  const strokeWidth = 18;
-  const radius = center - strokeWidth - 10; // ~122px
+  const strokeWidth = 20;
+  const radius = center - strokeWidth - 14; // ~136px
   const circumference = 2 * Math.PI * radius;
 
   // Determine period duration from records or default
@@ -71,14 +71,9 @@ export function RhythmRing({ analysis, record, onOpenLogger, className }) {
       aria-label="Interactive cycle rhythm ring"
       className={cx("relative mx-auto flex flex-col items-center justify-center p-2", className)}
     >
-      <div className="relative flex items-center justify-center">
+      <div className="relative flex items-center justify-center w-full max-w-[340px] aspect-square">
         {/* SVG Ring Canvas */}
-        <svg
-          viewBox={`0 0 ${size} ${size}`}
-          width={size}
-          height={size}
-          className="select-none overflow-visible"
-        >
+        <svg viewBox={`0 0 ${size} ${size}`} className="w-full h-full select-none overflow-visible">
           <defs>
             {/* Striped Hatching Pattern for Uncertainty Interval */}
             <pattern
@@ -104,12 +99,22 @@ export function RhythmRing({ analysis, record, onOpenLogger, className }) {
               <feDropShadow
                 dx="0"
                 dy="0"
-                stdDeviation="4"
+                stdDeviation="5"
                 floodColor="var(--period)"
                 floodOpacity="0.8"
               />
             </filter>
+
+            {/* Ambient Aura Gradient inside the circle */}
+            <radialGradient id="ringAura" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.12" />
+              <stop offset="70%" stopColor="var(--period)" stopOpacity="0.04" />
+              <stop offset="100%" stopColor="transparent" stopOpacity="0" />
+            </radialGradient>
           </defs>
+
+          {/* Internal ambient aura */}
+          <circle cx={center} cy={center} r={radius - strokeWidth / 2} fill="url(#ringAura)" />
 
           {/* Background Track Ring */}
           <circle
@@ -119,7 +124,7 @@ export function RhythmRing({ analysis, record, onOpenLogger, className }) {
             fill="none"
             stroke="var(--card)"
             strokeWidth={strokeWidth}
-            className="stroke-border/50"
+            className="stroke-border/45"
           />
 
           {/* Normal Mode / Full Cycles */}
@@ -137,7 +142,7 @@ export function RhythmRing({ analysis, record, onOpenLogger, className }) {
                 strokeDashoffset="0"
                 strokeLinecap="round"
                 transform={`rotate(-90 ${center} ${center})`}
-                className="opacity-90 transition-all duration-500"
+                className="opacity-95 transition-all duration-500"
               />
 
               {/* 2. Predicted Next Period Arc (Uncertainty Hatched Pattern) */}
@@ -170,7 +175,7 @@ export function RhythmRing({ analysis, record, onOpenLogger, className }) {
               strokeDashoffset="0"
               strokeLinecap="round"
               transform={`rotate(-90 ${center} ${center})`}
-              className="opacity-75 transition-all duration-500"
+              className="opacity-80 transition-all duration-500"
             />
           )}
 
@@ -206,7 +211,7 @@ export function RhythmRing({ analysis, record, onOpenLogger, className }) {
                     r={strokeWidth / 2 + 5}
                     fill="none"
                     stroke="var(--ring)"
-                    strokeWidth="3"
+                    strokeWidth="3.5"
                     className="animate-pulse"
                   />
                 )}
@@ -215,7 +220,7 @@ export function RhythmRing({ analysis, record, onOpenLogger, className }) {
                 <circle
                   cx={pos.x}
                   cy={pos.y}
-                  r={isToday ? 6 : isPeriod ? 4 : 2.5}
+                  r={isToday ? 6.5 : isPeriod ? 4.5 : 3}
                   fill={
                     isToday
                       ? "var(--period)"
@@ -234,19 +239,19 @@ export function RhythmRing({ analysis, record, onOpenLogger, className }) {
 
         {/* Central Rhythm Hub */}
         <div
-          className="absolute flex flex-col items-center justify-center rounded-full bg-card/95 p-5 text-center shadow-soft backdrop-blur-md transition-all border border-border/60"
+          className="absolute flex flex-col items-center justify-center rounded-full bg-card/95 p-6 text-center shadow-soft backdrop-blur-md transition-all border border-border/70"
           style={{
             width: `${(radius - strokeWidth) * 2}px`,
             height: `${(radius - strokeWidth) * 2}px`,
           }}
         >
           {isInsufficient ? (
-            <div className="space-y-1">
-              <Sparkles className="mx-auto h-6 w-6 text-primary" />
-              <p className="font-display text-lg font-bold text-foreground">
+            <div className="space-y-1.5">
+              <Sparkles className="mx-auto h-7 w-7 text-primary animate-pulse" />
+              <p className="font-display text-xl font-extrabold text-foreground tracking-tight">
                 {t("today.progressTitle")}
               </p>
-              <p className="text-[11px] leading-tight text-muted-foreground px-2">
+              <p className="text-xs leading-snug text-muted-foreground px-2">
                 {t("today.insufficientCount", { n: analysis?.cycles?.length || 0 })}
               </p>
             </div>
@@ -258,11 +263,11 @@ export function RhythmRing({ analysis, record, onOpenLogger, className }) {
                   : fmt(inspectedDate, { weekday: "short", day: "numeric", month: "short" })}
               </span>
 
-              <h2 className="font-display text-3xl font-extrabold tracking-tight text-foreground">
+              <h2 className="font-display text-3xl sm:text-4xl font-black tracking-tight text-foreground">
                 {t("today.cycleDay", { n: selectedDayNum })}
               </h2>
 
-              <p className="text-xs font-medium text-muted-foreground px-2">
+              <p className="text-xs font-semibold text-muted-foreground px-2">
                 {hasLoggedPeriod
                   ? `🩸 ${t("cal.periodDay")}`
                   : isEstimatedRange
@@ -275,7 +280,7 @@ export function RhythmRing({ analysis, record, onOpenLogger, className }) {
                 <button
                   type="button"
                   onClick={() => setSelectedDayNum(currentCycleDay)}
-                  className="mt-1 inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-0.5 text-[10px] font-semibold text-primary hover:bg-muted/80"
+                  className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-muted/80 px-3 py-0.5 text-[11px] font-bold text-primary hover:bg-muted transition-all active:scale-95"
                 >
                   <RotateCcw className="h-3 w-3" />
                   <span>{t("today.title")}</span>
@@ -287,13 +292,13 @@ export function RhythmRing({ analysis, record, onOpenLogger, className }) {
       </div>
 
       {/* Primary Contextual Action Beneath the Ring */}
-      <div className="mt-4 flex w-full max-w-xs flex-col items-center gap-2">
+      <div className="mt-5 flex w-full max-w-xs flex-col items-center gap-2.5">
         <button
           type="button"
           onClick={() => (onOpenLogger ? onOpenLogger(inspectedDate) : null)}
-          className="group flex min-h-[50px] w-full items-center justify-center gap-2 rounded-2xl bg-primary px-5 font-bold text-primary-foreground shadow-md transition-all hover:opacity-95 active:scale-98"
+          className="group flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary to-period px-6 font-extrabold text-sm text-primary-foreground shadow-md transition-all hover:opacity-95 active:scale-98"
         >
-          <Droplet className="h-5 w-5 transition-transform group-hover:scale-110" />
+          <Droplet className="h-4 w-4 fill-current transition-transform group-hover:scale-110" />
           <span>
             {isInspectingToday
               ? t("today.logToday")
@@ -303,7 +308,7 @@ export function RhythmRing({ analysis, record, onOpenLogger, className }) {
 
         {/* Uncertainty-Aware Prediction Strip if exists */}
         {hasPrediction && (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
             <span className="h-2 w-2 rounded-full bg-period/70" />
             <span>
               {t("today.next")}:{" "}

@@ -1,8 +1,18 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Siren } from "lucide-react";
+import {
+  Siren,
+  Baby,
+  Calendar,
+  AlertTriangle,
+  Phone,
+  ShieldCheck,
+  Stethoscope,
+  Heart,
+  CheckCircle2,
+} from "lucide-react";
 import { useApp } from "@/App.jsx";
-import { Btn, Card, PageTitle, Sources, inputCls, Status } from "@/components/common/ui.jsx";
+import { Btn, PageTitle, Sources, inputCls, Status } from "@/components/common/ui.jsx";
 import { PREGNANCY_WEEKS, CHECKUP_WEEKS, PREGNANCY_WARNINGS } from "@/content/pregnancyWeeks.js";
 import { addDays, diffDays, isValidDate } from "@/lib/localDate.js";
 import { CONFIG, EMERGENCY } from "@/config.js";
@@ -17,14 +27,17 @@ export default function Pregnancy() {
 
   if (!pregnancyVisible)
     return (
-      <div>
+      <div className="space-y-4 max-w-xl mx-auto py-8">
         <PageTitle>{t("preg.title")}</PageTitle>
-        <Card>
-          <p>{t("preg.hiddenUnder18")}</p>
-          <Link to="/settings" className="mt-2 inline-block font-semibold underline">
+        <div className="rounded-3xl border border-border/70 bg-card p-6 shadow-soft space-y-3">
+          <p className="text-sm text-muted-foreground">{t("preg.hiddenUnder18")}</p>
+          <Link
+            to="/settings"
+            className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-primary px-4 text-xs font-bold text-primary-foreground"
+          >
             {t("nav.settings")}
           </Link>
-        </Card>
+        </div>
       </div>
     );
 
@@ -37,31 +50,54 @@ export default function Pregnancy() {
 
   if (!preg.active)
     return (
-      <div className="space-y-4">
-        <PageTitle sub={t("preg.intro")}>{t("preg.title")}</PageTitle>
-        <Card className="space-y-3">
-          <label className="flex min-h-12 items-start gap-3">
+      <div className="space-y-6 max-w-xl mx-auto py-4">
+        <div className="border-b border-border/60 pb-3">
+          <span className="text-xs font-bold uppercase tracking-wider text-primary">
+            Maternity Care
+          </span>
+          <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+            {t("preg.title")}
+          </h1>
+          <p className="text-sm text-muted-foreground mt-0.5">{t("preg.intro")}</p>
+        </div>
+
+        <div className="rounded-3xl border border-border/70 bg-card p-6 shadow-soft space-y-4">
+          <div className="flex items-center gap-2 text-primary font-bold text-sm">
+            <Baby className="h-5 w-5" />
+            <span>Enable Pregnancy Mode</span>
+          </div>
+
+          <label className="flex min-h-12 items-start gap-3 cursor-pointer">
             <input
               type="checkbox"
-              className="mt-1 h-6 w-6 accent-primary"
+              className="mt-1 h-5 w-5 rounded border-border accent-primary shrink-0"
               checked={confirm}
               onChange={(e) => setConfirm(e.target.checked)}
             />
-            <span>{t("preg.confirm")}</span>
+            <span className="text-xs text-foreground leading-relaxed">{t("preg.confirm")}</span>
           </label>
-          <label className="block font-semibold">
-            {t("preg.lmp")}
+
+          <div className="space-y-1">
+            <label
+              htmlFor="preg-lmp-date"
+              className="block font-bold text-xs uppercase tracking-wider text-muted-foreground"
+            >
+              {t("preg.lmp")}
+            </label>
             <input
+              id="preg-lmp-date"
               type="date"
               max={today}
               className={inputCls}
               value={lmp}
               onChange={(e) => setLmp(e.target.value)}
             />
-          </label>
+          </div>
+
           <Status msg={err} tone="err" />
+
           <Btn
-            className="w-full"
+            className="w-full min-h-12 text-sm font-bold"
             disabled={!confirm}
             onClick={() => {
               if (!isValidDate(lmp) || lmp > today || diffDays(lmp, today) > 42 * 7)
@@ -75,20 +111,21 @@ export default function Pregnancy() {
           >
             {t("preg.start")}
           </Btn>
-        </Card>
+        </div>
+
         {record.settings.trackingPaused && (
-          <Card>
-            <p>{t("set.tracking")}</p>
+          <div className="rounded-3xl border border-border/70 bg-hero p-5 shadow-soft space-y-2">
+            <p className="text-xs text-muted-foreground">{t("set.tracking")}</p>
             <Btn
               variant="secondary"
-              className="mt-2"
+              className="w-full text-xs font-bold min-h-11"
               onClick={() =>
                 update((r) => ({ ...r, settings: { ...r.settings, trackingPaused: false } }))
               }
             >
               {t("set.resumeTracking")}
             </Btn>
-          </Card>
+          </div>
         )}
       </div>
     );
@@ -99,88 +136,164 @@ export default function Pregnancy() {
   const stage =
     PREGNANCY_WEEKS.find((s) => w >= s.from && w <= s.to) ||
     PREGNANCY_WEEKS[PREGNANCY_WEEKS.length - 1];
+
   return (
-    <div className="space-y-4">
-      <PageTitle>{t("preg.title")}</PageTitle>
-      <Card className="bg-hero">
-        <p className="font-display text-3xl font-bold text-primary">{t("preg.week", { w, d })}</p>
-        <p className="mt-1 text-lg font-semibold">
-          {t("preg.due", {
-            date: fmt(addDays(preg.lmp, CONFIG.gestationDays), {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            }),
-          })}
-        </p>
-        <p className="text-sm text-muted-foreground">{t("preg.dueNote")}</p>
-      </Card>
-      <section className="urgent-pattern rounded-2xl border-4 border-urgent bg-urgent-soft p-4">
-        <h2 className="flex items-center gap-2 text-lg font-extrabold text-urgent">
-          <Siren aria-hidden className="h-6 w-6" /> {t("preg.warnings")}
-        </h2>
-        <ul className="ml-5 mt-1 list-disc">
-          {PREGNANCY_WARNINGS.map((x) => (
-            <li key={x.id}>{t(`preg.warn.${x.id}`)}</li>
-          ))}
-        </ul>
-        <div className="mt-2 flex flex-wrap gap-2">
-          <a
-            href={`tel:${EMERGENCY.national}`}
-            className="inline-flex min-h-12 items-center rounded-xl bg-urgent px-4 font-bold text-urgent-foreground"
-          >
-            {t("doc.call112")}
-          </a>
-          <a
-            href={`tel:${EMERGENCY.ambulance}`}
-            className="inline-flex min-h-12 items-center rounded-xl bg-urgent px-4 font-bold text-urgent-foreground"
-          >
-            {t("doc.call108")}
-          </a>
-        </div>
-        <Sources ids={PREGNANCY_WARNINGS.map((x) => x.src)} />
-      </section>
-      <Card>
-        <h2 className="text-lg font-bold">{t("preg.thisWeek")}</h2>
-        <p className="mt-1">{L(stage)}</p>
-        <Sources ids={[stage.src]} />
-      </Card>
-      <Card>
-        <h2 className="text-lg font-bold">{t("preg.checkups")}</h2>
-        <p>{t("preg.checkupText")}</p>
-        <ul className="mt-2 grid grid-cols-2 gap-2">
-          {CHECKUP_WEEKS.map((cw) => (
-            <li
-              key={cw}
-              className={`rounded-lg border-2 p-2 ${cw >= w && cw - w <= 4 ? "border-primary font-bold" : "border-border"}`}
-            >
-              {t("preg.checkupItem", { w: cw })} · {fmt(addDays(preg.lmp, cw * 7))}
-              {cw >= w && cw - w <= 4 ? " ←" : ""}
-            </li>
-          ))}
-        </ul>
-        <p className="mt-2">{t("preg.pmsma")}</p>
-        <Sources ids={["who_anc", "mohfw_pmsma"]} />
-      </Card>
-      <p className="text-sm text-muted-foreground">{t("preg.notDiag")}</p>
-      {!askOff ? (
-        <Btn variant="outline" className="w-full" onClick={() => setAskOff(true)}>
-          {t("preg.off")}
-        </Btn>
-      ) : (
-        <Card role="dialog" aria-label={t("preg.offQ")}>
-          <p className="font-semibold">{t("preg.offQ")}</p>
-          <div className="mt-2 grid gap-2">
-            <Btn onClick={() => turnOff(true)}>{t("preg.offYes")}</Btn>
-            <Btn variant="outline" onClick={() => turnOff(false)}>
-              {t("preg.offNo")}
-            </Btn>
-            <Btn variant="ghost" onClick={() => setAskOff(false)}>
-              {t("common.cancel")}
-            </Btn>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="border-b border-border/60 pb-3">
+        <span className="text-xs font-bold uppercase tracking-wider text-primary">
+          Maternity Tracking
+        </span>
+        <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+          {t("preg.title")}
+        </h1>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left Column: Progress, Estimated Due Date, Milestones */}
+        <div className="lg:col-span-6 space-y-4">
+          {/* Week Counter Hero */}
+          <div className="rounded-3xl border-2 border-primary/20 bg-hero p-6 shadow-soft space-y-3">
+            <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-wider">
+              <Baby className="h-4 w-4" />
+              <span>Current Gestational Age</span>
+            </div>
+            <p className="font-display text-3xl sm:text-4xl font-extrabold text-foreground">
+              {t("preg.week", { w, d })}
+            </p>
+            <div className="pt-2 border-t border-border/60 space-y-0.5">
+              <p className="text-sm font-bold text-foreground">
+                {t("preg.due", {
+                  date: fmt(addDays(preg.lmp, CONFIG.gestationDays), {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  }),
+                })}
+              </p>
+              <p className="text-xs text-muted-foreground">{t("preg.dueNote")}</p>
+            </div>
           </div>
-        </Card>
-      )}
+
+          {/* This Week's Development Stage */}
+          <div className="rounded-3xl border border-border/70 bg-card p-6 shadow-soft space-y-3">
+            <h2 className="font-display font-bold text-lg text-foreground">{t("preg.thisWeek")}</h2>
+            <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-line">
+              {L(stage)}
+            </p>
+            <div className="pt-2 border-t border-border/50">
+              <Sources ids={[stage.src]} />
+            </div>
+          </div>
+
+          {/* Exit / Turn off pregnancy mode */}
+          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft">
+            {!askOff ? (
+              <Btn
+                variant="outline"
+                className="w-full text-xs font-semibold min-h-11"
+                onClick={() => setAskOff(true)}
+              >
+                {t("preg.off")}
+              </Btn>
+            ) : (
+              <div role="dialog" aria-label={t("preg.offQ")} className="space-y-3">
+                <p className="font-bold text-sm text-foreground">{t("preg.offQ")}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <Btn onClick={() => turnOff(true)} className="text-xs min-h-11">
+                    {t("preg.offYes")}
+                  </Btn>
+                  <Btn
+                    variant="outline"
+                    onClick={() => turnOff(false)}
+                    className="text-xs min-h-11"
+                  >
+                    {t("preg.offNo")}
+                  </Btn>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setAskOff(false)}
+                  className="w-full text-xs font-semibold text-muted-foreground hover:text-foreground py-1 text-center"
+                >
+                  {t("common.cancel")}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right Column: Red Flag Warnings & Checkup Schedule */}
+        <div className="lg:col-span-6 space-y-4">
+          {/* Urgent Warning Signs in Pregnancy */}
+          <div className="rounded-3xl border-2 border-urgent/60 bg-urgent-soft/40 p-6 shadow-soft space-y-4">
+            <div className="flex items-center gap-2 text-urgent font-bold text-lg">
+              <Siren aria-hidden className="h-6 w-6" />
+              <h2>{t("preg.warnings")}</h2>
+            </div>
+            <ul className="space-y-1.5 text-xs text-foreground">
+              {PREGNANCY_WARNINGS.map((x) => (
+                <li key={x.id} className="flex items-start gap-2">
+                  <span className="text-urgent font-bold">•</span>
+                  <span>{t(`preg.warn.${x.id}`)}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="flex flex-wrap gap-2 pt-1">
+              <a
+                href={`tel:${EMERGENCY.national}`}
+                className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-urgent px-5 font-bold text-urgent-foreground shadow-sm hover:opacity-95"
+              >
+                <Phone className="h-4 w-4" /> {t("doc.call112")}
+              </a>
+              <a
+                href={`tel:${EMERGENCY.ambulance}`}
+                className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-urgent px-5 font-bold text-urgent-foreground shadow-sm hover:opacity-95"
+              >
+                <Phone className="h-4 w-4" /> {t("doc.call108")}
+              </a>
+            </div>
+            <Sources ids={PREGNANCY_WARNINGS.map((x) => x.src)} />
+          </div>
+
+          {/* Recommended Antenatal Checkups (WHO & PMSMA India) */}
+          <div className="rounded-3xl border border-border/70 bg-card p-6 shadow-soft space-y-3">
+            <h2 className="font-display font-bold text-base text-foreground">
+              {t("preg.checkups")}
+            </h2>
+            <p className="text-xs text-muted-foreground">{t("preg.checkupText")}</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+              {CHECKUP_WEEKS.map((cw) => {
+                const isCurrent = cw >= w && cw - w <= 4;
+                return (
+                  <div
+                    key={cw}
+                    className={`rounded-2xl p-3 text-xs border transition-all ${
+                      isCurrent
+                        ? "border-primary bg-primary/5 font-bold text-primary shadow-xs"
+                        : "border-border/60 bg-muted/30 text-foreground"
+                    }`}
+                  >
+                    <p className="font-bold">
+                      {t("preg.checkupItem", { w: cw })}
+                      {isCurrent && " · Next"}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                      {fmt(addDays(preg.lmp, cw * 7))}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+            <p className="text-xs text-muted-foreground pt-2 border-t border-border/50">
+              {t("preg.pmsma")}
+            </p>
+            <Sources ids={["who_anc", "mohfw_pmsma"]} />
+          </div>
+
+          <p className="text-xs text-muted-foreground leading-relaxed px-1">{t("preg.notDiag")}</p>
+        </div>
+      </div>
     </div>
   );
 }

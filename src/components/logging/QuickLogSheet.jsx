@@ -20,10 +20,10 @@ const COMMON_SYMPTOMS = [
   "cramps",
   "headache",
   "bloating",
-  "fatigue",
-  "backache",
+  "tiredness",
+  "back_pain",
   "acne",
-  "tenderBreasts",
+  "breast_tenderness",
   "nausea",
 ];
 

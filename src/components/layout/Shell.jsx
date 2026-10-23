@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
 import {
   Home,
@@ -13,6 +13,16 @@ import {
   Plus,
   Droplet,
   Sparkles,
+  BarChart3,
+  Users,
+  MessageCircle,
+  Settings,
+  Shield,
+  Eye,
+  EyeOff,
+  Lock,
+  ChevronRight,
+  Stethoscope,
 } from "lucide-react";
 import { useApp } from "@/App.jsx";
 import { Btn, Card, speak, cx, inputCls } from "@/components/common/ui.jsx";
@@ -24,14 +34,20 @@ import { SaheliLogo, AmbientGlow } from "@/components/brand/SaheliLogo.jsx";
 import { QuickLogSheet } from "@/components/logging/QuickLogSheet.jsx";
 
 let failCount = 0;
+
 function LockScreen() {
-  const { t, unlock, prefs } = useApp();
+  const { t, unlock, prefs, setPrefs } = useApp();
   const [pin, setPin] = useState("");
   const [err, setErr] = useState(null);
   const [busy, setBusy] = useState(false);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
 
   async function submit(e) {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (!isValidPin(pin)) return setErr({ key: "set.pinInvalid" });
     setBusy(true);
     setErr("");
@@ -49,51 +65,199 @@ function LockScreen() {
     setBusy(false);
   }
 
+  const handleDigit = (digit) => {
+    if (pin.length < 4) {
+      const nextPin = pin + digit;
+      setPin(nextPin);
+      if (nextPin.length === 4) {
+        setTimeout(() => {
+          submitPin(nextPin);
+        }, 150);
+      }
+    }
+  };
+
+  const handleBackspace = () => {
+    setPin((prev) => prev.slice(0, -1));
+  };
+
+  const submitPin = async (submittedPin) => {
+    if (!isValidPin(submittedPin)) return setErr({ key: "set.pinInvalid" });
+    setBusy(true);
+    setErr("");
+    try {
+      await unlock(submittedPin);
+      failCount = 0;
+    } catch {
+      failCount++;
+      setPin("");
+      if (failCount >= CONFIG.maxPinAttemptsBeforeDelay) {
+        setErr({ key: "lock.wait", vars: { s: CONFIG.pinDelayMs / 1000 } });
+        await new Promise((r) => setTimeout(r, CONFIG.pinDelayMs));
+      } else setErr({ key: "lock.wrong" });
+    }
+    setBusy(false);
+  };
+
   return (
-    <main id="main" className="mx-auto max-w-sm space-y-4 px-4 py-12 text-center">
-      <SaheliLogo discreet={prefs.discreet} size={48} className="mx-auto" />
-      <h1 className="font-display text-2xl font-bold">
-        {prefs.discreet ? t("app.discreetName") : t("lock.title")}
-      </h1>
-      <p>{t("lock.prompt")}</p>
-      <form onSubmit={submit} className="space-y-3">
-        <label htmlFor="pin" className="sr-only">
-          {t("lock.pin")}
-        </label>
-        <input
-          id="pin"
-          inputMode="numeric"
-          autoComplete="off"
-          maxLength={4}
-          pattern="\d{4}"
-          type="password"
-          value={pin}
-          onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
-          className={cx(inputCls, "text-center text-2xl tracking-[0.5em]")}
-          placeholder="••••"
-        />
-        <Btn type="submit" className="w-full" disabled={busy}>
-          {busy ? t("set.working") : t("lock.unlock")}
-        </Btn>
-      </form>
-      {err && (
-        <p role="alert" className="rounded-xl bg-destructive/10 p-2 text-destructive">
-          {t(err.key, err.vars)}
-        </p>
-      )}
-      <p className="text-sm text-muted-foreground">{t("lock.forgot")}</p>
-    </main>
+    <div className="relative min-h-screen flex items-center justify-center p-4 selection:bg-primary/20">
+      <AmbientGlow />
+
+      <main
+        id="main"
+        className="relative w-full max-w-md overflow-hidden rounded-3xl border border-border/70 bg-card/90 p-8 shadow-2xl backdrop-blur-xl animate-fade-in"
+      >
+        {/* Language selector in top right of lock screen */}
+        <div className="flex justify-end mb-4">
+          <label htmlFor="lock-lang-select" className="sr-only">
+            {t("nav.langToggleLabel")}
+          </label>
+          <select
+            id="lock-lang-select"
+            value={prefs.lang}
+            onChange={(e) => setPrefs({ lang: e.target.value })}
+            className="rounded-xl border border-border/80 bg-background/80 px-2.5 py-1 text-xs font-semibold text-foreground hover:bg-muted cursor-pointer"
+          >
+            {LANGUAGES.map((l) => (
+              <option key={l.code} value={l.code}>
+                {l.nativeName}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Brand Header */}
+        <div className="text-center space-y-3">
+          <div className="inline-flex p-3 rounded-2xl bg-primary/10 ring-1 ring-primary/20">
+            <SaheliLogo discreet={prefs.discreet} size={52} animated />
+          </div>
+
+          <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+            {prefs.discreet ? t("app.discreetName") : t("lock.title")}
+          </h1>
+
+          <p className="text-xs sm:text-sm text-muted-foreground max-w-xs mx-auto leading-relaxed">
+            {t("lock.prompt")}
+          </p>
+        </div>
+
+        {/* Tactile 4-Digit Display Indicator */}
+        <div
+          className="my-6 flex justify-center gap-3 cursor-pointer"
+          onClick={() => inputRef.current?.focus()}
+        >
+          {[0, 1, 2, 3].map((i) => {
+            const hasDigit = pin.length > i;
+            return (
+              <div
+                key={i}
+                className={cx(
+                  "flex h-14 w-12 sm:w-14 items-center justify-center rounded-2xl border-2 text-2xl font-bold transition-all",
+                  hasDigit
+                    ? "border-primary bg-primary/15 text-primary shadow-sm scale-105"
+                    : pin.length === i
+                      ? "border-primary/50 bg-background/60 animate-pulse"
+                      : "border-border/60 bg-muted/30 text-muted-foreground",
+                )}
+              >
+                {hasDigit ? "•" : ""}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Hidden Accessible Input for physical keyboards */}
+        <form onSubmit={submit} className="sr-only">
+          <label htmlFor="pin-input">{t("lock.pin")}</label>
+          <input
+            id="pin-input"
+            ref={inputRef}
+            inputMode="numeric"
+            autoComplete="off"
+            maxLength={4}
+            pattern="\d{4}"
+            type="password"
+            value={pin}
+            onChange={(e) => {
+              const val = e.target.value.replace(/\D/g, "").slice(0, 4);
+              setPin(val);
+              if (val.length === 4) submitPin(val);
+            }}
+          />
+        </form>
+
+        {/* On-Screen Tactile Keypad */}
+        <div className="grid grid-cols-3 gap-2.5 max-w-xs mx-auto">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((digit) => (
+            <button
+              key={digit}
+              type="button"
+              disabled={busy}
+              onClick={() => handleDigit(String(digit))}
+              className="flex h-12 sm:h-13 items-center justify-center rounded-2xl border border-border/70 bg-card hover:bg-muted/70 active:scale-95 text-lg font-bold text-foreground transition-all shadow-xs"
+            >
+              {digit}
+            </button>
+          ))}
+          <button
+            type="button"
+            disabled={busy || pin.length === 0}
+            onClick={() => setPin("")}
+            className="flex h-12 sm:h-13 items-center justify-center rounded-2xl text-xs font-bold text-muted-foreground hover:bg-muted/50 active:scale-95 transition-all"
+          >
+            {t("common.cancel")}
+          </button>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => handleDigit("0")}
+            className="flex h-12 sm:h-13 items-center justify-center rounded-2xl border border-border/70 bg-card hover:bg-muted/70 active:scale-95 text-lg font-bold text-foreground transition-all shadow-xs"
+          >
+            0
+          </button>
+          <button
+            type="button"
+            disabled={busy || pin.length === 0}
+            onClick={handleBackspace}
+            aria-label="Backspace"
+            className="flex h-12 sm:h-13 items-center justify-center rounded-2xl border border-border/70 bg-muted/40 hover:bg-muted active:scale-95 text-sm font-bold text-foreground transition-all"
+          >
+            ⌫
+          </button>
+        </div>
+
+        {err && (
+          <div
+            role="alert"
+            className="mt-4 rounded-2xl bg-destructive/10 p-3 text-center text-xs font-semibold text-destructive animate-fade-in"
+          >
+            {t(err.key || err, err.vars)}
+          </div>
+        )}
+
+        {/* Recovery Reassurance */}
+        <div className="mt-6 pt-4 border-t border-border/50 text-center space-y-1 text-xs text-muted-foreground">
+          <div className="flex items-center justify-center gap-1.5 text-foreground/80 font-semibold">
+            <Shield className="h-3.5 w-3.5 text-primary" />
+            <span>{t("onb.privacyExplainTitle")}</span>
+          </div>
+          <p className="text-[11px] leading-relaxed max-w-xs mx-auto">{t("lock.forgot")}</p>
+        </div>
+      </main>
+    </div>
   );
 }
 
 const DESKTOP_NAV = [
-  { to: "/", key: "nav.today" },
-  { to: "/calendar", key: "nav.calendar" },
-  { to: "/learn", key: "nav.learn" },
-  { to: "/insights", key: "nav.insights" },
-  { to: "/community", key: "nav.community" },
-  { to: "/ask", key: "nav.ask" },
-  { to: "/more", key: "nav.more" },
+  { to: "/", key: "nav.today", icon: Home },
+  { to: "/calendar", key: "nav.calendar", icon: CalendarDays },
+  { to: "/log", key: "nav.log", icon: Droplet },
+  { to: "/insights", key: "nav.insights", icon: BarChart3 },
+  { to: "/learn", key: "nav.learn", icon: BookOpen },
+  { to: "/community", key: "nav.community", icon: Users },
+  { to: "/ask", key: "nav.ask", icon: MessageCircle },
+  { to: "/more", key: "nav.more", icon: Menu },
+  { to: "/settings", key: "nav.settings", icon: Settings },
 ];
 
 export function Shell({ children }) {
@@ -120,8 +284,8 @@ export function Shell({ children }) {
     return (
       <div className="flex min-h-screen items-center justify-center p-8 text-center" role="status">
         <div className="flex flex-col items-center gap-3">
-          <SaheliLogo size={40} animated />
-          <p className="text-sm font-medium text-muted-foreground">{t("common.loading")}</p>
+          <SaheliLogo size={44} animated />
+          <p className="text-sm font-semibold text-muted-foreground">{t("common.loading")}</p>
         </div>
       </div>
     );
@@ -129,9 +293,9 @@ export function Shell({ children }) {
   if (status === "error")
     return (
       <div className="flex min-h-screen items-center justify-center p-8 text-center" role="alert">
-        <p className="rounded-2xl bg-destructive/10 p-6 font-semibold text-destructive">
-          {t("set.failed")}
-        </p>
+        <div className="max-w-md rounded-3xl border border-destructive/20 bg-card p-8 shadow-soft space-y-3">
+          <p className="font-bold text-destructive">{t("set.failed")}</p>
+        </div>
       </div>
     );
 
@@ -144,170 +308,284 @@ export function Shell({ children }) {
 
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-xl focus:bg-card focus:p-3 focus:shadow-lg focus:ring-2 focus:ring-primary"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-2xl focus:bg-card focus:p-3 focus:shadow-xl focus:ring-2 focus:ring-primary"
       >
         {t("common.skipToContent")}
       </a>
 
-      {/* Primary Top Header */}
-      <header className="sticky top-0 z-30 border-b border-border/60 bg-background/85 px-4 py-2.5 backdrop-blur-md transition-all print:hidden">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4">
-          <Link
-            to="/"
-            className="group flex min-h-11 items-center gap-2.5 font-display text-xl font-extrabold tracking-tight text-primary transition-transform active:scale-98"
-          >
-            <SaheliLogo discreet={prefs.discreet} size={32} animated />
-            <span className="bg-gradient-to-r from-primary to-period bg-clip-text text-transparent">
-              {prefs.discreet ? t("app.discreetName") : t("app.name")}
-            </span>
-          </Link>
-
-          {/* Desktop Navigation Links */}
-          <nav aria-label={t("nav.main")} className="hidden md:flex items-center gap-1">
-            {DESKTOP_NAV.map(({ to, key }) => (
+      {/* Main Responsive Layout Wrapper: Left Rail on Desktop, Top Bar on Mobile */}
+      <div className="flex-1 flex flex-col lg:flex-row">
+        {/* ========================================================================= */}
+        {/* DESKTOP SIDEBAR / NAVIGATION RAIL (>= 1024px)                             */}
+        {/* ========================================================================= */}
+        <aside
+          aria-label={t("nav.main")}
+          className="hidden lg:flex w-64 xl:w-72 shrink-0 flex-col justify-between border-r border-border/60 bg-card/65 backdrop-blur-xl sticky top-0 h-screen p-5 z-30 select-none"
+        >
+          <div className="space-y-6">
+            {/* Brand Header & Tagline */}
+            <div className="space-y-2">
               <Link
-                key={to}
-                to={to}
-                activeOptions={{ exact: to === "/" }}
-                className="rounded-xl px-3 py-1.5 text-xs font-bold text-muted-foreground hover:bg-muted/60 hover:text-foreground transition-colors data-[status=active]:bg-primary/10 data-[status=active]:text-primary"
-                activeProps={{ "aria-current": "page" }}
+                to="/"
+                className="group flex items-center gap-3 font-display text-2xl font-extrabold tracking-tight text-primary transition-transform active:scale-98"
               >
-                {t(key)}
+                <SaheliLogo discreet={prefs.discreet} size={36} animated />
+                <span className="bg-gradient-to-r from-primary to-period bg-clip-text text-transparent">
+                  {prefs.discreet ? t("app.discreetName") : t("app.name")}
+                </span>
               </Link>
-            ))}
-          </nav>
+              <p className="text-[11px] font-medium text-muted-foreground leading-tight px-0.5">
+                {prefs.discreet
+                  ? t("common.discreetDesc") || "Discreet health journal"
+                  : "Your cycle, your rhythm"}
+              </p>
+            </div>
 
-          {/* Right Header Controls (Desktop Quick Log, Read Aloud, Language Switcher) */}
-          <div className="flex items-center gap-2">
+            {/* Prominent Quick-Log CTA Button */}
             <button
               type="button"
               onClick={() => setQuickLogOpen(true)}
-              className="hidden sm:inline-flex items-center gap-1.5 rounded-xl bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground shadow-sm hover:bg-primary/90 transition-all active:scale-95"
+              className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary to-period text-primary-foreground font-bold text-sm shadow-md hover:opacity-95 active:scale-98 transition-all"
             >
-              <Droplet className="h-3.5 w-3.5 fill-current" />
-              <span>{t("log.title")}</span>
+              <Droplet className="h-4 w-4 fill-current" />
+              <span>{t("today.logToday")}</span>
             </button>
 
-            {prefs.readAloud && (
-              <button
-                type="button"
-                aria-label={t("common.readPage")}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                onClick={() =>
-                  setSpeechFailed(
-                    !speak(document.getElementById("main")?.innerText || "", prefs.lang),
-                  )
-                }
-              >
-                <Volume2 aria-hidden className="h-4 w-4" />
-              </button>
-            )}
-
-            <label htmlFor="shell-lang-select" className="sr-only">
-              {t("nav.langToggleLabel")}
-            </label>
-            <select
-              id="shell-lang-select"
-              value={prefs.lang}
-              onChange={(e) => setPrefs({ lang: e.target.value })}
-              className="h-9 rounded-xl border border-border bg-card px-2.5 py-1 text-xs font-semibold text-foreground shadow-xs hover:bg-muted cursor-pointer transition-all"
-              aria-label={t("nav.langToggleLabel")}
-            >
-              {LANGUAGES.map((l) => (
-                <option key={l.code} value={l.code}>
-                  {l.nativeName}
-                </option>
+            {/* Desktop Navigation Links */}
+            <nav className="space-y-1">
+              {DESKTOP_NAV.map(({ to, key, icon: Icon }) => (
+                <Link
+                  key={to}
+                  to={to}
+                  activeOptions={{ exact: to === "/" }}
+                  className="flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-xs font-bold text-muted-foreground hover:bg-muted/60 hover:text-foreground transition-all data-[status=active]:bg-primary/15 data-[status=active]:text-primary shadow-2xs"
+                  activeProps={{ "aria-current": "page" }}
+                >
+                  <Icon aria-hidden className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{t(key)}</span>
+                </Link>
               ))}
-            </select>
+            </nav>
           </div>
-        </div>
-      </header>
 
-      {/* Offline Status Pill */}
-      {!isOnline && (
-        <div
-          role="status"
-          aria-live="polite"
-          className="flex items-center justify-center gap-2 border-b border-border bg-muted/80 px-4 py-1.5 text-center text-xs font-semibold text-muted-foreground print:hidden"
-        >
-          <WifiOff aria-hidden className="h-3.5 w-3.5" />
-          <span>{prefs.discreet ? t("pwa.offlineDiscreet") : t("pwa.offline")}</span>
-        </div>
-      )}
-
-      {/* Update Waiting Banner */}
-      {updateWaiting && (
-        <div
-          role="alert"
-          aria-live="polite"
-          className="mx-auto my-2 w-full max-w-5xl px-4 print:hidden"
-        >
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-accent p-3.5 text-sm text-accent-foreground shadow-soft">
-            <p className="font-medium">
-              {prefs.discreet ? t("pwa.updateReadyDiscreet") : t("pwa.updateReady")}
-            </p>
-            <div className="flex shrink-0 items-center gap-2">
-              <Btn size="sm" onClick={applyUpdate}>
-                {t("pwa.updateNow")}
-              </Btn>
-              <Btn size="sm" variant="ghost" onClick={dismissUpdate}>
-                {t("pwa.updateLater")}
-              </Btn>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Demo Badge */}
-      {isDemo && (
-        <div className="bg-accent/40 border-b border-accent/60 px-4 py-1 text-center text-xs font-bold text-accent-foreground print:hidden">
-          {t("common.demoBadge")}
-        </div>
-      )}
-
-      {speechFailed && (
-        <p
-          role="status"
-          className="mx-auto max-w-5xl px-4 py-1 text-xs text-muted-foreground print:hidden"
-        >
-          {t("common.ttsUnsupported")}
-        </p>
-      )}
-
-      {/* Active User Banners */}
-      <div aria-live="polite" className="mx-auto w-full max-w-5xl space-y-2 px-4 pt-2 print:hidden">
-        {banners.map((b) => (
-          <div
-            key={b.id}
-            className="flex items-center justify-between gap-2 rounded-2xl bg-accent/80 p-3 text-sm text-accent-foreground shadow-sm"
-          >
-            <span className="flex items-center gap-2">
-              <Bell aria-hidden className="h-4 w-4 shrink-0" /> {b.text}
-            </span>
+          {/* Bottom Sidebar Utilities (Discreet Mode, Language, Privacy) */}
+          <div className="space-y-3 pt-4 border-t border-border/50 text-xs">
+            {/* Discreet Mode Quick Toggle */}
             <button
               type="button"
-              aria-label={t("rem.dismiss")}
-              onClick={() => dismissBanner(b.id)}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-lg hover:bg-background/40"
+              onClick={() => setPrefs({ discreet: !prefs.discreet })}
+              className={cx(
+                "flex min-h-[40px] w-full items-center justify-between rounded-xl px-3 py-1.5 font-semibold transition-all border",
+                prefs.discreet
+                  ? "border-primary/40 bg-primary/10 text-primary"
+                  : "border-border/60 bg-muted/40 text-muted-foreground hover:bg-muted",
+              )}
             >
-              <X aria-hidden className="h-4 w-4" />
+              <div className="flex items-center gap-2">
+                {prefs.discreet ? (
+                  <EyeOff className="h-3.5 w-3.5" />
+                ) : (
+                  <Eye className="h-3.5 w-3.5" />
+                )}
+                <span className="text-[11px]">{t("set.discreet")}</span>
+              </div>
+              <span className="text-[10px] uppercase font-bold">
+                {prefs.discreet ? "ON" : "OFF"}
+              </span>
             </button>
+
+            {/* Language Selection Dropdown */}
+            <div className="flex items-center gap-2">
+              <label htmlFor="desktop-lang-select" className="sr-only">
+                {t("nav.langToggleLabel")}
+              </label>
+              <select
+                id="desktop-lang-select"
+                value={prefs.lang}
+                onChange={(e) => setPrefs({ lang: e.target.value })}
+                className="flex-1 h-9 rounded-xl border border-border bg-card px-2.5 py-1 text-xs font-semibold text-foreground hover:bg-muted cursor-pointer transition-all"
+                aria-label={t("nav.langToggleLabel")}
+              >
+                {LANGUAGES.map((l) => (
+                  <option key={l.code} value={l.code}>
+                    {l.nativeName}
+                  </option>
+                ))}
+              </select>
+
+              {prefs.readAloud && (
+                <button
+                  type="button"
+                  aria-label={t("common.readPage")}
+                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                  onClick={() =>
+                    setSpeechFailed(
+                      !speak(document.getElementById("main")?.innerText || "", prefs.lang),
+                    )
+                  }
+                >
+                  <Volume2 aria-hidden className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+
+            {/* Offline & Encryption Status Pill */}
+            <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1 px-1">
+              <span className="flex items-center gap-1.5 font-medium">
+                <Shield className="h-3 w-3 text-primary" />
+                <span>Local-first</span>
+              </span>
+              {!isOnline ? (
+                <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-semibold">
+                  <WifiOff className="h-3 w-3" /> Offline
+                </span>
+              ) : (
+                <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Ready</span>
+              )}
+            </div>
           </div>
-        ))}
+        </aside>
+
+        {/* ========================================================================= */}
+        {/* MAIN BODY AREA & RESPONSIVE CANVAS                                        */}
+        {/* ========================================================================= */}
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Mobile Top Header (< 1024px) */}
+          <header className="lg:hidden sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-border/60 bg-background/85 px-4 py-2.5 backdrop-blur-md transition-all print:hidden">
+            <Link
+              to="/"
+              className="flex items-center gap-2 font-display text-lg font-extrabold tracking-tight text-primary"
+            >
+              <SaheliLogo discreet={prefs.discreet} size={28} animated />
+              <span className="bg-gradient-to-r from-primary to-period bg-clip-text text-transparent">
+                {prefs.discreet ? t("app.discreetName") : t("app.name")}
+              </span>
+            </Link>
+
+            <div className="flex items-center gap-2">
+              <label htmlFor="mobile-lang-select" className="sr-only">
+                {t("nav.langToggleLabel")}
+              </label>
+              <select
+                id="mobile-lang-select"
+                value={prefs.lang}
+                onChange={(e) => setPrefs({ lang: e.target.value })}
+                className="h-8 rounded-xl border border-border bg-card px-2 py-0.5 text-xs font-semibold text-foreground hover:bg-muted cursor-pointer"
+              >
+                {LANGUAGES.map((l) => (
+                  <option key={l.code} value={l.code}>
+                    {l.nativeName}
+                  </option>
+                ))}
+              </select>
+
+              {prefs.readAloud && (
+                <button
+                  type="button"
+                  aria-label={t("common.readPage")}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted"
+                  onClick={() =>
+                    setSpeechFailed(
+                      !speak(document.getElementById("main")?.innerText || "", prefs.lang),
+                    )
+                  }
+                >
+                  <Volume2 aria-hidden className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+          </header>
+
+          {/* System Notification Banners */}
+          {!isOnline && (
+            <div
+              role="status"
+              aria-live="polite"
+              className="flex items-center justify-center gap-2 border-b border-border bg-muted/80 px-4 py-1.5 text-center text-xs font-semibold text-muted-foreground print:hidden"
+            >
+              <WifiOff aria-hidden className="h-3.5 w-3.5" />
+              <span>{prefs.discreet ? t("pwa.offlineDiscreet") : t("pwa.offline")}</span>
+            </div>
+          )}
+
+          {updateWaiting && (
+            <div
+              role="alert"
+              aria-live="polite"
+              className="mx-auto my-3 w-full max-w-6xl px-4 print:hidden"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-accent p-3.5 text-sm text-accent-foreground shadow-soft">
+                <p className="font-semibold">
+                  {prefs.discreet ? t("pwa.updateReadyDiscreet") : t("pwa.updateReady")}
+                </p>
+                <div className="flex shrink-0 items-center gap-2">
+                  <Btn size="sm" onClick={applyUpdate}>
+                    {t("pwa.updateNow")}
+                  </Btn>
+                  <Btn size="sm" variant="ghost" onClick={dismissUpdate}>
+                    {t("pwa.updateLater")}
+                  </Btn>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {isDemo && (
+            <div className="bg-accent/40 border-b border-accent/60 px-4 py-1 text-center text-xs font-bold text-accent-foreground print:hidden">
+              {t("common.demoBadge")}
+            </div>
+          )}
+
+          {speechFailed && (
+            <p
+              role="status"
+              className="mx-auto max-w-6xl px-4 py-1 text-xs text-muted-foreground print:hidden"
+            >
+              {t("common.ttsUnsupported")}
+            </p>
+          )}
+
+          {/* Active User Banners */}
+          <div
+            aria-live="polite"
+            className="mx-auto w-full max-w-6xl space-y-2 px-4 pt-3 print:hidden"
+          >
+            {banners.map((b) => (
+              <div
+                key={b.id}
+                className="flex items-center justify-between gap-2 rounded-2xl bg-accent/80 p-3 text-sm text-accent-foreground shadow-xs"
+              >
+                <span className="flex items-center gap-2">
+                  <Bell aria-hidden className="h-4 w-4 shrink-0" /> {b.text}
+                </span>
+                <button
+                  type="button"
+                  aria-label={t("rem.dismiss")}
+                  onClick={() => dismissBanner(b.id)}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg hover:bg-background/40"
+                >
+                  <X aria-hidden className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* Core Viewport Canvas */}
+          <main
+            id="main"
+            className="flex-1 w-full max-w-6xl mx-auto px-4 py-6 sm:px-6 lg:px-8 pb-32 lg:pb-12"
+          >
+            {children}
+          </main>
+        </div>
       </div>
 
-      {/* Main Content Viewport */}
-      <main id="main" className="mx-auto w-full max-w-5xl flex-1 px-4 pb-28 pt-4 md:pb-12 md:pt-6">
-        {children}
-      </main>
-
-      {/* Mobile Floating Frosted Bottom Dock */}
+      {/* Mobile Floating Frosted Bottom Dock (< 1024px) */}
       <nav
         aria-label={t("nav.main")}
-        className="fixed inset-x-0 bottom-3 z-40 mx-auto max-w-sm px-4 md:hidden print:hidden"
+        className="fixed inset-x-0 bottom-4 z-40 mx-auto max-w-sm px-4 lg:hidden print:hidden"
       >
         <div className="flex items-center justify-around rounded-3xl border border-border/70 bg-card/90 px-3 py-1.5 shadow-2xl backdrop-blur-xl">
-          {/* 1. Today */}
           <Link
             to="/"
             activeOptions={{ exact: true }}
@@ -318,7 +596,6 @@ export function Shell({ children }) {
             <span className="leading-none">{t("nav.today")}</span>
           </Link>
 
-          {/* 2. Calendar */}
           <Link
             to="/calendar"
             className="flex flex-col items-center justify-center gap-1 py-1 px-2.5 text-center text-[10px] font-bold text-muted-foreground transition-colors data-[status=active]:text-primary"
@@ -328,7 +605,7 @@ export function Shell({ children }) {
             <span className="leading-none">{t("nav.calendar")}</span>
           </Link>
 
-          {/* 3. Elevated Tactile Quick Log Action */}
+          {/* Elevated Quick Log Action */}
           <div className="relative -top-3">
             <button
               type="button"
@@ -340,7 +617,6 @@ export function Shell({ children }) {
             </button>
           </div>
 
-          {/* 4. Learn */}
           <Link
             to="/learn"
             className="flex flex-col items-center justify-center gap-1 py-1 px-2.5 text-center text-[10px] font-bold text-muted-foreground transition-colors data-[status=active]:text-primary"
@@ -350,7 +626,6 @@ export function Shell({ children }) {
             <span className="leading-none">{t("nav.learn")}</span>
           </Link>
 
-          {/* 5. More */}
           <Link
             to="/more"
             className="flex flex-col items-center justify-center gap-1 py-1 px-2.5 text-center text-[10px] font-bold text-muted-foreground transition-colors data-[status=active]:text-primary"
