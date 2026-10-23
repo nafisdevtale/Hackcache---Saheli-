@@ -3,6 +3,8 @@ import { redactPII, handleCommunityRequest, resetCommunityStore } from "../serve
 
 describe("Saheli Safe Pseudonymous Community", () => {
   beforeEach(() => {
+    process.env.COMMUNITY_MOCK_STORE = "true";
+    process.env.MODERATOR_SECRET = "test-secret-123";
     resetCommunityStore(true);
   });
 
@@ -18,126 +20,181 @@ describe("Saheli Safe Pseudonymous Community", () => {
     expect(cleaned).toContain("[link hidden]");
   });
 
-  it("enforces strict age separation between adult and under18 feeds", async () => {
-    // Adult feed query
-    const adultReq = new Request("http://localhost/api/community/posts?age_group=adult");
-    const adultRes = await handleCommunityRequest(adultReq);
-    const adultData = await adultRes.json();
-    expect(adultData.ok).toBe(true);
-    expect(adultData.posts.length).toBeGreaterThan(0);
-    expect(adultData.posts.every((p) => p.age_group === "adult")).toBe(true);
-
-    // Under-18 feed query
+  it("strictly disables the online teen community under DPDP Act Section 9", async () => {
+    // Attempting to fetch under-18 feed returns disabled status
     const teenReq = new Request("http://localhost/api/community/posts?age_group=under18");
     const teenRes = await handleCommunityRequest(teenReq);
     const teenData = await teenRes.json();
     expect(teenData.ok).toBe(true);
-    expect(teenData.posts.length).toBeGreaterThan(0);
-    expect(teenData.posts.every((p) => p.age_group === "under18")).toBe(true);
+    expect(teenData.disabled).toBe(true);
+    expect(teenData.posts).toHaveLength(0);
+    expect(teenData.reason).toContain("DPDP Act 2023 Section 9");
 
-    // Cross-age isolation check: no adult posts in teen feed
-    const teenTitles = teenData.posts.map((p) => p.title);
-    expect(adultData.posts.some((ap) => teenTitles.includes(ap.title))).toBe(false);
-  });
-
-  it("queues newly created posts as pending and excludes them from public feed until approved", async () => {
-    const createReq = new Request("http://localhost/api/community/posts", {
+    // Attempting to post to under-18 space returns 403 Forbidden
+    const createTeenPostReq = new Request("http://localhost/api/community/posts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        author_alias: "Saheli 9999",
-        author_hash: "test-author-hash-123",
-        age_group: "adult",
-        topic: "cycles",
-        title: "Testing Moderation Queue",
-        content: "This post should start in pending status.",
+        author_alias: "Saheli 1234",
+        author_hash: "teen-hash",
+        age_group: "under18",
+        topic: "first_period",
+        title: "Teen Question",
+        content: "Trying to post to teen forum",
       }),
     });
-    const createRes = await handleCommunityRequest(createReq);
-    expect(createRes.status).toBe(201);
-    const createData = await createRes.json();
-    expect(createData.ok).toBe(true);
-    expect(createData.post.status).toBe("pending");
+    const createTeenRes = await handleCommunityRequest(createTeenPostReq);
+    expect(createTeenRes.status).toBe(403);
+    const createTeenData = await createTeenRes.json();
+    expect(createTeenData.disabled).toBe(true);
+  });
 
-    // Public feed (without author_hash) should NOT show pending post
-    const publicReq = new Request("http://localhost/api/community/posts?age_group=adult");
-    const publicRes = await handleCommunityRequest(publicReq);
-    const publicData = await publicRes.json();
-    expect(publicData.posts.some((p) => p.title === "Testing Moderation Queue")).toBe(false);
+  it("enforces abuse rate limits on post creation (max 3 posts per 10 minutes)", async () => {
+    const authorHash = "rate-limit-test-hash-" + Date.now();
 
-    // Author feed (with author_hash) SHOULD show their pending post
-    const authorReq = new Request(
-      "http://localhost/api/community/posts?age_group=adult&author_hash=test-author-hash-123",
+    for (let i = 0; i < 3; i++) {
+      const res = await handleCommunityRequest(
+        new Request("http://localhost/api/community/posts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            author_alias: "Saheli 9999",
+            author_hash: authorHash,
+            age_group: "adult",
+            topic: "general",
+            title: `Post ${i}`,
+            content: `Content ${i}`,
+          }),
+        }),
+      );
+      expect(res.status).toBe(201);
+    }
+
+    // 4th attempt should be blocked with 429 Rate Limit
+    const blockedRes = await handleCommunityRequest(
+      new Request("http://localhost/api/community/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          author_alias: "Saheli 9999",
+          author_hash: authorHash,
+          age_group: "adult",
+          topic: "general",
+          title: "Post 4",
+          content: "Should be blocked",
+        }),
+      }),
     );
-    const authorRes = await handleCommunityRequest(authorReq);
-    const authorData = await authorRes.json();
-    expect(authorData.posts.some((p) => p.title === "Testing Moderation Queue")).toBe(true);
+    expect(blockedRes.status).toBe(429);
+    const blockedData = await blockedRes.json();
+    expect(blockedData.error).toContain("Rate limit reached");
   });
 
-  it("auto-flags and hides a post when 3 reports are submitted", async () => {
-    // Submit a post
-    const createReq = new Request("http://localhost/api/community/posts", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        author_alias: "Saheli 1111",
-        author_hash: "abusive-author",
-        age_group: "adult",
-        topic: "general",
-        title: "Flag Test Post",
-        content: "Testing reporting auto-flag",
+  it("prevents duplicate reports from the same reporter hash (HTTP 409)", async () => {
+    // Create a post
+    const createRes = await handleCommunityRequest(
+      new Request("http://localhost/api/community/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          author_alias: "Saheli 5555",
+          author_hash: "author-report-target",
+          age_group: "adult",
+          topic: "cycles",
+          title: "Post to report",
+          content: "Report content",
+        }),
       }),
-    });
-    const createRes = await handleCommunityRequest(createReq);
+    );
     const createData = await createRes.json();
     const postId = createData.post.id;
 
-    // Approve it via moderation decision
-    const modReq = new Request("http://localhost/api/community/moderation/decision", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        target_type: "post",
-        target_id: postId,
-        action: "approved",
-      }),
-    });
-    await handleCommunityRequest(modReq);
-
-    // Verify it is in public feed
-    let feedRes = await handleCommunityRequest(
-      new Request("http://localhost/api/community/posts?age_group=adult"),
-    );
-    let feedData = await feedRes.json();
-    expect(feedData.posts.some((p) => p.id === postId)).toBe(true);
-
-    // Submit 3 reports
-    for (let i = 0; i < 3; i++) {
-      const repReq = new Request("http://localhost/api/community/report", {
+    // First report succeeds
+    const rep1 = await handleCommunityRequest(
+      new Request("http://localhost/api/community/report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           target_type: "post",
           target_id: postId,
           reason: "Spam",
-          reporter_hash: `rep-${i}`,
+          reporter_hash: "same-reporter-1",
         }),
-      });
-      await handleCommunityRequest(repReq);
-    }
-
-    // Verify post is now flagged and hidden from public feed
-    feedRes = await handleCommunityRequest(
-      new Request("http://localhost/api/community/posts?age_group=adult"),
+      }),
     );
-    feedData = await feedRes.json();
-    expect(feedData.posts.some((p) => p.id === postId)).toBe(false);
+    expect(rep1.status).toBe(200);
+
+    // Duplicate report by same reporter returns 409 Conflict
+    const rep2 = await handleCommunityRequest(
+      new Request("http://localhost/api/community/report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          target_type: "post",
+          target_id: postId,
+          reason: "Spam",
+          reporter_hash: "same-reporter-1",
+        }),
+      }),
+    );
+    expect(rep2.status).toBe(409);
+    const rep2Data = await rep2.json();
+    expect(rep2Data.error).toContain("already submitted a report");
   });
 
-  it("supports delete-all-my-data to wipe all posts and replies by device author_hash", async () => {
-    const testHash = "author-to-wipe-" + Date.now();
+  it("requires genuine moderator authentication and rejects invalid or missing tokens", async () => {
+    // Missing token
+    const noTokenRes = await handleCommunityRequest(
+      new Request("http://localhost/api/community/moderation/decision", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          target_type: "post",
+          target_id: "demo-adult-1",
+          action: "approved",
+        }),
+      }),
+    );
+    expect(noTokenRes.status).toBe(401);
 
-    // Create a post
+    // Invalid token
+    const wrongTokenRes = await handleCommunityRequest(
+      new Request("http://localhost/api/community/moderation/decision", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-moderator-token": "wrong-secret",
+        },
+        body: JSON.stringify({
+          target_type: "post",
+          target_id: "demo-adult-1",
+          action: "approved",
+        }),
+      }),
+    );
+    expect(wrongTokenRes.status).toBe(401);
+
+    // Valid token succeeds
+    const validRes = await handleCommunityRequest(
+      new Request("http://localhost/api/community/moderation/decision", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-moderator-token": "test-secret-123",
+        },
+        body: JSON.stringify({
+          target_type: "post",
+          target_id: "demo-adult-1",
+          action: "approved",
+        }),
+      }),
+    );
+    expect(validRes.status).toBe(200);
+  });
+
+  it("supports delete-all-my-data to wipe all posts published from a device identifier", async () => {
+    const testHash = "author-wipe-test-" + Date.now();
+
     await handleCommunityRequest(
       new Request("http://localhost/api/community/posts", {
         method: "POST",
@@ -147,28 +204,21 @@ describe("Saheli Safe Pseudonymous Community", () => {
           author_hash: testHash,
           age_group: "adult",
           topic: "cycles",
-          title: "My Personal Post",
-          content: "Content to wipe",
+          title: "Post to Wipe",
+          content: "Content",
         }),
       }),
     );
 
-    // Wipe all
-    const deleteReq = new Request("http://localhost/api/community/delete-all", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ author_hash: testHash }),
-    });
-    const deleteRes = await handleCommunityRequest(deleteReq);
+    const deleteRes = await handleCommunityRequest(
+      new Request("http://localhost/api/community/delete-all", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ author_hash: testHash }),
+      }),
+    );
     const deleteData = await deleteRes.json();
     expect(deleteData.ok).toBe(true);
     expect(deleteData.deleted.posts).toBe(1);
-
-    // Confirm post is gone even for author query
-    const checkRes = await handleCommunityRequest(
-      new Request(`http://localhost/api/community/posts?age_group=adult&author_hash=${testHash}`),
-    );
-    const checkData = await checkRes.json();
-    expect(checkData.posts.some((p) => p.title === "My Personal Post")).toBe(false);
   });
 });

@@ -5,11 +5,11 @@ Saheli is a complete, privacy-first menstrual-health companion Progressive Web A
 ## Core Pillars & India-wide Architecture
 
 1. **Separation of Private Health Records from Optional Online Services**:
-   - Menstrual cycle history, bleeding volume, custom symptoms, and notes stay exclusively on your device in **IndexedDB** with optional hardware-backed **WebCrypto AES-256-GCM** encryption.
+   - Menstrual cycle history, bleeding volume, custom symptoms, and notes stay exclusively on your device in **IndexedDB** with optional client-side **WebCrypto AES-256-GCM** encryption.
    - Zero remote accounts, zero phone/email registrations, zero third-party tracking cookies or telemetry.
 2. **13 Indian Languages with 100% Key Parity**:
    - English, Hindi (हिन्दी), Marathi (मराठी), Telugu (తెలుగు), Kannada (ಕನ್ನಡ), Tamil (தமிழ்), Bengali (বাংলা), Gujarati (ગુજરાતી), Punjabi (ਪੰਜਾਬੀ), Malayalam (മലയാളം), Odia (ଓଡ଼ିଆ), Assamese (অসমীয়া), and Urdu (اردو with native RTL layout).
-   - 606 keys across all dictionaries with zero missing translation keys.
+   - 606 keys across all dictionaries with verified native script core terms. Full language status documented in `TRANSLATION_REPORT.md`.
 3. **Deterministic Safety Engine & Real AI Health Assistant (`/api/ask`)**:
    - Google Gemini 2.5 Flash / OpenAI-compatible provider integration with strict rate-limiting and privacy-first consent flow.
    - **Deterministic Emergency Screening**: Bypasses AI to provide immediate emergency helplines for acute hemorrhage (soaking 2+ pads/hour), sudden severe pelvic pain, high fever with foul discharge, or ectopic pregnancy risks (**National Emergency: 112 / Ambulance: 108**).
@@ -19,18 +19,18 @@ Saheli is a complete, privacy-first menstrual-health companion Progressive Web A
 4. **Safe Pseudonymous Community (`/community`, `/api/community/*`)**:
    - Complete pseudonymity using a client-held device token hash (e.g., "Saheli 4821"). No phone numbers or emails required.
    - **Automated PII Redaction**: Phone numbers, emails, and external links are automatically stripped before queueing.
-   - **Strict Age Group Separation**: Completely partitioned feeds for Teen / Under-18 and Adult users.
+   - **Child Safety (DPDP Act Section 9)**: Online teen community forum is disabled pending parental consent and age assurance framework.
    - **Pre-Publication Moderation**: Submissions start in a pending moderation queue before public appearance.
    - **Auto-Flagging & Instant Wiping**: 3 reports automatically flag and hide content. "Delete All My Data" purges all posts and replies tied to the user's device credential immediately.
-   - Database schema and Row-Level Security (RLS) migration in `supabase/migrations/20261023_community_schema.sql`.
+   - Database schema and Row-Level Security (RLS) migration in `supabase/migrations/20261023_community_schema.sql`. Fails closed if database credentials are not set.
 5. **Core Health MVP Enhancements**:
    - Custom symptom tracking with frequency analysis and backward/forward compatible schema import.
    - Calendar period quick-actions ("Start period here" / "Remove period") with accessible distinct non-color shapes.
    - Expanded evidence-based lessons: Thyroid conditions, Postpartum return, Perimenopause transition, Preparing for a doctor visit, and Cycle record interpretation.
 6. **Smart Reminders & Discreet Notifications**:
-   - Web Push and scheduler endpoints with discreet copy to safeguard shared-phone households.
-7. **DPDP Act 2023 Compliance**:
-   - Full regulatory readiness review and data minimization disclosures detailed in `COMPLIANCE.md`.
+   - Web Push using standard VAPID authentication and discreet notification payloads. Fails closed when VAPID keys are unconfigured while preserving local in-app reminders.
+7. **DPDP Act 2023 Readiness & Honest Governance**:
+   - Full regulatory readiness review and data minimization disclosures detailed in `COMPLIANCE.md`. Medical and clinical review marked as pending independent accreditation.
 
 ---
 

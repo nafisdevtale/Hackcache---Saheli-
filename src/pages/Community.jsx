@@ -220,41 +220,81 @@ export default function Community() {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="grid grid-cols-3 gap-1 rounded-2xl bg-muted p-1 text-sm font-semibold">
-        <button
-          type="button"
-          onClick={() => setActiveTab("feed")}
-          className={`flex min-h-11 items-center justify-center rounded-xl transition-all ${
-            activeTab === "feed" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
-          }`}
-        >
-          {t("comm.tabFeed") || "Feed"}
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab("new_post")}
-          className={`flex min-h-11 items-center justify-center gap-1 rounded-xl transition-all ${
-            activeTab === "new_post" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
-          }`}
-        >
-          <Plus className="h-4 w-4" />
-          {t("comm.tabNewPost") || "New Post"}
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab("my_activity")}
-          className={`flex min-h-11 items-center justify-center rounded-xl transition-all ${
-            activeTab === "my_activity"
-              ? "bg-card text-foreground shadow-sm"
-              : "text-muted-foreground"
-          }`}
-        >
-          {t("comm.tabMyActivity") || "My Posts"}
-        </button>
-      </div>
+      {userAgeGroup === "under18" ? (
+        <Card className="space-y-3 border-2 border-primary/30 bg-primary-soft/20 p-5">
+          <div className="flex items-center gap-2 font-bold text-base text-primary">
+            <Shield className="h-5 w-5" />
+            <span>Teen Peer Forum Protection (DPDP Act 2023)</span>
+          </div>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            In compliance with Section 9 of India's Digital Personal Data Protection Act (DPDP Act
+            2023), the online community forum for under-18 users is currently paused until legal
+            age-assurance and verifiable parental consent frameworks are certified.
+          </p>
+          <div className="rounded-xl bg-card p-3 border border-border text-xs text-foreground space-y-1">
+            <p className="font-semibold">Safe alternative resources available right now:</p>
+            <ul className="list-disc pl-4 space-y-0.5 text-muted-foreground">
+              <li>
+                Verified adolescent health lessons (First Period, Cramps, Normal Cycle variation)
+              </li>
+              <li>Doctor appointment guidance and question lists</li>
+              <li>Local-only cycle diary (never leaves your phone)</li>
+            </ul>
+          </div>
+          <div className="flex flex-wrap gap-2 pt-2">
+            <a
+              href="/learn"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-4 text-xs font-semibold text-primary-foreground"
+            >
+              Browse Health Lessons
+            </a>
+            <a
+              href="/doctor"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border px-4 text-xs font-semibold hover:bg-muted"
+            >
+              Doctor Guidance
+            </a>
+          </div>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-3 gap-1 rounded-2xl bg-muted p-1 text-sm font-semibold">
+          <button
+            type="button"
+            onClick={() => setActiveTab("feed")}
+            className={`flex min-h-11 items-center justify-center rounded-xl transition-all ${
+              activeTab === "feed" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
+            }`}
+          >
+            {t("comm.tabFeed") || "Feed"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("new_post")}
+            className={`flex min-h-11 items-center justify-center gap-1 rounded-xl transition-all ${
+              activeTab === "new_post"
+                ? "bg-card text-foreground shadow-sm"
+                : "text-muted-foreground"
+            }`}
+          >
+            <Plus className="h-4 w-4" />
+            {t("comm.tabNewPost") || "New Post"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("my_activity")}
+            className={`flex min-h-11 items-center justify-center rounded-xl transition-all ${
+              activeTab === "my_activity"
+                ? "bg-card text-foreground shadow-sm"
+                : "text-muted-foreground"
+            }`}
+          >
+            {t("comm.tabMyActivity") || "My Posts"}
+          </button>
+        </div>
+      )}
 
       {/* TAB 1: FEED */}
-      {activeTab === "feed" && (
+      {userAgeGroup !== "under18" && activeTab === "feed" && (
         <div className="space-y-4">
           {/* Topic Pills */}
           <div className="flex flex-wrap gap-1.5 pb-1">
@@ -385,7 +425,7 @@ export default function Community() {
       )}
 
       {/* TAB 2: NEW POST */}
-      {activeTab === "new_post" && (
+      {userAgeGroup !== "under18" && activeTab === "new_post" && (
         <Card className="space-y-4">
           <div>
             <h2 className="font-bold text-base">
@@ -473,7 +513,7 @@ export default function Community() {
       )}
 
       {/* TAB 3: MY ACTIVITY */}
-      {activeTab === "my_activity" && (
+      {userAgeGroup !== "under18" && activeTab === "my_activity" && (
         <div className="space-y-4">
           <Card className="space-y-3">
             <h2 className="font-bold text-base">

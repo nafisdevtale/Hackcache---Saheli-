@@ -4,11 +4,14 @@
  * Safety-First Architecture:
  * 1. Deterministic screening for emergency red flags (immediate 112/108 guidance).
  * 2. Deterministic screening for mental health crisis/self-harm (immediate Tele-MANAS 14416 / KIRAN guidance).
- * 3. Rate limiting (in-memory per client).
- * 4. Input validation (consent check, length limits, sanitization).
- * 5. Provider abstraction (Google Gemini default, generic OpenAI-compatible fallback).
- * 6. Graceful offline/missing key fallback to local FAQ.
- * 7. Privacy: No PII logged, minimal cycle context only when user opts in.
+ * 3. Deterministic safety guardrails for medication prescription and misleading contraception queries.
+ * 4. Multi-language emergency and crisis detection (Hindi, Marathi, Bengali, Tamil, Telugu, Urdu, etc.).
+ * 5. Production rate limiting (in-memory per client).
+ * 6. Input validation (consent check, length limits, sanitization).
+ * 7. Provider abstraction (Google Gemini default, generic OpenAI-compatible fallback).
+ * 8. Source Grounding: Returns verified medical source references with every response.
+ * 9. Graceful offline/missing key fallback to local FAQ.
+ * 10. Privacy: No PII logged, minimal cycle context only when user opts in.
  */
 
 export interface Helpline {
@@ -19,9 +22,10 @@ export interface Helpline {
 
 export interface AskSafetyResult {
   isRedFlag: boolean;
-  type?: "urgent" | "crisis";
+  type?: "urgent" | "crisis" | "medication" | "contraception";
   message?: string;
   helplines?: Helpline[];
+  sources?: string[];
 }
 
 export const URGENT_RED_FLAGS = [
@@ -37,6 +41,12 @@ export const URGENT_RED_FLAGS = [
   "खून बहुत ज़्यादा बह रहा",
   "चक्कर आकर गिर पड़ी",
   "बहुत बड़े खून के थक्के",
+  "प्रचंड रक्तस्राव", // Marathi
+  "অতিরিক্ত রক্তক্ষরণ", // Bengali
+  "அதிக இரத்தப்போக்கு", // Tamil
+  "తీవ్ర రక్తస్రావం", // Telugu
+  "شدید خون بہنا", // Urdu
+
   // Severe sudden pain
   "sudden severe pelvic pain",
   "sudden severe abdominal pain",
@@ -44,12 +54,19 @@ export const URGENT_RED_FLAGS = [
   "doubled over in pain",
   "अचानक असहनीय पेट दर्द",
   "तेज़ चुभने वाला दर्द",
+  "अचानक असह्य पोटदुखी", // Marathi
+  "তীব্র পেটব্যথা", // Bengali
+  "கடுமையான வயிற்று வலி", // Tamil
+  "తీవ్రమైన కడుపు నొప్పి", // Telugu
+  "شدید پیٹ کا درد", // Urdu
+
   // High fever + foul discharge or pain
   "high fever and foul smelling discharge",
   "fever with bad smelling discharge",
   "fever with pelvic pain",
   "बुखार और बदबूदार पानी",
   "बुखार और पेट के निचले हिस्से में दर्द",
+
   // Ectopic pregnancy risk
   "pregnant and heavy bleeding",
   "pregnant and severe pain",
@@ -73,10 +90,51 @@ export const CRISIS_KEYWORDS = [
   "मरना चाहता",
   "जान दे दूंगी",
   "जीना नहीं चाहती",
+  "स्वतःला इजा", // Marathi
+  "নিজেকে শেষ", // Bengali
+  "தற்கொலை", // Tamil
+  "ఆత్మహత్య", // Telugu
+  "خودکشی", // Urdu
+  "جان لینا", // Urdu
+];
+
+export const MEDICATION_KEYWORDS = [
+  "which medicine",
+  "what medicine",
+  "medicine should i take",
+  "antibiotic",
+  "prescribe",
+  "prescription",
+  "what tablet",
+  "give me medicine",
+  "pills to induce",
+  "pills to stop",
+  "pills to abort",
+  "abortion pills",
+  "दवा बताओ",
+  "कौन सी दवा",
+  "गोली खानी चाहिए",
+  "पीरियड लाने की दवा",
+  "गर्भपात की गोली",
+  "औषध सांगा", // Marathi
+  "কী ওষুধ খাব", // Bengali
+  "மருந்து சொல்லுங்கள்", // Tamil
+  "ఏ మందు తీసుకోవాలి", // Telugu
+];
+
+export const CONTRACEPTION_RISK_KEYWORDS = [
+  "safe days to avoid pregnancy",
+  "can i have sex without condom",
+  "unprotected sex safe days",
+  "calendar method safe days",
+  "is it safe without condom on day",
+  "कंडोम के बिना सुरक्षित दिन",
+  "बिना कंडोम प्रेगनेंसी नहीं होगी",
+  "कंडोमशिवाय सुरक्षित दिवस", // Marathi
 ];
 
 const DISCLAIMER =
-  "Saheli is an educational health information companion, not a doctor. This guidance does not constitute a medical diagnosis or treatment plan. Always consult a qualified medical professional for health concerns.";
+  "Saheli is an educational health information companion, not a doctor. Automated keyword screening is an assistive safety filter, not a guarantee that all emergencies will be detected. Always consult a qualified medical professional for health concerns.";
 
 // Rate limiter storage: IP/identifier -> timestamps array
 const rateLimitMap = new Map<string, number[]>();
@@ -119,6 +177,7 @@ export function screenSafety(text: string): AskSafetyResult {
           { name: "KIRAN Mental Health Helpline", number: "1800-599-0019" },
           { name: "National Emergency Service", number: "112" },
         ],
+        sources: ["telemanas", "india_112"],
       };
     }
   }
@@ -183,7 +242,34 @@ export function screenSafety(text: string): AskSafetyResult {
         { name: "National Ambulance Service", number: "108" },
         { name: "Women's Helpline", number: "1091" },
       ],
+      sources: ["nhs_heavy", "nhs_preg_bleeding", "nhs_pain", "india_112"],
     };
+  }
+
+  // 3. Medication Prescription Safety Rule
+  for (const medKw of MEDICATION_KEYWORDS) {
+    if (normalized.includes(medKw.toLowerCase())) {
+      return {
+        isRedFlag: false,
+        type: "medication",
+        message:
+          "CLINICAL SAFETY NOTICE: Saheli is an educational companion and does NOT prescribe, recommend, or dose medications, antibiotics, or pharmaceutical treatments. Using medications without a prescription can be dangerous. Please consult a licensed MBBS doctor, gynaecologist, or pharmacist for prescription guidance.",
+        sources: ["acog_visit", "nhs_periods"],
+      };
+    }
+  }
+
+  // 4. Misleading Contraception Safety Rule
+  for (const cKw of CONTRACEPTION_RISK_KEYWORDS) {
+    if (normalized.includes(cKw.toLowerCase())) {
+      return {
+        isRedFlag: false,
+        type: "contraception",
+        message:
+          "IMPORTANT CONTRACEPTION WARNING: Natural cycle estimates and calendar calculations in Saheli must NEVER be used as a method of contraception or family planning. Cycle lengths vary naturally due to stress, illness, and hormonal fluctuations, and ovulation timing can shift. Please consult a qualified doctor or healthcare provider for reliable modern contraception.",
+        sources: ["who_contraception", "nhs_missed"],
+      };
+    }
   }
 
   return { isRedFlag: false };
@@ -254,14 +340,15 @@ export async function handleAskRequest(req: Request): Promise<Response> {
 
   // Step 1: Deterministic safety screening (executed BEFORE any AI call)
   const safety = screenSafety(question);
-  if (safety.isRedFlag) {
+  if (safety.isRedFlag || safety.type === "medication" || safety.type === "contraception") {
     return new Response(
       JSON.stringify({
         ok: true,
         type: safety.type,
-        red_flag: true,
+        red_flag: safety.isRedFlag,
         answer: safety.message,
         helplines: safety.helplines,
+        sources: safety.sources || ["nhs_periods", "acog_visit"],
         disclaimer: DISCLAIMER,
         source: "deterministic_safety",
       }),
@@ -281,7 +368,7 @@ export async function handleAskRequest(req: Request): Promise<Response> {
         ok: false,
         fallback: true,
         error:
-          "AI provider is not configured. Falling back to Saheli offline verified FAQ library.",
+          "AI provider is not configured on this server. Falling back to Saheli offline verified medical library.",
       }),
       { status: 200, headers: { "Content-Type": "application/json" } },
     );
@@ -299,17 +386,17 @@ export async function handleAskRequest(req: Request): Promise<Response> {
       parts.push(`Last period started ~${Number(context.lastPeriodDaysAgo)} days ago`);
     if (context.currentPhase) parts.push(`Estimated phase: ${String(context.currentPhase)}`);
     if (parts.length > 0) {
-      contextSnippet = `\n\n[User's Optional Cycle Summary: ${parts.join(", ")}]`;
+      contextSnippet = `\n\n[User's Optional Anonymized Cycle Summary: ${parts.join(", ")}]`;
     }
   }
 
-  const systemInstruction = `You are Saheli Health Assistant, an empathetic, evidence-based menstrual-health educational assistant serving users across India.
+  const systemInstruction = `You are Saheli Health Assistant, an empathetic, evidence-based menstrual-health educational assistant serving women and adolescents across India.
 CRITICAL SAFETY & CLINICAL RULES:
-1. Provide educational health information ONLY. NEVER provide medical diagnosis, treatment prescriptions, or definitive medical verdicts.
-2. Recommend consulting a qualified healthcare professional (gynaecologist or primary care doctor) for diagnosis, persistent symptoms, or severe pain.
+1. Provide educational health information ONLY. NEVER provide medical diagnosis, treatment prescriptions, medication dosages, or definitive clinical verdicts.
+2. Recommend consulting a qualified healthcare professional (gynaecologist or primary care physician) for diagnosis, persistent symptoms, or severe pain.
 3. Keep answers clear, accessible, culturally sensitive, non-judgmental, and practical.
-4. If the question is in Hindi or another Indian language, respond naturally in that language (using native script or clear Hinglish if requested).
-5. Address the user's cycle context respectfully if provided, but clarify that estimates are calculated predictions rather than biological certainty.
+4. Ground all advice in established clinical guidelines (NHS, WHO, ACOG, FOGSI).
+5. If the question is in Hindi, Marathi, Bengali, Tamil, Telugu, Urdu, or another Indian language, respond naturally in that language.
 6. Maximum answer length: 3 concise paragraphs.`;
 
   try {
@@ -355,7 +442,11 @@ CRITICAL SAFETY & CLINICAL RULES:
         );
       }
 
-      const data = await aiRes.json();
+      const data = (await aiRes.json()) as {
+        candidates?: Array<{
+          content?: { parts?: Array<{ text?: string }> };
+        }>;
+      };
       answerText = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
     } else {
       // OpenAI-compatible provider
@@ -391,7 +482,9 @@ CRITICAL SAFETY & CLINICAL RULES:
         );
       }
 
-      const data = await aiRes.json();
+      const data = (await aiRes.json()) as {
+        choices?: Array<{ message?: { content?: string } }>;
+      };
       answerText = data?.choices?.[0]?.message?.content?.trim() || "";
     }
 
@@ -411,6 +504,7 @@ CRITICAL SAFETY & CLINICAL RULES:
         ok: true,
         answer: answerText,
         disclaimer: DISCLAIMER,
+        sources: ["nhs_periods", "acog_adolescent", "who_pcos"],
         source: "ai_assistant",
       }),
       { status: 200, headers: { "Content-Type": "application/json" } },

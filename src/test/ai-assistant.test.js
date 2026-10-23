@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import { screenSafety, handleAskRequest, checkRateLimit } from "../server/api/ai";
 
 describe("Saheli AI Health Assistant & Deterministic Safety Engine", () => {
@@ -9,6 +9,7 @@ describe("Saheli AI Health Assistant & Deterministic Safety Engine", () => {
     expect(res.type).toBe("urgent");
     expect(res.helplines?.some((h) => h.number === "112")).toBe(true);
     expect(res.helplines?.some((h) => h.number === "108")).toBe(true);
+    expect(res.sources).toContain("nhs_heavy");
   });
 
   // Case 2: Sudden severe pelvic pain red flag
@@ -17,6 +18,7 @@ describe("Saheli AI Health Assistant & Deterministic Safety Engine", () => {
     expect(res.isRedFlag).toBe(true);
     expect(res.type).toBe("urgent");
     expect(res.helplines?.some((h) => h.number === "112")).toBe(true);
+    expect(res.sources).toContain("nhs_pain");
   });
 
   // Case 3: High fever with foul discharge red flag
@@ -31,15 +33,17 @@ describe("Saheli AI Health Assistant & Deterministic Safety Engine", () => {
     const res = screenSafety("I have a positive pregnancy test and heavy bleeding with sharp pain");
     expect(res.isRedFlag).toBe(true);
     expect(res.type).toBe("urgent");
+    expect(res.sources).toContain("nhs_preg_bleeding");
   });
 
-  // Case 5: Crisis / self-harm / suicidal thoughts
+  // Case 5: Crisis / self-harm / suicidal thoughts in English
   it("Case 5: routes self-harm or suicidal thoughts directly to Tele-MANAS 14416", () => {
     const res = screenSafety("I feel hopeless and want to end my life");
     expect(res.isRedFlag).toBe(true);
     expect(res.type).toBe("crisis");
     expect(res.helplines?.some((h) => h.number === "14416")).toBe(true);
     expect(res.helplines?.some((h) => h.number === "1800-599-0019")).toBe(true);
+    expect(res.sources).toContain("telemanas");
   });
 
   // Case 6: Hindi crisis keywords
@@ -50,20 +54,53 @@ describe("Saheli AI Health Assistant & Deterministic Safety Engine", () => {
     expect(res.helplines?.some((h) => h.number === "14416")).toBe(true);
   });
 
-  // Case 7: Normal non-urgent cycle question is not flagged as red flag
-  it("Case 7: allows normal cycle length question through to educational guidance", () => {
+  // Case 7: Marathi, Tamil, Telugu, Bengali, Urdu crisis screening
+  it("Case 7: detects crisis and red flags across multiple Indian languages", () => {
+    // Marathi crisis
+    expect(screenSafety("मला स्वतःला इजा करायची आहे").type).toBe("crisis");
+    // Tamil crisis
+    expect(screenSafety("எனக்கு தற்கொலை எண்ணங்கள் வருகின்றன").type).toBe("crisis");
+    // Telugu crisis
+    expect(screenSafety("నేను ఆత్మహత్య చేసుకోవాలనుకుంటున్నాను").type).toBe("crisis");
+    // Urdu crisis
+    expect(screenSafety("مجھے خودکشی کے خیالات آ رہے ہیں").type).toBe("crisis");
+    // Bengali red flag
+    expect(screenSafety("অতিরিক্ত রক্তক্ষরণ হচ্ছে এবং জ্ঞান হারিয়ে ফেলেছি").isRedFlag).toBe(true);
+    // Tamil red flag
+    expect(screenSafety("அதிக இரத்தப்போக்கு மற்றும் மயக்கம்").isRedFlag).toBe(true);
+  });
+
+  // Case 8: Medication prescription request safety guardrail
+  it("Case 8: detects medication requests and refuses unprescribed pharmaceutical dosing", () => {
+    const res = screenSafety("Which antibiotic or medicine should I take to stop my period?");
+    expect(res.isRedFlag).toBe(false);
+    expect(res.type).toBe("medication");
+    expect(res.message).toContain("Saheli is an educational companion and does NOT prescribe");
+    expect(res.sources).toContain("acog_visit");
+
+    // Hindi medication request
+    const hiRes = screenSafety("मुझे पीरियड लाने की दवा बताओ कौन सी गोली खानी चाहिए");
+    expect(hiRes.type).toBe("medication");
+  });
+
+  // Case 9: Misleading contraception calendar method inquiry
+  it("Case 9: detects contraception inquiries and warns against using calendar for family planning", () => {
+    const res = screenSafety("What are the safe days to avoid pregnancy without condom?");
+    expect(res.isRedFlag).toBe(false);
+    expect(res.type).toBe("contraception");
+    expect(res.message).toContain("must NEVER be used as a method of contraception");
+    expect(res.sources).toContain("who_contraception");
+  });
+
+  // Case 10: Normal non-urgent cycle question is not flagged as red flag
+  it("Case 10: allows normal cycle length question through to educational guidance", () => {
     const res = screenSafety("How many days is a normal menstrual cycle in adult women?");
     expect(res.isRedFlag).toBe(false);
+    expect(res.type).toBeUndefined();
   });
 
-  // Case 8: Period cramps self-care inquiry
-  it("Case 8: allows non-emergency cramps question through", () => {
-    const res = screenSafety("What home remedies or warm compresses help with mild day 1 cramps?");
-    expect(res.isRedFlag).toBe(false);
-  });
-
-  // Case 9: Request handler rejects request if consent is not granted
-  it("Case 9: rejects request when consent is false", async () => {
+  // Case 11: Request handler rejects request if consent is not granted
+  it("Case 11: rejects request when consent is false", async () => {
     const req = new Request("http://localhost/api/ask", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -76,8 +113,8 @@ describe("Saheli AI Health Assistant & Deterministic Safety Engine", () => {
     expect(body.error).toContain("Consent required");
   });
 
-  // Case 10: Request handler rejects empty question
-  it("Case 10: rejects empty question with HTTP 400", async () => {
+  // Case 12: Request handler rejects empty question
+  it("Case 12: rejects empty question with HTTP 400", async () => {
     const req = new Request("http://localhost/api/ask", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -89,8 +126,8 @@ describe("Saheli AI Health Assistant & Deterministic Safety Engine", () => {
     expect(body.ok).toBe(false);
   });
 
-  // Case 11: Request handler rejects question over 500 characters
-  it("Case 11: rejects question exceeding 500 characters", async () => {
+  // Case 13: Request handler rejects question over 500 characters
+  it("Case 13: rejects question exceeding 500 characters", async () => {
     const req = new Request("http://localhost/api/ask", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -103,8 +140,8 @@ describe("Saheli AI Health Assistant & Deterministic Safety Engine", () => {
     expect(body.error).toContain("maximum 500 characters");
   });
 
-  // Case 12: Deterministic safety handles red flag directly without needing AI key
-  it("Case 12: returns deterministic emergency response without needing AI API key", async () => {
+  // Case 14: Deterministic safety handles red flag directly without needing AI key
+  it("Case 14: returns deterministic emergency response without needing AI API key", async () => {
     const req = new Request("http://localhost/api/ask", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -120,10 +157,11 @@ describe("Saheli AI Health Assistant & Deterministic Safety Engine", () => {
     expect(body.red_flag).toBe(true);
     expect(body.source).toBe("deterministic_safety");
     expect(body.helplines).toBeDefined();
+    expect(body.sources).toBeDefined();
   });
 
-  // Case 13: Missing AI API key returns graceful fallback
-  it("Case 13: returns graceful fallback when AI API key is not configured", async () => {
+  // Case 15: Missing AI API key returns graceful fallback
+  it("Case 15: returns graceful fallback when AI API key is not configured", async () => {
     const origKey = process.env.AI_API_KEY;
     const origGeminiKey = process.env.GEMINI_API_KEY;
     delete process.env.AI_API_KEY;
@@ -150,8 +188,8 @@ describe("Saheli AI Health Assistant & Deterministic Safety Engine", () => {
     }
   });
 
-  // Case 14: Rate limiting enforcement
-  it("Case 14: enforces rate limits per client IP", () => {
+  // Case 16: Rate limiting enforcement
+  it("Case 16: enforces rate limits per client IP", () => {
     const testIp = "test-rate-limit-ip-" + Date.now();
     for (let i = 0; i < 5; i++) {
       expect(checkRateLimit(testIp, 5, 10000)).toBe(true);
@@ -159,8 +197,8 @@ describe("Saheli AI Health Assistant & Deterministic Safety Engine", () => {
     expect(checkRateLimit(testIp, 5, 10000)).toBe(false);
   });
 
-  // Case 15: Safety screening includes medical disclaimer
-  it("Case 15: attaches medical disclaimer to emergency answers", async () => {
+  // Case 17: Disclaimer notes that automated screening is a supportive filter
+  it("Case 17: disclaimer notes that automated keyword screening is a safety filter", async () => {
     const req = new Request("http://localhost/api/ask", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -171,6 +209,6 @@ describe("Saheli AI Health Assistant & Deterministic Safety Engine", () => {
     });
     const res = await handleAskRequest(req);
     const body = await res.json();
-    expect(body.disclaimer).toContain("Saheli is an educational health information companion");
+    expect(body.disclaimer).toContain("Automated keyword screening is an assistive safety filter");
   });
 });
