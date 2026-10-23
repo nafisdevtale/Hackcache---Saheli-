@@ -10,6 +10,8 @@ const b64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)));
 const unb64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
 
 export const isValidPin = (p) => typeof p === "string" && /^\d{4}$/.test(p);
+export const isValidPassphrase = (p) => typeof p === "string" && p.trim().length >= 6;
+export const isValidSecret = (s) => isValidPin(s) || isValidPassphrase(s);
 export const randomSaltB64 = () => b64(crypto.getRandomValues(new Uint8Array(16)));
 
 export async function deriveKey(pin, saltB64, iterations = CONFIG.pbkdf2Iterations) {

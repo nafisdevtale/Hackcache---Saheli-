@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   Calendar,
@@ -13,9 +14,12 @@ import {
   Stethoscope,
   TrendingUp,
   Sparkles,
+  Search,
+  X,
+  ExternalLink,
 } from "lucide-react";
 import { useApp } from "@/App.jsx";
-import { Card, PageTitle, Chip } from "@/components/common/ui.jsx";
+import { Card, PageTitle, Chip, cx } from "@/components/common/ui.jsx";
 import { BarChart } from "@/components/insights/BarChart.jsx";
 import { patternText } from "@/components/insights/patternText.js";
 import { computeCycleInsights } from "@/lib/insights.js";
@@ -24,11 +28,14 @@ import { InsightEmptyArt } from "@/components/brand/SaheliArt.jsx";
 
 export default function Insights() {
   const { t, fmt, fmtRange, analysis: a, record, prefs, today } = useApp();
+  const [cycleScope, setCycleScope] = useState("recent");
+  const [inspectProvenance, setInspectProvenance] = useState(null);
 
   const insights = computeCycleInsights({
     record,
     analysis: a,
     today,
+    scope: cycleScope,
   });
 
   const { limits } = insights;
@@ -36,13 +43,45 @@ export default function Insights() {
 
   return (
     <div className="space-y-6">
-      <div className="border-b border-border/60 pb-3">
-        <span className="text-xs font-bold uppercase tracking-wider text-primary">
-          {t("ins.title")}
-        </span>
-        <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-          {prefs.discreet ? t("app.discreetName") : t("ins.title")}
-        </h1>
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-border/60 pb-3">
+        <div>
+          <span className="text-xs font-bold uppercase tracking-wider text-primary">
+            {t("ins.title")}
+          </span>
+          <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+            {prefs.discreet ? t("app.discreetName") : t("ins.title")}
+          </h1>
+        </div>
+
+        {/* Filter Toggle: Recent 6 Cycles vs All Cycles */}
+        {insights.totalCyclesCount > 0 && (
+          <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-muted/70 border border-border/60 w-fit text-xs">
+            <button
+              type="button"
+              onClick={() => setCycleScope("recent")}
+              className={cx(
+                "px-3 py-1.5 font-bold rounded-xl transition-all",
+                cycleScope === "recent"
+                  ? "bg-card text-foreground shadow-2xs"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {t("ins.filterRecent", { n: CONFIG.historyWindow })}
+            </button>
+            <button
+              type="button"
+              onClick={() => setCycleScope("all")}
+              className={cx(
+                "px-3 py-1.5 font-bold rounded-xl transition-all",
+                cycleScope === "all"
+                  ? "bg-card text-foreground shadow-2xs"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {t("ins.filterAll", { n: insights.totalCyclesCount })}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Empty state: No complete cycles yet */}
@@ -330,6 +369,21 @@ export default function Insights() {
                         • {t("log.bigClots")} ({insights.bigClotsDays} d)
                       </p>
                     )}
+                    {insights.heavyBleedingProvenance && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setInspectProvenance({
+                            title: t("ins.supportHeavyTitle"),
+                            provenance: insights.heavyBleedingProvenance,
+                          })
+                        }
+                        className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-900 dark:text-amber-200 hover:underline pt-1"
+                      >
+                        <Search className="h-3 w-3" />
+                        <span>{t("ins.inspectEvidence")}</span>
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
@@ -348,9 +402,29 @@ export default function Insights() {
                   {t("ins.patterns")}
                 </h3>
                 {insights.patterns.length ? (
-                  <ul className="mt-1.5 space-y-1.5 text-xs list-disc pl-5 text-foreground leading-relaxed">
+                  <ul className="mt-1.5 space-y-1.5 text-xs text-foreground leading-relaxed">
                     {insights.patterns.map((p, i) => (
-                      <li key={i}>{patternText(p, t)}</li>
+                      <li
+                        key={i}
+                        className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 py-1 border-b border-border/30 last:border-none"
+                      >
+                        <span>• {patternText(p, t)}</span>
+                        {p.provenance && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setInspectProvenance({
+                                title: patternText(p, t),
+                                provenance: p.provenance,
+                              })
+                            }
+                            className="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:underline shrink-0"
+                          >
+                            <Search className="h-3 w-3" />
+                            <span>{t("ins.inspectEvidence")}</span>
+                          </button>
+                        )}
+                      </li>
                     ))}
                   </ul>
                 ) : (
@@ -376,15 +450,30 @@ export default function Insights() {
                       return (
                         <div
                           key={s.id}
-                          className="flex flex-col sm:flex-row sm:items-center justify-between rounded-xl bg-muted/40 p-2.5 text-xs"
+                          className="flex flex-col sm:flex-row sm:items-center justify-between rounded-xl bg-muted/40 p-2.5 text-xs gap-2"
                         >
                           <span className="font-semibold text-foreground">
                             {s.custom ? s.label : t(`sym.${s.id}`)}
                           </span>
-                          <div className="flex items-center gap-2 text-[11px] text-muted-foreground mt-1 sm:mt-0">
+                          <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
                             <span>{t("ins.loggedTimes", { n: s.count, pct: s.percentage })}</span>
                             <span>•</span>
                             <span className="text-primary font-bold">{phaseLabel}</span>
+                            {s.provenance && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setInspectProvenance({
+                                    title: s.custom ? s.label : t(`sym.${s.id}`),
+                                    provenance: s.provenance,
+                                  })
+                                }
+                                className="ml-1 inline-flex items-center gap-0.5 font-bold text-primary hover:underline"
+                              >
+                                <Search className="h-3 w-3" />
+                                <span>{t("ins.inspectEvidence")}</span>
+                              </button>
+                            )}
                           </div>
                         </div>
                       );
@@ -398,9 +487,26 @@ export default function Insights() {
 
               {/* Pain & Well-being Trends */}
               <div className="border-t border-border/60 pt-3 space-y-2">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                  {t("ins.painOverview")}
-                </h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                    {t("ins.painOverview")}
+                  </h3>
+                  {insights.pain.provenance && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setInspectProvenance({
+                          title: t("ins.painOverview"),
+                          provenance: insights.pain.provenance,
+                        })
+                      }
+                      className="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:underline"
+                    >
+                      <Search className="h-3 w-3" />
+                      <span>{t("ins.inspectEvidence")}</span>
+                    </button>
+                  )}
+                </div>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="rounded-xl bg-card border border-border/70 p-2.5">
                     <p className="text-muted-foreground">{t("log.pain")}</p>
@@ -506,6 +612,98 @@ export default function Insights() {
                 National Emergency: {EMERGENCY.national} | Ambulance: {EMERGENCY.ambulance} | Mental
                 Health (Tele-MANAS): {EMERGENCY.teleManas}
               </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Provenance & Supporting Evidence Modal */}
+      {inspectProvenance && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="provenance-title"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-xs animate-fade-in"
+        >
+          <div className="relative w-full max-w-lg rounded-3xl border border-border/70 bg-card p-6 shadow-2xl space-y-4">
+            <div className="flex items-start justify-between gap-3 border-b border-border/60 pb-3">
+              <div>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-primary">
+                  {t("ins.evidenceTitle")}
+                </span>
+                <h2
+                  id="provenance-title"
+                  className="text-base sm:text-lg font-bold text-foreground"
+                >
+                  {inspectProvenance.title}
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setInspectProvenance(null)}
+                className="rounded-xl p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-all"
+                aria-label={t("common.close")}
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div className="flex items-center justify-between p-3 rounded-2xl bg-muted/40 border border-border/60">
+                <div>
+                  <p className="font-semibold text-foreground">{t("ins.evidenceMethod")}</p>
+                  <p className="text-muted-foreground mt-0.5">
+                    {inspectProvenance.provenance.methodology}
+                  </p>
+                </div>
+                <span className="rounded-xl bg-primary/10 px-2.5 py-1 font-bold text-primary uppercase text-[10px] shrink-0">
+                  {inspectProvenance.provenance.confidence} {t("ins.confidence")}
+                </span>
+              </div>
+
+              <div>
+                <p className="font-semibold text-foreground mb-1">{t("ins.evidenceDates")}:</p>
+                <p className="text-[11px] text-muted-foreground mb-2">
+                  {t("ins.evidenceTapToEdit")}
+                </p>
+                <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto p-1">
+                  {inspectProvenance.provenance.supportingDates?.length > 0 ? (
+                    inspectProvenance.provenance.supportingDates.map((d) => (
+                      <Link
+                        key={d}
+                        to="/log"
+                        search={{ date: d }}
+                        onClick={() => setInspectProvenance(null)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-muted hover:bg-primary hover:text-primary-foreground font-mono text-xs font-semibold transition-all shadow-2xs"
+                      >
+                        <span>{fmt(d, { month: "short", day: "numeric", year: "numeric" })}</span>
+                        <ExternalLink className="h-3 w-3 opacity-70" />
+                      </Link>
+                    ))
+                  ) : (
+                    <span className="text-muted-foreground">{t("ins.noDatesRecorded")}</span>
+                  )}
+                </div>
+              </div>
+
+              {insights.totalDaysInSpan > 0 && (
+                <div className="rounded-2xl bg-accent/40 border border-accent p-3 text-[11px] text-accent-foreground leading-relaxed">
+                  {t("ins.evidenceUnloggedNote", {
+                    total: insights.totalDaysInSpan,
+                    unlogged: insights.unloggedDaysCount,
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                type="button"
+                onClick={() => setInspectProvenance(null)}
+                className="px-4 py-2 rounded-xl bg-primary text-primary-foreground font-bold text-xs shadow-xs hover:bg-primary/90 transition-all"
+              >
+                {t("common.close")}
+              </button>
             </div>
           </div>
         </div>

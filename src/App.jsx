@@ -24,6 +24,7 @@ import {
   randomSaltB64,
   isEncrypted,
   isValidPin,
+  isValidSecret,
 } from "./lib/encryption.js";
 import { analyze } from "./lib/cycle.js";
 import { evaluateSafety } from "./lib/safetyRules.js";
@@ -268,7 +269,7 @@ export function AppProvider({ children }) {
         };
       }
 
-      if (pin && isValidPin(pin)) {
+      if (pin && isValidSecret(pin)) {
         const salt = randomSaltB64();
         const iterations = CONFIG.pbkdf2Iterations;
         const key = await deriveKey(pin, salt, iterations);

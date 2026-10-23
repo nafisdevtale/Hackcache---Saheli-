@@ -26,7 +26,7 @@ import {
 } from "lucide-react";
 import { useApp } from "@/App.jsx";
 import { Btn, Card, speak, cx, inputCls } from "@/components/common/ui.jsx";
-import { isValidPin } from "@/lib/encryption.js";
+import { isValidPin, isValidSecret } from "@/lib/encryption.js";
 import { CONFIG } from "@/config.js";
 import { OnboardingFlow } from "@/components/onboarding/OnboardingFlow.jsx";
 import { LANGUAGES } from "@/i18n/languages.js";
@@ -41,15 +41,16 @@ function LockScreen() {
   const [pin, setPin] = useState("");
   const [err, setErr] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [usePassphraseMode, setUsePassphraseMode] = useState(false);
   const inputRef = useRef(null);
 
   useEffect(() => {
     inputRef.current?.focus();
-  }, []);
+  }, [usePassphraseMode]);
 
   async function submit(e) {
     if (e) e.preventDefault();
-    if (!isValidPin(pin)) return setErr({ key: "set.pinInvalid" });
+    if (!isValidSecret(pin)) return setErr({ key: "set.pinInvalid" });
     setBusy(true);
     setErr("");
     try {
@@ -83,7 +84,7 @@ function LockScreen() {
   };
 
   const submitPin = async (submittedPin) => {
-    if (!isValidPin(submittedPin)) return setErr({ key: "set.pinInvalid" });
+    if (!isValidSecret(submittedPin)) return setErr({ key: "set.pinInvalid" });
     setBusy(true);
     setErr("");
     try {
@@ -163,90 +164,144 @@ function LockScreen() {
           </p>
         </div>
 
-        {/* Tactile 4-Digit Display Indicator */}
-        <div
-          className="my-6 flex justify-center gap-3 cursor-pointer"
-          onClick={() => inputRef.current?.focus()}
-        >
-          {[0, 1, 2, 3].map((i) => {
-            const hasDigit = pin.length > i;
-            return (
-              <div
-                key={i}
+        {usePassphraseMode ? (
+          /* Passphrase Input Mode */
+          <form onSubmit={submit} className="my-6 max-w-xs mx-auto space-y-4">
+            <div>
+              <label htmlFor="passphrase-input" className="sr-only">
+                {t("lock.enterPassphrase")}
+              </label>
+              <input
+                id="passphrase-input"
+                ref={inputRef}
+                type="password"
+                autoComplete="current-password"
+                value={pin}
+                onChange={(e) => setPin(e.target.value)}
+                placeholder={t("lock.enterPassphrase")}
                 className={cx(
-                  "flex h-14 w-12 sm:w-14 items-center justify-center rounded-2xl border-2 text-2xl font-bold transition-all",
-                  hasDigit
-                    ? "border-primary bg-primary/15 text-primary shadow-sm scale-105"
-                    : pin.length === i
-                      ? "border-primary/50 bg-background/60 animate-pulse"
-                      : "border-border/60 bg-muted/30 text-muted-foreground",
+                  inputCls,
+                  "h-12 w-full rounded-2xl text-center text-base tracking-widest px-4 border-2 border-primary/40 focus:border-primary",
                 )}
-              >
-                {hasDigit ? "•" : ""}
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Hidden Accessible Input for physical keyboards */}
-        <form onSubmit={submit} className="sr-only">
-          <label htmlFor="pin-input">{t("lock.pin")}</label>
-          <input
-            id="pin-input"
-            ref={inputRef}
-            inputMode="numeric"
-            autoComplete="off"
-            maxLength={4}
-            pattern="\d{4}"
-            type="password"
-            value={pin}
-            onChange={(e) => {
-              const val = e.target.value.replace(/\D/g, "").slice(0, 4);
-              setPin(val);
-              if (val.length === 4) submitPin(val);
-            }}
-          />
-        </form>
-
-        {/* On-Screen Tactile Keypad */}
-        <div className="grid grid-cols-3 gap-2.5 max-w-xs mx-auto">
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((digit) => (
+              />
+            </div>
             <button
-              key={digit}
-              type="button"
-              disabled={busy}
-              onClick={() => handleDigit(String(digit))}
-              className="flex h-12 sm:h-13 items-center justify-center rounded-2xl border border-border/70 bg-card hover:bg-muted/70 active:scale-95 text-lg font-bold text-foreground transition-all shadow-xs"
+              type="submit"
+              disabled={busy || !pin}
+              className="w-full h-12 rounded-2xl bg-primary text-primary-foreground font-bold text-sm shadow-md hover:bg-primary/90 transition-all active:scale-98 disabled:opacity-50"
             >
-              {digit}
+              {busy ? t("set.working") : t("lock.unlock")}
             </button>
-          ))}
-          <button
-            type="button"
-            disabled={busy || pin.length === 0}
-            onClick={() => setPin("")}
-            className="flex h-12 sm:h-13 items-center justify-center rounded-2xl text-xs font-bold text-muted-foreground hover:bg-muted/50 active:scale-95 transition-all"
-          >
-            {t("common.cancel")}
-          </button>
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => handleDigit("0")}
-            className="flex h-12 sm:h-13 items-center justify-center rounded-2xl border border-border/70 bg-card hover:bg-muted/70 active:scale-95 text-lg font-bold text-foreground transition-all shadow-xs"
-          >
-            0
-          </button>
-          <button
-            type="button"
-            disabled={busy || pin.length === 0}
-            onClick={handleBackspace}
-            aria-label="Backspace"
-            className="flex h-12 sm:h-13 items-center justify-center rounded-2xl border border-border/70 bg-muted/40 hover:bg-muted active:scale-95 text-sm font-bold text-foreground transition-all"
-          >
-            ⌫
-          </button>
-        </div>
+            <button
+              type="button"
+              onClick={() => {
+                setUsePassphraseMode(false);
+                setPin("");
+              }}
+              className="w-full text-center py-1 text-xs text-muted-foreground hover:text-foreground font-semibold"
+            >
+              {t("lock.switchToPin")}
+            </button>
+          </form>
+        ) : (
+          /* Tactile 4-Digit PIN Mode */
+          <>
+            <div
+              className="my-6 flex justify-center gap-3 cursor-pointer"
+              onClick={() => inputRef.current?.focus()}
+            >
+              {[0, 1, 2, 3].map((i) => {
+                const hasDigit = pin.length > i;
+                return (
+                  <div
+                    key={i}
+                    className={cx(
+                      "flex h-14 w-12 sm:w-14 items-center justify-center rounded-2xl border-2 text-2xl font-bold transition-all",
+                      hasDigit
+                        ? "border-primary bg-primary/15 text-primary shadow-sm scale-105"
+                        : pin.length === i
+                          ? "border-primary/50 bg-background/60 animate-pulse"
+                          : "border-border/60 bg-muted/30 text-muted-foreground",
+                    )}
+                  >
+                    {hasDigit ? "•" : ""}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Hidden Accessible Input for physical keyboards */}
+            <form onSubmit={submit} className="sr-only">
+              <label htmlFor="pin-input">{t("lock.pin")}</label>
+              <input
+                id="pin-input"
+                ref={inputRef}
+                inputMode="numeric"
+                autoComplete="off"
+                maxLength={4}
+                pattern="\d{4}"
+                type="password"
+                value={pin}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, "").slice(0, 4);
+                  setPin(val);
+                  if (val.length === 4) submitPin(val);
+                }}
+              />
+            </form>
+
+            {/* On-Screen Tactile Keypad */}
+            <div className="grid grid-cols-3 gap-2.5 max-w-xs mx-auto">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((digit) => (
+                <button
+                  key={digit}
+                  type="button"
+                  disabled={busy}
+                  onClick={() => handleDigit(String(digit))}
+                  className="flex h-12 sm:h-13 items-center justify-center rounded-2xl border border-border/70 bg-card hover:bg-muted/70 active:scale-95 text-lg font-bold text-foreground transition-all shadow-xs"
+                >
+                  {digit}
+                </button>
+              ))}
+              <button
+                type="button"
+                disabled={busy || pin.length === 0}
+                onClick={() => setPin("")}
+                className="flex h-12 sm:h-13 items-center justify-center rounded-2xl text-xs font-bold text-muted-foreground hover:bg-muted/50 active:scale-95 transition-all"
+              >
+                {t("common.cancel")}
+              </button>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => handleDigit("0")}
+                className="flex h-12 sm:h-13 items-center justify-center rounded-2xl border border-border/70 bg-card hover:bg-muted/70 active:scale-95 text-lg font-bold text-foreground transition-all shadow-xs"
+              >
+                0
+              </button>
+              <button
+                type="button"
+                disabled={busy || pin.length === 0}
+                onClick={handleBackspace}
+                aria-label="Backspace"
+                className="flex h-12 sm:h-13 items-center justify-center rounded-2xl border border-border/70 bg-muted/40 hover:bg-muted active:scale-95 text-sm font-bold text-foreground transition-all"
+              >
+                ⌫
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setUsePassphraseMode(true);
+                setPin("");
+              }}
+              className="mt-4 block mx-auto text-xs text-primary hover:underline font-semibold"
+            >
+              {t("lock.switchToPassphrase")}
+            </button>
+          </>
+        )}
 
         {err && (
           <div

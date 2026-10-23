@@ -29,7 +29,7 @@ import {
 } from "@/components/common/ui.jsx";
 import { SYMPTOMS } from "@/data/symptoms.js";
 import { exportJSON, exportCSV, parseImport, importPreview } from "@/lib/exportImport.js";
-import { isValidPin } from "@/lib/encryption.js";
+import { isValidPin, isValidPassphrase, isValidSecret } from "@/lib/encryption.js";
 import { todayStr } from "@/lib/localDate.js";
 import { LANGUAGES } from "@/i18n/languages.js";
 
@@ -42,19 +42,26 @@ function download(name, text, type) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-function PinInput({ id, label, value, onChange }) {
+function PinInput({ id, label, value, onChange, isPassphrase = false }) {
   return (
     <label htmlFor={id} className="block font-semibold text-xs text-foreground mb-1">
       {label}
       <input
         id={id}
         type="password"
-        inputMode="numeric"
-        maxLength={4}
+        inputMode={isPassphrase ? "text" : "numeric"}
+        maxLength={isPassphrase ? 64 : 4}
         autoComplete="off"
         value={value}
-        onChange={(e) => onChange(e.target.value.replace(/\D/g, ""))}
-        className={cx(inputCls, "h-11 rounded-2xl tracking-[0.4em] text-center text-lg")}
+        onChange={(e) =>
+          onChange(isPassphrase ? e.target.value : e.target.value.replace(/\D/g, ""))
+        }
+        className={cx(
+          inputCls,
+          isPassphrase
+            ? "h-11 rounded-2xl px-4 text-base tracking-widest"
+            : "h-11 rounded-2xl tracking-[0.4em] text-center text-lg",
+        )}
       />
     </label>
   );
@@ -116,6 +123,7 @@ function ExportBlock() {
 function PinSection() {
   const { t, meta, enablePin, disablePin, changePin, lock } = useApp();
   const [mode, setMode] = useState(null);
+  const [secretType, setSecretType] = useState("pin"); // "pin" | "passphrase"
   const [a, setA] = useState("");
   const [b, setB] = useState("");
   const [c, setC] = useState("");
@@ -138,15 +146,21 @@ function PinSection() {
     setMsg(null);
     try {
       if (mode === "enable") {
-        if (!isValidPin(a)) throw new Error("set.pinInvalid");
+        const isValid = secretType === "passphrase" ? isValidPassphrase(a) : isValidPin(a);
+        if (!isValid)
+          throw new Error(secretType === "passphrase" ? "set.passphraseInvalid" : "set.pinInvalid");
         if (a !== b) throw new Error("set.pinMismatch");
         await enablePin(a);
         reset();
       } else if (mode === "disable") {
+        if (!isValidSecret(a)) throw new Error("set.pinInvalid");
         await disablePin(a);
         reset();
       } else if (mode === "change") {
-        if (!isValidPin(b)) throw new Error("set.pinInvalid");
+        if (!isValidSecret(a)) throw new Error("set.pinInvalid");
+        const isValid = secretType === "passphrase" ? isValidPassphrase(b) : isValidPin(b);
+        if (!isValid)
+          throw new Error(secretType === "passphrase" ? "set.passphraseInvalid" : "set.pinInvalid");
         if (b !== c) throw new Error("set.pinMismatch");
         await changePin(a, b);
         reset();
@@ -156,6 +170,8 @@ function PinSection() {
     }
     setBusy(false);
   }
+
+  const isPass = secretType === "passphrase";
 
   return (
     <div className="space-y-4">
@@ -208,10 +224,61 @@ function PinSection() {
           onSubmit={submit}
           className="space-y-3 rounded-2xl border border-border/70 bg-muted/30 p-4 animate-fade-in"
         >
+          {(mode === "enable" || mode === "change") && (
+            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-card border border-border/60 w-fit text-xs">
+              <button
+                type="button"
+                onClick={() => {
+                  setSecretType("pin");
+                  setA("");
+                  setB("");
+                  setC("");
+                }}
+                className={cx(
+                  "px-3 py-1 font-bold rounded-lg transition-all",
+                  secretType === "pin"
+                    ? "bg-primary text-primary-foreground shadow-2xs"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {t("set.secretTypePin")}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSecretType("passphrase");
+                  setA("");
+                  setB("");
+                  setC("");
+                }}
+                className={cx(
+                  "px-3 py-1 font-bold rounded-lg transition-all",
+                  secretType === "passphrase"
+                    ? "bg-primary text-primary-foreground shadow-2xs"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {t("set.secretTypePassphrase")}
+              </button>
+            </div>
+          )}
+
           {mode === "enable" && (
             <>
-              <PinInput id="new" label={t("set.pinNew")} value={a} onChange={setA} />
-              <PinInput id="confirm" label={t("set.pinConfirm")} value={b} onChange={setB} />
+              <PinInput
+                id="new"
+                label={isPass ? t("set.passphraseNew") : t("set.pinNew")}
+                value={a}
+                onChange={setA}
+                isPassphrase={isPass}
+              />
+              <PinInput
+                id="confirm"
+                label={isPass ? t("set.passphraseConfirm") : t("set.pinConfirm")}
+                value={b}
+                onChange={setB}
+                isPassphrase={isPass}
+              />
               <label className="flex items-start gap-2 text-xs text-muted-foreground cursor-pointer pt-1">
                 <input
                   type="checkbox"
@@ -224,13 +291,37 @@ function PinSection() {
             </>
           )}
           {mode === "disable" && (
-            <PinInput id="curr" label={t("set.pinCurrent")} value={a} onChange={setA} />
+            <PinInput
+              id="curr"
+              label={t("set.pinCurrent")}
+              value={a}
+              onChange={setA}
+              isPassphrase={true}
+            />
           )}
           {mode === "change" && (
             <>
-              <PinInput id="curr" label={t("set.pinCurrent")} value={a} onChange={setA} />
-              <PinInput id="new" label={t("set.pinNew")} value={b} onChange={setB} />
-              <PinInput id="confirm" label={t("set.pinConfirm")} value={c} onChange={setC} />
+              <PinInput
+                id="curr"
+                label={t("set.pinCurrent")}
+                value={a}
+                onChange={setA}
+                isPassphrase={true}
+              />
+              <PinInput
+                id="new"
+                label={isPass ? t("set.passphraseNew") : t("set.pinNew")}
+                value={b}
+                onChange={setB}
+                isPassphrase={isPass}
+              />
+              <PinInput
+                id="confirm"
+                label={isPass ? t("set.passphraseConfirm") : t("set.pinConfirm")}
+                value={c}
+                onChange={setC}
+                isPassphrase={isPass}
+              />
             </>
           )}
           <div className="flex gap-2 pt-2">

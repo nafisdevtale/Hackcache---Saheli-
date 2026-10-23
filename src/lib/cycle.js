@@ -184,12 +184,19 @@ export function analyze(days = {}, opts = {}) {
   else if (fertilityStatus === "unavailable_data") fertilityUnavailable = "insufficient";
 
   const diagnosticInfo = {
+    calculationVersion: "6.1.0",
     cyclesConsidered: recent.length,
     cycleLengths: lengths,
     variationMeasure: spread,
     activeAgeBand: ageGroup,
     estimationPreference: showFertility !== false,
     pregnancyMode: isPregnancyActive,
+    eligibilityStatus: fertilityStatus === "estimate_available" ? "eligible" : "suppressed",
+    inputValidity: {
+      periodsCount: periods.length,
+      completeCyclesCount: cycles.length,
+      valid: true,
+    },
     suppressionReason: fertilitySuppressionReason,
     fertilityStatus,
   };

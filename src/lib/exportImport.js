@@ -1,6 +1,17 @@
 import { isValidDate } from "./localDate.js";
 import { SYMPTOM_IDS, MOODS, ENERGY, FLOWS } from "../data/symptoms.js";
 
+export const DEFAULT_DASHBOARD_WIDGETS = [
+  { id: "rhythmRing", visible: true },
+  { id: "nextPeriod", visible: true },
+  { id: "todayLog", visible: true },
+  { id: "reminders", visible: true },
+  { id: "fertility", visible: true },
+  { id: "insights", visible: true },
+  { id: "learning", visible: true },
+  { id: "doctorShortcuts", visible: true },
+];
+
 export function emptyRecord() {
   return {
     version: 1,
@@ -11,6 +22,7 @@ export function emptyRecord() {
       customSymptoms: [],
       symptomCategories: ["physical", "emotional", "digestive", "sleep_energy", "safety"],
       quickLogFavorites: ["cramps", "headache", "tiredness", "bloating"],
+      dashboardWidgets: [...DEFAULT_DASHBOARD_WIDGETS],
       showFertility: true,
       fertilityOptIn: false,
       pregnancyOptIn: false,
@@ -45,6 +57,9 @@ export function normalizeRecord(r) {
       quickLogFavorites: Array.isArray(r.settings?.quickLogFavorites)
         ? r.settings.quickLogFavorites
         : e.settings.quickLogFavorites,
+      dashboardWidgets: Array.isArray(r.settings?.dashboardWidgets)
+        ? r.settings.dashboardWidgets
+        : [...e.settings.dashboardWidgets],
     },
     pregnancy: { ...e.pregnancy, ...(r.pregnancy || {}) },
     reminders: {
@@ -101,6 +116,7 @@ const ALLOWED_SETTINGS_KEYS = [
   "customSymptoms",
   "symptomCategories",
   "quickLogFavorites",
+  "dashboardWidgets",
   "showFertility",
   "fertilityOptIn",
   "pregnancyOptIn",
@@ -297,6 +313,11 @@ export function parseImport(text) {
     (s.quickLogFavorites &&
       (!Array.isArray(s.quickLogFavorites) ||
         s.quickLogFavorites.some((f) => typeof f !== "string"))) ||
+    (s.dashboardWidgets &&
+      (!Array.isArray(s.dashboardWidgets) ||
+        s.dashboardWidgets.some(
+          (w) => !object(w) || typeof w.id !== "string" || typeof w.visible !== "boolean",
+        ))) ||
     (p.lmp !== null && !isValidDate(p.lmp)) ||
     (p.active && !isValidDate(p.lmp)) ||
     !time(r.daily.time) ||

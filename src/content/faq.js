@@ -1216,9 +1216,33 @@ export const SELF_HARM_KW = [
 const norm = (s) =>
   s
     .toLowerCase()
-    .replace(/[?.!,।]/g, " ")
+    .replace(/[?.!,।:;()"'`~@#$%^&*_\-+=/\\<>{}[\]]/gu, " ")
     .replace(/\s+/g, " ")
     .trim();
+
+export const INDIAN_VERNACULAR_SYNONYMS = {
+  mahavari: ["period", "cycle", "माहवारी"],
+  mahina: ["period", "cycle", "महीना"],
+  mc: ["period", "cycle"],
+  periods: ["period"],
+  dard: ["pain", "cramps", "दर्द"],
+  peeda: ["pain", "cramps", "पीड़ा"],
+  cramp: ["cramps"],
+  cramping: ["cramps"],
+  dukhna: ["pain", "दर्द"],
+  khoon: ["bleeding", "blood", "खून"],
+  safed: ["discharge", "सफेद"],
+  pani: ["discharge", "पानी"],
+  likoria: ["discharge", "leukorrhea", "लकोरिया"],
+  leukorrhea: ["discharge"],
+  kamjor: ["tired", "fatigue", "कमज़ोर"],
+  kamjori: ["tired", "fatigue", "कमज़ोरी"],
+  thakan: ["tired", "fatigue", "थकान"],
+  garbh: ["pregnant", "pregnancy", "गर्भ"],
+  hamal: ["pregnant", "pregnancy", "حمل"],
+  pcos: ["irregular", "pcos"],
+  motapa: ["weight", "वजन"],
+};
 
 // Whole tokens/phrases avoid matching "din" inside "bleeding". Longer phrases win ties.
 export function matchFaq(question) {
@@ -1320,13 +1344,31 @@ export function matchFaq(question) {
     contains(["sudden severe", "अचानक तेज़", "अचानक बहुत दर्द"])
   )
     return { type: "urgent" };
+
+  const queryTokens = q.trim().split(/\s+/).filter(Boolean);
+  const expandedTokens = new Set(queryTokens);
+  for (const t of queryTokens) {
+    if (INDIAN_VERNACULAR_SYNONYMS[t]) {
+      for (const syn of INDIAN_VERNACULAR_SYNONYMS[t]) {
+        expandedTokens.add(syn.toLowerCase());
+      }
+    }
+  }
+
   let best = null;
   for (const item of FAQ) {
-    const hits = item.kw.filter((k) => q.includes(` ${norm(k)} `));
+    const phraseHits = item.kw.filter((k) => q.includes(` ${norm(k)} `));
+    const tokenHits = item.kw.filter((k) => {
+      const kwNorm = norm(k);
+      return expandedTokens.has(kwNorm) || queryTokens.includes(kwNorm);
+    });
+
+    const combinedHits = Array.from(new Set([...phraseHits, ...tokenHits]));
     const score =
-      hits.reduce((a, k) => a + (k.includes(" ") ? 2 : 1), 0) +
-      Math.max(0, ...hits.map((k) => k.length)) / 1000;
-    if (score > 0 && (!best || score > best.score)) best = { item, hits, score };
+      combinedHits.reduce((a, k) => a + (k.includes(" ") ? 3 : 1.5), 0) +
+      Math.max(0, ...combinedHits.map((k) => k.length)) / 1000;
+
+    if (score > 0 && (!best || score > best.score)) best = { item, hits: combinedHits, score };
   }
   return best ? { type: "match", ...best } : { type: "none" };
 }
