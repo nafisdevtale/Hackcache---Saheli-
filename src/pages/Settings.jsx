@@ -5,6 +5,7 @@ import { SYMPTOMS } from "@/data/symptoms.js";
 import { exportJSON, exportCSV, parseImport, importPreview } from "@/lib/exportImport.js";
 import { isValidPin } from "@/lib/encryption.js";
 import { todayStr } from "@/lib/localDate.js";
+import { LANGUAGES } from "@/i18n/languages.js";
 
 function download(name, text, type) {
   const url = URL.createObjectURL(new Blob([text], { type }));
@@ -314,6 +315,7 @@ export default function Settings() {
   const s = record.settings;
   const [confirmDel, setConfirmDel] = useState(false);
   const [failure, setFailure] = useState("");
+  const [newCustomSym, setNewCustomSym] = useState("");
   const act = async (fn) => {
     try {
       await fn();
@@ -334,13 +336,14 @@ export default function Settings() {
         <h2 className="text-lg font-bold">{t("set.display")}</h2>
         <fieldset>
           <legend className="font-semibold">{t("set.language")}</legend>
-          <div className="mt-1 flex gap-2">
-            {[
-              ["en", "English"],
-              ["hi", "हिंदी"],
-            ].map(([v, l]) => (
-              <Chip key={v} selected={prefs.lang === v} onClick={() => setPrefs({ lang: v })}>
-                {l}
+          <div className="mt-1 flex flex-wrap gap-2">
+            {LANGUAGES.map((l) => (
+              <Chip
+                key={l.code}
+                selected={prefs.lang === l.code}
+                onClick={() => setPrefs({ lang: l.code })}
+              >
+                {l.nativeName}
               </Chip>
             ))}
           </div>
@@ -438,6 +441,65 @@ export default function Settings() {
             })}
           </div>
         </fieldset>
+
+        <div className="space-y-3 border-t border-border pt-4">
+          <h3 className="font-bold">{t("set.customSymptomsTitle")}</h3>
+          <p className="text-xs text-muted-foreground">{t("set.customSymptomsDesc")}</p>
+
+          {(s.customSymptoms || []).length > 0 && (
+            <div className="space-y-2">
+              {s.customSymptoms.map((cs) => (
+                <div
+                  key={cs.id}
+                  className="flex items-center justify-between rounded-xl border border-border p-2.5 text-sm"
+                >
+                  <span className="font-medium">{cs.label}</span>
+                  <Btn
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setS({
+                        customSymptoms: (s.customSymptoms || []).filter((c) => c.id !== cs.id),
+                      });
+                    }}
+                    aria-label={`${t("common.delete")} ${cs.label}`}
+                    className="text-destructive hover:bg-destructive/10"
+                  >
+                    {t("common.delete")}
+                  </Btn>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="flex gap-2">
+            <input
+              type="text"
+              maxLength={30}
+              placeholder={t("set.customSymptomPh")}
+              value={newCustomSym}
+              onChange={(e) => setNewCustomSym(e.target.value)}
+              className={inputCls}
+            />
+            <Btn
+              type="button"
+              disabled={!newCustomSym.trim() || (s.customSymptoms || []).length >= 20}
+              onClick={() => {
+                const label = newCustomSym.trim();
+                if (!label) return;
+                const existing = s.customSymptoms || [];
+                if (existing.some((c) => c.label.toLowerCase() === label.toLowerCase())) return;
+                const id = `c_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
+                setS({
+                  customSymptoms: [...existing, { id, label }],
+                });
+                setNewCustomSym("");
+              }}
+            >
+              {t("set.addCustomSymptom")}
+            </Btn>
+          </div>
+        </div>
       </Card>
 
       <Card className="space-y-3">

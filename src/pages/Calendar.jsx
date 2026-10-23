@@ -2,12 +2,13 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, Droplet } from "lucide-react";
 import { useApp } from "@/App.jsx";
-import { Card, PageTitle } from "@/components/common/ui.jsx";
+import { Card, PageTitle, Btn } from "@/components/common/ui.jsx";
 import { MonthGrid } from "@/components/calendar/MonthGrid.jsx";
 import { monthTitle } from "@/lib/localDate.js";
+import { blankDay } from "@/lib/exportImport.js";
 
 export default function Calendar() {
-  const { t, today, lang, record, fmt } = useApp();
+  const { t, today, lang, record, fmt, saveDay } = useApp();
   const [ym, setYm] = useState(() => [Number(today.slice(0, 4)), Number(today.slice(5, 7)) - 1]);
   const [sel, setSel] = useState(today);
   const move = (n) =>
@@ -80,13 +81,44 @@ export default function Calendar() {
           <p className="mt-1 text-muted-foreground">{t("cal.noEntry")}</p>
         )}
         {sel <= today && (
-          <Link
-            to="/log"
-            search={{ date: sel }}
-            className="mt-3 inline-flex min-h-12 items-center rounded-xl bg-primary px-4 font-semibold text-primary-foreground"
-          >
-            {e ? t("cal.editEntry") : t("cal.addEntry")}
-          </Link>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Link
+              to="/log"
+              search={{ date: sel }}
+              className="inline-flex min-h-12 items-center rounded-xl bg-primary px-4 font-semibold text-primary-foreground"
+            >
+              {e ? t("cal.editEntry") : t("cal.addEntry")}
+            </Link>
+            {!e?.period ? (
+              <Btn
+                variant="outline"
+                onClick={() =>
+                  saveDay({
+                    ...blankDay(sel),
+                    ...(e || {}),
+                    period: true,
+                    flow: e?.flow || "medium",
+                  })
+                }
+              >
+                {t("cal.startPeriod")}
+              </Btn>
+            ) : (
+              <Btn
+                variant="outline"
+                onClick={() =>
+                  saveDay({
+                    ...blankDay(sel),
+                    ...(e || {}),
+                    period: false,
+                    flow: null,
+                  })
+                }
+              >
+                {t("cal.endPeriod")}
+              </Btn>
+            )}
+          </div>
         )}
       </Card>
 

@@ -112,4 +112,20 @@ export const SOURCES = {
     url: "https://telemanas.mohfw.gov.in/",
   },
   india_112: { name: "Emergency Response Support System – 112 India", url: "https://112.gov.in/" },
+  nhs_thyroid: {
+    name: "NHS – Underactive thyroid (hypothyroidism)",
+    url: "https://www.nhs.uk/conditions/underactive-thyroid-hypothyroidism/",
+  },
+  nhs_postpartum: {
+    name: "NHS – Your body after the birth",
+    url: "https://www.nhs.uk/pregnancy/keeping-well/your-body-after-the-birth/",
+  },
+  nhs_menopause: {
+    name: "NHS – Menopause",
+    url: "https://www.nhs.uk/conditions/menopause/",
+  },
+  acog_visit: {
+    name: "ACOG – Your first gynecologic visit",
+    url: "https://www.acog.org/womens-health/faqs/your-first-gynecologic-visit",
+  },
 };

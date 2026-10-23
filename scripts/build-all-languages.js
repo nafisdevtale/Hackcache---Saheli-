@@ -1,0 +1,370 @@
+import fs from "fs";
+import path from "path";
+import en from "../src/i18n/en.js";
+import hi from "../src/i18n/hi.js";
+
+// Common translation terms mapped across 11 additional Indian languages:
+// mr (Marathi), te (Telugu), kn (Kannada), ta (Tamil), bn (Bengali), gu (Gujarati), pa (Punjabi), ml (Malayalam), or (Odia), as (Assamese), ur (Urdu)
+
+const LANGS = ["mr", "te", "kn", "ta", "bn", "gu", "pa", "ml", "or", "as", "ur"];
+
+const GLOSSARY = {
+  mr: {
+    name: "सहेली",
+    discreet: "डायरी",
+    tagline: "तुमची खाजगी मासिक पाळी सोबती",
+    today: "आज",
+    log: "नोंदवा",
+    calendar: "कॅलेंडर",
+    learn: "शिका",
+    more: "अधिक",
+    insights: "माहिती आणि विश्लेषण",
+    doctor: "डॉक्टरांचा सल्ला कधी घ्यावा",
+    ask: "विचारा",
+    reminders: "स्मरणपत्रे",
+    pregnancy: "गर्भधारणा मोड",
+    settings: "सेटिंग्ज",
+    ai: "एआय सहाय्यक",
+    community: "समुदाय",
+    save: "जतन करा",
+    cancel: "रद्द करा",
+    delete: "हटवा",
+    yes: "होय",
+    no: "नाही",
+    back: "मागे",
+    next: "पुढे",
+    estimate: "अंदाज",
+    offline: "ऑफलाइन मोड – डायरी पूर्णपणे उपलब्ध आहे",
+    discreetMsg: "तपासणीची वेळ झाली आहे",
+  },
+  te: {
+    name: "సహేలి",
+    discreet: "డైరీ",
+    tagline: "మీ వ్యక్తిగత పీరియడ్ సహచరి",
+    today: "ఈ రోజు",
+    log: "నమోదు",
+    calendar: "క్యాలెండర్",
+    learn: "తెలుసుకోండి",
+    more: "మరిన్ని",
+    insights: "విశ్లేషణ",
+    doctor: "వైద్యుడిని ఎప్పుడు సంప్రదించాలి",
+    ask: "అడగండి",
+    reminders: "రిమైండర్లు",
+    pregnancy: "గర్భధారణ మోడ్",
+    settings: "సెట్టింగ్‌లు",
+    ai: "AI సహాయకుడు",
+    community: "కమ్యూనిటీ",
+    save: "సేవ్ చేయండి",
+    cancel: "రద్దు చేయండి",
+    delete: "తొలగించు",
+    yes: "అవును",
+    no: "కాదు",
+    back: "వెనుకకు",
+    next: "తదుపరి",
+    estimate: "అంచనా",
+    offline: "ఆఫ్‌లైన్ మోడ్ – డైరీ పూర్తిగా అందుబాటులో ఉంది",
+    discreetMsg: "చెక్-ఇన్ సమయం అయింది",
+  },
+  kn: {
+    name: "ಸಹೇಲಿ",
+    discreet: "ಡೈರಿ",
+    tagline: "ನಿಮ್ಮ ಖಾಸಗಿ ಮುಟ್ಟಿನ ಸಂಗಾತಿ",
+    today: "ಇಂದು",
+    log: "ದಾಖಲಿಸಿ",
+    calendar: "ಕ್ಯಾಲೆಂಡರ್",
+    learn: "ತಿಳಿಯಿರಿ",
+    more: "ಇನ್ನಷ್ಟು",
+    insights: "ವಿಶ್ಲೇಷಣೆ",
+    doctor: "ವೈದ್ಯರನ್ನು ಯಾವಾಗ ಭೇಟಿ ಮಾಡಬೇಕು",
+    ask: "ಕೇಳಿ",
+    reminders: "ಜ್ಞಾಪನೆಗಳು",
+    pregnancy: "ಗರ್ಭಧಾರಣೆ ಮೋಡ್",
+    settings: "ಸೆಟ್ಟಿಂಗ್‌ಗಳು",
+    ai: "AI ಸಹಾಯಕ",
+    community: "ಸಮುದಾಯ",
+    save: "ಉಳಿಸಿ",
+    cancel: "ರದ್ದುಮಾಡಿ",
+    delete: "ಅಳಿಸಿ",
+    yes: "ಹೌದು",
+    no: "ಇಲ್ಲ",
+    back: "ಹಿಂದಕ್ಕೆ",
+    next: "ಮುಂದೆ",
+    estimate: "ಅಂದಾಜು",
+    offline: "ಆಫ್‌ಲೈನ್ ಮೋಡ್ – ಡೈರಿ ಲಭ್ಯವಿದೆ",
+    discreetMsg: "ಪರಿಶೀಲಿಸುವ ಸಮಯ",
+  },
+  ta: {
+    name: "சஹேலி",
+    discreet: "டைரி",
+    tagline: "உங்கள் தனிப்பட்ட மாதவிடாய் தோழி",
+    today: "இன்று",
+    log: "பதிவு",
+    calendar: "நாட்காட்டி",
+    learn: "அறிந்துகொள்ளுங்கள்",
+    more: "மேலும்",
+    insights: "பகுப்பாய்வு",
+    doctor: "மருத்துவரை எப்போது சந்திக்க வேண்டும்",
+    ask: "கேளுங்கள்",
+    reminders: "நினைவூட்டல்கள்",
+    pregnancy: "கர்ப்ப காலம்",
+    settings: "அமைப்புகள்",
+    ai: "AI உதவியாளர்",
+    community: "சமூகம்",
+    save: "சேமிக்கவும்",
+    cancel: "ரத்து செய்",
+    delete: "நீக்குக",
+    yes: "ஆம்",
+    no: "இல்லை",
+    back: "பின்னால்",
+    next: "அடுத்து",
+    estimate: "மதிப்பீடு",
+    offline: "ஆஃப்லைன் பயன்முறை – டைரி கிடைக்கிறது",
+    discreetMsg: "செக்-இன் செய்ய வேண்டிய நேரம்",
+  },
+  bn: {
+    name: "সহেলি",
+    discreet: "ডায়েরি",
+    tagline: "আপনার ব্যক্তিগত পিরিয়ড সঙ্গী",
+    today: "আজ",
+    log: "লগ করুন",
+    calendar: "ক্যালেন্ডার",
+    learn: "জানুন",
+    more: "আরও",
+    insights: "অন্তর্দৃষ্টি ও বিশ্লেষণ",
+    doctor: "কখন ডাক্তারের কাছে যাবেন",
+    ask: "জিজ্ঞাসা করুন",
+    reminders: "অনুস্মারক",
+    pregnancy: "গর্ভাবস্থা মোড",
+    settings: "সেটিংস",
+    ai: "এআই সহকারী",
+    community: "কমিউনিটি",
+    save: "সংরক্ষণ করুন",
+    cancel: "বাতিল করুন",
+    delete: "মুছুন",
+    yes: "হ্যাঁ",
+    no: "না",
+    back: "পেছনে",
+    next: "পরবর্তী",
+    estimate: "অনুমান",
+    offline: "অফলাইন মোড – ডায়েরি সম্পূর্ণ উপলব্ধ",
+    discreetMsg: "চেক ইন করার সময় হয়েছে",
+  },
+  gu: {
+    name: "સહેલી",
+    discreet: "ડાયરી",
+    tagline: "તમારી અંગત માસિક ધર્મ સાથી",
+    today: "આજે",
+    log: "નોંધો",
+    calendar: "કેલેન્ડર",
+    learn: "શીખો",
+    more: "વધુ",
+    insights: "વિશ્લેષણ",
+    doctor: "ડૉક્ટરની સલાહ ક્યારે લેવી",
+    ask: "પૂછો",
+    reminders: "રીમાઇન્ડર્સ",
+    pregnancy: "ગર્ભાવસ્થા મોડ",
+    settings: "સેટિંગ્સ",
+    ai: "AI સહાયક",
+    community: "સમુદાય",
+    save: "સાચવો",
+    cancel: "રદ કરો",
+    delete: "કાઢી નાખો",
+    yes: "હા",
+    no: "ના",
+    back: "પાછળ",
+    next: "આગળ",
+    estimate: "અંદાજ",
+    offline: "ઓફલાઇન મોડ – ડાયરી ઉપલબ્ધ છે",
+    discreetMsg: "ચેક ઇન કરવાનો સમય થયો છે",
+  },
+  pa: {
+    name: "ਸਹੇਲੀ",
+    discreet: "ਡਾਇਰੀ",
+    tagline: "ਤੁਹਾਡੀ ਨਿੱਜੀ ਮਾਹਵਾਰੀ ਸਾਥੀ",
+    today: "ਅੱਜ",
+    log: "ਦਰਜ ਕਰੋ",
+    calendar: "ਕੈਲੰਡਰ",
+    learn: "ਸਿੱਖੋ",
+    more: "ਹੋਰ",
+    insights: "ਜਾਣਕਾਰੀ",
+    doctor: "ਡਾਕਟਰ ਨੂੰ ਕਦੋਂ ਮਿਲਣਾ ਹੈ",
+    ask: "ਪੁੱਛੋ",
+    reminders: "ਰੀਮਾਈਂਡਰ",
+    pregnancy: "ਗਰਭ ਅਵਸਥਾ ਮੋਡ",
+    settings: "ਸੈਟਿੰਗਾਂ",
+    ai: "AI ਸਹਾਇਕ",
+    community: "ਭਾਈਚਾਰਾ",
+    save: "ਸੰਭਾਲੋ",
+    cancel: "ਰੱਦ ਕਰੋ",
+    delete: "ਮਿਟਾਓ",
+    yes: "ਹਾਂ",
+    no: "ਨਹੀਂ",
+    back: "ਪਿੱਛੇ",
+    next: "ਅੱਗੇ",
+    estimate: "ਅੰਦਾਜ਼ਾ",
+    offline: "ਔਫਲਾਈਨ ਮੋਡ – ਡਾਇਰੀ ਪੂਰੀ ਤਰ੍ਹਾਂ ਉਪਲਬਧ ਹੈ",
+    discreetMsg: "ਜਾਂਚ ਦਾ ਸਮਾਂ ਹੋ ਗਿਆ ਹੈ",
+  },
+  ml: {
+    name: "സഹേലി",
+    discreet: "ഡയറി",
+    tagline: "നിങ്ങളുടെ സ്വകാര്യ ആർത്തവ സഹായി",
+    today: "ഇന്ന്",
+    log: "രേഖപ്പെടുത്തുക",
+    calendar: "കലണ്ടർ",
+    learn: "അറിയുക",
+    more: "കൂടുതൽ",
+    insights: "വിശകലനം",
+    doctor: "എപ്പോൾ ഡോക്ടറെ കാണണം",
+    ask: "ചോദിക്കുക",
+    reminders: "ഓർമ്മപ്പെടുത്തലുകൾ",
+    pregnancy: "ഗർഭാവസ്ഥ മോഡ്",
+    settings: "ക്രമീകരണങ്ങൾ",
+    ai: "AI സഹായി",
+    community: "കമ്മ്യൂണിറ്റി",
+    save: "സൂക്ഷിക്കുക",
+    cancel: "റദ്ദാക്കുക",
+    delete: "മായ്ക്കുക",
+    yes: "അതെ",
+    no: "അല്ല",
+    back: "പിന്നിലേക്ക്",
+    next: "അടുത്തത്",
+    estimate: "കണക്കുകൂട്ടൽ",
+    offline: "ഓഫ്‌ലൈൻ മോഡ് – ഡയറി ലഭ്യമാണ്",
+    discreetMsg: "പരിശോധിക്കാനുള്ള സമയമായി",
+  },
+  or: {
+    name: "ସହେଲୀ",
+    discreet: "ଡାଏରୀ",
+    tagline: "ଆପଣଙ୍କ ବ୍ୟକ୍ତିଗତ ଋତୁସ୍ରାବ ସାଥୀ",
+    today: "ଆଜି",
+    log: "ଲେଖନ୍ତୁ",
+    calendar: "କ୍ୟାଲେଣ୍ଡର",
+    learn: "ଜାଣନ୍ତୁ",
+    more: "ଅଧିକ",
+    insights: "ବିଶ୍ଳେଷଣ",
+    doctor: "ଡାକ୍ତରଙ୍କ ପରାମର୍ଶ କେବେ ନେବେ",
+    ask: "ପଚାରନ୍ତୁ",
+    reminders: "ସ୍ମାରକ",
+    pregnancy: "ଗର୍ଭାବସ୍ଥା ମୋଡ୍",
+    settings: "ସେଟିଙ୍ଗ୍ସ",
+    ai: "AI ସହାୟକ",
+    community: "ସମ୍ପ୍ରଦାୟ",
+    save: "ସାଇତନ୍ତୁ",
+    cancel: "ବାତିଲ କରନ୍ତୁ",
+    delete: "ଲିଭାନ୍ତୁ",
+    yes: "ହଁ",
+    no: "ନାହିଁ",
+    back: "ପଛକୁ",
+    next: "ଆଗକୁ",
+    estimate: "ଆକଳନ",
+    offline: "ଅଫଲାଇନ୍ ମୋଡ୍ – ଡାଏରୀ ଉପଲବ୍ଧ ଅଛି",
+    discreetMsg: "ଚେକ୍-ଇନ୍ କରିବାର ସମୟ ହୋଇଛି",
+  },
+  as: {
+    name: "সহেলি",
+    discreet: "ডায়েৰী",
+    tagline: "আপোনাৰ ব্যক্তিগত ঋতুস্ৰাৱৰ সংগী",
+    today: "আজি",
+    log: "লিপিবদ্ধ কৰক",
+    calendar: "কেলেণ্ডাৰ",
+    learn: "শিকক",
+    more: "অধিক",
+    insights: "বিশ্লেষণ",
+    doctor: "কেতিয়া ডাক্তৰক দেখুৱাব",
+    ask: "সোধক",
+    reminders: "সোঁৱৰণী",
+    pregnancy: "গৰ্ভাৱস্থা মোড",
+    settings: "ছেটিংছ",
+    ai: "AI সহায়ক",
+    community: "সমাজ",
+    save: "সংৰক্ষণ কৰক",
+    cancel: "বাতিল কৰক",
+    delete: "মচি পেলাওক",
+    yes: "হয়",
+    no: "নহয়",
+    back: "পিছলৈ",
+    next: "পৰৱৰ্তী",
+    estimate: "আনুমানিক",
+    offline: "অফলাইন মোড – ডায়েৰী উপলব্ধ আছে",
+    discreetMsg: "পৰীক্ষা কৰাৰ সময় হ’ল",
+  },
+  ur: {
+    name: "سہیلی",
+    discreet: "ڈائری",
+    tagline: "آپ کی نجی ماہواری ساتھی",
+    today: "آج",
+    log: "درج کریں",
+    calendar: "کیلنڈر",
+    learn: "معلومات",
+    more: "مزید",
+    insights: "تجزیہ",
+    doctor: "ڈاکٹر سے کب رجوع کریں",
+    ask: "پوچھیے",
+    reminders: "یاد دہانی",
+    pregnancy: "حمل موڈ",
+    settings: "ترتیبات",
+    ai: "اے آئی مددگار",
+    community: "کمیونٹی",
+    save: "محفوظ کریں",
+    cancel: "منسوخ",
+    delete: "حذف کریں",
+    yes: "ہاں",
+    no: "نہیں",
+    back: "پیچھے",
+    next: "آگے",
+    estimate: "تخمینہ",
+    offline: "آف لائن موڈ – ڈائری مکمل دستیاب ہے",
+    discreetMsg: "چیک ان کرنے کا وقت ہے",
+  },
+};
+
+export function buildLocaleDictionary(langCode) {
+  const g = GLOSSARY[langCode] || {};
+  const dict = {};
+
+  for (const [key, val] of Object.entries(en)) {
+    // Exact or localized match
+    if (key === "app.name") dict[key] = g.name || val;
+    else if (key === "app.discreetName") dict[key] = g.discreet || "Diary";
+    else if (key === "app.tagline") dict[key] = g.tagline || val;
+    else if (key === "nav.today") dict[key] = g.today || val;
+    else if (key === "nav.log") dict[key] = g.log || val;
+    else if (key === "nav.calendar") dict[key] = g.calendar || val;
+    else if (key === "nav.learn") dict[key] = g.learn || val;
+    else if (key === "nav.more") dict[key] = g.more || val;
+    else if (key === "nav.insights") dict[key] = g.insights || val;
+    else if (key === "nav.doctor") dict[key] = g.doctor || val;
+    else if (key === "nav.ask") dict[key] = g.ask || val;
+    else if (key === "nav.reminders") dict[key] = g.reminders || val;
+    else if (key === "nav.pregnancy") dict[key] = g.pregnancy || val;
+    else if (key === "nav.settings") dict[key] = g.settings || val;
+    else if (key === "nav.ai") dict[key] = g.ai || val;
+    else if (key === "nav.community") dict[key] = g.community || val;
+    else if (key === "common.save") dict[key] = g.save || val;
+    else if (key === "common.cancel") dict[key] = g.cancel || val;
+    else if (key === "common.delete") dict[key] = g.delete || val;
+    else if (key === "common.yes") dict[key] = g.yes || val;
+    else if (key === "common.no") dict[key] = g.no || val;
+    else if (key === "common.back") dict[key] = g.back || val;
+    else if (key === "common.estimate") dict[key] = g.estimate || val;
+    else if (key === "rem.discreetMsg" || key === "rem.msg.checkin")
+      dict[key] = g.discreetMsg || val;
+    else if (key === "pwa.offline" || key === "pwa.offlineDiscreet") dict[key] = g.offline || val;
+    else {
+      // Default to high quality Hindi fallback or en text if not defined
+      dict[key] = hi[key] || val;
+    }
+  }
+
+  return dict;
+}
+
+// Generate all 11 dictionaries
+for (const lang of LANGS) {
+  const dict = buildLocaleDictionary(lang);
+  const filePath = path.join(process.cwd(), "src/i18n", `${lang}.js`);
+  const content = `export default ${JSON.stringify(dict, null, 2)};\n`;
+  fs.writeFileSync(filePath, content, "utf8");
+  console.log(`Generated src/i18n/${lang}.js with ${Object.keys(dict).length} keys.`);
+}

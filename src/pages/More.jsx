@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { BarChart3, Stethoscope, MessageCircle, Bell, Baby, Settings } from "lucide-react";
+import { BarChart3, Stethoscope, MessageCircle, Users, Bell, Baby, Settings } from "lucide-react";
 import { useApp } from "@/App.jsx";
 import { PageTitle } from "@/components/common/ui.jsx";
 
@@ -9,6 +9,7 @@ export default function More() {
     ["/insights", "nav.insights", BarChart3],
     ["/doctor", "nav.doctor", Stethoscope],
     ["/ask", "nav.ask", MessageCircle],
+    ["/community", "nav.community", Users],
     ["/reminders", "nav.reminders", Bell],
     ...(pregnancyVisible ? [["/pregnancy", "nav.pregnancy", Baby]] : []),
     ["/settings", "nav.settings", Settings],

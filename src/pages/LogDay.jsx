@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearch, useNavigate } from "@tanstack/react-router";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, CircleDot } from "lucide-react";
 import { useApp } from "@/App.jsx";
 import {
   Btn,
@@ -44,10 +44,19 @@ export default function LogDay() {
     setMsg(null);
   };
   const exists = !!record.days[date];
-  const tracked = SYMPTOMS.filter(
-    (s) =>
-      s.safety || record.settings.trackedSymptoms.includes(s.id) || form.symptoms.includes(s.id),
-  );
+  const customSymptoms = (record.settings?.customSymptoms || []).map((cs) => ({
+    id: cs.id,
+    label: cs.label,
+    icon: CircleDot,
+    custom: true,
+  }));
+  const tracked = [
+    ...SYMPTOMS.filter(
+      (s) =>
+        s.safety || record.settings.trackedSymptoms.includes(s.id) || form.symptoms.includes(s.id),
+    ),
+    ...customSymptoms,
+  ];
   const toggleSym = (id) =>
     set({
       symptoms: form.symptoms.includes(id)
@@ -232,7 +241,7 @@ export default function LogDay() {
                 selected={form.symptoms.includes(s.id)}
                 onClick={() => toggleSym(s.id)}
               >
-                {t(`sym.${s.id}`)}
+                {s.custom ? s.label : t(`sym.${s.id}`)}
               </Chip>
             ))}
           </div>

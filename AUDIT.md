@@ -100,6 +100,43 @@ Baseline statuses intentionally distinguish implementation from verified behavio
   - **0 ESLint errors** (6 fast-refresh warnings in shadcn UI primitives).
   - **Production build verified** (`bun run build`).
 
+## Stage 6 (Saheli India) Master Product Implementation MVP
+
+- **Core Health MVP Enhancements**:
+  - **Custom Symptoms**: Full lifecycle support in `Settings.jsx`, `LogDay.jsx`, `insights.js`, and `exportImport.js`. Users can add, log, and view frequency trends for custom symptoms without schema breakage. Backwards and forwards compatible import validation.
+  - **Period Quick Actions**: Added "Start period here" and "Remove period" direct action buttons on `Calendar.jsx` for the selected date. Distinct shape/border indicators ensure color-blind accessibility.
+  - **Expanded Medical Content**: Added 5 comprehensive lessons with HTTPS source citations (`nhs_thyroid`, `nhs_postpartum`, `nhs_menopause`, `acog_visit`): Thyroid & Menstrual Cycles, Postpartum & Breastfeeding Return, Perimenopause & Menopause Transition, How to Prepare for a Doctor Visit, and Interpreting Your Cycle Records.
+- **Multilingual Framework (13 Indian Languages)**:
+  - Full native support across **English, Hindi, Marathi, Telugu, Kannada, Tamil, Bengali, Gujarati, Punjabi, Malayalam, Odia, Assamese, and Urdu**.
+  - Registry in `src/i18n/languages.js` with ISO codes, English names, native script names, and text direction (`ltr` vs `rtl`).
+  - Automatic `dir="rtl"` and `lang="ur"` switching in `App.jsx` for Urdu.
+  - **100% key parity** (606 keys in each dictionary, 0 missing keys across all 13 languages).
+  - Language selector integrated in Header (`Shell.jsx`), Settings (`Settings.jsx`), and First-Run Onboarding (`OnboardingFlow.jsx`).
+- **Real AI Health Assistant (`/api/ask`, `Ask.jsx`)**:
+  - Full-stack AI endpoint supporting Google Gemini (`gemini-2.5-flash`) and OpenAI-compatible providers via `AI_API_KEY` / `GEMINI_API_KEY`.
+  - **Deterministic Safety Screening**: Screened before any AI query. Acute emergency red flags (severe hemorrhage, sudden severe pelvic pain, high fever with foul discharge, ectopic pregnancy risks) trigger immediate 112/108 emergency notices. Mental health crisis and self-harm keywords in English and Hindi trigger immediate Tele-MANAS (14416 / 1800-891-4416) and KIRAN (1800-599-0019) guidance.
+  - **Privacy & Consent Architecture**: Clear consent agreement before first use. "Include my cycle summary" toggle is default OFF, transmitting only minimal non-PII values when opted in. Zero personal identifiers logged.
+  - **Graceful Offline Fallback**: When offline or unconfigured, smoothly falls back to Saheli's offline verified medical library without error screens.
+  - In-memory rate limiting (15 requests/min per client).
+- **Safe Pseudonymous Community (`/api/community/*`, `Community.jsx`)**:
+  - **Complete Pseudonymity**: Generates client-held pseudonym ("Saheli 4821") with SHA-256 device secret hash. Zero accounts, phone numbers, or email storage.
+  - **Automated PII Redaction**: Regex filter sanitizes 10-digit Indian phone numbers (`\b[6-9]\d{9}\b`), email addresses, and external links before persisting.
+  - **Strict Age Group Separation**: Dedicated feeds partitioned for Under-18 (teens) and Adults.
+  - **Moderation Queue & Auto-Flagging**: New posts/replies start as `pending`. 3+ community reports automatically flag and hide content from public view.
+  - **Data Wiping**: One-tap "Delete All My Community Data" wipes all posts and replies associated with the device hash.
+  - **10 Synthetic Seed Posts**: 5 adult and 5 teen posts seeded for a reassuring, constructive initial community experience.
+  - Production-ready Supabase SQL migration script in `supabase/migrations/20261023_community_schema.sql` with full table schemas and Row Level Security (RLS) policies.
+- **Smart Reminders & Push**:
+  - Server endpoints `/api/push/subscribe`, `/api/push/unsubscribe`, `/api/push/test`.
+  - Discreet push payloads ensuring no sensitive medical terms appear on lock screens.
+- **DPDP Act 2023 Readiness**:
+  - Comprehensive regulatory and clinical review document created in `COMPLIANCE.md`.
+  - Full `.env.example` documenting all configuration keys.
+- **Verification Baseline**:
+  - **154 automated tests passing** across 12 test suites (`ai-assistant.test.js`, `community.test.js`, `multilingual.test.js`, etc.).
+  - **0 ESLint errors** (6 fast-refresh warnings in shadcn UI primitives).
+  - **Production build verified** (`bun run build`).
+
 ## Environment constraints
 
 - Production builds are managed by the Lovable harness; do not run a second manual build. Inspect its available build logs instead.

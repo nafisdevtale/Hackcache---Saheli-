@@ -18,6 +18,7 @@ import { Btn, Card, speak, cx, inputCls } from "@/components/common/ui.jsx";
 import { isValidPin } from "@/lib/encryption.js";
 import { CONFIG } from "@/config.js";
 import { OnboardingFlow } from "@/components/onboarding/OnboardingFlow.jsx";
+import { LANGUAGES } from "@/i18n/languages.js";
 
 let failCount = 0;
 function LockScreen() {
@@ -150,14 +151,22 @@ export function Shell({ children }) {
               <Volume2 aria-hidden className="h-6 w-6" />
             </button>
           )}
-          <button
-            type="button"
+          <label htmlFor="shell-lang-select" className="sr-only">
+            {t("nav.langToggleLabel")}
+          </label>
+          <select
+            id="shell-lang-select"
+            value={prefs.lang}
+            onChange={(e) => setPrefs({ lang: e.target.value })}
+            className="min-h-11 rounded-xl border-2 border-border px-2 py-1 text-xs sm:text-sm font-semibold bg-background hover:bg-muted cursor-pointer"
             aria-label={t("nav.langToggleLabel")}
-            onClick={() => setPrefs({ lang: prefs.lang === "en" ? "hi" : "en" })}
-            className="min-h-12 rounded-xl border-2 border-border px-3 font-semibold hover:bg-muted"
           >
-            {t("nav.langToggle")}
-          </button>
+            {LANGUAGES.map((l) => (
+              <option key={l.code} value={l.code}>
+                {l.nativeName}
+              </option>
+            ))}
+          </select>
         </div>
       </header>
       {!isOnline && (

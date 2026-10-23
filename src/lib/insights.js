@@ -85,11 +85,18 @@ export function computeCycleInsights({ record = {}, analysis = {}, today = today
 
   // 3. Symptom frequencies, trends, and severity
   let totalLoggedDays = 0;
+  const customDefs = (settings.customSymptoms || []).map((cs) => ({
+    id: cs.id,
+    label: cs.label,
+    custom: true,
+  }));
+  const allSymptomDefs = [...SYMPTOMS, ...customDefs];
+
   const symptomDayCounts = {};
-  for (const s of SYMPTOMS) symptomDayCounts[s.id] = 0;
+  for (const s of allSymptomDefs) symptomDayCounts[s.id] = 0;
 
   const symptomPhaseCounts = {};
-  for (const s of SYMPTOMS) {
+  for (const s of allSymptomDefs) {
     symptomPhaseCounts[s.id] = { period: 0, premenstrual: 0, other: 0 };
   }
 
@@ -181,27 +188,30 @@ export function computeCycleInsights({ record = {}, analysis = {}, today = today
   }
 
   // Calculate top symptoms and their associated timings
-  const frequentSymptoms = SYMPTOMS.map((s) => {
-    const count = symptomDayCounts[s.id] || 0;
-    const phases = symptomPhaseCounts[s.id] || { period: 0, premenstrual: 0, other: 0 };
-    let dominantPhase = null;
-    if (count > 0) {
-      if (phases.premenstrual >= phases.period && phases.premenstrual >= phases.other) {
-        dominantPhase = "premenstrual";
-      } else if (phases.period >= phases.premenstrual && phases.period >= phases.other) {
-        dominantPhase = "period";
-      } else {
-        dominantPhase = "other";
+  const frequentSymptoms = allSymptomDefs
+    .map((s) => {
+      const count = symptomDayCounts[s.id] || 0;
+      const phases = symptomPhaseCounts[s.id] || { period: 0, premenstrual: 0, other: 0 };
+      let dominantPhase = null;
+      if (count > 0) {
+        if (phases.premenstrual >= phases.period && phases.premenstrual >= phases.other) {
+          dominantPhase = "premenstrual";
+        } else if (phases.period >= phases.premenstrual && phases.period >= phases.other) {
+          dominantPhase = "period";
+        } else {
+          dominantPhase = "other";
+        }
       }
-    }
-    return {
-      id: s.id,
-      count,
-      percentage: totalLoggedDays ? Math.round((count / totalLoggedDays) * 100) : 0,
-      phases,
-      dominantPhase,
-    };
-  })
+      return {
+        id: s.id,
+        label: s.label,
+        custom: s.custom,
+        count,
+        percentage: totalLoggedDays ? Math.round((count / totalLoggedDays) * 100) : 0,
+        phases,
+        dominantPhase,
+      };
+    })
     .filter((s) => s.count > 0)
     .sort((a, b) => b.count - a.count);
 

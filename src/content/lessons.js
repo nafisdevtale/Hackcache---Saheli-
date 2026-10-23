@@ -118,4 +118,104 @@ export const LESSONS = [
     ],
   },
   FIRST_PERIOD,
+  {
+    id: "thyroid",
+    title: {
+      en: "Thyroid problems and delayed periods",
+      hi: "थायरॉयड की समस्या और पीरियड में देरी",
+    },
+    illustration: "clock",
+    paras: [
+      {
+        en: "The thyroid gland makes hormones that control metabolism and influence the menstrual cycle. An underactive or overactive thyroid can cause periods to become irregular, lighter, heavier, or stop altogether.",
+        hi: "थायरॉयड ग्रंथि ऐसे हार्मोन बनाती है जो शरीर की ऊर्जा और मासिक चक्र को नियंत्रित करते हैं। थायरॉयड कम या ज़्यादा काम करने से पीरियड अनियमित हो सकते हैं, हल्के या भारी आ सकते हैं, या रुक सकते हैं।",
+        src: "nhs_thyroid",
+      },
+      {
+        en: "Common symptoms of an underactive thyroid include tiredness, weight gain, feeling cold, and dry skin. A simple blood test (TSH) ordered by a doctor can check your thyroid levels.",
+        hi: "थायरॉयड कम काम करने के आम लक्षणों में थकान, वजन बढ़ना, ठंड लगना और सूखी त्वचा शामिल हैं। डॉक्टर के लिखे साधारण खून टेस्ट (TSH) से थायरॉयड की जांच हो सकती है।",
+        src: "nhs_thyroid",
+      },
+    ],
+  },
+  {
+    id: "postpartum",
+    title: {
+      en: "Postpartum bleeding and bodily changes",
+      hi: "प्रसव के बाद रक्तस्राव और शारीरिक बदलाव",
+    },
+    illustration: "drop",
+    paras: [
+      {
+        en: "After giving birth, you will have vaginal bleeding called lochia. It starts heavy and bright red, then turns pink, brown, and yellowish-white over 2 to 6 weeks.",
+        hi: "प्रसव (डिलीवरी) के बाद योनि से खून आता है जिसे लोकिया कहते हैं। यह शुरू में गाढ़ा लाल होता है, फिर 2 से 6 हफ्तों में हल्का गुलाबी, भूरा और सफेद-पीला हो जाता है।",
+        src: "nhs_postpartum",
+      },
+      {
+        en: "See a doctor urgently if you soak a pad every 1–2 hours, pass large clots, have a high fever, or vaginal discharge has an unpleasant smell.",
+        hi: "अगर हर 1–2 घंटे में पैड भीग जाए, बड़े थक्के निकलें, तेज़ बुखार हो या दुर्गंध वाला स्राव हो, तो तुरंत डॉक्टर को दिखाएँ।",
+        src: "nhs_postpartum",
+      },
+    ],
+  },
+  {
+    id: "menopause",
+    title: {
+      en: "Perimenopause and menopause",
+      hi: "पेरिमेनोपॉज़ और मेनोपॉज़",
+    },
+    illustration: "heat",
+    paras: [
+      {
+        en: "Menopause usually happens between ages 45 and 55, when periods stop permanently. Perimenopause is the transition phase leading up to it, when periods often become unpredictable, closer together, or further apart.",
+        hi: "मेनोपॉज़ आमतौर पर 45 से 55 साल की उम्र में होता है, जब पीरियड हमेशा के लिए बंद हो जाते हैं। इससे पहले के बदलाव वाले दौर को पेरिमेनोपॉज़ कहते हैं, जिसमें पीरियड अनियमित हो सकते हैं।",
+        src: "nhs_menopause",
+      },
+      {
+        en: "Common experiences include hot flushes, night sweats, sleep changes, and mood shifts. Any vaginal bleeding occurring more than 12 months after your last period must be checked by a doctor.",
+        hi: "इसमें अचानक गर्मी लगना, रात में पसीना, नींद में खलल और मूड बदलना आम है। आखिरी पीरियड के 12 महीने बाद अगर कभी भी खून आए, तो डॉक्टर से जांच करवाना बेहद जरूरी है।",
+        src: "nhs_pmb",
+      },
+    ],
+  },
+  {
+    id: "doctor_prep",
+    title: {
+      en: "Preparing for a doctor appointment",
+      hi: "डॉक्टर के पास जाने की तैयारी कैसे करें",
+    },
+    illustration: "check",
+    paras: [
+      {
+        en: "Doctors understand menstrual health and are there to help, not judge. Before your visit, note the start date of your last period, how long bleeding usually lasts, and any medicines you take.",
+        hi: "डॉक्टर मासिक धर्म को अच्छी तरह समझते हैं और आपकी मदद के लिए हैं। जाने से पहले पिछले पीरियड की तारीख, खून कितने दिन आता है, और जो दवाइयाँ आप ले रही हैं, उन्हें नोट कर लें।",
+        src: "acog_visit",
+      },
+      {
+        en: "Use Saheli's printable Visit Summary to show your logged pain scores, disrupted days, and symptom patterns directly to your healthcare provider.",
+        hi: "सहेली के डॉक्टर विजिट सारांश का उपयोग करके अपने दर्द के स्कोर, काम में आई रुकावट और लक्षणों के पैटर्न सीधे डॉक्टर को दिखा सकती हैं।",
+        src: "acog_visit",
+      },
+    ],
+  },
+  {
+    id: "cycle_records",
+    title: {
+      en: "How to interpret your cycle records responsibly",
+      hi: "अपने चक्र रिकॉर्ड को जिम्मेदारी से कैसे समझें",
+    },
+    illustration: "cycle",
+    paras: [
+      {
+        en: "Menstrual cycle lengths naturally vary by a few days from month to month due to stress, travel, illness, and lifestyle changes. Variation is not necessarily a sign of disease.",
+        hi: "तनाव, सफर, बीमारी या जीवनशैली के बदलाव से पीरियड के दिनों में कुछ दिनों का फर्क आना सामान्य है। थोड़ा फर्क किसी बीमारी का पक्का संकेत नहीं होता।",
+        src: "who_menstrual",
+      },
+      {
+        en: "Saheli's estimates and fertile windows are educational approximations based on historical math. They are never a substitute for clinical diagnostics or reliable contraception.",
+        hi: "सहेली के अनुमान और फर्टिलिटी विंडो केवल पुराने आंकड़ों पर आधारित अनुमान हैं। यह डॉक्टरी जांच या गर्भनिरोध का विकल्प कभी नहीं हो सकते।",
+        src: "who_menstrual",
+      },
+    ],
+  },
 ];

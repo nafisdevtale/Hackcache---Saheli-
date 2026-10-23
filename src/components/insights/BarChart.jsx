@@ -14,17 +14,11 @@ export function BarChart({ data = [], title, refLines = [], summary = "" }) {
     h = 160,
     pad = 24,
     bw = (w - pad) / Math.max(data.length, 1);
-  const textSummary =
-    summary || `${title}: ${data.map((d) => `${d.label} ${d.value}`).join(", ")}`;
+  const textSummary = summary || `${title}: ${data.map((d) => `${d.label} ${d.value}`).join(", ")}`;
 
   return (
     <figure>
-      <svg
-        viewBox={`0 0 ${w} ${h + 28}`}
-        role="img"
-        aria-label={textSummary}
-        className="w-full"
-      >
+      <svg viewBox={`0 0 ${w} ${h + 28}`} role="img" aria-label={textSummary} className="w-full">
         {refLines.map((r) => {
           const y = h - (r.value / max) * (h - 16);
           return (

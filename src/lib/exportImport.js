@@ -8,6 +8,7 @@ export function emptyRecord() {
     settings: {
       ageGroup: "adult",
       trackedSymptoms: [...SYMPTOM_IDS],
+      customSymptoms: [],
       showFertility: true,
       fertilityOptIn: false,
       pregnancyOptIn: false,
@@ -30,7 +31,11 @@ export function normalizeRecord(r) {
   return {
     version: 1,
     days: r.days && typeof r.days === "object" ? r.days : {},
-    settings: { ...e.settings, ...(r.settings || {}) },
+    settings: {
+      ...e.settings,
+      ...(r.settings || {}),
+      customSymptoms: Array.isArray(r.settings?.customSymptoms) ? r.settings.customSymptoms : [],
+    },
     pregnancy: { ...e.pregnancy, ...(r.pregnancy || {}) },
     reminders: {
       ...e.reminders,
@@ -80,6 +85,7 @@ const ALLOWED_ROOT_KEYS = ["version", "days", "settings", "pregnancy", "reminder
 const ALLOWED_SETTINGS_KEYS = [
   "ageGroup",
   "trackedSymptoms",
+  "customSymptoms",
   "showFertility",
   "fertilityOptIn",
   "pregnancyOptIn",
@@ -94,6 +100,21 @@ const ALLOWED_MEDICINE_KEYS = ["name", "time"];
 const hasOnlyKeys = (obj, allowed) => {
   const keys = Object.keys(obj);
   return keys.length === allowed.length && keys.every((k) => allowed.includes(k));
+};
+
+const hasOnlySettingsKeys = (obj) => {
+  const keys = Object.keys(obj);
+  const required = [
+    "ageGroup",
+    "trackedSymptoms",
+    "showFertility",
+    "fertilityOptIn",
+    "pregnancyOptIn",
+    "trackingPaused",
+  ];
+  return (
+    required.every((k) => keys.includes(k)) && keys.every((k) => ALLOWED_SETTINGS_KEYS.includes(k))
+  );
 };
 
 // Validates a single day entry; returns list of error keys.
@@ -120,7 +141,13 @@ export function validateDay(d) {
     errs.push("err.sleep");
   if (d.mood != null && !MOODS.includes(d.mood)) errs.push("err.mood");
   if (d.energy != null && !ENERGY.includes(d.energy)) errs.push("err.energy");
-  if (!Array.isArray(d.symptoms) || d.symptoms.some((s) => !SYMPTOM_IDS.includes(s)))
+  if (
+    !Array.isArray(d.symptoms) ||
+    d.symptoms.some(
+      (s) =>
+        typeof s !== "string" || s.length > 35 || (!SYMPTOM_IDS.includes(s) && !s.startsWith("c_")),
+    )
+  )
     errs.push("err.symptoms");
   if (typeof d.note !== "string" || d.note.length > 2000) errs.push("err.note");
   if (typeof d.medicines !== "string" || d.medicines.length > 300) errs.push("err.medicines");
@@ -183,7 +210,7 @@ export function parseImport(text) {
     raw.version !== 1 ||
     !object(raw.days) ||
     !object(raw.settings) ||
-    !hasOnlyKeys(raw.settings, ALLOWED_SETTINGS_KEYS) ||
+    !hasOnlySettingsKeys(raw.settings) ||
     !object(raw.pregnancy) ||
     !hasOnlyKeys(raw.pregnancy, ALLOWED_PREGNANCY_KEYS) ||
     !object(raw.reminders) ||
@@ -233,6 +260,30 @@ export function parseImport(text) {
     )
   )
     return { ok: false, error: "imp.wrongFormat" };
+  if (raw.settings.customSymptoms != null) {
+    if (!Array.isArray(raw.settings.customSymptoms) || raw.settings.customSymptoms.length > 20) {
+      return { ok: false, error: "imp.badEntry" };
+    }
+    for (const cs of raw.settings.customSymptoms) {
+      if (
+        !object(cs) ||
+        typeof cs.id !== "string" ||
+        !cs.id.startsWith("c_") ||
+        cs.id.length > 35 ||
+        typeof cs.label !== "string" ||
+        !cs.label.trim() ||
+        cs.label.length > 30 ||
+        SYMPTOM_IDS.includes(cs.id)
+      ) {
+        return { ok: false, error: "imp.badEntry" };
+      }
+    }
+    const ids = raw.settings.customSymptoms.map((c) => c.id);
+    const labels = raw.settings.customSymptoms.map((c) => c.label.toLowerCase().trim());
+    if (new Set(ids).size !== ids.length || new Set(labels).size !== labels.length) {
+      return { ok: false, error: "imp.badEntry" };
+    }
+  }
   for (const [k, v] of Object.entries(raw.days)) {
     if (!isValidDate(k) || !object(v)) return { ok: false, error: "imp.badEntry", date: k };
     const day = { ...blankDay(k), ...v };
@@ -246,7 +297,22 @@ export function parseImport(text) {
 export function mergeRecords(existing, incoming, strategy) {
   if (strategy === "replace") return incoming;
   // merge: existing entries win on conflicting dates — nothing is overwritten
-  return { ...existing, days: { ...incoming.days, ...existing.days } };
+  const existingCustom = existing.settings?.customSymptoms || [];
+  const incomingCustom = incoming.settings?.customSymptoms || [];
+  const customMap = new Map();
+  existingCustom.forEach((c) => customMap.set(c.id, c));
+  incomingCustom.forEach((c) => {
+    if (!customMap.has(c.id)) customMap.set(c.id, c);
+  });
+
+  return {
+    ...existing,
+    settings: {
+      ...existing.settings,
+      customSymptoms: Array.from(customMap.values()),
+    },
+    days: { ...incoming.days, ...existing.days },
+  };
 }
 
 export function importPreview(existing, incoming) {

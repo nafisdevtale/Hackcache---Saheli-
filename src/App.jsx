@@ -147,10 +147,13 @@ export function AppProvider({ children }) {
 
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   useEffect(() => {
+    const isRtl = prefs.lang === "ur";
+    document.documentElement.dir = isRtl ? "rtl" : "ltr";
+    document.documentElement.lang = prefs.lang || "en";
     const id = setTimeout(() => {
       if (prefs.discreet) document.title = translate(prefs.lang, "app.discreetName");
       else if (!document.title || document.title === "Diary" || document.title === "डायरी")
-        document.title = "Saheli";
+        document.title = translate(prefs.lang, "app.name");
     }, 0);
     return () => clearTimeout(id);
   }, [prefs.discreet, prefs.lang, pathname]);

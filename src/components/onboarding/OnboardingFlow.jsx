@@ -1,9 +1,17 @@
 import { useState } from "react";
-import { Flower2, NotebookPen, ShieldCheck, CheckCircle2, ArrowRight, ArrowLeft } from "lucide-react";
+import {
+  Flower2,
+  NotebookPen,
+  ShieldCheck,
+  CheckCircle2,
+  ArrowRight,
+  ArrowLeft,
+} from "lucide-react";
 import { useApp } from "@/App.jsx";
 import { Btn, Card, cx, inputCls } from "@/components/common/ui.jsx";
 import { isValidPin } from "@/lib/encryption.js";
 import { isValidDate } from "@/lib/localDate.js";
+import { LANGUAGES } from "@/i18n/languages.js";
 
 export function OnboardingFlow() {
   const { t, prefs, setPrefs, completeOnboarding, today } = useApp();
@@ -147,25 +155,24 @@ export function OnboardingFlow() {
 
           <fieldset className="space-y-2">
             <legend className="font-semibold">{t("onb.lang")}</legend>
-            <div className="grid grid-cols-2 gap-2">
-              {[
-                ["en", "English"],
-                ["hi", "हिंदी"],
-              ].map(([code, label]) => (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-56 overflow-y-auto p-1">
+              {LANGUAGES.map((lang) => (
                 <button
-                  key={code}
+                  key={lang.code}
                   type="button"
-                  aria-pressed={prefs.lang === code}
-                  onClick={() => setPrefs({ lang: code })}
+                  aria-pressed={prefs.lang === lang.code}
+                  onClick={() => setPrefs({ lang: lang.code })}
                   className={cx(
-                    "flex min-h-12 items-center justify-center gap-2 rounded-xl border-2 px-3 text-base font-semibold transition-colors",
-                    prefs.lang === code
+                    "flex min-h-12 items-center justify-between gap-1 rounded-xl border-2 px-2.5 py-1 text-sm font-semibold transition-colors",
+                    prefs.lang === lang.code
                       ? "border-primary bg-primary/10 text-primary"
                       : "border-border bg-card hover:bg-muted",
                   )}
                 >
-                  {label}
-                  {prefs.lang === code && <CheckCircle2 aria-hidden className="h-4 w-4" />}
+                  <span className="truncate">{lang.nativeName}</span>
+                  {prefs.lang === lang.code && (
+                    <CheckCircle2 aria-hidden className="h-4 w-4 shrink-0" />
+                  )}
                 </button>
               ))}
             </div>
@@ -187,7 +194,10 @@ export function OnboardingFlow() {
           </Card>
 
           <div className="pt-2">
-            <Btn className="flex min-h-12 w-full items-center justify-center gap-2" onClick={handleNext}>
+            <Btn
+              className="flex min-h-12 w-full items-center justify-center gap-2"
+              onClick={handleNext}
+            >
               <span>{t("onb.next")}</span>
               <ArrowRight aria-hidden className="h-4 w-4" />
             </Btn>
@@ -255,11 +265,18 @@ export function OnboardingFlow() {
           </fieldset>
 
           <div className="flex gap-2 pt-2">
-            <Btn variant="outline" className="flex min-h-12 flex-1 items-center justify-center gap-1" onClick={handlePrev}>
+            <Btn
+              variant="outline"
+              className="flex min-h-12 flex-1 items-center justify-center gap-1"
+              onClick={handlePrev}
+            >
               <ArrowLeft aria-hidden className="h-4 w-4" />
               <span>{t("onb.prev")}</span>
             </Btn>
-            <Btn className="flex min-h-12 flex-1 items-center justify-center gap-1" onClick={handleNext}>
+            <Btn
+              className="flex min-h-12 flex-1 items-center justify-center gap-1"
+              onClick={handleNext}
+            >
               <span>{t("onb.next")}</span>
               <ArrowRight aria-hidden className="h-4 w-4" />
             </Btn>
@@ -352,17 +369,27 @@ export function OnboardingFlow() {
           </Card>
 
           {errorMsg && (
-            <p role="alert" className="rounded-xl bg-destructive/10 p-2 text-center text-xs text-destructive">
+            <p
+              role="alert"
+              className="rounded-xl bg-destructive/10 p-2 text-center text-xs text-destructive"
+            >
               {errorMsg}
             </p>
           )}
 
           <div className="flex gap-2 pt-2">
-            <Btn variant="outline" className="flex min-h-12 flex-1 items-center justify-center gap-1" onClick={handlePrev}>
+            <Btn
+              variant="outline"
+              className="flex min-h-12 flex-1 items-center justify-center gap-1"
+              onClick={handlePrev}
+            >
               <ArrowLeft aria-hidden className="h-4 w-4" />
               <span>{t("onb.prev")}</span>
             </Btn>
-            <Btn className="flex min-h-12 flex-1 items-center justify-center gap-1" onClick={handleNext}>
+            <Btn
+              className="flex min-h-12 flex-1 items-center justify-center gap-1"
+              onClick={handleNext}
+            >
               <span>{t("onb.next")}</span>
               <ArrowRight aria-hidden className="h-4 w-4" />
             </Btn>
@@ -492,17 +519,29 @@ export function OnboardingFlow() {
           </fieldset>
 
           {errorMsg && (
-            <p role="alert" className="rounded-xl bg-destructive/10 p-2 text-center text-xs text-destructive">
+            <p
+              role="alert"
+              className="rounded-xl bg-destructive/10 p-2 text-center text-xs text-destructive"
+            >
               {errorMsg}
             </p>
           )}
 
           <div className="flex gap-2 pt-2">
-            <Btn variant="outline" className="flex min-h-12 flex-1 items-center justify-center gap-1" disabled={busy} onClick={handlePrev}>
+            <Btn
+              variant="outline"
+              className="flex min-h-12 flex-1 items-center justify-center gap-1"
+              disabled={busy}
+              onClick={handlePrev}
+            >
               <ArrowLeft aria-hidden className="h-4 w-4" />
               <span>{t("onb.prev")}</span>
             </Btn>
-            <Btn className="flex min-h-12 flex-1 items-center justify-center gap-1" disabled={busy} onClick={handleFinish}>
+            <Btn
+              className="flex min-h-12 flex-1 items-center justify-center gap-1"
+              disabled={busy}
+              onClick={handleFinish}
+            >
               <span>{busy ? t("set.working") : t("onb.finish")}</span>
             </Btn>
           </div>

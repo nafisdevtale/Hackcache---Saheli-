@@ -14,6 +14,8 @@ export default {
   "nav.reminders": "Reminders",
   "nav.pregnancy": "Pregnancy mode",
   "nav.settings": "Settings",
+  "nav.ai": "AI Assistant",
+  "nav.community": "Community",
   "nav.langToggle": "हिंदी",
   "nav.langToggleLabel": "Switch language to Hindi",
 
@@ -248,6 +250,8 @@ export default {
   "cal.noEntry": "Nothing logged on this day.",
   "cal.addEntry": "Add entry",
   "cal.editEntry": "View / edit entry",
+  "cal.startPeriod": "Start period here",
+  "cal.endPeriod": "Remove period",
   "cal.periodDay": "period",
   "cal.estDay": "estimated period",
   "cal.symDay": "symptoms",
@@ -539,6 +543,11 @@ export default {
   "set.symptoms": "Symptoms to track",
   "set.symptomsDesc":
     "Safety-related symptoms (dizziness, fainting, unusual bleeding, sudden pain) are always shown.",
+  "set.customSymptomsTitle": "Custom symptoms",
+  "set.customSymptomsDesc":
+    "Add symptoms specific to your body. They are saved privately on this device.",
+  "set.customSymptomPh": "e.g. Lower back stiffness, sweet cravings",
+  "set.addCustomSymptom": "Add",
   "set.privacy": "Privacy",
   "set.pin": "PIN lock",
   "set.pinOn": "PIN lock is on. Records are encrypted on this device.",
@@ -622,4 +631,87 @@ export default {
   "pwa.iosGuide":
     "To install on iPhone or iPad: tap the Share button in Safari, then select 'Add to Home Screen'.",
   "pwa.offlineTitle": "Offline Access",
+
+  "ai.title": "AI Health Assistant",
+  "ai.badge": "Informational AI",
+  "ai.intro":
+    "Ask confidential menstrual health questions. Answers are based on verified medical resources.",
+  "ai.consentTitle": "AI Data & Privacy Notice",
+  "ai.consentDesc":
+    "When you submit a question, it is processed on our secure server. Your personal diary records, private notes, and device identity are never sent.",
+  "ai.consentBtn": "I understand & continue",
+  "ai.includeSummary": "Include my cycle summary",
+  "ai.includeSummaryDesc":
+    "Shares only anonymous cycle length and irregularity status to provide more relevant answers. (Default: Off)",
+  "ai.placeholder": "Ask a question about your cycle, symptoms, or health...",
+  "ai.askBtn": "Ask Assistant",
+  "ai.disclaimer":
+    "Saheli AI provides general health information only and cannot diagnose conditions, prescribe medications, or replace a qualified healthcare professional.",
+  "ai.fallbackNotice":
+    "Generative AI is currently offline. Showing matching verified health answers from our local library.",
+  "ai.suggestVisit": "Tip: You can take your printable Doctor-Visit Summary to your appointment.",
+  "ai.unconfigured":
+    "AI service is currently unconfigured on the server. Local verified FAQs are always available.",
+  "ai.rateLimit":
+    "You have asked several questions recently. Please wait a moment before asking again.",
+  "ai.emergencyAlert": "Immediate Medical Attention Needed",
+
+  "comm.title": "Community Support",
+  "comm.badge": "Moderated & Pseudonymous",
+  "comm.intro":
+    "A supportive, judgment-free space to ask questions and share menstrual experiences with other women and teens.",
+  "comm.privacyNotice":
+    "Posts are pseudonymous (e.g. Saheli 4821) and stored on our secure community server. Your private cycle tracking records are NEVER linked to community posts.",
+  "comm.rulesTitle": "Community Safety Rules",
+  "comm.rule1": "Be respectful, kind, and supportive.",
+  "comm.rule2": "No medical prescriptions, unverified treatments, or dosage advice.",
+  "comm.rule3": "No personal contact information, phone numbers, or private messaging.",
+  "comm.rule4": "Under-18 and adult spaces are strictly separated for safety.",
+  "comm.tabFeed": "Discussions",
+  "comm.tabMyPosts": "My Activity",
+  "comm.categoryAll": "All topics",
+  "comm.categoryPeriods": "Period basics",
+  "comm.categoryPcos": "PCOS / PCOD",
+  "comm.categoryHygiene": "Hygiene & Products",
+  "comm.categorySupport": "Pain & Wellness",
+  "comm.newPost": "Ask the Community",
+  "comm.postTitle": "Topic title",
+  "comm.postTitlePh": "What is on your mind?",
+  "comm.postBody": "Your question or experience",
+  "comm.postBodyPh": "Share your thoughts respectfully...",
+  "comm.postSubmit": "Submit for Moderation",
+  "comm.statusPending": "Under Review",
+  "comm.pendingDesc":
+    "All posts and replies are reviewed by human moderators before becoming public to keep our community safe.",
+  "comm.statusApproved": "Approved",
+  "comm.statusRejected": "Declined",
+  "comm.reply": "Reply",
+  "comm.replyPh": "Write a supportive reply...",
+  "comm.report": "Report",
+  "comm.reportConfirm": "Report this post for moderator review?",
+  "comm.reportSuccess": "Thank you. Our moderators will review this.",
+  "comm.deleteAll": "Delete all my community posts",
+  "comm.deleteAllConfirm":
+    "Are you sure? This will permanently delete all your community posts and replies from the server.",
+  "comm.deleteAllDone": "All your community contributions have been permanently deleted.",
+  "comm.clinicianReviewed": "Clinician Reviewed",
+  "comm.modPanel": "Moderation Queue",
+  "comm.modApprove": "Approve",
+  "comm.modReject": "Reject",
+  "comm.modRemove": "Remove",
+  "comm.minorSpace": "Teen Community (Under 18)",
+  "comm.adultSpace": "Adult Community (18+)",
+
+  "push.title": "Background Reminders",
+  "push.optInTitle": "Enable Phone Reminders",
+  "push.optInDesc":
+    "To receive reminders when the app is closed, Saheli schedules anonymous check-in alerts with your browser. No personal health notes or cycle details are ever sent to the reminder server.",
+  "push.enableBtn": "Enable Reminders",
+  "push.disableBtn": "Disable Remote Reminders",
+  "push.enabled": "Background notifications active.",
+  "push.disabled": "Background notifications disabled.",
+  "push.unsupported":
+    "Background push notifications are not supported by this browser. Reminders work while the app is open.",
+  "push.unconfigured":
+    "Remote push service is currently unconfigured. Local in-app reminders remain active.",
 };

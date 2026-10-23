@@ -43,9 +43,7 @@ export default function Insights() {
             <div>
               <h2 className="text-lg font-bold">{t("ins.title")}</h2>
               <p className="mt-1 text-muted-foreground">{t("ins.noData")}</p>
-              <p className="mt-2 text-sm text-muted-foreground">
-                {t("ins.insufficientSubtitle")}
-              </p>
+              <p className="mt-2 text-sm text-muted-foreground">{t("ins.insufficientSubtitle")}</p>
             </div>
           </div>
           <Link
@@ -61,9 +59,7 @@ export default function Insights() {
           <Card className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  {t("ins.medianCycle")}
-                </p>
+                <p className="text-sm font-medium text-muted-foreground">{t("ins.medianCycle")}</p>
                 <p className="font-display text-3xl font-bold">
                   {insights.medianCycle ? t("common.days", { n: insights.medianCycle }) : "—"}
                 </p>
@@ -72,9 +68,7 @@ export default function Insights() {
                 </p>
               </div>
               <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  {t("ins.medianPeriod")}
-                </p>
+                <p className="text-sm font-medium text-muted-foreground">{t("ins.medianPeriod")}</p>
                 <p className="font-display text-3xl font-bold">
                   {insights.medianPeriod ? t("common.days", { n: insights.medianPeriod }) : "—"}
                 </p>
@@ -151,9 +145,7 @@ export default function Insights() {
                     count: insights.recentCycles.length,
                   })}
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  {t("ins.insufficientSubtitle")}
-                </p>
+                <p className="text-xs text-muted-foreground">{t("ins.insufficientSubtitle")}</p>
               </div>
             )}
           </Card>
@@ -290,10 +282,14 @@ export default function Insights() {
                 <div className="rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-950/40 p-3 text-xs text-amber-900 dark:text-amber-200 space-y-1">
                   <p className="font-bold">{t("ins.supportHeavyTitle")}</p>
                   {insights.padHourlyDays > 0 && (
-                    <p>• {t("log.padHourly")} ({insights.padHourlyDays} d)</p>
+                    <p>
+                      • {t("log.padHourly")} ({insights.padHourlyDays} d)
+                    </p>
                   )}
                   {insights.bigClotsDays > 0 && (
-                    <p>• {t("log.bigClots")} ({insights.bigClotsDays} d)</p>
+                    <p>
+                      • {t("log.bigClots")} ({insights.bigClotsDays} d)
+                    </p>
                   )}
                 </div>
               )}
@@ -339,7 +335,7 @@ export default function Insights() {
                         key={s.id}
                         className="flex flex-col sm:flex-row sm:items-center justify-between rounded-lg bg-muted/40 p-2 text-sm"
                       >
-                        <span className="font-medium">{t(`sym.${s.id}`)}</span>
+                        <span className="font-medium">{s.custom ? s.label : t(`sym.${s.id}`)}</span>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1 sm:mt-0">
                           <span>{t("ins.loggedTimes", { n: s.count, pct: s.percentage })}</span>
                           <span>•</span>
@@ -349,9 +345,7 @@ export default function Insights() {
                     );
                   })}
                 </div>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  {t("ins.associationNotice")}
-                </p>
+                <p className="mt-2 text-xs text-muted-foreground">{t("ins.associationNotice")}</p>
               </div>
             )}
 
@@ -367,7 +361,9 @@ export default function Insights() {
                   </p>
                 </div>
                 <div className="rounded-lg bg-card border border-border p-2">
-                  <p className="text-muted-foreground">{t("ins.disruptivePain", { count: "" }).replace(":", "")}</p>
+                  <p className="text-muted-foreground">
+                    {t("ins.disruptivePain", { count: "" }).replace(":", "")}
+                  </p>
                   <p className="font-bold text-base">{insights.pain.disruptivePainDays}</p>
                   <p className="text-[10px] text-muted-foreground">
                     {t("ins.highPainDays", { count: insights.pain.highPainDays })}
@@ -384,9 +380,7 @@ export default function Insights() {
 
             {/* Data Completeness & Cautionary Note */}
             <div className="border-t border-border pt-2 text-xs text-muted-foreground">
-              <p>
-                {t("ins.completenessNote", { logged: insights.totalLoggedDays })}
-              </p>
+              <p>{t("ins.completenessNote", { logged: insights.totalLoggedDays })}</p>
               <p className="mt-1 font-medium">{t("ins.notDiagnosis")}</p>
             </div>
           </Card>
@@ -401,10 +395,7 @@ export default function Insights() {
             {insights.supportiveCards.length > 0 ? (
               <div className="space-y-2">
                 {insights.supportiveCards.map((c) => (
-                  <div
-                    key={c.id}
-                    className="rounded-xl border border-border bg-card p-3 space-y-2"
-                  >
+                  <div key={c.id} className="rounded-xl border border-border bg-card p-3 space-y-2">
                     <div className="flex items-start gap-2">
                       <AlertCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" aria-hidden />
                       <div>
@@ -434,9 +425,7 @@ export default function Insights() {
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">
-                {t("doc.none")}
-              </p>
+              <p className="text-sm text-muted-foreground">{t("doc.none")}</p>
             )}
 
             <div className="border-t border-border pt-3 flex flex-col sm:flex-row gap-2">
@@ -455,7 +444,8 @@ export default function Insights() {
             </div>
 
             <p className="text-[11px] text-muted-foreground pt-1">
-              National Emergency: {EMERGENCY.national} | Ambulance: {EMERGENCY.ambulance} | Mental Health (Tele-MANAS): {EMERGENCY.teleManas}
+              National Emergency: {EMERGENCY.national} | Ambulance: {EMERGENCY.ambulance} | Mental
+              Health (Tele-MANAS): {EMERGENCY.teleManas}
             </p>
           </Card>
         </>
