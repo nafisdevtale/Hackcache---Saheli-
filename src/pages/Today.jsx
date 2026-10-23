@@ -130,6 +130,9 @@ export default function Today() {
           </div>
         );
 
+      case "phaseTracker":
+        return <PhaseCards />;
+
       case "todayLog":
         return (
           <div className="rounded-3xl border border-border/70 bg-card/85 p-5 shadow-xs">
@@ -319,87 +322,88 @@ export default function Today() {
         );
 
       case "fertility":
-        if (!fertilityVisible) return null;
         return (
-          <div className="space-y-3">
-            <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-xs text-xs space-y-3">
-              {a?.fertility ? (
-                <>
-                  <div className="flex items-center justify-between border-b border-border/40 pb-2">
-                    <span className="font-bold text-foreground text-sm flex items-center gap-1.5">
-                      <Sparkles className="h-4 w-4 text-primary" />
-                      {t("today.fertileWindow")}
-                    </span>
-                    <span className="rounded-full bg-primary/10 text-primary px-2.5 py-0.5 text-[11px] font-bold">
-                      {t("common.estimate")}
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                    <div className="rounded-2xl bg-primary/5 border border-primary/15 p-3 space-y-1">
-                      <span className="text-[11px] font-bold text-primary uppercase tracking-wider block">
+          <div className="space-y-4">
+            {fertilityVisible && (
+              <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-xs text-xs space-y-3">
+                {a?.fertility ? (
+                  <>
+                    <div className="flex items-center justify-between border-b border-border/40 pb-2">
+                      <span className="font-bold text-foreground text-sm flex items-center gap-1.5">
+                        <Sparkles className="h-4 w-4 text-primary" />
                         {t("today.fertileWindow")}
                       </span>
-                      <p className="text-xs font-bold text-foreground">
-                        {fmtRange(a.fertility.fertile.start, a.fertility.fertile.end)}
-                      </p>
-                      <span className="text-[10px] text-muted-foreground block">
-                        ±{a.prediction.halfWidth} {t("insights.days")} {t("common.uncertainty")}
+                      <span className="rounded-full bg-primary/10 text-primary px-2.5 py-0.5 text-[11px] font-bold">
+                        {t("common.estimate")}
                       </span>
                     </div>
 
-                    <div className="rounded-2xl bg-secondary/15 border border-secondary/30 p-3 space-y-1">
-                      <span className="text-[11px] font-bold text-secondary-strong uppercase tracking-wider block">
-                        {t("today.ovulation")}
-                      </span>
-                      <p className="text-xs font-bold text-foreground">
-                        {fmtRange(a.fertility.ovulation.start, a.fertility.ovulation.end)}
-                      </p>
-                      <span className="text-[10px] text-muted-foreground block">
-                        {t("today.basedOn", { n: a.prediction.basedOn })}
-                      </span>
-                    </div>
-                  </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                      <div className="rounded-2xl bg-primary/5 border border-primary/15 p-3 space-y-1">
+                        <span className="text-[11px] font-bold text-primary uppercase tracking-wider block">
+                          {t("today.fertileWindow")}
+                        </span>
+                        <p className="text-xs font-bold text-foreground">
+                          {fmtRange(a.fertility.fertile.start, a.fertility.fertile.end)}
+                        </p>
+                        <span className="text-[10px] text-muted-foreground block">
+                          ±{a.prediction.halfWidth} {t("insights.days")} {t("common.uncertainty")}
+                        </span>
+                      </div>
 
-                  {/* Educational Context & Non-Contraceptive Limitation */}
-                  <div className="mt-2 rounded-2xl bg-muted/70 p-3 text-[11px] text-muted-foreground space-y-1.5 leading-relaxed">
-                    <p className="font-bold text-foreground flex items-center gap-1.5">
-                      <ShieldCheck className="h-3.5 w-3.5 text-primary shrink-0" />
-                      {t("common.fertilityDisclaimer")}
+                      <div className="rounded-2xl bg-secondary/15 border border-secondary/30 p-3 space-y-1">
+                        <span className="text-[11px] font-bold text-secondary-strong uppercase tracking-wider block">
+                          {t("today.ovulation")}
+                        </span>
+                        <p className="text-xs font-bold text-foreground">
+                          {fmtRange(a.fertility.ovulation.start, a.fertility.ovulation.end)}
+                        </p>
+                        <span className="text-[10px] text-muted-foreground block">
+                          {t("today.basedOn", { n: a.prediction.basedOn })}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Educational Context & Non-Contraceptive Limitation */}
+                    <div className="mt-2 rounded-2xl bg-muted/70 p-3 text-[11px] text-muted-foreground space-y-1.5 leading-relaxed">
+                      <p className="font-bold text-foreground flex items-center gap-1.5">
+                        <ShieldCheck className="h-3.5 w-3.5 text-primary shrink-0" />
+                        {t("common.fertilityDisclaimer")}
+                      </p>
+                      <p>{t("today.fertility.eduNote")}</p>
+                    </div>
+                  </>
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-muted-foreground leading-relaxed">
+                      {t(getFertilitySuppressionMessageKey(a?.fertilitySuppressionReason))}
                     </p>
-                    <p>{t("today.fertility.eduNote")}</p>
+                    {a?.fertilitySuppressionReason === "adolescent_safeguard" ? (
+                      <div className="rounded-2xl bg-muted/60 p-3 text-[11px] text-muted-foreground space-y-1">
+                        <p className="font-semibold text-foreground flex items-center gap-1.5">
+                          <BookOpen className="h-3.5 w-3.5 text-primary shrink-0" />
+                          {t("today.fertility.adolescentTitle")}
+                        </p>
+                        <p className="font-medium text-foreground">
+                          {t("today.fertility.adolescentEdu")}
+                        </p>
+                        <p>{t("today.fertility.adolescentEduDesc")}</p>
+                      </div>
+                    ) : (
+                      <div className="rounded-2xl bg-muted/50 p-2.5 text-[11px] text-muted-foreground space-y-0.5">
+                        <p className="font-semibold text-foreground flex items-center gap-1.5">
+                          <Info className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                          {t("today.fertility.eduTitle")}
+                        </p>
+                        <p>{t("today.fertility.eduGeneral")}</p>
+                      </div>
+                    )}
                   </div>
-                </>
-              ) : (
-                <div className="space-y-2">
-                  <p className="text-muted-foreground leading-relaxed">
-                    {t(getFertilitySuppressionMessageKey(a?.fertilitySuppressionReason))}
-                  </p>
-                  {a?.fertilitySuppressionReason === "adolescent_safeguard" ? (
-                    <div className="rounded-2xl bg-muted/60 p-3 text-[11px] text-muted-foreground space-y-1">
-                      <p className="font-semibold text-foreground flex items-center gap-1.5">
-                        <BookOpen className="h-3.5 w-3.5 text-primary shrink-0" />
-                        {t("today.fertility.adolescentTitle")}
-                      </p>
-                      <p className="font-medium text-foreground">
-                        {t("today.fertility.adolescentEdu")}
-                      </p>
-                      <p>{t("today.fertility.adolescentEduDesc")}</p>
-                    </div>
-                  ) : (
-                    <div className="rounded-2xl bg-muted/50 p-2.5 text-[11px] text-muted-foreground space-y-0.5">
-                      <p className="font-semibold text-foreground flex items-center gap-1.5">
-                        <Info className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                        {t("today.fertility.eduTitle")}
-                      </p>
-                      <p>{t("today.fertility.eduGeneral")}</p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
 
-            {/* Menstrual Cycle Phases: Follicular & Luteal Educational Cards */}
+            {/* Prominent My Phase Tracker */}
             <PhaseCards />
 
             {/* Developer Diagnostics View (Strictly Dev / Debug only) */}

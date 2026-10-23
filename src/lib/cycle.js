@@ -707,6 +707,196 @@ export function getAuthoritativeCycleState(record, targetDate = todayStr()) {
       : null,
   };
 
+  // Extract symptoms in current cycle for follicular vs luteal days
+  const currentFollicularSymptoms = new Set();
+  const currentLutealSymptoms = new Set();
+  if (currentCycleStart) {
+    Object.entries(days).forEach(([d, dayEntry]) => {
+      if (d >= currentCycleStart && d <= targetDate && dayEntry?.symptoms?.length) {
+        const dNum = diffDays(currentCycleStart, d) + 1;
+        const isFoll = phaseDiag.follicular
+          ? dNum <= (phaseDiag.follicular.endDay || 14)
+          : dNum <= 14;
+        dayEntry.symptoms.forEach((sym) => {
+          if (isFoll) currentFollicularSymptoms.add(sym);
+          else currentLutealSymptoms.add(sym);
+        });
+      }
+    });
+  }
+
+  // Prior cycle symptoms patterns for follicular and luteal phases
+  const priorFollicularPatterns = new Set();
+  const priorLutealPatterns = new Set();
+  if (a.cycles && a.cycles.length > 0) {
+    a.cycles.forEach((c) => {
+      const half = Math.round(c.length / 2);
+      for (let offset = 0; offset < c.length; offset++) {
+        const dt = addDays(c.start, offset);
+        const dayEntry = days[dt];
+        if (dayEntry?.symptoms?.length) {
+          const dNum = offset + 1;
+          dayEntry.symptoms.forEach((sym) => {
+            if (dNum <= half) priorFollicularPatterns.add(sym);
+            else priorLutealPatterns.add(sym);
+          });
+        }
+      }
+    });
+  }
+
+  // Follicular Phase Tracker Model
+  let follicularStatus = "unknown";
+  let follicularEvidence = "boundary_not_established";
+  let follicularEndDay = null;
+  let follicularProgressPercent = null;
+  let follicularElapsedDays = null;
+
+  if (cycleDay != null) {
+    follicularElapsedDays = cycleDay;
+    if (phaseDiag.eligible && phaseDiag.follicular) {
+      follicularEndDay = phaseDiag.follicular.endDay;
+      follicularEvidence = positiveLhObs ? "supported_by_observations" : "calendar_estimate";
+      follicularProgressPercent = Math.min(
+        100,
+        Math.max(0, Math.round((cycleDay / follicularEndDay) * 100)),
+      );
+      if (cycleDay <= follicularEndDay) {
+        follicularStatus = "current";
+      } else {
+        follicularStatus = "past";
+      }
+    } else {
+      follicularStatus = cycleDay <= 14 ? "current" : "past";
+      follicularEvidence = positiveLhObs ? "supported_by_observations" : "boundary_not_established";
+      follicularEndDay = null;
+      follicularProgressPercent = null;
+    }
+  }
+
+  const follicularTracker = {
+    titleKey: "phase.follicularTrackerTitle",
+    status: follicularStatus,
+    evidence: follicularEvidence,
+    startDay: 1,
+    endDay: follicularEndDay,
+    elapsedDays: follicularElapsedDays,
+    progressPercent: follicularProgressPercent,
+    uncertaintyDays: phaseDiag.eligible ? a.prediction?.halfWidth || 2 : null,
+    currentSymptoms: Array.from(currentFollicularSymptoms),
+    previousPatterns: Array.from(priorFollicularPatterns),
+    boundaryNoteKey: phaseDiag.eligible
+      ? "phase.follicularBoundary"
+      : "phase.boundaryNotEstablishedDesc",
+  };
+
+  // Luteal Phase Tracker Model
+  let lutealStatus = "unknown";
+  let lutealEvidence = "boundary_not_established";
+  let lutealStartDay = null;
+  let lutealEndDay = null;
+  let lutealElapsedDays = null;
+  let lutealRemainingDays = null;
+  let lutealProgressPercent = null;
+
+  if (cycleDay != null) {
+    if (phaseDiag.eligible && phaseDiag.luteal) {
+      lutealStartDay = phaseDiag.luteal.startDay;
+      lutealEndDay = phaseDiag.luteal.endDay;
+      lutealEvidence = positiveLhObs ? "supported_by_observations" : "calendar_estimate";
+      const totalLutealDays = Math.max(1, lutealEndDay - lutealStartDay + 1);
+
+      if (cycleDay < lutealStartDay) {
+        lutealStatus = "upcoming";
+        lutealElapsedDays = 0;
+        lutealRemainingDays = totalLutealDays;
+        lutealProgressPercent = 0;
+      } else if (cycleDay <= lutealEndDay) {
+        lutealStatus = "current";
+        lutealElapsedDays = cycleDay - lutealStartDay + 1;
+        lutealRemainingDays = Math.max(0, lutealEndDay - cycleDay);
+        lutealProgressPercent = Math.min(
+          100,
+          Math.round((lutealElapsedDays / totalLutealDays) * 100),
+        );
+      } else {
+        lutealStatus = "past";
+        lutealElapsedDays = totalLutealDays;
+        lutealRemainingDays = 0;
+        lutealProgressPercent = 100;
+      }
+    } else {
+      lutealStatus = cycleDay > 14 ? "current" : "upcoming";
+      lutealEvidence = positiveLhObs ? "supported_by_observations" : "boundary_not_established";
+      lutealStartDay = null;
+      lutealEndDay = null;
+      lutealElapsedDays = null;
+      lutealRemainingDays = null;
+      lutealProgressPercent = null;
+    }
+  }
+
+  const lutealTracker = {
+    titleKey: "phase.lutealTrackerTitle",
+    status: lutealStatus,
+    evidence: lutealEvidence,
+    startDay: lutealStartDay,
+    endDay: lutealEndDay,
+    elapsedDays: lutealElapsedDays,
+    remainingDays: lutealRemainingDays,
+    progressPercent: lutealProgressPercent,
+    uncertaintyDays: phaseDiag.eligible ? a.prediction?.halfWidth || 2 : null,
+    currentSymptoms: Array.from(currentLutealSymptoms),
+    previousPatterns: Array.from(priorLutealPatterns),
+    boundaryNoteKey: phaseDiag.eligible
+      ? "phase.lutealBoundary"
+      : "phase.boundaryNotEstablishedDesc",
+  };
+
+  // Past Recorded Cycles Detail (for cycle history selector)
+  const pastCycles = (a.cycles || [])
+    .map((c, idx) => {
+      const cycleObservations = Object.entries(observations)
+        .filter(([d]) => d >= c.start && d < c.nextStart)
+        .map(([d, obs]) => ({ ...obs, date: d, cycleDay: diffDays(c.start, d) + 1 }));
+
+      const cycleSymptoms = [];
+      for (let i = 0; i < c.length; i++) {
+        const dt = addDays(c.start, i);
+        const e = days[dt];
+        if (e?.symptoms?.length) {
+          cycleSymptoms.push({ date: dt, cycleDay: i + 1, symptoms: e.symptoms });
+        }
+      }
+
+      const cyclePeriodDays = [];
+      for (let i = 0; i < c.length; i++) {
+        const dt = addDays(c.start, i);
+        if (days[dt]?.period) {
+          cyclePeriodDays.push(dt);
+        }
+      }
+
+      const estimatedMid = Math.round(c.length / 2);
+      return {
+        cycleNumber: idx + 1,
+        start: c.start,
+        nextStart: c.nextStart,
+        end: addDays(c.nextStart, -1),
+        length: c.length,
+        periodDuration: cyclePeriodDays.length,
+        periodDays: cyclePeriodDays,
+        symptomsCount: cycleSymptoms.reduce((acc, s) => acc + s.symptoms.length, 0),
+        symptoms: cycleSymptoms,
+        observationsCount: cycleObservations.length,
+        observations: cycleObservations,
+        estimatedFollicularEnd: estimatedMid,
+        estimatedLutealStart: estimatedMid + 1,
+        hasObservations: cycleObservations.length > 0,
+      };
+    })
+    .reverse();
+
   return {
     cycleDay,
     isLongCycleGap,
@@ -724,6 +914,9 @@ export function getAuthoritativeCycleState(record, targetDate = todayStr()) {
     ovulationObservationStatus,
     estimateExplanation,
     relevantSourceDates,
+    follicularTracker,
+    lutealTracker,
+    pastCycles,
     phaseDiagnostics: phaseDiag,
     analysis: a,
     lastCalculatedAt: new Date().toISOString(),
