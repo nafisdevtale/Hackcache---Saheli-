@@ -430,11 +430,7 @@ export function AppProvider({ children }) {
     () => (record && analysis ? evaluateSafety({ record, analysis, today }) : null),
     [record, analysis, today],
   );
-  const fertilityVisible =
-    !!settings &&
-    (settings.ageGroup === "adult"
-      ? settings.showFertility !== false
-      : settings.fertilityOptIn === true);
+  const fertilityVisible = !!settings && settings.showFertility !== false;
   const pregnancyVisible =
     !!settings && (settings.ageGroup === "adult" || settings.pregnancyOptIn === true);
 

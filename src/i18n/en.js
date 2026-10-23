@@ -884,4 +884,15 @@ export default {
   "lock.unlock": "Unlock",
   "lock.switchToPin": "Switch to 4-Digit PIN Keypad",
   "lock.switchToPassphrase": "Switch to Passphrase Mode",
+
+  "today.fertility.adolescentTitle": "Adolescent Cycle Rhythms",
+  "today.fertility.adolescentEdu": "Natural Cycle Maturation",
+  "today.fertility.adolescentEduDesc":
+    "Menstrual cycles commonly take 2 to 3 years after the first period to settle into regular ovulatory patterns. Ovulation dates vary as hormones mature.",
+  "today.fertility.eduTitle": "About Ovulation Estimates",
+  "today.fertility.eduGeneral":
+    "Ovulation timing is sensitive to lifestyle, stress, sleep, and hormonal variations. Saheli calculates estimates strictly from consistent historical data and withholds them when rhythms fluctuate naturally.",
+  "today.fertility.eduNote":
+    "Ovulation is when an ovary releases an egg, typically 12 to 16 days before the next period starts. Calendar estimates are mathematical approximations and must never be used for contraception.",
+  "common.uncertainty": "uncertainty",
 };

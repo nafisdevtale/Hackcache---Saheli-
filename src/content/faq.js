@@ -40,7 +40,7 @@ export const FAQ = [
   ),
   f(
     "irregular",
-    ["irregular", "anियमित", "अनियमित", "late", "early", "vary", "बदलता"],
+    ["irregular", "anियमित", "अनियमित", "late", "early", "vary", "बदलता", "पाळी"],
     {
       en: "Are irregular periods normal?",
       hi: "क्या अनियमित पीरियड सामान्य हैं?",
@@ -1216,7 +1216,7 @@ export const SELF_HARM_KW = [
 const norm = (s) =>
   s
     .toLowerCase()
-    .replace(/[?.!,।:;()"'`~@#$%^&*_\-+=/\\<>{}[\]]/gu, " ")
+    .replace(/[?.!,।:;()"'`~@#$%^&*_\-+=/\\<>{}[\]؟،]/gu, " ")
     .replace(/\s+/g, " ")
     .trim();
 
@@ -1242,6 +1242,16 @@ export const INDIAN_VERNACULAR_SYNONYMS = {
   hamal: ["pregnant", "pregnancy", "حمل"],
   pcos: ["irregular", "pcos"],
   motapa: ["weight", "वजन"],
+  // Regional additions for Hindi, Marathi, and Urdu
+  माहवारी: ["period", "cycle"],
+  पाळी: ["period", "cycle"],
+  अनियमित: ["irregular"],
+  ماہواری: ["period", "cycle"],
+  حیض: ["period", "cycle"],
+  چکر: ["cycle"],
+  دن: ["days", "din"],
+  دنوں: ["days", "din"],
+  عام: ["normal"],
 };
 
 // Whole tokens/phrases avoid matching "din" inside "bleeding". Longer phrases win ties.
