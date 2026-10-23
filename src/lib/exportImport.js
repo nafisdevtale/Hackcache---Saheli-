@@ -9,10 +9,13 @@ export function emptyRecord() {
       ageGroup: "adult",
       trackedSymptoms: [...SYMPTOM_IDS],
       customSymptoms: [],
+      symptomCategories: ["physical", "emotional", "digestive", "sleep_energy", "safety"],
+      quickLogFavorites: ["cramps", "headache", "tiredness", "bloating"],
       showFertility: true,
       fertilityOptIn: false,
       pregnancyOptIn: false,
       trackingPaused: false,
+      discreetMode: false,
     },
     pregnancy: { active: false, lmp: null },
     reminders: {
@@ -21,6 +24,7 @@ export function emptyRecord() {
       daily: { on: false, time: "20:00" },
       medicines: [],
       custom: { on: false, text: "", time: "09:00" },
+      quietHours: { on: false, start: "22:00", end: "07:00" },
     },
   };
 }
@@ -35,6 +39,12 @@ export function normalizeRecord(r) {
       ...e.settings,
       ...(r.settings || {}),
       customSymptoms: Array.isArray(r.settings?.customSymptoms) ? r.settings.customSymptoms : [],
+      symptomCategories: Array.isArray(r.settings?.symptomCategories)
+        ? r.settings.symptomCategories
+        : e.settings.symptomCategories,
+      quickLogFavorites: Array.isArray(r.settings?.quickLogFavorites)
+        ? r.settings.quickLogFavorites
+        : e.settings.quickLogFavorites,
     },
     pregnancy: { ...e.pregnancy, ...(r.pregnancy || {}) },
     reminders: {
@@ -42,6 +52,7 @@ export function normalizeRecord(r) {
       ...(r.reminders || {}),
       daily: { ...e.reminders.daily, ...(r.reminders?.daily || {}) },
       custom: { ...e.reminders.custom, ...(r.reminders?.custom || {}) },
+      quietHours: { ...e.reminders.quietHours, ...(r.reminders?.quietHours || {}) },
     },
   };
 }
@@ -57,6 +68,7 @@ export function blankDay(date) {
     painStoppedActivities: false,
     painkillerHelped: "na",
     symptoms: [],
+    symptomIntensities: {},
     mood: null,
     energy: null,
     sleep: null,
@@ -75,6 +87,7 @@ const ALLOWED_DAY_KEYS = [
   "painStoppedActivities",
   "painkillerHelped",
   "symptoms",
+  "symptomIntensities",
   "mood",
   "energy",
   "sleep",
@@ -86,20 +99,39 @@ const ALLOWED_SETTINGS_KEYS = [
   "ageGroup",
   "trackedSymptoms",
   "customSymptoms",
+  "symptomCategories",
+  "quickLogFavorites",
   "showFertility",
   "fertilityOptIn",
   "pregnancyOptIn",
   "trackingPaused",
+  "discreetMode",
 ];
 const ALLOWED_PREGNANCY_KEYS = ["active", "lmp"];
-const ALLOWED_REMINDERS_KEYS = ["notify", "nextPeriod", "daily", "medicines", "custom"];
+const ALLOWED_REMINDERS_KEYS = [
+  "notify",
+  "nextPeriod",
+  "daily",
+  "medicines",
+  "custom",
+  "quietHours",
+];
 const ALLOWED_DAILY_KEYS = ["on", "time"];
 const ALLOWED_CUSTOM_KEYS = ["on", "text", "time"];
 const ALLOWED_MEDICINE_KEYS = ["name", "time"];
+const ALLOWED_QUIET_HOURS_KEYS = ["on", "start", "end"];
 
 const hasOnlyKeys = (obj, allowed) => {
   const keys = Object.keys(obj);
   return keys.length === allowed.length && keys.every((k) => allowed.includes(k));
+};
+
+const hasOnlyRemindersKeys = (obj) => {
+  const keys = Object.keys(obj);
+  const required = ["notify", "nextPeriod", "daily", "medicines", "custom"];
+  return (
+    required.every((k) => keys.includes(k)) && keys.every((k) => ALLOWED_REMINDERS_KEYS.includes(k))
+  );
 };
 
 const hasOnlySettingsKeys = (obj) => {
@@ -145,8 +177,21 @@ export function validateDay(d) {
     !Array.isArray(d.symptoms) ||
     d.symptoms.some(
       (s) =>
-        typeof s !== "string" || s.length > 35 || (!SYMPTOM_IDS.includes(s) && !s.startsWith("c_")),
+        typeof s !== "string" ||
+        s.length > 35 ||
+        (!SYMPTOM_IDS.includes(s) && !s.startsWith("c_") && !s.startsWith("custom_")),
     )
+  )
+    errs.push("err.symptoms");
+  if (
+    d.symptomIntensities != null &&
+    (typeof d.symptomIntensities !== "object" ||
+      Array.isArray(d.symptomIntensities) ||
+      Object.entries(d.symptomIntensities).some(
+        ([sym, int]) =>
+          (!SYMPTOM_IDS.includes(sym) && !sym.startsWith("c_") && !sym.startsWith("custom_")) ||
+          !["mild", "moderate", "severe"].includes(int),
+      ))
   )
     errs.push("err.symptoms");
   if (typeof d.note !== "string" || d.note.length > 2000) errs.push("err.note");
@@ -214,11 +259,14 @@ export function parseImport(text) {
     !object(raw.pregnancy) ||
     !hasOnlyKeys(raw.pregnancy, ALLOWED_PREGNANCY_KEYS) ||
     !object(raw.reminders) ||
-    !hasOnlyKeys(raw.reminders, ALLOWED_REMINDERS_KEYS) ||
+    !hasOnlyRemindersKeys(raw.reminders) ||
     !object(raw.reminders.daily) ||
     !hasOnlyKeys(raw.reminders.daily, ALLOWED_DAILY_KEYS) ||
     !object(raw.reminders.custom) ||
-    !hasOnlyKeys(raw.reminders.custom, ALLOWED_CUSTOM_KEYS)
+    !hasOnlyKeys(raw.reminders.custom, ALLOWED_CUSTOM_KEYS) ||
+    (raw.reminders.quietHours &&
+      (!object(raw.reminders.quietHours) ||
+        !hasOnlyKeys(raw.reminders.quietHours, ALLOWED_QUIET_HOURS_KEYS)))
   )
     return { ok: false, error: "imp.wrongFormat" };
   const rec = normalizeRecord(obj.record);
@@ -242,12 +290,24 @@ export function parseImport(text) {
       r.daily.on,
       r.custom.on,
     ].some((v) => !bool(v)) ||
+    (s.discreetMode !== undefined && !bool(s.discreetMode)) ||
+    (s.symptomCategories &&
+      (!Array.isArray(s.symptomCategories) ||
+        s.symptomCategories.some((c) => typeof c !== "string"))) ||
+    (s.quickLogFavorites &&
+      (!Array.isArray(s.quickLogFavorites) ||
+        s.quickLogFavorites.some((f) => typeof f !== "string"))) ||
     (p.lmp !== null && !isValidDate(p.lmp)) ||
     (p.active && !isValidDate(p.lmp)) ||
     !time(r.daily.time) ||
     !time(r.custom.time) ||
     typeof r.custom.text !== "string" ||
     r.custom.text.length > 80 ||
+    (r.quietHours &&
+      (!object(r.quietHours) ||
+        !bool(r.quietHours.on) ||
+        !time(r.quietHours.start) ||
+        !time(r.quietHours.end))) ||
     !Array.isArray(r.medicines) ||
     r.medicines.some(
       (m) =>
@@ -268,12 +328,13 @@ export function parseImport(text) {
       if (
         !object(cs) ||
         typeof cs.id !== "string" ||
-        !cs.id.startsWith("c_") ||
+        (!cs.id.startsWith("c_") && !cs.id.startsWith("custom_")) ||
         cs.id.length > 35 ||
         typeof cs.label !== "string" ||
         !cs.label.trim() ||
         cs.label.length > 30 ||
-        SYMPTOM_IDS.includes(cs.id)
+        SYMPTOM_IDS.includes(cs.id) ||
+        (cs.retired !== undefined && typeof cs.retired !== "boolean")
       ) {
         return { ok: false, error: "imp.badEntry" };
       }

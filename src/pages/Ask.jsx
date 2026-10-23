@@ -20,7 +20,7 @@ import { diffDays, todayStr } from "@/lib/localDate.js";
 import { AskAssistantArt } from "@/components/brand/SaheliArt.jsx";
 
 export default function Ask() {
-  const { t, L, record } = useApp();
+  const { t, L, record, prefs } = useApp();
   const [activeTab, setActiveTab] = useState("faq"); // 'faq' | 'ai'
   const [q, setQ] = useState("");
   const [res, setRes] = useState(null);
@@ -33,6 +33,7 @@ export default function Ask() {
     return false;
   });
   const [includeCycleContext, setIncludeCycleContext] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiRes, setAiRes] = useState(null);
   const [aiError, setAiError] = useState(null);
@@ -48,10 +49,10 @@ export default function Ask() {
   };
 
   const getCycleContext = () => {
-    if (!includeCycleContext || !record?.days) return undefined;
+    if (!record?.days) return undefined;
     const days = record.days;
     const sortedDates = Object.keys(days)
-      .filter((d) => days[d]?.flow && days[d]?.flow !== "none")
+      .filter((d) => days[d]?.period || (days[d]?.flow && days[d]?.flow !== "none"))
       .sort();
     const lastDate = sortedDates[sortedDates.length - 1];
     const today = todayStr();
@@ -62,7 +63,7 @@ export default function Ask() {
     };
   };
 
-  const askAi = async (e) => {
+  const onAiSubmit = (e) => {
     if (e) e.preventDefault();
     if (!q.trim()) return;
 
@@ -71,6 +72,15 @@ export default function Ask() {
       return;
     }
 
+    if (includeCycleContext) {
+      setPreviewOpen(true);
+    } else {
+      executeAskAi(false);
+    }
+  };
+
+  const executeAskAi = async (withContext) => {
+    setPreviewOpen(false);
     setAiLoading(true);
     setAiError(null);
     setAiRes(null);
@@ -82,8 +92,8 @@ export default function Ask() {
         body: JSON.stringify({
           question: q,
           consent: true,
-          context: getCycleContext(),
-          lang: prefs.lang || "en",
+          context: withContext ? getCycleContext() : undefined,
+          lang: prefs?.lang || "en",
         }),
       });
 
@@ -404,7 +414,7 @@ export default function Ask() {
               </div>
             ) : (
               <form
-                onSubmit={askAi}
+                onSubmit={onAiSubmit}
                 className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4"
               >
                 <div>
@@ -449,6 +459,72 @@ export default function Ask() {
                     : t("ai.askBtn") || "Ask Assistant"}
                 </Btn>
               </form>
+            )}
+
+            {/* Data Transmission Preview Modal */}
+            {previewOpen && (
+              <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="preview-title"
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-fade-in"
+              >
+                <div className="w-full max-w-md rounded-3xl bg-card border border-border/80 p-6 shadow-2xl space-y-4">
+                  <div className="flex items-center justify-between pb-2 border-b border-border/60">
+                    <div className="flex items-center gap-2 text-primary font-bold text-sm">
+                      <ShieldCheck className="h-5 w-5" />
+                      <h2 id="preview-title">{t("ai.previewTitle")}</h2>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setPreviewOpen(false)}
+                      className="rounded-full p-1 text-muted-foreground hover:bg-muted"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    {t("ai.previewDesc")}
+                  </p>
+
+                  <div className="rounded-2xl bg-muted/50 p-3.5 border border-border/60 space-y-2 text-xs">
+                    <p className="font-bold text-foreground">{t("ai.previewCycleStats")}:</p>
+                    <pre className="text-[11px] font-mono bg-background/80 p-2.5 rounded-xl border border-border/40 overflow-x-auto text-foreground">
+                      {JSON.stringify(getCycleContext(), null, 2)}
+                    </pre>
+                    <p className="text-[10px] text-muted-foreground italic">
+                      Zero personal identifiers, device tokens, or diary notes are shared.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-2 pt-2">
+                    <Btn
+                      type="button"
+                      onClick={() => executeAskAi(true)}
+                      className="w-full min-h-11 font-bold text-xs"
+                    >
+                      {t("ai.previewConfirm")}
+                    </Btn>
+                    <Btn
+                      type="button"
+                      variant="outline"
+                      onClick={() => executeAskAi(false)}
+                      className="w-full min-h-11 font-bold text-xs"
+                    >
+                      {t("ai.previewSendWithout")}
+                    </Btn>
+                    <Btn
+                      type="button"
+                      variant="ghost"
+                      onClick={() => setPreviewOpen(false)}
+                      className="w-full text-xs"
+                    >
+                      {t("common.cancel")}
+                    </Btn>
+                  </div>
+                </div>
+              </div>
             )}
 
             {aiError && (

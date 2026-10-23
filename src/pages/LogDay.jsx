@@ -45,12 +45,18 @@ export default function LogDay() {
     setMsg(null);
   };
   const exists = !!record.days[date];
-  const customSymptoms = (record.settings?.customSymptoms || []).map((cs) => ({
-    id: cs.id,
-    label: cs.label,
-    icon: CircleDot,
-    custom: true,
-  }));
+  const [symCategoryFilter, setSymCategoryFilter] = useState("all");
+
+  const customSymptoms = (record.settings?.customSymptoms || [])
+    .filter((cs) => !cs.retired || form.symptoms.includes(cs.id))
+    .map((cs) => ({
+      id: cs.id,
+      label: cs.label,
+      icon: CircleDot,
+      custom: true,
+      category: cs.category || "physical",
+    }));
+
   const tracked = [
     ...SYMPTOMS.filter(
       (s) =>
@@ -58,12 +64,37 @@ export default function LogDay() {
     ),
     ...customSymptoms,
   ];
-  const toggleSym = (id) =>
+
+  const filteredTracked = tracked.filter((s) => {
+    if (symCategoryFilter === "all") return true;
+    return s.category === symCategoryFilter;
+  });
+
+  const toggleSym = (id) => {
+    const isSelected = form.symptoms.includes(id);
+    const newSymptoms = isSelected
+      ? form.symptoms.filter((s) => s !== id)
+      : [...form.symptoms, id];
+    const newIntensities = { ...(form.symptomIntensities || {}) };
+    if (isSelected) {
+      delete newIntensities[id];
+    } else {
+      newIntensities[id] = "moderate";
+    }
     set({
-      symptoms: form.symptoms.includes(id)
-        ? form.symptoms.filter((s) => s !== id)
-        : [...form.symptoms, id],
+      symptoms: newSymptoms,
+      symptomIntensities: newIntensities,
     });
+  };
+
+  const setIntensity = (id, intensity) => {
+    set({
+      symptomIntensities: {
+        ...(form.symptomIntensities || {}),
+        [id]: intensity,
+      },
+    });
+  };
 
   function go(n) {
     const d = addDays(date, n);
@@ -80,6 +111,7 @@ export default function LogDay() {
       flow: form.period ? form.flow : null,
       padHourly: form.period && form.flow === "heavy" ? form.padHourly : null,
       bigClots: form.period && form.flow === "heavy" ? form.bigClots : null,
+      symptomIntensities: form.symptomIntensities || {},
       sleep: form.sleep === "" || form.sleep == null ? null : Number(form.sleep),
     };
     const errs = validateDay(entry);
@@ -291,15 +323,43 @@ export default function LogDay() {
 
         {/* Right Column: Symptoms, Mood, Energy, Notes & Extras */}
         <div className="lg:col-span-6 space-y-4">
-          {/* Symptoms Chips */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-3">
+          {/* Symptoms Chips & Intensity */}
+          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
             <fieldset>
               <legend className="font-bold text-sm text-foreground mb-1">
                 {t("log.symptoms")}
               </legend>
               <p className="text-xs text-muted-foreground mb-3">{t("log.symptomsNote")}</p>
+
+              {/* Category Filter Pills */}
+              <div className="flex flex-wrap gap-1 mb-3 pb-2 border-b border-border/50">
+                {[
+                  { id: "all", label: t("learn.catAll") },
+                  { id: "physical", label: t("sym.catPhysical") },
+                  { id: "emotional", label: t("sym.catEmotional") },
+                  { id: "digestive", label: t("sym.catDigestive") },
+                  { id: "sleep_energy", label: t("sym.catSleepEnergy") },
+                  { id: "safety", label: t("sym.catSafety") },
+                ].map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => setSymCategoryFilter(c.id)}
+                    className={cx(
+                      "text-[11px] font-bold px-2.5 py-1 rounded-full transition-colors",
+                      symCategoryFilter === c.id
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted/70 text-muted-foreground hover:bg-muted",
+                    )}
+                  >
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Symptom Selection Chips */}
               <div className="flex flex-wrap gap-1.5">
-                {tracked.map((s) => (
+                {filteredTracked.map((s) => (
                   <Chip
                     key={s.id}
                     icon={s.icon}
@@ -311,6 +371,55 @@ export default function LogDay() {
                 ))}
               </div>
             </fieldset>
+
+            {/* Active Symptom Intensity Selector */}
+            {form.symptoms.length > 0 && (
+              <div className="pt-3 border-t border-border/50 space-y-2.5 animate-fade-in">
+                <span className="font-bold text-xs uppercase tracking-wider text-muted-foreground">
+                  {t("log.symptoms")} — {t("ins.flowBreakdown")}
+                </span>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {form.symptoms.map((id) => {
+                    const customObj = customSymptoms.find((c) => c.id === id);
+                    const label = customObj ? customObj.label : t(`sym.${id}`);
+                    const intensity = form.symptomIntensities?.[id] || "moderate";
+                    return (
+                      <div
+                        key={id}
+                        className="flex items-center justify-between gap-2 p-2.5 rounded-2xl bg-muted/40 border border-border/60"
+                      >
+                        <span className="text-xs font-semibold text-foreground truncate max-w-[110px]">
+                          {label}
+                        </span>
+                        <div className="flex gap-1 shrink-0">
+                          {[
+                            { key: "mild", label: t("sym.intensityMild") },
+                            { key: "moderate", label: t("sym.intensityModerate") },
+                            { key: "severe", label: t("sym.intensitySevere") },
+                          ].map((int) => (
+                            <button
+                              key={int.key}
+                              type="button"
+                              onClick={() => setIntensity(id, int.key)}
+                              className={cx(
+                                "text-[10px] font-bold px-2 py-0.5 rounded-full transition-all",
+                                intensity === int.key
+                                  ? int.key === "severe"
+                                    ? "bg-destructive text-destructive-foreground font-extrabold shadow-xs"
+                                    : "bg-primary text-primary-foreground font-extrabold shadow-xs"
+                                  : "bg-background text-muted-foreground hover:bg-muted",
+                              )}
+                            >
+                              {int.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Mood & Energy */}

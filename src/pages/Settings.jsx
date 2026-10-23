@@ -283,16 +283,47 @@ export default function Settings() {
     if (!customInput.trim()) return;
     const current = record.settings?.customSymptoms || [];
     const newSym = {
-      id: `custom_${Date.now()}`,
+      id: `c_${Date.now()}`,
       label: customInput.trim(),
+      retired: false,
     };
     setSettings({ customSymptoms: [...current, newSym] });
     setCustomInput("");
   };
 
+  const toggleRetireCustomSymptom = (id) => {
+    const current = record.settings?.customSymptoms || [];
+    setSettings({
+      customSymptoms: current.map((s) => (s.id === id ? { ...s, retired: !s.retired } : s)),
+    });
+  };
+
   const removeCustomSymptom = (id) => {
     const current = record.settings?.customSymptoms || [];
     setSettings({ customSymptoms: current.filter((s) => s.id !== id) });
+  };
+
+  const toggleSymptomCategory = (catId) => {
+    const current = record.settings?.symptomCategories || [
+      "physical",
+      "emotional",
+      "digestive",
+      "sleep_energy",
+      "safety",
+    ];
+    const updated = current.includes(catId)
+      ? current.filter((c) => c !== catId)
+      : [...current, catId];
+    if (!updated.includes("safety")) updated.push("safety");
+    setSettings({ symptomCategories: updated });
+  };
+
+  const toggleQuickLogFavorite = (symId) => {
+    const current = record.settings?.quickLogFavorites || [];
+    const updated = current.includes(symId)
+      ? current.filter((s) => s !== symId)
+      : [...current, symId];
+    setSettings({ quickLogFavorites: updated });
   };
 
   const handleFile = async (e) => {
@@ -484,8 +515,8 @@ export default function Settings() {
             </div>
           </div>
 
-          {/* Tracked Symptoms Selection */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
+          {/* Tracked Symptoms & Categories */}
+          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-5">
             <div>
               <h2 className="font-bold text-sm sm:text-base text-foreground">
                 {t("set.trackedSymptoms")}
@@ -493,22 +524,98 @@ export default function Settings() {
               <p className="text-xs text-muted-foreground mt-0.5">{t("set.trackedDesc")}</p>
             </div>
 
-            <div className="flex flex-wrap gap-1.5">
-              {SYMPTOMS.map((s) => (
-                <Chip
-                  key={s.id}
-                  icon={s.icon}
-                  selected={record.settings.trackedSymptoms.includes(s.id)}
-                  onClick={() => toggleSymptom(s.id)}
-                  className="rounded-xl"
-                >
-                  {t(`sym.${s.id}`)}
-                </Chip>
-              ))}
+            {/* Category enable/disable toggles */}
+            <div className="space-y-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                {t("comm.categoryAll")}
+              </span>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {[
+                  { id: "physical", label: t("sym.catPhysical") },
+                  { id: "emotional", label: t("sym.catEmotional") },
+                  { id: "digestive", label: t("sym.catDigestive") },
+                  { id: "sleep_energy", label: t("sym.catSleepEnergy") },
+                ].map((cat) => {
+                  const enabled = (record.settings?.symptomCategories || [
+                    "physical",
+                    "emotional",
+                    "digestive",
+                    "sleep_energy",
+                    "safety",
+                  ]).includes(cat.id);
+                  return (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => toggleSymptomCategory(cat.id)}
+                      className={cx(
+                        "flex items-center justify-between p-2.5 rounded-2xl border text-xs font-bold transition-all",
+                        enabled
+                          ? "bg-primary/10 border-primary text-primary"
+                          : "bg-muted/40 border-border/60 text-muted-foreground",
+                      )}
+                    >
+                      <span>{cat.label}</span>
+                      <span className="text-[10px]">{enabled ? "✓" : "+"}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
-            {/* Custom Symptoms Input */}
-            <div className="pt-4 border-t border-border/50 space-y-3">
+            {/* Symptom chips */}
+            <div className="space-y-2 pt-2 border-t border-border/50">
+              <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                {t("set.symptoms")}
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {SYMPTOMS.map((s) => (
+                  <Chip
+                    key={s.id}
+                    icon={s.icon}
+                    selected={record.settings.trackedSymptoms.includes(s.id)}
+                    onClick={() => toggleSymptom(s.id)}
+                    className="rounded-xl"
+                  >
+                    {t(`sym.${s.id}`)}
+                  </Chip>
+                ))}
+              </div>
+            </div>
+
+            {/* Quick Log Favorites Selection */}
+            <div className="space-y-2 pt-2 border-t border-border/50">
+              <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                ★ {t("today.upcomingReminders")} (Quick Log)
+              </span>
+              <p className="text-[11px] text-muted-foreground">
+                Select your favorite symptoms for instant 1-tap logging.
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {SYMPTOMS.filter((s) => !s.safety).map((s) => {
+                  const isFav = (record.settings?.quickLogFavorites || []).includes(s.id);
+                  return (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => toggleQuickLogFavorite(s.id)}
+                      className={cx(
+                        "inline-flex items-center gap-1 rounded-xl px-2.5 py-1 text-xs font-bold transition-all border",
+                        isFav
+                          ? "bg-accent text-accent-foreground border-accent shadow-xs"
+                          : "bg-background border-border text-muted-foreground hover:bg-muted",
+                      )}
+                    >
+                      <span>{isFav ? "★" : "☆"}</span>
+                      <span>{t(`sym.${s.id}`)}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Custom Symptoms Input & Retirement */}
+            <div className="pt-3 border-t border-border/50 space-y-3">
               <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                 {t("set.customSymptoms")}
               </span>
@@ -528,20 +635,42 @@ export default function Settings() {
               </form>
 
               {(record.settings?.customSymptoms || []).length > 0 && (
-                <div className="flex flex-wrap gap-2 pt-1">
+                <div className="grid gap-2 sm:grid-cols-2 pt-1">
                   {record.settings.customSymptoms.map((cs) => (
                     <div
                       key={cs.id}
-                      className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-1 text-xs font-semibold text-foreground"
+                      className={cx(
+                        "flex items-center justify-between gap-2 rounded-2xl border p-2.5 text-xs transition-all",
+                        cs.retired
+                          ? "bg-muted/30 border-border/50 opacity-60"
+                          : "bg-card border-border shadow-xs",
+                      )}
                     >
-                      <span>{cs.label}</span>
-                      <button
-                        type="button"
-                        onClick={() => removeCustomSymptom(cs.id)}
-                        className="text-muted-foreground hover:text-destructive"
-                      >
-                        ×
-                      </button>
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="font-semibold text-foreground truncate">{cs.label}</span>
+                        {cs.retired && (
+                          <span className="text-[10px] font-bold rounded-md bg-muted px-1.5 py-0.5 text-muted-foreground">
+                            {t("sym.retired")}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => toggleRetireCustomSymptom(cs.id)}
+                          className="text-[11px] font-semibold text-primary hover:underline px-1.5 py-0.5"
+                        >
+                          {cs.retired ? t("sym.reactivate") : t("sym.retire")}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => removeCustomSymptom(cs.id)}
+                          className="text-muted-foreground hover:text-destructive p-1"
+                          title="Delete"
+                        >
+                          ×
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>

@@ -53,11 +53,24 @@ export function QuickLogSheet({ isOpen, onClose, targetDate }) {
 
   if (!isOpen) return null;
 
+  const quickList =
+    record?.settings?.quickLogFavorites?.length > 0
+      ? record.settings.quickLogFavorites
+      : COMMON_SYMPTOMS;
+  const customList = (record?.settings?.customSymptoms || []).filter((c) => !c.retired);
+
   const toggleSymptom = (sym) => {
     setForm((prev) => {
       const current = prev.symptoms || [];
-      const updated = current.includes(sym) ? current.filter((s) => s !== sym) : [...current, sym];
-      return { ...prev, symptoms: updated };
+      const isSelected = current.includes(sym);
+      const updated = isSelected ? current.filter((s) => s !== sym) : [...current, sym];
+      const newIntensities = { ...(prev.symptomIntensities || {}) };
+      if (isSelected) {
+        delete newIntensities[sym];
+      } else {
+        newIntensities[sym] = "moderate";
+      }
+      return { ...prev, symptoms: updated, symptomIntensities: newIntensities };
     });
   };
 
@@ -72,6 +85,7 @@ export function QuickLogSheet({ isOpen, onClose, targetDate }) {
       flow: form.period ? form.flow || "medium" : null,
       padHourly: form.period && form.flow === "heavy" ? form.padHourly : null,
       bigClots: form.period && form.flow === "heavy" ? form.bigClots : null,
+      symptomIntensities: form.symptomIntensities || {},
     };
 
     const errs = validateDay(entry);
@@ -319,14 +333,16 @@ export function QuickLogSheet({ isOpen, onClose, targetDate }) {
             </div>
           </div>
 
-          {/* 4. Common Physical Symptoms */}
+          {/* 4. Common & Favorite Symptoms */}
           <div className="space-y-2">
             <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
               {t("log.symptoms")}
             </label>
             <div className="flex flex-wrap gap-1.5">
-              {COMMON_SYMPTOMS.map((symKey) => {
+              {[...quickList, ...customList.map((c) => c.id)].map((symKey) => {
                 const isSelected = (form.symptoms || []).includes(symKey);
+                const customObj = customList.find((c) => c.id === symKey);
+                const label = customObj ? customObj.label : t(`sym.${symKey}`);
                 return (
                   <button
                     key={symKey}
@@ -340,11 +356,53 @@ export function QuickLogSheet({ isOpen, onClose, targetDate }) {
                     )}
                   >
                     {isSelected && <Check className="h-3 w-3" />}
-                    <span>{t(`sym.${symKey}`)}</span>
+                    <span>{label}</span>
                   </button>
                 );
               })}
             </div>
+
+            {/* Intensity Selector for Active Symptoms in QuickLog */}
+            {form.symptoms?.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 pt-1.5">
+                {form.symptoms.map((symId) => {
+                  const int = form.symptomIntensities?.[symId] || "moderate";
+                  const custom = customList.find((c) => c.id === symId);
+                  const label = custom ? custom.label : t(`sym.${symId}`);
+                  return (
+                    <div
+                      key={symId}
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-primary/10 border border-primary/20 px-2 py-1 text-[11px]"
+                    >
+                      <span className="font-semibold text-primary">{label}:</span>
+                      {["mild", "moderate", "severe"].map((level) => (
+                        <button
+                          key={level}
+                          type="button"
+                          onClick={() =>
+                            setForm((f) => ({
+                              ...f,
+                              symptomIntensities: {
+                                ...(f.symptomIntensities || {}),
+                                [symId]: level,
+                              },
+                            }))
+                          }
+                          className={cx(
+                            "px-1.5 py-0.5 rounded-md font-bold text-[10px] transition-all",
+                            int === level
+                              ? "bg-primary text-primary-foreground"
+                              : "text-muted-foreground hover:text-foreground",
+                          )}
+                        >
+                          {t(`sym.intensity${level.charAt(0).toUpperCase() + level.slice(1)}`)}
+                        </button>
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
 

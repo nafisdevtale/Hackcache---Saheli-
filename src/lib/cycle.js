@@ -157,7 +157,8 @@ export function analyze(days = {}, opts = {}) {
 
   let fertility = null;
   let fertilityUnavailable = null;
-  if (irr.irregular) fertilityUnavailable = "irregular";
+  if (ageGroup === "under18") fertilityUnavailable = "under18";
+  else if (irr.irregular) fertilityUnavailable = "irregular";
   else {
     const ovStart = addDays(prediction.start, -CONFIG.lutealDays);
     const ovEnd = addDays(prediction.end, -CONFIG.lutealDays);

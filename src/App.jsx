@@ -468,6 +468,13 @@ export function AppProvider({ children }) {
       const hm = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
       const d = todayStr(now);
       const r = record.reminders;
+      const isQuietTime = (time, q) => {
+        if (!q?.on || !q?.start || !q?.end) return false;
+        if (q.start <= q.end) return time >= q.start && time < q.end;
+        return time >= q.start || time < q.end;
+      };
+      if (isQuietTime(hm, r.quietHours)) return;
+
       const once = (id, fn) => {
         const k = `${id}-${d}-${hm}`;
         if (!fired.current.has(k)) {

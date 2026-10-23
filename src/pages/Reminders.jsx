@@ -68,6 +68,71 @@ export default function Reminders() {
             </div>
           </div>
 
+          {/* Quiet Hours Card */}
+          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-3">
+            <Toggle
+              label={t("rem.quietHours")}
+              desc={t("rem.quietHoursDesc")}
+              checked={r.quietHours?.on || false}
+              onChange={(v) =>
+                save({
+                  quietHours: {
+                    ...(r.quietHours || { start: "22:00", end: "07:00" }),
+                    on: v,
+                  },
+                })
+              }
+            />
+            {r.quietHours?.on && (
+              <div className="pt-2 grid grid-cols-2 gap-3 border-t border-border/40 animate-fade-in">
+                <div>
+                  <label
+                    htmlFor="quiet-start"
+                    className="block text-[11px] font-semibold text-muted-foreground mb-1"
+                  >
+                    {t("rem.quietHoursStart")}
+                  </label>
+                  <input
+                    id="quiet-start"
+                    type="time"
+                    className="w-full rounded-xl border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground"
+                    value={r.quietHours?.start || "22:00"}
+                    onChange={(e) =>
+                      save({
+                        quietHours: {
+                          ...(r.quietHours || { on: true, end: "07:00" }),
+                          start: e.target.value,
+                        },
+                      })
+                    }
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="quiet-end"
+                    className="block text-[11px] font-semibold text-muted-foreground mb-1"
+                  >
+                    {t("rem.quietHoursEnd")}
+                  </label>
+                  <input
+                    id="quiet-end"
+                    type="time"
+                    className="w-full rounded-xl border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground"
+                    value={r.quietHours?.end || "07:00"}
+                    onChange={(e) =>
+                      save({
+                        quietHours: {
+                          ...(r.quietHours || { on: true, start: "22:00" }),
+                          end: e.target.value,
+                        },
+                      })
+                    }
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Automated Cycle & Habit Reminders */}
           <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
             <h2 className="font-bold text-xs uppercase tracking-wider text-muted-foreground">

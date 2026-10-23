@@ -37,7 +37,10 @@ const TOPICS = [
 
 export default function Community() {
   const { t, record } = useApp();
-  const userAgeGroup = record?.settings?.ageGroup === "teen" ? "under18" : "adult";
+  const userAgeGroup =
+    record?.settings?.ageGroup === "under18" || record?.settings?.ageGroup === "teen"
+      ? "under18"
+      : "adult";
 
   const [identity, setIdentity] = useState(null);
   const [activeTab, setActiveTab] = useState("feed"); // 'feed' | 'my_activity' | 'new_post'
