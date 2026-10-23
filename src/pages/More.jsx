@@ -16,6 +16,7 @@ import {
   Compass,
   ShoppingBag,
   MessageSquareWarning,
+  Heart,
 } from "lucide-react";
 import { useApp } from "@/App.jsx";
 import { PageTitle } from "@/components/common/ui.jsx";
@@ -44,6 +45,12 @@ export default function More() {
           key: "nav.selfCare",
           icon: Sparkles,
           color: "text-accent-foreground bg-accent",
+        },
+        {
+          to: "/companion",
+          key: "nav.companion",
+          icon: Heart,
+          color: "text-period bg-period/10",
         },
         {
           to: "/learn",

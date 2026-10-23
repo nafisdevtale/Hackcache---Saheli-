@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AskRouteImport } from './routes/ask'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as CommunityRouteImport } from './routes/community'
+import { Route as CompanionRouteImport } from './routes/companion'
 import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as DoctorRouteImport } from './routes/doctor'
 import { Route as FeedbackRouteImport } from './routes/feedback'
@@ -45,6 +46,11 @@ const CalendarRoute = CalendarRouteImport.update({
 const CommunityRoute = CommunityRouteImport.update({
   id: '/community',
   path: '/community',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompanionRoute = CompanionRouteImport.update({
+  id: '/companion',
+  path: '/companion',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DiscoverRoute = DiscoverRouteImport.update({
@@ -118,6 +124,7 @@ export interface FileRoutesByFullPath {
   '/ask': typeof AskRoute
   '/calendar': typeof CalendarRoute
   '/community': typeof CommunityRoute
+  '/companion': typeof CompanionRoute
   '/discover': typeof DiscoverRoute
   '/doctor': typeof DoctorRoute
   '/feedback': typeof FeedbackRoute
@@ -137,6 +144,7 @@ export interface FileRoutesByTo {
   '/ask': typeof AskRoute
   '/calendar': typeof CalendarRoute
   '/community': typeof CommunityRoute
+  '/companion': typeof CompanionRoute
   '/discover': typeof DiscoverRoute
   '/doctor': typeof DoctorRoute
   '/feedback': typeof FeedbackRoute
@@ -157,6 +165,7 @@ export interface FileRoutesById {
   '/ask': typeof AskRoute
   '/calendar': typeof CalendarRoute
   '/community': typeof CommunityRoute
+  '/companion': typeof CompanionRoute
   '/discover': typeof DiscoverRoute
   '/doctor': typeof DoctorRoute
   '/feedback': typeof FeedbackRoute
@@ -178,6 +187,7 @@ export interface FileRouteTypes {
     | '/ask'
     | '/calendar'
     | '/community'
+    | '/companion'
     | '/discover'
     | '/doctor'
     | '/feedback'
@@ -197,6 +207,7 @@ export interface FileRouteTypes {
     | '/ask'
     | '/calendar'
     | '/community'
+    | '/companion'
     | '/discover'
     | '/doctor'
     | '/feedback'
@@ -216,6 +227,7 @@ export interface FileRouteTypes {
     | '/ask'
     | '/calendar'
     | '/community'
+    | '/companion'
     | '/discover'
     | '/doctor'
     | '/feedback'
@@ -236,6 +248,7 @@ export interface RootRouteChildren {
   AskRoute: typeof AskRoute
   CalendarRoute: typeof CalendarRoute
   CommunityRoute: typeof CommunityRoute
+  CompanionRoute: typeof CompanionRoute
   DiscoverRoute: typeof DiscoverRoute
   DoctorRoute: typeof DoctorRoute
   FeedbackRoute: typeof FeedbackRoute
@@ -279,6 +292,13 @@ declare module '@tanstack/react-router' {
       path: '/community'
       fullPath: '/community'
       preLoaderRoute: typeof CommunityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/companion': {
+      id: '/companion'
+      path: '/companion'
+      fullPath: '/companion'
+      preLoaderRoute: typeof CompanionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/discover': {
@@ -380,6 +400,7 @@ const rootRouteChildren: RootRouteChildren = {
   AskRoute: AskRoute,
   CalendarRoute: CalendarRoute,
   CommunityRoute: CommunityRoute,
+  CompanionRoute: CompanionRoute,
   DiscoverRoute: DiscoverRoute,
   DoctorRoute: DoctorRoute,
   FeedbackRoute: FeedbackRoute,

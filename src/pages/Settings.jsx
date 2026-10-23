@@ -20,6 +20,8 @@ import {
   Bell,
   MessageSquareWarning,
   Play,
+  Stethoscope,
+  HeartPulse,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useApp } from "@/App.jsx";
@@ -42,7 +44,9 @@ import {
   parseCSVImport,
   generateDoctorSummaryPDF,
   parsePDFImport,
+  defaultHealthConditions,
 } from "@/lib/exportImport.js";
+import { QUESTIONNAIRE_CONDITIONS, CONFIRMATION_STATUSES } from "@/content/conditions.js";
 import { loadChimeSettings, saveChimeSettings, playSaheliChime } from "@/lib/chime.js";
 import { isValidPin, isValidPassphrase, isValidSecret } from "@/lib/encryption.js";
 import { todayStr } from "@/lib/localDate.js";
@@ -391,6 +395,52 @@ export default function Settings() {
   const [importState, setImportState] = useState(null);
   const [importErr, setImportErr] = useState(null);
   const [chimeSettings, setChimeSettings] = useState(() => loadChimeSettings());
+  const [showAddCondition, setShowAddCondition] = useState(false);
+  const [conditionFilter, setConditionFilter] = useState("");
+
+  const healthConditions = record.healthConditions || defaultHealthConditions();
+  const setHealthConditions = (patch) =>
+    update((r) => {
+      const current = r.healthConditions || defaultHealthConditions();
+      return {
+        ...r,
+        healthConditions: {
+          ...current,
+          ...patch,
+          lastUpdated: todayStr(),
+        },
+      };
+    });
+
+  const toggleConditionItem = (condId, defaultStatus = "confirmed_diagnosis") => {
+    const list = healthConditions.conditions || [];
+    const exists = list.some((c) => c.id === condId);
+    if (exists) {
+      setHealthConditions({
+        conditions: list.filter((c) => c.id !== condId),
+      });
+    } else {
+      setHealthConditions({
+        conditions: [...list, { id: condId, status: defaultStatus }],
+        preferNotToSay: false,
+      });
+    }
+  };
+
+  const updateConditionStatus = (condId, newStatus) => {
+    const list = healthConditions.conditions || [];
+    setHealthConditions({
+      conditions: list.map((c) => (c.id === condId ? { ...c, status: newStatus } : c)),
+    });
+  };
+
+  const clearAllConditions = () => {
+    setHealthConditions({
+      conditions: [],
+      otherText: "",
+      preferNotToSay: false,
+    });
+  };
 
   const updateChime = (patch) => {
     const next = { ...chimeSettings, ...patch };
@@ -725,6 +775,179 @@ export default function Settings() {
                 checked={record.settings.showPregnancy}
                 onChange={(v) => setSettings({ showPregnancy: v })}
               />
+            </div>
+          </div>
+
+          {/* Health Conditions Questionnaire & Educational Personalisation */}
+          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="font-bold text-sm sm:text-base text-foreground flex items-center gap-2">
+                  <Stethoscope className="h-4 w-4 text-primary" />
+                  <span>{t("cond.settings.title")}</span>
+                </h2>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {t("cond.settings.subtitle")}
+                </p>
+              </div>
+
+              <Btn
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowAddCondition(!showAddCondition)}
+                className="rounded-xl text-xs font-bold"
+              >
+                {showAddCondition ? t("common.done") : `+ ${t("cond.settings.addOrEdit")}`}
+              </Btn>
+            </div>
+
+            {/* Toggle: Personalisation */}
+            <Toggle
+              label={t("cond.settings.enablePersonalisation")}
+              desc={t("cond.settings.enablePersonalisationDesc")}
+              checked={healthConditions.personalisationEnabled}
+              onChange={(v) => setHealthConditions({ personalisationEnabled: v })}
+            />
+
+            {/* Active Conditions List */}
+            {healthConditions.conditions?.length > 0 ? (
+              <div className="space-y-2 pt-2 border-t border-border/40">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block">
+                  {t("cond.settings.activeConditions")}
+                </span>
+                <div className="space-y-2">
+                  {healthConditions.conditions.map((item) => {
+                    const info = QUESTIONNAIRE_CONDITIONS.find((c) => c.id === item.id);
+                    return (
+                      <div
+                        key={item.id}
+                        className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-2xl border border-border/70 bg-muted/30 text-xs"
+                      >
+                        <div>
+                          <div className="font-bold text-foreground">
+                            {info ? t(info.labelKey) : item.id}
+                            {item.id === "other" && healthConditions.otherText && (
+                              <span className="font-normal text-muted-foreground ml-1">
+                                ("{healthConditions.otherText}")
+                              </span>
+                            )}
+                          </div>
+                          {info && (
+                            <p className="text-[11px] text-muted-foreground">
+                              {t(info.plainNameKey)}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={item.status}
+                            onChange={(e) => updateConditionStatus(item.id, e.target.value)}
+                            className="h-8 rounded-xl border border-border bg-card px-2 text-[11px] font-semibold text-foreground"
+                          >
+                            {CONFIRMATION_STATUSES.map((st) => (
+                              <option key={st.id} value={st.id}>
+                                {t(st.labelKey)}
+                              </option>
+                            ))}
+                          </select>
+
+                          <button
+                            type="button"
+                            onClick={() => toggleConditionItem(item.id)}
+                            className="p-1.5 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all"
+                            aria-label={`${t("common.delete")} ${info ? t(info.labelKey) : item.id}`}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="pt-2 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={clearAllConditions}
+                    className="text-xs text-destructive hover:underline font-semibold"
+                  >
+                    {t("cond.settings.clearAll")}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground italic pt-1">
+                {healthConditions.preferNotToSay
+                  ? t("cond.onboarding.preferNotToSay")
+                  : t("cond.settings.noConditionsRecorded")}
+              </p>
+            )}
+
+            {/* Condition Picker Drawer / Inset */}
+            {showAddCondition && (
+              <div className="space-y-3 pt-3 border-t border-border/50 animate-fade-in">
+                <input
+                  type="text"
+                  value={conditionFilter}
+                  onChange={(e) => setConditionFilter(e.target.value)}
+                  placeholder={t("cond.onboarding.searchPlaceholder")}
+                  className={cx(inputCls, "h-10 text-xs rounded-xl")}
+                />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-60 overflow-y-auto p-1">
+                  {QUESTIONNAIRE_CONDITIONS.filter((c) => {
+                    if (!conditionFilter.trim()) return true;
+                    const q = conditionFilter.toLowerCase();
+                    return (
+                      t(c.labelKey).toLowerCase().includes(q) ||
+                      t(c.plainNameKey).toLowerCase().includes(q)
+                    );
+                  }).map((c) => {
+                    const isSelected = healthConditions.conditions?.some((x) => x.id === c.id);
+                    return (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => toggleConditionItem(c.id)}
+                        className={cx(
+                          "flex items-center justify-between p-2.5 rounded-xl border text-left text-xs font-semibold transition-all",
+                          isSelected
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border bg-card text-muted-foreground hover:bg-muted",
+                        )}
+                      >
+                        <span className="truncate">{t(c.labelKey)}</span>
+                        {isSelected && <Check className="h-4 w-4 text-primary shrink-0" />}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {healthConditions.conditions?.some((c) => c.id === "other") && (
+                  <div className="pt-2">
+                    <label className="block text-xs font-semibold text-foreground mb-1">
+                      {t("cond.onboarding.otherPlaceholder")}
+                    </label>
+                    <input
+                      type="text"
+                      value={healthConditions.otherText || ""}
+                      onChange={(e) => setHealthConditions({ otherText: e.target.value })}
+                      placeholder={t("cond.onboarding.otherPlaceholder")}
+                      className={cx(inputCls, "h-9 text-xs rounded-xl")}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Medical Disclaimer */}
+            <div className="rounded-2xl bg-muted/40 p-3 text-[11px] text-muted-foreground leading-relaxed">
+              <span className="font-semibold text-foreground">
+                {t("cond.onboarding.privacyTitle")}:{" "}
+              </span>
+              <span>{t("cond.onboarding.privacyDesc")}</span>
             </div>
           </div>
 

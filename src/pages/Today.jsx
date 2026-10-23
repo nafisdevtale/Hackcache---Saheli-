@@ -32,6 +32,9 @@ import { patternText } from "@/components/insights/patternText.js";
 import { RhythmRing } from "@/components/cycle/RhythmRing.jsx";
 import { QuickLogSheet } from "@/components/logging/QuickLogSheet.jsx";
 import { DEFAULT_DASHBOARD_WIDGETS } from "@/lib/exportImport.js";
+import { loadCompanionState } from "@/lib/companionStorage.js";
+import { PetArtwork } from "@/components/companion/PetArtwork.jsx";
+import { PhaseCards } from "@/components/cycle/PhaseCards.jsx";
 
 export default function Today() {
   const app = useApp();
@@ -42,6 +45,7 @@ export default function Today() {
   const [customizing, setCustomizing] = useState(false);
   const [workingWidgets, setWorkingWidgets] = useState([]);
   const [customizeBusy, setCustomizeBusy] = useState(false);
+  const [companion] = useState(() => loadCompanionState());
 
   const dayCount = Object.keys(record?.days || {}).length;
   const patterns = symptomPatterns(record?.days || {}, a);
@@ -395,6 +399,9 @@ export default function Today() {
               )}
             </div>
 
+            {/* Menstrual Cycle Phases: Follicular & Luteal Educational Cards */}
+            <PhaseCards />
+
             {/* Developer Diagnostics View (Strictly Dev / Debug only) */}
             {typeof window !== "undefined" &&
               (window.__SAHELI_DEV_DIAGNOSTICS__ === true ||
@@ -502,6 +509,40 @@ export default function Today() {
               </div>
               <span className="shrink-0 rounded-xl bg-primary px-3 py-1.5 font-bold text-primary-foreground shadow-2xs group-hover:scale-102 transition-transform">
                 {t("selfcare.exploreAll")}
+              </span>
+            </Link>
+
+            {/* My Saheli Companion Card */}
+            <Link
+              to="/companion"
+              className="group flex items-center justify-between gap-3 rounded-3xl border border-period/30 bg-gradient-to-r from-period/10 via-card to-primary/10 p-4 text-xs shadow-xs hover:border-period/50 hover:bg-muted/40 transition-all"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-card border border-border/80 shadow-2xs overflow-hidden">
+                  <PetArtwork
+                    speciesId={companion.speciesId || "cat"}
+                    growthStage={companion.growthStage || 1}
+                    accessory={companion.accessory || "none"}
+                    mood={companion.currentMood || "happy"}
+                    size={42}
+                  />
+                </div>
+                <div>
+                  <h3 className="font-bold text-foreground text-sm flex items-center gap-1.5">
+                    <Heart className="h-4 w-4 text-period fill-period" />
+                    <span>
+                      {companion.isAdopted ? companion.name : t("companion.dashboardMeetTitle")}
+                    </span>
+                  </h3>
+                  <p className="text-muted-foreground text-xs line-clamp-1">
+                    {companion.isAdopted
+                      ? `${t(`companion.species.${companion.speciesId}`)} • ${t(`companion.mood.${companion.currentMood}`)}`
+                      : t("companion.dashboardMeetDesc")}
+                  </p>
+                </div>
+              </div>
+              <span className="shrink-0 rounded-xl bg-period/15 text-period px-3 py-1.5 font-bold shadow-2xs group-hover:scale-102 transition-transform">
+                {companion.isAdopted ? t("companion.dashboardVisit") : t("companion.adoptAction")}
               </span>
             </Link>
           </div>

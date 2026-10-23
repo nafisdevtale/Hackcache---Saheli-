@@ -16,6 +16,7 @@ import { monthTitle } from "@/lib/localDate.js";
 import { blankDay } from "@/lib/exportImport.js";
 import { QuickLogSheet } from "@/components/logging/QuickLogSheet.jsx";
 import { CalendarEmptyArt } from "@/components/brand/SaheliArt.jsx";
+import { PhaseCards } from "@/components/cycle/PhaseCards.jsx";
 
 export default function Calendar() {
   const { t, today, lang, record, fmt, saveDay } = useApp();
@@ -269,6 +270,9 @@ export default function Calendar() {
           </div>
         </div>
       </div>
+
+      {/* Menstrual Phase Education: Follicular & Luteal Cards */}
+      <PhaseCards />
 
       {/* Quick Log Sheet for Selected Date */}
       <QuickLogSheet

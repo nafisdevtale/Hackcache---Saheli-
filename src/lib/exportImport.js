@@ -12,6 +12,16 @@ export const DEFAULT_DASHBOARD_WIDGETS = [
   { id: "doctorShortcuts", visible: true },
 ];
 
+export function defaultHealthConditions() {
+  return {
+    conditions: [], // array of { id: string, status: "confirmed_diagnosis" | "being_evaluated" | "seeking_info" }
+    otherText: "",
+    preferNotToSay: false,
+    personalisationEnabled: true,
+    lastUpdated: null,
+  };
+}
+
 export function emptyRecord() {
   return {
     version: 1,
@@ -38,6 +48,7 @@ export function emptyRecord() {
       custom: { on: false, text: "", time: "09:00" },
       quietHours: { on: false, start: "22:00", end: "07:00" },
     },
+    healthConditions: defaultHealthConditions(),
   };
 }
 
@@ -68,6 +79,48 @@ export function normalizeRecord(r) {
       daily: { ...e.reminders.daily, ...(r.reminders?.daily || {}) },
       custom: { ...e.reminders.custom, ...(r.reminders?.custom || {}) },
       quietHours: { ...e.reminders.quietHours, ...(r.reminders?.quietHours || {}) },
+    },
+    healthConditions: {
+      ...defaultHealthConditions(),
+      conditions: Array.isArray(r.healthConditions?.conditions)
+        ? r.healthConditions.conditions
+            .filter(
+              (c) =>
+                c &&
+                typeof c.id === "string" &&
+                [
+                  "dysmenorrhea",
+                  "pms",
+                  "heavy_bleeding",
+                  "uterine_fibroids",
+                  "pcos",
+                  "hypothyroidism",
+                  "endometriosis",
+                  "adenomyosis",
+                  "thyroid_general",
+                  "bleeding_disorder",
+                  "other",
+                ].includes(c.id),
+            )
+            .map((c) => ({
+              id: c.id,
+              status: ["confirmed_diagnosis", "being_evaluated", "seeking_info"].includes(c.status)
+                ? c.status
+                : "confirmed_diagnosis",
+            }))
+        : [],
+      otherText:
+        typeof r.healthConditions?.otherText === "string" ? r.healthConditions.otherText : "",
+      preferNotToSay:
+        typeof r.healthConditions?.preferNotToSay === "boolean"
+          ? r.healthConditions.preferNotToSay
+          : false,
+      personalisationEnabled:
+        typeof r.healthConditions?.personalisationEnabled === "boolean"
+          ? r.healthConditions.personalisationEnabled
+          : true,
+      lastUpdated:
+        typeof r.healthConditions?.lastUpdated === "string" ? r.healthConditions.lastUpdated : null,
     },
   };
 }
@@ -109,7 +162,22 @@ const ALLOWED_DAY_KEYS = [
   "medicines",
   "note",
 ];
-const ALLOWED_ROOT_KEYS = ["version", "days", "settings", "pregnancy", "reminders"];
+const ALLOWED_ROOT_KEYS = [
+  "version",
+  "days",
+  "settings",
+  "pregnancy",
+  "reminders",
+  "healthConditions",
+];
+const ALLOWED_HEALTH_CONDITIONS_KEYS = [
+  "conditions",
+  "otherText",
+  "preferNotToSay",
+  "personalisationEnabled",
+  "lastUpdated",
+];
+const ALLOWED_CONDITION_ITEM_KEYS = ["id", "status"];
 const ALLOWED_SETTINGS_KEYS = [
   "ageGroup",
   "trackedSymptoms",
@@ -613,7 +681,10 @@ export function parseImport(text) {
     !hasOnlyKeys(raw.reminders.custom, ALLOWED_CUSTOM_KEYS) ||
     (raw.reminders.quietHours &&
       (!object(raw.reminders.quietHours) ||
-        !hasOnlyKeys(raw.reminders.quietHours, ALLOWED_QUIET_HOURS_KEYS)))
+        !hasOnlyKeys(raw.reminders.quietHours, ALLOWED_QUIET_HOURS_KEYS))) ||
+    (raw.healthConditions &&
+      (!object(raw.healthConditions) ||
+        !hasOnlyKeys(raw.healthConditions, ALLOWED_HEALTH_CONDITIONS_KEYS)))
   )
     return { ok: false, error: "imp.wrongFormat" };
   const rec = normalizeRecord(obj.record);
@@ -669,7 +740,22 @@ export function parseImport(text) {
         !m.name.trim() ||
         m.name.length > 60 ||
         !time(m.time),
-    )
+    ) ||
+    (raw.healthConditions &&
+      (!Array.isArray(raw.healthConditions.conditions) ||
+        raw.healthConditions.conditions.some(
+          (c) =>
+            !object(c) ||
+            !hasOnlyKeys(c, ALLOWED_CONDITION_ITEM_KEYS) ||
+            typeof c.id !== "string" ||
+            !["confirmed_diagnosis", "being_evaluated", "seeking_info"].includes(c.status),
+        ) ||
+        (raw.healthConditions.otherText !== undefined &&
+          typeof raw.healthConditions.otherText !== "string") ||
+        (raw.healthConditions.preferNotToSay !== undefined &&
+          typeof raw.healthConditions.preferNotToSay !== "boolean") ||
+        (raw.healthConditions.personalisationEnabled !== undefined &&
+          typeof raw.healthConditions.personalisationEnabled !== "boolean")))
   )
     return { ok: false, error: "imp.wrongFormat" };
   if (raw.settings.customSymptoms != null) {
@@ -718,11 +804,23 @@ export function mergeRecords(existing, incoming, strategy) {
     if (!customMap.has(c.id)) customMap.set(c.id, c);
   });
 
+  const mergedConditions = [...(existing.healthConditions?.conditions || [])];
+  const existingCondIds = new Set(mergedConditions.map((c) => c.id));
+  (incoming.healthConditions?.conditions || []).forEach((c) => {
+    if (!existingCondIds.has(c.id)) mergedConditions.push(c);
+  });
+
   return {
     ...existing,
     settings: {
       ...existing.settings,
       customSymptoms: Array.from(customMap.values()),
+    },
+    healthConditions: {
+      ...defaultHealthConditions(),
+      ...(existing.healthConditions || {}),
+      otherText: existing.healthConditions?.otherText || incoming.healthConditions?.otherText || "",
+      conditions: mergedConditions,
     },
     days: { ...incoming.days, ...existing.days },
   };

@@ -13,13 +13,17 @@ import {
   Activity,
   BookOpen,
   FileText,
+  Search,
+  HeartPulse,
+  Stethoscope,
 } from "lucide-react";
 import { useApp } from "@/App.jsx";
 import { Btn, Card, cx, inputCls } from "@/components/common/ui.jsx";
 import { isValidPin } from "@/lib/encryption.js";
 import { isValidDate } from "@/lib/localDate.js";
 import { LANGUAGES } from "@/i18n/languages.js";
-import { parseImport } from "@/lib/exportImport.js";
+import { parseImport, defaultHealthConditions } from "@/lib/exportImport.js";
+import { QUESTIONNAIRE_CONDITIONS, CONFIRMATION_STATUSES } from "@/content/conditions.js";
 import {
   WelcomeArt,
   PrivacyArt,
@@ -37,11 +41,15 @@ export function OnboardingFlow() {
   const [selectedGoals, setSelectedGoals] = useState(["cycle", "symptoms", "learn"]);
   const [startChoice, setStartChoice] = useState("empty"); // "empty" | "firstPeriod" | "demo" | "learn"
   const [firstPeriodDate, setFirstPeriodDate] = useState("");
+  const [selectedConditions, setSelectedConditions] = useState([]); // [{ id, status }]
+  const [conditionSearch, setConditionSearch] = useState("");
+  const [otherConditionText, setOtherConditionText] = useState("");
+  const [preferNotToSayConditions, setPreferNotToSayConditions] = useState(false);
   const [busy, setBusy] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const fileInputRef = useRef(null);
 
-  const totalSteps = 7;
+  const totalSteps = 8;
 
   const toggleGoal = (goal) => {
     setSelectedGoals((prev) =>
@@ -95,6 +103,13 @@ export function OnboardingFlow() {
         firstPeriodDate: dateToSave,
         discreet: prefs.discreet,
         lang: prefs.lang,
+        healthConditions: {
+          conditions: preferNotToSayConditions ? [] : selectedConditions,
+          otherText: otherConditionText.trim(),
+          preferNotToSay: preferNotToSayConditions,
+          personalisationEnabled: true,
+          lastUpdated: today,
+        },
       });
 
       if (startChoice === "learn") {
@@ -247,7 +262,7 @@ export function OnboardingFlow() {
               type="button"
               onClick={() => {
                 setStartChoice("demo");
-                setStep(6);
+                setStep(7);
               }}
               className="flex w-full min-h-[44px] items-center justify-center text-xs font-semibold text-muted-foreground hover:text-foreground"
             >
@@ -611,8 +626,182 @@ export function OnboardingFlow() {
         </section>
       )}
 
-      {/* Screen 6: Start Experience Options */}
+      {/* Screen 6: Optional Health Conditions Questionnaire */}
       {step === 6 && (
+        <section aria-label={t("cond.onboarding.title")} className="space-y-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="rounded-full bg-primary/10 text-primary text-[11px] font-bold px-2.5 py-0.5">
+                {t("common.optional") || "Optional"}
+              </span>
+            </div>
+            <h1 className="font-display text-2xl font-bold">{t("cond.onboarding.title")}</h1>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              {t("cond.onboarding.subtitle")}
+            </p>
+          </div>
+
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3.5 top-3.5 h-4 w-4 text-muted-foreground" />
+            <input
+              type="text"
+              value={conditionSearch}
+              onChange={(e) => setConditionSearch(e.target.value)}
+              placeholder={t("cond.onboarding.searchPlaceholder")}
+              className={cx(inputCls, "pl-10 h-11 rounded-2xl text-xs")}
+            />
+          </div>
+
+          {/* Prefer Not to Say Toggle */}
+          <button
+            type="button"
+            onClick={() => {
+              const nextVal = !preferNotToSayConditions;
+              setPreferNotToSayConditions(nextVal);
+              if (nextVal) {
+                setSelectedConditions([]);
+              }
+            }}
+            className={cx(
+              "flex w-full items-center justify-between p-3 rounded-2xl border-2 text-xs font-semibold transition-all",
+              preferNotToSayConditions
+                ? "border-primary bg-primary/10 text-primary"
+                : "border-border bg-card text-muted-foreground hover:bg-muted/50",
+            )}
+          >
+            <span>{t("cond.onboarding.preferNotToSay")}</span>
+            {preferNotToSayConditions && <CheckCircle2 className="h-4 w-4 text-primary" />}
+          </button>
+
+          {!preferNotToSayConditions && (
+            <div className="space-y-2 max-h-72 overflow-y-auto p-1">
+              {QUESTIONNAIRE_CONDITIONS.filter((c) => {
+                if (!conditionSearch.trim()) return true;
+                const query = conditionSearch.toLowerCase();
+                const label = t(c.labelKey).toLowerCase();
+                const plain = t(c.plainNameKey).toLowerCase();
+                return label.includes(query) || plain.includes(query);
+              }).map((c) => {
+                const isSelected = selectedConditions.some((item) => item.id === c.id);
+                const currentItem = selectedConditions.find((item) => item.id === c.id);
+
+                return (
+                  <div
+                    key={c.id}
+                    className={cx(
+                      "rounded-2xl border-2 p-3 transition-all space-y-2.5",
+                      isSelected
+                        ? "border-primary bg-primary/5 text-foreground"
+                        : "border-border bg-card hover:bg-muted/40",
+                    )}
+                  >
+                    <div
+                      className="flex items-start justify-between cursor-pointer select-none"
+                      onClick={() => {
+                        setSelectedConditions((prev) =>
+                          isSelected
+                            ? prev.filter((item) => item.id !== c.id)
+                            : [...prev, { id: c.id, status: "confirmed_diagnosis" }],
+                        );
+                      }}
+                    >
+                      <div>
+                        <div className="font-bold text-xs sm:text-sm flex items-center gap-1.5">
+                          <span>{t(c.labelKey)}</span>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">
+                          {t(c.plainNameKey)}
+                        </p>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => {}}
+                        className="mt-0.5 h-4 w-4 rounded border-border text-primary accent-primary"
+                      />
+                    </div>
+
+                    {/* Status Selection when selected */}
+                    {isSelected && (
+                      <div className="pt-2 border-t border-border/50 space-y-2 text-xs">
+                        <span className="font-semibold text-muted-foreground block text-[11px]">
+                          {t("cond.onboarding.statusLabel")}:
+                        </span>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
+                          {CONFIRMATION_STATUSES.map((st) => (
+                            <button
+                              key={st.id}
+                              type="button"
+                              onClick={() => {
+                                setSelectedConditions((prev) =>
+                                  prev.map((item) =>
+                                    item.id === c.id ? { ...item, status: st.id } : item,
+                                  ),
+                                );
+                              }}
+                              className={cx(
+                                "rounded-xl px-2 py-1.5 text-[11px] font-semibold border text-center transition-all",
+                                currentItem?.status === st.id
+                                  ? "bg-primary text-primary-foreground border-primary"
+                                  : "bg-muted/60 text-muted-foreground border-border hover:bg-muted",
+                              )}
+                            >
+                              {t(st.labelKey)}
+                            </button>
+                          ))}
+                        </div>
+
+                        {c.allowsCustomText && (
+                          <div className="pt-1">
+                            <input
+                              type="text"
+                              value={otherConditionText}
+                              onChange={(e) => setOtherConditionText(e.target.value)}
+                              placeholder={t("cond.onboarding.otherPlaceholder")}
+                              className={cx(inputCls, "h-9 text-xs rounded-xl")}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Privacy & Non-Diagnostic Guarantee */}
+          <div className="rounded-2xl bg-muted/40 p-3 text-[11px] text-muted-foreground space-y-1 border border-border/50">
+            <p className="font-semibold text-foreground flex items-center gap-1.5">
+              <Stethoscope className="h-3.5 w-3.5 text-primary shrink-0" />
+              <span>{t("cond.onboarding.privacyTitle")}</span>
+            </p>
+            <p className="leading-relaxed">{t("cond.onboarding.privacyDesc")}</p>
+          </div>
+
+          <div className="flex gap-2 pt-2">
+            <Btn
+              variant="outline"
+              className="flex min-h-12 flex-1 items-center justify-center gap-1"
+              onClick={handlePrev}
+            >
+              <ArrowLeft aria-hidden className="h-4 w-4" />
+              <span>{t("onb.prev")}</span>
+            </Btn>
+            <Btn
+              className="flex min-h-12 flex-1 items-center justify-center gap-1"
+              onClick={handleNext}
+            >
+              <span>{selectedConditions.length > 0 ? t("onb.next") : t("onb.skip")}</span>
+              <ArrowRight aria-hidden className="h-4 w-4" />
+            </Btn>
+          </div>
+        </section>
+      )}
+
+      {/* Screen 7: Start Experience Options */}
+      {step === 7 && (
         <section aria-label={t("onb.step4Title")} className="space-y-4">
           <div className="space-y-1">
             <h1 className="font-display text-2xl font-bold">{t("onb.step4Title")}</h1>
@@ -714,8 +903,8 @@ export function OnboardingFlow() {
         </section>
       )}
 
-      {/* Screen 7: Personalised Introduction to Today */}
-      {step === 7 && (
+      {/* Screen 8: Personalised Introduction to Today */}
+      {step === 8 && (
         <section aria-label={t("onb.welcomeTodayTitle")} className="space-y-6 pt-2 text-center">
           <div className="relative mx-auto flex h-24 w-24 items-center justify-center rounded-3xl bg-primary/10 text-primary shadow-soft overflow-hidden">
             <RhythmMotif className="absolute inset-0 opacity-40 scale-125" />
@@ -742,12 +931,20 @@ export function OnboardingFlow() {
                 {pinEnabled ? t("set.pinOn") : t("onb.privacyStorage").split(":")[0]}
               </strong>
             </div>
-            <div className="flex justify-between py-1">
+            <div className="flex justify-between py-1 border-b border-border">
               <span>{t("onb.step4Title")}:</span>
               <strong className="text-foreground">
                 {startChoice === "demo" ? t("onb.startDemo") : t("onb.startEmpty")}
               </strong>
             </div>
+            {selectedConditions.length > 0 && (
+              <div className="flex justify-between py-1">
+                <span>{t("cond.onboarding.title")}:</span>
+                <strong className="text-foreground">
+                  {selectedConditions.length} {t("cond.selectedCount")}
+                </strong>
+              </div>
+            )}
           </Card>
 
           {errorMsg && (

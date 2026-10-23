@@ -354,3 +354,147 @@ export function symptomPatterns(days, a) {
 
   return out.sort((x, y) => y.n - x.n);
 }
+
+/**
+ * Saheli 7.3 — Phase Diagnostic Engine
+ *
+ * Provides bounded estimated cycle phases (Follicular & Luteal) for eligible regular adults.
+ * Strictly suppresses personalized estimates and returns educational-only mode for:
+ * - Adolescents (<18)
+ * - Irregular cycles (>7 days spread or flagged irregular)
+ * - Insufficient history (< 3 complete cycles)
+ * - Pregnancy mode or paused tracking
+ */
+export function getCyclePhaseDiagnostics(a, opts = {}, today = todayStr()) {
+  const ageGroup = opts.ageGroup || a?.diagnosticInfo?.activeAgeBand || "adult";
+  const isTrackingPaused = opts.trackingPaused || (opts.paused && !opts.pregnancyActive);
+  const isPregnancy =
+    opts.pregnancyActive ||
+    opts.pregnancyMode ||
+    (!isTrackingPaused && a?.fertilitySuppressionReason === "pregnancy_mode");
+  const paused = isTrackingPaused || opts.paused || a?.status === "paused";
+  const isUnder18 = ageGroup === "under18";
+  const isIrregularCycle = a?.irregular || a?.diagnosticInfo?.variationMeasure > 7;
+  const minCycles = CONFIG.minCyclesForPrediction || 3;
+  const cyclesCount = a?.cycles?.length || 0;
+
+  if (isPregnancy) {
+    return {
+      status: "suppressed",
+      reason: "pregnancy_mode",
+      eligible: false,
+      activePhase: null,
+      uncertaintyNoteKey: "phase.suppressed.pregnancy",
+      follicular: null,
+      luteal: null,
+    };
+  }
+
+  if (paused) {
+    return {
+      status: "suppressed",
+      reason: "tracking_paused",
+      eligible: false,
+      activePhase: null,
+      uncertaintyNoteKey: "phase.suppressed.paused",
+      follicular: null,
+      luteal: null,
+    };
+  }
+
+  if (isUnder18) {
+    return {
+      status: "suppressed",
+      reason: "adolescent_safeguard",
+      eligible: false,
+      activePhase: null,
+      uncertaintyNoteKey: "phase.suppressed.adolescent",
+      follicular: null,
+      luteal: null,
+    };
+  }
+
+  if (cyclesCount < minCycles) {
+    return {
+      status: "suppressed",
+      reason: "insufficient_history",
+      eligible: false,
+      activePhase: null,
+      uncertaintyNoteKey: "phase.suppressed.insufficient",
+      follicular: null,
+      luteal: null,
+    };
+  }
+
+  if (isIrregularCycle) {
+    return {
+      status: "suppressed",
+      reason: "irregular_cycles",
+      eligible: false,
+      activePhase: null,
+      uncertaintyNoteKey: "phase.suppressed.irregular",
+      follicular: null,
+      luteal: null,
+    };
+  }
+
+  if (!a?.prediction || !a?.lastStart) {
+    return {
+      status: "suppressed",
+      reason: "insufficient_history",
+      eligible: false,
+      activePhase: null,
+      uncertaintyNoteKey: "phase.suppressed.insufficient",
+      follicular: null,
+      luteal: null,
+    };
+  }
+
+  const lastStart = a.lastStart;
+  const med = a.prediction.median;
+  const ovStart = a.fertility?.ovulation?.start || addDays(a.prediction.start, -CONFIG.lutealDays);
+  const ovEnd = a.fertility?.ovulation?.end || addDays(a.prediction.end, -CONFIG.lutealDays);
+
+  const follicularEndDay = Math.max(1, diffDays(lastStart, ovStart));
+  const follicular = {
+    start: lastStart,
+    end: ovStart,
+    startDay: 1,
+    endDay: follicularEndDay,
+    uncertaintyDays: a.prediction.halfWidth,
+  };
+
+  const lutealStart = addDays(ovEnd, 1);
+  const lutealEnd = a.prediction.start;
+  const lutealStartDay = follicularEndDay + 1;
+  const lutealEndDay = med;
+  const luteal = {
+    start: lutealStart,
+    end: lutealEnd,
+    startDay: lutealStartDay,
+    endDay: lutealEndDay,
+    uncertaintyDays: a.prediction.halfWidth,
+  };
+
+  let activePhase = "follicular";
+  if (today < lastStart) {
+    activePhase = "unknown";
+  } else if (today <= ovEnd) {
+    activePhase = "follicular";
+  } else if (today <= a.prediction.end) {
+    activePhase = "luteal";
+  } else {
+    activePhase = "overdue";
+  }
+
+  return {
+    status: "estimate_available",
+    reason: null,
+    eligible: true,
+    activePhase,
+    cyclesConsidered: a.prediction.basedOn,
+    uncertaintyDays: a.prediction.halfWidth,
+    follicular,
+    luteal,
+  };
+}

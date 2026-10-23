@@ -139,3 +139,111 @@ export const CONDITIONS = {
     ],
   },
 };
+
+/**
+ * Saheli 7.3 — Optional Health Conditions Questionnaire Catalogue
+ *
+ * Clinical Taxonomy & Evidence Governance:
+ * - 11 clear, non-overlapping categories representing common gynecological & endocrine contexts.
+ * - Explicitly EXCLUDES "Polyendocrine Metabolic Ovarian Syndrome (PMOS)" as an unverified/non-authoritative synonym.
+ * - Distinction between confirmed medical diagnosis vs exploratory evaluation vs educational interest.
+ * - Zero automatic inferences or disease scoring based on symptom logs.
+ */
+export const CONFIRMATION_STATUSES = [
+  { id: "confirmed_diagnosis", labelKey: "cond.status.confirmed" },
+  { id: "being_evaluated", labelKey: "cond.status.evaluating" },
+  { id: "seeking_info", labelKey: "cond.status.seekingInfo" },
+];
+
+export const QUESTIONNAIRE_CONDITIONS = [
+  {
+    id: "dysmenorrhea",
+    labelKey: "cond.item.dysmenorrhea",
+    plainNameKey: "cond.item.dysmenorrheaPlain",
+    descKey: "cond.item.dysmenorrheaDesc",
+    sourceIds: ["nhs_pain", "acog_dysmenorrhea"],
+    learnTopic: "cramps",
+  },
+  {
+    id: "pms",
+    labelKey: "cond.item.pms",
+    plainNameKey: "cond.item.pmsPlain",
+    descKey: "cond.item.pmsDesc",
+    sourceIds: ["nhs_pms", "acog_pms"],
+    learnTopic: "cycle",
+  },
+  {
+    id: "heavy_bleeding",
+    labelKey: "cond.item.heavyBleeding",
+    plainNameKey: "cond.item.heavyBleedingPlain",
+    descKey: "cond.item.heavyBleedingDesc",
+    sourceIds: ["nhs_heavy", "acog_heavy"],
+    learnTopic: "heavy",
+  },
+  {
+    id: "uterine_fibroids",
+    labelKey: "cond.item.fibroids",
+    plainNameKey: "cond.item.fibroidsPlain",
+    descKey: "cond.item.fibroidsDesc",
+    sourceIds: ["nhs_fibroids", "acog_fibroids"],
+    learnTopic: "heavy",
+  },
+  {
+    id: "pcos",
+    labelKey: "cond.item.pcos",
+    plainNameKey: "cond.item.pcosPlain",
+    descKey: "cond.item.pcosDesc",
+    sourceIds: ["who_pcos", "nhs_pcos", "fogsi"],
+    learnTopic: "late",
+    // Clinical exclusion note: "Polyendocrine Metabolic Ovarian Syndrome (PMOS)" is rejected as an unverified synonym.
+  },
+  {
+    id: "hypothyroidism",
+    labelKey: "cond.item.hypothyroidism",
+    plainNameKey: "cond.item.hypothyroidismPlain",
+    descKey: "cond.item.hypothyroidismDesc",
+    sourceIds: ["nhs_thyroid", "acog_visit"],
+    learnTopic: "cycle",
+  },
+  {
+    id: "endometriosis",
+    labelKey: "cond.item.endometriosis",
+    plainNameKey: "cond.item.endometriosisPlain",
+    descKey: "cond.item.endometriosisDesc",
+    sourceIds: ["who_endometriosis", "nhs_endo"],
+    learnTopic: "cramps",
+  },
+  {
+    id: "adenomyosis",
+    labelKey: "cond.item.adenomyosis",
+    plainNameKey: "cond.item.adenomyosisPlain",
+    descKey: "cond.item.adenomyosisDesc",
+    sourceIds: ["nhs_adenomyosis", "acog_visit"],
+    learnTopic: "cramps",
+  },
+  {
+    id: "thyroid_general",
+    labelKey: "cond.item.thyroidGeneral",
+    plainNameKey: "cond.item.thyroidGeneralPlain",
+    descKey: "cond.item.thyroidGeneralDesc",
+    sourceIds: ["nhs_thyroid", "acog_visit"],
+    learnTopic: "cycle",
+  },
+  {
+    id: "bleeding_disorder",
+    labelKey: "cond.item.bleedingDisorder",
+    plainNameKey: "cond.item.bleedingDisorderPlain",
+    descKey: "cond.item.bleedingDisorderDesc",
+    sourceIds: ["who_bleeding", "acog_heavy"],
+    learnTopic: "heavy",
+  },
+  {
+    id: "other",
+    labelKey: "cond.item.other",
+    plainNameKey: "cond.item.otherPlain",
+    descKey: "cond.item.otherDesc",
+    sourceIds: ["acog_visit"],
+    learnTopic: "doctor_prep",
+    allowsCustomText: true,
+  },
+];

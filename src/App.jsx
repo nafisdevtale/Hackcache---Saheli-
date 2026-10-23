@@ -29,7 +29,13 @@ import {
 import { analyze } from "./lib/cycle.js";
 import { evaluateSafety } from "./lib/safetyRules.js";
 import { buildDemo } from "./data/demo.js";
-import { emptyRecord, normalizeRecord, mergeRecords, blankDay } from "./lib/exportImport.js";
+import {
+  emptyRecord,
+  normalizeRecord,
+  mergeRecords,
+  blankDay,
+  defaultHealthConditions,
+} from "./lib/exportImport.js";
 import { todayStr, formatDate, formatRange, addDays, isValidDate } from "./lib/localDate.js";
 import { translate, pick } from "./i18n/index.js";
 import {
@@ -244,6 +250,7 @@ export function AppProvider({ children }) {
       firstPeriodDate = null,
       discreet = false,
       lang = null,
+      healthConditions = null,
     } = {}) {
       if (lang) {
         setPrefs({ lang, ...(discreet ? { discreet: true } : {}) });
@@ -258,6 +265,14 @@ export function AppProvider({ children }) {
       const r = emptyRecord();
       r.settings.ageGroup = ageGroup || "under18";
       if (r.settings.ageGroup === "under18") r.settings.showFertility = false;
+
+      if (healthConditions && typeof healthConditions === "object") {
+        r.healthConditions = {
+          ...defaultHealthConditions(),
+          ...healthConditions,
+          conditions: Array.isArray(healthConditions.conditions) ? healthConditions.conditions : [],
+        };
+      }
 
       if (firstPeriodDate && isValidDate(firstPeriodDate)) {
         r.days[firstPeriodDate] = {

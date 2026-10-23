@@ -25,6 +25,8 @@ import { patternText } from "@/components/insights/patternText.js";
 import { computeCycleInsights } from "@/lib/insights.js";
 import { CONFIG, EMERGENCY } from "@/config.js";
 import { InsightEmptyArt } from "@/components/brand/SaheliArt.jsx";
+import { PhaseCards } from "@/components/cycle/PhaseCards.jsx";
+import { QUESTIONNAIRE_CONDITIONS } from "@/content/conditions.js";
 
 export default function Insights() {
   const { t, fmt, fmtRange, analysis: a, record, prefs, today } = useApp();
@@ -616,6 +618,74 @@ export default function Insights() {
           </div>
         </div>
       )}
+
+      {/* Personalized Health Conditions Educational Overview */}
+      {record?.healthConditions?.personalisationEnabled &&
+        record?.healthConditions?.conditions?.length > 0 && (
+          <div className="rounded-3xl border border-border/80 bg-card p-5 sm:p-6 shadow-soft space-y-4">
+            <div className="flex items-start justify-between gap-3 border-b border-border/40 pb-3">
+              <div>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-primary">
+                  {t("cond.insights.badge")}
+                </span>
+                <h3 className="font-display text-base sm:text-lg font-bold text-foreground">
+                  {t("cond.insights.title")}
+                </h3>
+              </div>
+              <Link
+                to="/settings"
+                className="text-xs font-bold text-primary hover:underline shrink-0"
+              >
+                {t("cond.insights.manageSettings")}
+              </Link>
+            </div>
+
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              {t("cond.insights.desc")}
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {record.healthConditions.conditions.map((item) => {
+                const info = QUESTIONNAIRE_CONDITIONS.find((c) => c.id === item.id);
+                return (
+                  <div
+                    key={item.id}
+                    className="p-3 rounded-2xl border border-border/70 bg-muted/30 text-xs space-y-1"
+                  >
+                    <div className="font-bold text-foreground flex items-center justify-between">
+                      <span>{info ? t(info.labelKey) : item.id}</span>
+                      <span className="text-[10px] font-semibold text-primary rounded-lg bg-primary/10 px-2 py-0.5">
+                        {t(
+                          `cond.status.${item.status === "confirmed_diagnosis" ? "confirmed" : item.status === "being_evaluated" ? "evaluating" : "seekingInfo"}`,
+                        )}
+                      </span>
+                    </div>
+                    {info && (
+                      <p className="text-[11px] text-muted-foreground">{t(info.plainNameKey)}</p>
+                    )}
+                    {info?.learnTopic && (
+                      <Link
+                        to="/learn"
+                        search={{ topic: info.learnTopic }}
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline pt-1"
+                      >
+                        <BookOpen className="h-3 w-3" />
+                        <span>{t("cond.insights.readGuide")}</span>
+                      </Link>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            <p className="text-[10px] text-muted-foreground italic">
+              {t("cond.onboarding.privacyDesc")}
+            </p>
+          </div>
+        )}
+
+      {/* Menstrual Phase Education: Follicular & Luteal Deep Dive */}
+      <PhaseCards showAll />
 
       {/* Provenance & Supporting Evidence Modal */}
       {inspectProvenance && (
