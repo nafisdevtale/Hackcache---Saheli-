@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearch, useNavigate } from "@tanstack/react-router";
-import { ChevronLeft, ChevronRight, CircleDot } from "lucide-react";
+import { ChevronLeft, ChevronRight, CircleDot, Droplet, Check, Trash2, Save } from "lucide-react";
 import { useApp } from "@/App.jsx";
 import {
   Btn,
@@ -95,8 +95,8 @@ export default function LogDay() {
 
   const YesNo = ({ value, onChange, legend }) => (
     <fieldset>
-      <legend className="font-semibold">{legend}</legend>
-      <div className="mt-1 flex flex-wrap gap-2">
+      <legend className="font-semibold text-xs text-foreground mb-1.5">{legend}</legend>
+      <div className="flex flex-wrap gap-2">
         {[
           [true, "common.yes"],
           [false, "common.no"],
@@ -111,212 +111,290 @@ export default function LogDay() {
   );
 
   return (
-    <form onSubmit={onSave} className="space-y-4" noValidate>
-      <PageTitle>{t("log.title")}</PageTitle>
-      <Card>
-        <div className="flex items-end gap-2">
+    <form onSubmit={onSave} className="space-y-6" noValidate>
+      {/* Page Title & Navigation Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/60 pb-3">
+        <div>
+          <span className="text-xs font-bold uppercase tracking-wider text-primary">
+            {t("log.title")}
+          </span>
+          <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+            {fmt(date, { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
+          </h1>
+        </div>
+
+        {/* Date Stepper Controls */}
+        <div className="flex items-center gap-2">
           <button
             type="button"
             aria-label={t("log.prev")}
             onClick={() => go(-1)}
-            className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border-2 border-border"
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-border bg-card hover:bg-muted text-foreground transition-all active:scale-95"
           >
-            <ChevronLeft aria-hidden />
+            <ChevronLeft aria-hidden className="h-5 w-5" />
           </button>
-          <div className="flex-1">
-            <Field id="date" label={t("log.date")}>
-              <input
-                id="date"
-                type="date"
-                max={today}
-                value={date}
-                className={inputCls}
-                onChange={(e) => {
-                  const d = e.target.value;
-                  if (isValidDate(d) && d <= today) {
-                    setDate(d);
-                    navigate({ to: "/log", search: { date: d }, replace: true });
-                  }
-                }}
-              />
-            </Field>
-          </div>
+
+          <input
+            id="date"
+            type="date"
+            max={today}
+            value={date}
+            className="h-10 rounded-2xl border border-border bg-card px-3 text-xs font-semibold text-foreground hover:bg-muted cursor-pointer transition-all"
+            onChange={(e) => {
+              const d = e.target.value;
+              if (isValidDate(d) && d <= today) {
+                setDate(d);
+                navigate({ to: "/log", search: { date: d }, replace: true });
+              }
+            }}
+          />
+
           <button
             type="button"
             aria-label={t("log.next")}
             disabled={date >= today}
             onClick={() => go(1)}
-            className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border-2 border-border disabled:opacity-40"
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-border bg-card hover:bg-muted text-foreground disabled:opacity-40 transition-all active:scale-95"
           >
-            <ChevronRight aria-hidden />
+            <ChevronRight aria-hidden className="h-5 w-5" />
           </button>
         </div>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {fmt(date, { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-        </p>
-        {exists && <p className="mt-1 text-sm font-semibold">{t("log.editing")}</p>}
-      </Card>
+      </div>
 
-      <Card className="space-y-3">
-        <Toggle
-          label={t("log.period")}
-          checked={form.period}
-          onChange={(v) => set({ period: v, flow: v ? form.flow || "medium" : null })}
-        />
-        {form.period && (
-          <fieldset>
-            <legend className="font-semibold">{t("log.flow")}</legend>
-            <div className="mt-1 flex flex-wrap gap-2">
-              {FLOWS.map((f) => (
-                <Chip key={f} selected={form.flow === f} onClick={() => set({ flow: f })}>
-                  {t(`flow.${f}`)}
-                </Chip>
-              ))}
-            </div>
-          </fieldset>
-        )}
-        {form.period && form.flow === "heavy" && (
-          <div className="space-y-3 rounded-xl bg-muted p-3">
-            <YesNo
-              legend={t("log.padHourly")}
-              value={form.padHourly}
-              onChange={(v) => set({ padHourly: v })}
-            />
-            <YesNo
-              legend={t("log.bigClots")}
-              value={form.bigClots}
-              onChange={(v) => set({ bigClots: v })}
-            />
-          </div>
-        )}
-      </Card>
+      {exists && (
+        <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">
+          <Check className="h-3.5 w-3.5" />
+          <span>{t("log.editing")}</span>
+        </div>
+      )}
 
-      <Card className="space-y-3">
-        <Field id="pain" label={`${t("log.pain")}: ${form.pain}/10`} hint={t("log.painHelp")}>
-          <input
-            id="pain"
-            type="range"
-            min={0}
-            max={10}
-            step={1}
-            value={form.pain}
-            onChange={(e) => set({ pain: Number(e.target.value) })}
-            className="h-12 w-full accent-primary"
-          />
-        </Field>
-        {form.pain > 0 && (
-          <>
+      {/* Responsive 2-Column Grid on large screens */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left Column: Period, Flow & Pain */}
+        <div className="lg:col-span-6 space-y-4">
+          {/* Period & Flow Selector */}
+          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
             <Toggle
-              label={t("log.painStopped")}
-              checked={form.painStoppedActivities}
-              onChange={(v) => set({ painStoppedActivities: v })}
+              label={t("log.period")}
+              checked={form.period}
+              onChange={(v) => set({ period: v, flow: v ? form.flow || "medium" : null })}
             />
+
+            {form.period && (
+              <fieldset className="pt-2 border-t border-border/50 animate-fade-in space-y-2">
+                <legend className="font-bold text-xs uppercase tracking-wider text-period">
+                  {t("log.flow")}
+                </legend>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {FLOWS.map((f) => {
+                    const isSelected = form.flow === f;
+                    return (
+                      <button
+                        key={f}
+                        type="button"
+                        onClick={() => set({ flow: f })}
+                        className={cx(
+                          "flex flex-col items-center justify-center rounded-2xl py-3 px-2 text-xs font-semibold transition-all border",
+                          isSelected
+                            ? "bg-period text-period-foreground border-period shadow-sm"
+                            : "bg-card border-border/70 hover:bg-period/10 text-foreground",
+                        )}
+                      >
+                        <span className="text-base">
+                          {f === "spotting"
+                            ? "💧"
+                            : f === "light"
+                              ? "🩸"
+                              : f === "medium"
+                                ? "🩸🩸"
+                                : "🩸🩸🩸"}
+                        </span>
+                        <span className="mt-1 font-bold capitalize">{t(`flow.${f}`)}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </fieldset>
+            )}
+
+            {form.period && form.flow === "heavy" && (
+              <div className="space-y-3 rounded-2xl border border-period/30 bg-period/5 p-4 animate-fade-in">
+                <YesNo
+                  legend={t("log.padHourly")}
+                  value={form.padHourly}
+                  onChange={(v) => set({ padHourly: v })}
+                />
+                <YesNo
+                  legend={t("log.bigClots")}
+                  value={form.bigClots}
+                  onChange={(v) => set({ bigClots: v })}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Pain Slider & Severity */}
+          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
+            <div className="flex items-center justify-between">
+              <label htmlFor="pain" className="font-bold text-sm text-foreground">
+                {t("log.pain")}
+              </label>
+              <span className="rounded-full bg-primary/10 px-3 py-0.5 text-xs font-bold text-primary">
+                {form.pain}/10
+              </span>
+            </div>
+
+            <p className="text-xs text-muted-foreground">{t("log.painHelp")}</p>
+
+            <input
+              id="pain"
+              type="range"
+              min={0}
+              max={10}
+              step={1}
+              value={form.pain}
+              onChange={(e) => set({ pain: Number(e.target.value) })}
+              className="h-3 w-full cursor-pointer appearance-none rounded-lg bg-muted accent-primary"
+            />
+
+            {form.pain > 0 && (
+              <div className="space-y-3 pt-3 border-t border-border/50 animate-fade-in">
+                <Toggle
+                  label={t("log.painStopped")}
+                  checked={form.painStoppedActivities}
+                  onChange={(v) => set({ painStoppedActivities: v })}
+                />
+                <fieldset>
+                  <legend className="font-semibold text-xs text-muted-foreground uppercase tracking-wider mb-2">
+                    {t("log.painkiller")}
+                  </legend>
+                  <div className="flex flex-wrap gap-2">
+                    {["yes", "no", "na"].map((v) => (
+                      <Chip
+                        key={v}
+                        selected={form.painkillerHelped === v}
+                        onClick={() => set({ painkillerHelped: v })}
+                      >
+                        {t(`pk.${v}`)}
+                      </Chip>
+                    ))}
+                  </div>
+                </fieldset>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right Column: Symptoms, Mood, Energy, Notes & Extras */}
+        <div className="lg:col-span-6 space-y-4">
+          {/* Symptoms Chips */}
+          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-3">
             <fieldset>
-              <legend className="font-semibold">{t("log.painkiller")}</legend>
-              <div className="mt-1 flex flex-wrap gap-2">
-                {["yes", "no", "na"].map((v) => (
+              <legend className="font-bold text-sm text-foreground mb-1">
+                {t("log.symptoms")}
+              </legend>
+              <p className="text-xs text-muted-foreground mb-3">{t("log.symptomsNote")}</p>
+              <div className="flex flex-wrap gap-1.5">
+                {tracked.map((s) => (
                   <Chip
-                    key={v}
-                    selected={form.painkillerHelped === v}
-                    onClick={() => set({ painkillerHelped: v })}
+                    key={s.id}
+                    icon={s.icon}
+                    selected={form.symptoms.includes(s.id)}
+                    onClick={() => toggleSym(s.id)}
                   >
-                    {t(`pk.${v}`)}
+                    {s.custom ? s.label : t(`sym.${s.id}`)}
                   </Chip>
                 ))}
               </div>
             </fieldset>
-          </>
-        )}
-      </Card>
+          </div>
 
-      <Card>
-        <fieldset>
-          <legend className="text-lg font-bold">{t("log.symptoms")}</legend>
-          <p className="text-sm text-muted-foreground">{t("log.symptomsNote")}</p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {tracked.map((s) => (
-              <Chip
-                key={s.id}
-                icon={s.icon}
-                selected={form.symptoms.includes(s.id)}
-                onClick={() => toggleSym(s.id)}
-              >
-                {s.custom ? s.label : t(`sym.${s.id}`)}
-              </Chip>
-            ))}
-          </div>
-        </fieldset>
-      </Card>
+          {/* Mood & Energy */}
+          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
+            <fieldset>
+              <legend className="font-semibold text-xs text-muted-foreground uppercase tracking-wider mb-2">
+                {t("log.mood")}
+              </legend>
+              <div className="flex flex-wrap gap-1.5">
+                {MOODS.map((m) => (
+                  <Chip
+                    key={m}
+                    selected={form.mood === m}
+                    onClick={() => set({ mood: form.mood === m ? null : m })}
+                  >
+                    {t(`mood.${m}`)}
+                  </Chip>
+                ))}
+              </div>
+            </fieldset>
 
-      <Card className="space-y-3">
-        <fieldset>
-          <legend className="font-semibold">{t("log.mood")}</legend>
-          <div className="mt-1 flex flex-wrap gap-2">
-            {MOODS.map((m) => (
-              <Chip
-                key={m}
-                selected={form.mood === m}
-                onClick={() => set({ mood: form.mood === m ? null : m })}
-              >
-                {t(`mood.${m}`)}
-              </Chip>
-            ))}
+            <fieldset className="pt-2 border-t border-border/50">
+              <legend className="font-semibold text-xs text-muted-foreground uppercase tracking-wider mb-2">
+                {t("log.energy")}
+              </legend>
+              <div className="flex flex-wrap gap-1.5">
+                {ENERGY.map((m) => (
+                  <Chip
+                    key={m}
+                    selected={form.energy === m}
+                    onClick={() => set({ energy: form.energy === m ? null : m })}
+                  >
+                    {t(`energy.${m}`)}
+                  </Chip>
+                ))}
+              </div>
+            </fieldset>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-border/50">
+              <Field id="sleep" label={t("log.sleep")}>
+                <input
+                  id="sleep"
+                  type="number"
+                  inputMode="decimal"
+                  min={0}
+                  max={24}
+                  step={0.5}
+                  value={form.sleep ?? ""}
+                  placeholder="e.g. 7.5"
+                  onChange={(e) => set({ sleep: e.target.value === "" ? null : e.target.value })}
+                  className={inputCls}
+                />
+              </Field>
+
+              <Field id="meds" label={t("log.medicines")}>
+                <input
+                  id="meds"
+                  type="text"
+                  maxLength={300}
+                  value={form.medicines}
+                  placeholder={t("log.medicinesPh")}
+                  onChange={(e) => set({ medicines: e.target.value })}
+                  className={inputCls}
+                />
+              </Field>
+            </div>
+
+            <Field id="note" label={t("log.note")}>
+              <textarea
+                id="note"
+                rows={3}
+                maxLength={2000}
+                value={form.note}
+                placeholder={t("log.notePh")}
+                onChange={(e) => set({ note: e.target.value })}
+                className={cx(inputCls, "min-h-20")}
+              />
+            </Field>
           </div>
-        </fieldset>
-        <fieldset>
-          <legend className="font-semibold">{t("log.energy")}</legend>
-          <div className="mt-1 flex flex-wrap gap-2">
-            {ENERGY.map((m) => (
-              <Chip
-                key={m}
-                selected={form.energy === m}
-                onClick={() => set({ energy: form.energy === m ? null : m })}
-              >
-                {t(`energy.${m}`)}
-              </Chip>
-            ))}
-          </div>
-        </fieldset>
-        <Field id="sleep" label={t("log.sleep")}>
-          <input
-            id="sleep"
-            type="number"
-            inputMode="decimal"
-            min={0}
-            max={24}
-            step={0.5}
-            value={form.sleep ?? ""}
-            onChange={(e) => set({ sleep: e.target.value === "" ? null : e.target.value })}
-            className={inputCls}
-          />
-        </Field>
-        <Field id="meds" label={t("log.medicines")}>
-          <input
-            id="meds"
-            type="text"
-            maxLength={300}
-            value={form.medicines}
-            placeholder={t("log.medicinesPh")}
-            onChange={(e) => set({ medicines: e.target.value })}
-            className={inputCls}
-          />
-        </Field>
-        <Field id="note" label={t("log.note")}>
-          <textarea
-            id="note"
-            rows={3}
-            maxLength={2000}
-            value={form.note}
-            placeholder={t("log.notePh")}
-            onChange={(e) => set({ note: e.target.value })}
-            className={cx(inputCls, "min-h-24")}
-          />
-        </Field>
-      </Card>
+        </div>
+      </div>
 
       {errors.length > 0 && (
-        <div role="alert" className="rounded-xl bg-destructive/10 p-3 text-destructive">
-          <p className="font-semibold">{t("log.fixErrors")}</p>
+        <div
+          role="alert"
+          className="rounded-2xl bg-destructive/10 p-4 text-destructive text-xs space-y-1"
+        >
+          <p className="font-bold">{t("log.fixErrors")}</p>
           <ul className="ml-5 list-disc">
             {errors.map((e) => (
               <li key={e}>{t(e)}</li>
@@ -324,14 +402,19 @@ export default function LogDay() {
           </ul>
         </div>
       )}
+
       <Status msg={msg?.key && t(msg.key)} tone={msg?.tone} />
-      <div className="sticky bottom-20 z-10 flex gap-2 bg-background/90 py-2">
-        <Btn type="submit" className="flex-1 text-lg">
-          {t("log.save")}
+
+      {/* Floating Sticky Save Bar */}
+      <div className="sticky bottom-20 md:bottom-6 z-20 flex gap-3 rounded-2xl border border-border/70 bg-card/90 p-3 shadow-xl backdrop-blur-md">
+        <Btn type="submit" className="flex-1 min-h-12 rounded-xl text-base font-bold shadow-md">
+          <Save className="h-4 w-4 mr-1.5" />
+          <span>{t("log.save")}</span>
         </Btn>
         {exists && (
           <Btn
             variant="outline"
+            className="min-h-12 rounded-xl border-destructive/40 text-destructive hover:bg-destructive/10"
             onClick={async () => {
               try {
                 await deleteDay(date);
@@ -342,7 +425,8 @@ export default function LogDay() {
               }
             }}
           >
-            {t("common.delete")}
+            <Trash2 className="h-4 w-4 mr-1.5" />
+            <span>{t("common.delete")}</span>
           </Btn>
         )}
       </div>

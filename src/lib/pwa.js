@@ -82,10 +82,16 @@ export async function promptPwaInstall() {
 }
 
 export async function clearAppCaches() {
-  if (typeof window !== "undefined" && "caches" in window) {
+  const cacheStorage =
+    typeof caches !== "undefined"
+      ? caches
+      : typeof window !== "undefined" && "caches" in window
+        ? window.caches
+        : null;
+  if (cacheStorage) {
     try {
-      const keys = await caches.keys();
-      await Promise.all(keys.map((k) => caches.delete(k)));
+      const keys = await cacheStorage.keys();
+      await Promise.all(keys.map((k) => cacheStorage.delete(k)));
     } catch {
       // Ignore cache clearing errors
     }
