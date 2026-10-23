@@ -808,4 +808,12 @@ export default {
     "जैसे: क्या मेरा दर्द सामान्य है? क्या मुझे आयरन की जांच करानी चाहिए?",
   "visit.localOnlyNotice":
     "यह सारांश केवल आपके फ़ोन पर बनता है और कभी किसी सर्वर पर नहीं भेजा जाता।",
+
+  "learn.featuredGuide": "विशेष शैक्षणिक गाइड",
+  "learn.readFullArticle": "पूरा लेख पढ़ें",
+  "shell.localFirst": "लोकल-फ़र्स्ट (डिवाइस पर)",
+  "shell.offline": "ऑफ़लाइन",
+  "shell.ready": "सक्रिय",
+  "ask.browseAnswers": "{n} उत्तर देखें",
+  "ask.howToUseFaq": "सत्यापित मेडिकल FAQ का उपयोग कैसे करें",
 };

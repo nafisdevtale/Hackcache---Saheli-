@@ -78,7 +78,7 @@ export default function Learn() {
         <div className="rounded-3xl border border-primary/20 bg-hero p-6 sm:p-8 shadow-soft space-y-4">
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
             <Sparkles className="h-4 w-4" />
-            <span>Featured Educational Guide</span>
+            <span>{t("learn.featuredGuide")}</span>
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-2 max-w-xl">
@@ -97,7 +97,7 @@ export default function Learn() {
             href={`#${featured.id}`}
             className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline"
           >
-            <span>Read full article</span>
+            <span>{t("learn.readFullArticle")}</span>
             <ArrowRight className="h-3.5 w-3.5" />
           </a>
         </div>

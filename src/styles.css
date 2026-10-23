@@ -66,9 +66,16 @@
   --color-secondary-strong: var(--secondary-strong);
   --color-accent-strong: var(--accent-strong);
 
-  --font-display: "Noto Serif Devanagari", "Rozha One", Georgia, serif;
+  --font-display:
+    "Noto Serif Devanagari", "Rozha One", "Noto Nastaliq Urdu", "Noto Serif Bengali",
+    "Noto Serif Tamil", "Noto Serif Telugu", Georgia, serif;
   --font-body:
-    system-ui, -apple-system, "Noto Sans Devanagari", "Nirmala UI", "Mukta", "Segoe UI", sans-serif;
+    system-ui, -apple-system, "Noto Sans Devanagari", "Kohinoor Devanagari", "Mukta",
+    "Noto Sans Bengali", "Kohinoor Bangla", "Noto Sans Tamil", "Tamil Sangam MN",
+    "Noto Sans Telugu", "Kohinoor Telugu", "Noto Sans Gujarati", "Kohinoor Gujarati",
+    "Noto Sans Kannada", "Kannada Sangam MN", "Noto Sans Malayalam", "Malayalam Sangam MN",
+    "Noto Sans Gurmukhi", "Gurmukhi MN", "Noto Sans Oriya", "Noto Nastaliq Urdu",
+    "Noto Sans Arabic", "Geeza Pro", "Nirmala UI", "Segoe UI", sans-serif;
 
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
@@ -295,4 +302,36 @@
     box-shadow: none !important;
     border: none !important;
   }
+}
+
+/* RTL (Urdu) Layout and Typography Rules */
+[dir="rtl"] {
+  text-align: right;
+  --font-body:
+    "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", "Noto Sans Arabic", "Geeza Pro", "Damascus",
+    "Urdu Typesetting", "Nirmala UI", Tahoma, Arial, sans-serif;
+  letter-spacing: normal !important;
+}
+
+[dir="rtl"] .rtl-mirror {
+  transform: scaleX(-1);
+}
+
+[dir="rtl"] input,
+[dir="rtl"] textarea,
+[dir="rtl"] select {
+  text-align: right;
+  direction: rtl;
+}
+
+[dir="rtl"] input[type="search"] {
+  text-align: right;
+}
+
+/* Logical spacing utilities for RTL resilience */
+[dir="rtl"] .text-left {
+  text-align: right !important;
+}
+[dir="rtl"] .text-right {
+  text-align: left !important;
 }

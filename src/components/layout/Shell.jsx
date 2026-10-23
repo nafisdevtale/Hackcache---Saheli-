@@ -455,14 +455,16 @@ export function Shell({ children }) {
             <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1 px-1">
               <span className="flex items-center gap-1.5 font-medium">
                 <Shield className="h-3 w-3 text-primary" />
-                <span>Local-first</span>
+                <span>{t("shell.localFirst")}</span>
               </span>
               {!isOnline ? (
                 <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-semibold">
-                  <WifiOff className="h-3 w-3" /> Offline
+                  <WifiOff className="h-3 w-3" /> {t("shell.offline")}
                 </span>
               ) : (
-                <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Ready</span>
+                <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
+                  {t("shell.ready")}
+                </span>
               )}
             </div>
           </div>

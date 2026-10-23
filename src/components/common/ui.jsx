@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ExternalLink, Volume2, Square } from "lucide-react";
 import { useApp } from "@/App.jsx";
 import { SOURCES } from "@/content/sources.js";
+import { loc } from "@/lib/localDate.js";
 
 export const cx = (...a) => a.filter(Boolean).join(" ");
 
@@ -137,7 +138,7 @@ export function speak(text, lang, done = () => {}) {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) return false;
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
-  u.lang = lang === "hi" ? "hi-IN" : "en-IN";
+  u.lang = loc(lang);
   u.onend = done;
   u.onerror = done;
   window.speechSynthesis.speak(u);

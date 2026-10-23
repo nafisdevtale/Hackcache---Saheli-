@@ -83,6 +83,7 @@ export default function Ask() {
           question: q,
           consent: true,
           context: getCycleContext(),
+          lang: prefs.lang || "en",
         }),
       });
 
@@ -222,7 +223,7 @@ export default function Ask() {
               <summary className="min-h-11 cursor-pointer font-bold text-sm text-foreground flex items-center justify-between">
                 <span>{t("ask.allFaq", { n: FAQ.length })}</span>
                 <span className="text-xs font-normal text-muted-foreground">
-                  Browse {FAQ.length} answers
+                  {t("ask.browseAnswers", { n: FAQ.length })}
                 </span>
               </summary>
               <ul className="mt-3 divide-y divide-border/50 max-h-96 overflow-y-auto pr-1 text-xs">
@@ -340,7 +341,7 @@ export default function Ask() {
                 <div className="rounded-3xl border border-border/70 bg-hero p-6 shadow-soft space-y-4">
                   <div className="flex items-center gap-2 text-primary font-bold text-sm">
                     <Stethoscope className="h-5 w-5" />
-                    <span>How to use the Verified Medical FAQ</span>
+                    <span>{t("ask.howToUseFaq")}</span>
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     Search above or pick any question from the categories. All answers in this

@@ -142,7 +142,8 @@ export function AppProvider({ children }) {
     const h = document.documentElement;
     h.dataset.text = prefs.textSize || "md";
     h.classList.toggle("hc", !!prefs.contrast);
-    h.lang = prefs.lang === "hi" ? "hi" : "en";
+    h.lang = prefs.lang || "en";
+    h.dir = prefs.lang === "ur" ? "rtl" : "ltr";
 
     const updateTheme = () => {
       const mode = prefs.theme || "system";

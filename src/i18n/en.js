@@ -813,4 +813,12 @@ export default {
   "visit.questionsPlaceholder": "e.g., Are my cramps typical? Should I get iron levels checked?",
   "visit.localOnlyNotice":
     "This summary is generated strictly on your device. It is never uploaded to any server.",
+
+  "learn.featuredGuide": "Featured Educational Guide",
+  "learn.readFullArticle": "Read full article",
+  "shell.localFirst": "Local-first",
+  "shell.offline": "Offline",
+  "shell.ready": "Ready",
+  "ask.browseAnswers": "Browse {n} answers",
+  "ask.howToUseFaq": "How to use the Verified Medical FAQ",
 };

@@ -45,7 +45,32 @@ export function ymd(y, m0, d) {
 export const daysInMonth = (y, m0) => new Date(Date.UTC(y, m0 + 1, 0)).getUTCDate();
 export const weekdayOf = (s) => new Date(toNum(s) * DAY).getUTCDay(); // 0=Sun
 
-const loc = (lang) => (lang === "hi" ? "hi-IN" : "en-IN");
+export const LOCALE_MAP = {
+  en: "en-IN",
+  hi: "hi-IN",
+  mr: "mr-IN",
+  bn: "bn-IN",
+  te: "te-IN",
+  kn: "kn-IN",
+  ta: "ta-IN",
+  gu: "gu-IN",
+  pa: "pa-IN",
+  ml: "ml-IN",
+  or: "or-IN",
+  as: "as-IN",
+  ur: "ur-IN",
+};
+
+export const loc = (lang) => LOCALE_MAP[lang] || "en-IN";
+
+export function formatNumber(n, lang = "en") {
+  if (typeof n !== "number" || isNaN(n)) return String(n);
+  try {
+    return new Intl.NumberFormat(loc(lang)).format(n);
+  } catch {
+    return String(n);
+  }
+}
 export function formatDate(s, lang = "en", opts = { day: "numeric", month: "short" }) {
   if (!isValidDate(s)) return "";
   return new Intl.DateTimeFormat(loc(lang), { ...opts, timeZone: "UTC" }).format(
