@@ -1,4 +1,4 @@
-import { describe, it, expect } from "bun:test";
+import { describe, it, expect } from "vitest";
 import { CYCLE_PHASES } from "../content/cyclePhases.js";
 import { analyze, getCyclePhaseDiagnostics } from "../lib/cycle.js";
 import { addDays, todayStr } from "../lib/localDate.js";

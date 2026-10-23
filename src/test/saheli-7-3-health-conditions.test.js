@@ -1,4 +1,4 @@
-import { describe, it, expect } from "bun:test";
+import { describe, it, expect } from "vitest";
 import { QUESTIONNAIRE_CONDITIONS, CONFIRMATION_STATUSES } from "../content/conditions.js";
 import {
   defaultHealthConditions,
