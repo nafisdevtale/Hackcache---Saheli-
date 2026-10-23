@@ -16,6 +16,7 @@ import {
 import { SYMPTOMS, FLOWS, MOODS, ENERGY } from "@/data/symptoms.js";
 import { blankDay, validateDay } from "@/lib/exportImport.js";
 import { addDays, isValidDate } from "@/lib/localDate.js";
+import { DailyJournalMotif } from "@/components/brand/SaheliArt.jsx";
 
 export default function LogDay() {
   const { t, fmt, record, today, saveDay, deleteDay } = useApp();
@@ -114,13 +115,16 @@ export default function LogDay() {
     <form onSubmit={onSave} className="space-y-6" noValidate>
       {/* Page Title & Navigation Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/60 pb-3">
-        <div>
-          <span className="text-xs font-bold uppercase tracking-wider text-primary">
-            {t("log.title")}
-          </span>
-          <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-            {fmt(date, { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
-          </h1>
+        <div className="flex items-center gap-3">
+          <DailyJournalMotif className="w-10 h-10 shrink-0" />
+          <div>
+            <span className="text-xs font-bold uppercase tracking-wider text-primary">
+              {t("log.title")}
+            </span>
+            <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+              {fmt(date, { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
+            </h1>
+          </div>
         </div>
 
         {/* Date Stepper Controls */}

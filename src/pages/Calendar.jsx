@@ -15,6 +15,7 @@ import { MonthGrid } from "@/components/calendar/MonthGrid.jsx";
 import { monthTitle } from "@/lib/localDate.js";
 import { blankDay } from "@/lib/exportImport.js";
 import { QuickLogSheet } from "@/components/logging/QuickLogSheet.jsx";
+import { CalendarEmptyArt } from "@/components/brand/SaheliArt.jsx";
 
 export default function Calendar() {
   const { t, today, lang, record, fmt, saveDay } = useApp();
@@ -215,9 +216,9 @@ export default function Calendar() {
                 )}
               </div>
             ) : (
-              <div className="py-6 text-center text-muted-foreground space-y-2">
-                <CalendarIcon className="mx-auto h-8 w-8 opacity-40" />
-                <p className="text-xs font-medium">{t("cal.noEntry")}</p>
+              <div className="py-6 text-center text-muted-foreground space-y-2 flex flex-col items-center">
+                <CalendarEmptyArt className="w-20 h-20 opacity-80" />
+                <p className="text-xs font-semibold">{t("cal.noEntry")}</p>
               </div>
             )}
 

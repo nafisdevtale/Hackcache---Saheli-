@@ -20,6 +20,12 @@ import { isValidPin } from "@/lib/encryption.js";
 import { isValidDate } from "@/lib/localDate.js";
 import { LANGUAGES } from "@/i18n/languages.js";
 import { parseImport } from "@/lib/exportImport.js";
+import {
+  WelcomeArt,
+  PrivacyArt,
+  RhythmMotif,
+  SaheliBrandMark,
+} from "@/components/brand/SaheliArt.jsx";
 
 export function OnboardingFlow() {
   const { t, prefs, setPrefs, completeOnboarding, restoreFromBackup, today } = useApp();
@@ -134,11 +140,11 @@ export function OnboardingFlow() {
   const AppIcon = prefs.discreet ? NotebookPen : Flower2;
 
   return (
-    <main id="main" className="mx-auto max-w-md space-y-5 px-4 py-6">
+    <main id="main" className="mx-auto max-w-xl space-y-6 px-4 py-8">
       {/* Header with App Identity & Language/Skip Actions */}
-      <header className="flex items-center justify-between border-b border-border pb-3">
-        <div className="flex items-center gap-2 font-display text-xl font-bold text-primary">
-          <AppIcon aria-hidden className="h-6 w-6" />
+      <header className="flex items-center justify-between border-b border-border/60 pb-3">
+        <div className="flex items-center gap-2.5 font-display text-xl font-bold text-primary">
+          <SaheliBrandMark className="h-7 w-7 text-primary" />
           <span>{prefs.discreet ? t("app.discreetName") : t("app.name")}</span>
         </div>
         <div className="flex items-center gap-2">
@@ -155,7 +161,7 @@ export function OnboardingFlow() {
             type="button"
             aria-label={t("nav.langToggleLabel")}
             onClick={() => setPrefs({ lang: prefs.lang === "en" ? "hi" : "en" })}
-            className="min-h-9 rounded-lg border border-border px-2.5 text-xs font-semibold hover:bg-muted"
+            className="min-h-9 rounded-xl border border-border px-3 text-xs font-semibold hover:bg-muted"
           >
             {t("nav.langToggle")}
           </button>
@@ -164,16 +170,16 @@ export function OnboardingFlow() {
 
       {/* Step Progress Indicator (Steps 2-7) */}
       {step > 1 && (
-        <div className="space-y-1">
-          <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between text-xs font-bold text-muted-foreground">
             <span>{t("onb.step", { current: step, total: totalSteps })}</span>
           </div>
-          <div className="flex h-1.5 w-full gap-1 overflow-hidden rounded-full bg-muted">
+          <div className="flex h-2 w-full gap-1.5 overflow-hidden rounded-full bg-muted">
             {Array.from({ length: totalSteps }, (_, i) => i + 1).map((s) => (
               <div
                 key={s}
                 className={cx(
-                  "h-full flex-1 transition-all duration-200",
+                  "h-full flex-1 rounded-full transition-all duration-300",
                   s <= step ? "bg-primary" : "bg-transparent",
                 )}
               />
@@ -185,29 +191,31 @@ export function OnboardingFlow() {
       {/* Screen 1: Welcome & Brand Identity */}
       {step === 1 && (
         <section aria-label={t("onb.title")} className="space-y-6 pt-2 text-center">
-          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-primary/10 text-primary shadow-soft">
-            <AppIcon aria-hidden className="h-10 w-10" />
+          <div className="mx-auto flex justify-center py-2">
+            <WelcomeArt className="w-full max-w-xs h-auto" />
           </div>
 
           <div className="space-y-2">
-            <h1 className="font-display text-3xl font-bold tracking-tight text-foreground">
+            <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
               {t("app.name")}
             </h1>
-            <p className="text-base font-medium text-primary">{t("onb.tagline")}</p>
-            <p className="mx-auto max-w-xs text-sm text-muted-foreground">{t("onb.intro")}</p>
+            <p className="text-base font-semibold text-primary">{t("onb.tagline")}</p>
+            <p className="mx-auto max-w-md text-sm text-muted-foreground leading-relaxed">
+              {t("onb.intro")}
+            </p>
           </div>
 
-          <div className="space-y-3 pt-2 text-left">
+          <div className="space-y-3 pt-2 text-left max-w-md mx-auto">
             {/* Primary Action: Start Privately */}
             <button
               type="button"
               onClick={() => setStep(2)}
-              className="group flex w-full min-h-[56px] items-center justify-between rounded-2xl bg-primary px-4 py-3.5 text-primary-foreground shadow-md transition-all hover:opacity-95"
+              className="group flex w-full min-h-[58px] items-center justify-between rounded-2xl bg-gradient-to-r from-primary to-period px-5 py-3.5 text-primary-foreground shadow-md transition-all hover:opacity-95 active:scale-98"
             >
               <div className="flex items-center gap-3">
                 <Sparkles aria-hidden className="h-5 w-5" />
                 <div className="text-left">
-                  <div className="font-bold">{t("onb.startPrivately")}</div>
+                  <div className="font-bold text-base">{t("onb.startPrivately")}</div>
                   <div className="text-xs opacity-90">{t("onb.freshDesc")}</div>
                 </div>
               </div>
@@ -228,9 +236,9 @@ export function OnboardingFlow() {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="flex w-full min-h-[48px] items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3 text-sm font-semibold hover:bg-muted"
+              className="flex w-full min-h-[50px] items-center justify-center gap-3 rounded-2xl border border-border/80 bg-card px-4 py-3 text-sm font-bold text-foreground hover:bg-muted shadow-2xs transition-all"
             >
-              <Upload aria-hidden className="h-4 w-4 text-muted-foreground" />
+              <Upload aria-hidden className="h-4 w-4 text-primary" />
               <span>{t("onb.restoreBackup")}</span>
             </button>
 
@@ -320,13 +328,18 @@ export function OnboardingFlow() {
       {/* Screen 3: Privacy Explanation & Optional PIN */}
       {step === 3 && (
         <section aria-label={t("onb.step3Title")} className="space-y-4">
-          <div className="space-y-1">
-            <h1 className="font-display text-2xl font-bold">{t("onb.step3Title")}</h1>
-            <p className="text-xs text-muted-foreground">{t("onb.privacyExplainTitle")}</p>
+          <div className="flex items-center gap-4">
+            <PrivacyArt className="w-16 h-16 shrink-0" />
+            <div className="space-y-0.5">
+              <h1 className="font-display text-2xl font-bold text-foreground">
+                {t("onb.step3Title")}
+              </h1>
+              <p className="text-xs text-muted-foreground">{t("onb.privacyExplainTitle")}</p>
+            </div>
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-start gap-3 rounded-2xl border border-border bg-card p-3.5 shadow-sm">
+            <div className="flex items-start gap-3 rounded-2xl border border-border/70 bg-card p-4 shadow-xs">
               <ShieldCheck aria-hidden className="mt-0.5 h-5 w-5 shrink-0 text-secondary-strong" />
               <div className="text-xs leading-relaxed text-muted-foreground">
                 <strong className="font-semibold text-foreground">{t("onb.privacyStorage")}</strong>
@@ -334,7 +347,7 @@ export function OnboardingFlow() {
               </div>
             </div>
 
-            <div className="flex items-start gap-3 rounded-2xl border border-border bg-card p-3.5 shadow-sm">
+            <div className="flex items-start gap-3 rounded-2xl border border-border/70 bg-card p-4 shadow-xs">
               <BookOpen aria-hidden className="mt-0.5 h-5 w-5 shrink-0 text-info" />
               <div className="text-xs leading-relaxed text-muted-foreground">
                 <p>{t("onb.privacyNotDiagnosis")}</p>
@@ -704,15 +717,16 @@ export function OnboardingFlow() {
       {/* Screen 7: Personalised Introduction to Today */}
       {step === 7 && (
         <section aria-label={t("onb.welcomeTodayTitle")} className="space-y-6 pt-2 text-center">
-          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-secondary/20 text-secondary-strong shadow-soft">
-            <Sparkles aria-hidden className="h-10 w-10" />
+          <div className="relative mx-auto flex h-24 w-24 items-center justify-center rounded-3xl bg-primary/10 text-primary shadow-soft overflow-hidden">
+            <RhythmMotif className="absolute inset-0 opacity-40 scale-125" />
+            <Sparkles aria-hidden className="relative z-10 h-10 w-10 text-primary" />
           </div>
 
           <div className="space-y-2">
-            <h1 className="font-display text-2xl font-bold text-foreground">
+            <h1 className="font-display text-2xl sm:text-3xl font-extrabold text-foreground">
               {t("onb.welcomeTodayTitle")}
             </h1>
-            <p className="mx-auto max-w-xs text-sm text-muted-foreground">
+            <p className="mx-auto max-w-sm text-xs sm:text-sm text-muted-foreground leading-relaxed">
               {t("onb.welcomeTodayDesc")}
             </p>
           </div>

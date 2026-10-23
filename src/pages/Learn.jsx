@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Search, BookOpen, Sparkles, Filter, X } from "lucide-react";
+import { Search, BookOpen, Sparkles, Filter, X, ArrowRight } from "lucide-react";
 import { useApp } from "@/App.jsx";
 import {
   Card,
@@ -11,70 +11,7 @@ import {
   cx,
 } from "@/components/common/ui.jsx";
 import { LESSONS } from "@/content/lessons.js";
-
-function Illustration({ kind }) {
-  const c = "fill-none stroke-primary";
-  return (
-    <svg viewBox="0 0 120 60" aria-hidden className="h-16 w-32 shrink-0">
-      {kind === "cycle" && (
-        <>
-          <circle cx="60" cy="30" r="22" className={c} strokeWidth="6" strokeDasharray="20 8" />
-          <circle cx="60" cy="8" r="5" className="fill-period" />
-        </>
-      )}
-      {kind === "check" && (
-        <>
-          <rect x="35" y="8" width="50" height="44" rx="8" className={c} strokeWidth="4" />
-          <path d="M47 30l8 8 16-16" className={c} strokeWidth="5" />
-        </>
-      )}
-      {kind === "ovary" && (
-        <>
-          <circle cx="35" cy="34" r="12" className={c} strokeWidth="4" />
-          <circle cx="85" cy="34" r="12" className={c} strokeWidth="4" />
-          <path d="M47 30 Q60 6 73 30" className={c} strokeWidth="4" />
-        </>
-      )}
-      {kind === "clock" && (
-        <>
-          <circle cx="60" cy="30" r="22" className={c} strokeWidth="4" />
-          <path d="M60 16v14l10 6" className={c} strokeWidth="4" />
-        </>
-      )}
-      {kind === "heat" && (
-        <>
-          <rect
-            x="40"
-            y="14"
-            width="40"
-            height="36"
-            rx="10"
-            className="fill-accent stroke-primary"
-            strokeWidth="4"
-          />
-          <path d="M52 8q4 4 0 8M68 8q4 4 0 8" className={c} strokeWidth="3" />
-        </>
-      )}
-      {kind === "pad" && (
-        <rect
-          x="30"
-          y="18"
-          width="60"
-          height="24"
-          rx="12"
-          className="fill-secondary stroke-primary"
-          strokeWidth="4"
-        />
-      )}
-      {kind === "drop" && (
-        <path
-          d="M60 6 C74 26 80 34 80 40 a20 20 0 0 1-40 0 c0-6 6-14 20-34z"
-          className="fill-period"
-        />
-      )}
-    </svg>
-  );
-}
+import { EducationTopicArt } from "@/components/brand/SaheliArt.jsx";
 
 const CATEGORY_MAP = {
   cycle: "biology",
@@ -121,6 +58,9 @@ export default function Learn() {
     });
   }, [selectedCat, search, L]);
 
+  // Featured article (First lesson: Cycle biology)
+  const featured = LESSONS[0];
+
   return (
     <div className="space-y-6">
       <div className="border-b border-border/60 pb-3">
@@ -130,8 +70,38 @@ export default function Learn() {
         <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
           {t("learn.title")}
         </h1>
-        <p className="mt-1 text-xs text-muted-foreground">{t("learn.intro")}</p>
+        <p className="mt-1 text-xs sm:text-sm text-muted-foreground">{t("learn.intro")}</p>
       </div>
+
+      {/* Featured Editorial Hero Banner */}
+      {!search && selectedCat === "all" && featured && (
+        <div className="rounded-3xl border border-primary/20 bg-hero p-6 sm:p-8 shadow-soft space-y-4">
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
+            <Sparkles className="h-4 w-4" />
+            <span>Featured Educational Guide</span>
+          </div>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-2 max-w-xl">
+              <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground">
+                {L(featured.title)}
+              </h2>
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed line-clamp-2">
+                {L(featured.paras[0])}
+              </p>
+            </div>
+            <div className="shrink-0 flex items-center justify-center p-3 rounded-2xl bg-card border border-border/70 shadow-xs">
+              <EducationTopicArt category="biology" className="h-16 w-16" />
+            </div>
+          </div>
+          <a
+            href={`#${featured.id}`}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline"
+          >
+            <span>Read full article</span>
+            <ArrowRight className="h-3.5 w-3.5" />
+          </a>
+        </div>
+      )}
 
       {/* Search Bar & Filters */}
       <div className="space-y-3">
@@ -145,7 +115,7 @@ export default function Learn() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t("learn.searchPlaceholder")}
-            className={cx(inputCls, "pl-10 pr-9 min-h-[44px] rounded-2xl")}
+            className={cx(inputCls, "pl-10 pr-9 min-h-[46px] rounded-2xl")}
           />
           {search && (
             <button
@@ -184,6 +154,7 @@ export default function Learn() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
           {filtered.map((l) => {
+            const cat = CATEGORY_MAP[l.id] || "guidance";
             const textToRead = [L(l.title), ...l.paras.map((p) => L(p))].join(". ");
             const wordCount = textToRead.split(/\s+/).length;
             const readTime = Math.max(1, Math.ceil(wordCount / 140));
@@ -195,9 +166,9 @@ export default function Learn() {
                 className="scroll-mt-20 overflow-hidden rounded-3xl border border-border/70 bg-card shadow-xs transition-all hover:border-primary/40 hover:shadow-soft"
               >
                 <details className="group">
-                  <summary className="flex min-h-[64px] cursor-pointer items-center justify-between gap-3 p-4 text-sm sm:text-base font-bold text-foreground">
-                    <div className="flex items-center gap-3">
-                      <Illustration kind={l.illustration} />
+                  <summary className="flex min-h-[68px] cursor-pointer items-center justify-between gap-3 p-4 text-sm sm:text-base font-bold text-foreground">
+                    <div className="flex items-center gap-3.5">
+                      <EducationTopicArt category={cat} className="h-12 w-12 shrink-0" />
                       <div>
                         <span className="group-hover:text-primary transition-colors">
                           {L(l.title)}
@@ -208,7 +179,7 @@ export default function Learn() {
                       </div>
                     </div>
                   </summary>
-                  <div className="space-y-3 border-t border-border/50 px-4 py-4 text-xs sm:text-sm leading-relaxed bg-muted/20">
+                  <div className="space-y-3 border-t border-border/50 px-5 py-5 text-xs sm:text-sm leading-relaxed bg-muted/20">
                     <div className="flex justify-end">
                       <ListenButton text={textToRead} />
                     </div>

@@ -13,6 +13,7 @@ import { useApp } from "@/App.jsx";
 import { PageTitle, Sources } from "@/components/common/ui.jsx";
 import { GuidanceCard, UrgentCard, MoodSupport } from "@/components/common/GuidanceCard.jsx";
 import { UNLOGGABLE_SIGNS } from "@/data/redflags.js";
+import { DoctorPrepArt } from "@/components/brand/SaheliArt.jsx";
 
 export default function DoctorGuidance() {
   const { t, safety } = useApp();
@@ -42,24 +43,29 @@ export default function DoctorGuidance() {
           <MoodSupport mood={safety.mood} />
 
           {/* Doctor Visit Summary Quick CTA */}
-          <div className="rounded-3xl border-2 border-primary/20 bg-hero p-6 shadow-soft space-y-3">
-            <div className="flex items-center gap-2.5 text-primary">
-              <Printer className="h-6 w-6 shrink-0" />
-              <h2 className="font-display font-bold text-lg text-foreground">{t("doc.prepare")}</h2>
-            </div>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Generate a printable, one-page clinical summary of your recorded cycle lengths,
-              symptom frequencies, pain levels, and custom doctor questions to take to your
-              appointment.
-            </p>
-            <div className="pt-1">
-              <Link
-                to="/visit"
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-sm hover:bg-primary/90 transition-all active:scale-98"
-              >
-                <span>{t("doc.prepare")}</span>
-                <ArrowRight className="h-4 w-4" />
-              </Link>
+          <div className="rounded-3xl border-2 border-primary/20 bg-hero p-6 shadow-soft flex flex-col sm:flex-row items-center gap-5">
+            <DoctorPrepArt className="w-20 h-20 shrink-0" />
+            <div className="space-y-2 text-center sm:text-left flex-1">
+              <div className="flex items-center justify-center sm:justify-start gap-2 text-primary font-bold">
+                <Printer className="h-5 w-5 shrink-0" />
+                <h2 className="font-display font-bold text-lg text-foreground">
+                  {t("doc.prepare")}
+                </h2>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Generate a printable, one-page clinical summary of your recorded cycle lengths,
+                symptom frequencies, pain levels, and custom doctor questions to take to your
+                appointment.
+              </p>
+              <div className="pt-1">
+                <Link
+                  to="/visit"
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary to-period px-5 text-xs font-bold text-primary-foreground shadow-sm hover:opacity-95 transition-all active:scale-98"
+                >
+                  <span>{t("doc.prepare")}</span>
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
             </div>
           </div>
 

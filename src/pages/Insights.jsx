@@ -20,6 +20,7 @@ import { BarChart } from "@/components/insights/BarChart.jsx";
 import { patternText } from "@/components/insights/patternText.js";
 import { computeCycleInsights } from "@/lib/insights.js";
 import { CONFIG, EMERGENCY } from "@/config.js";
+import { InsightEmptyArt } from "@/components/brand/SaheliArt.jsx";
 
 export default function Insights() {
   const { t, fmt, fmtRange, analysis: a, record, prefs, today } = useApp();
@@ -46,18 +47,20 @@ export default function Insights() {
 
       {/* Empty state: No complete cycles yet */}
       {insights.totalCyclesCount === 0 ? (
-        <div className="mx-auto max-w-xl rounded-3xl border-2 border-primary/20 bg-hero p-6 sm:p-8 text-center shadow-soft space-y-4">
-          <Calendar className="mx-auto h-12 w-12 text-primary" aria-hidden />
-          <div>
-            <h2 className="font-display text-xl font-bold text-foreground">{t("ins.title")}</h2>
-            <p className="mt-1 text-sm text-muted-foreground">{t("ins.noData")}</p>
-            <p className="mt-2 text-xs text-muted-foreground max-w-md mx-auto">
+        <div className="mx-auto max-w-xl rounded-3xl border border-primary/20 bg-hero p-8 text-center shadow-soft space-y-5">
+          <div className="flex justify-center">
+            <InsightEmptyArt className="w-36 h-36" />
+          </div>
+          <div className="space-y-1.5">
+            <h2 className="font-display text-2xl font-bold text-foreground">{t("ins.title")}</h2>
+            <p className="text-sm font-semibold text-primary">{t("ins.noData")}</p>
+            <p className="text-xs text-muted-foreground max-w-md mx-auto leading-relaxed">
               {t("ins.insufficientSubtitle")}
             </p>
           </div>
           <Link
             to="/log"
-            className="inline-flex min-h-12 w-full max-w-xs items-center justify-center gap-2 rounded-2xl bg-primary px-5 font-bold text-primary-foreground shadow-sm hover:bg-primary/90 transition-all active:scale-98"
+            className="inline-flex min-h-12 w-full max-w-xs items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary to-period px-5 font-bold text-sm text-primary-foreground shadow-md hover:opacity-95 transition-all active:scale-98"
           >
             {t("cal.addEntry")}
           </Link>

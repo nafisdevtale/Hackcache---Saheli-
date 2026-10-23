@@ -17,6 +17,7 @@ import { useApp } from "@/App.jsx";
 import { Btn, Card, PageTitle, Sources, inputCls, Chip } from "@/components/common/ui.jsx";
 import { FAQ, SUGGESTED, matchFaq } from "@/content/faq.js";
 import { diffDays, todayStr } from "@/lib/localDate.js";
+import { AskAssistantArt } from "@/components/brand/SaheliArt.jsx";
 
 export default function Ask() {
   const { t, L, record } = useApp();
@@ -555,16 +556,18 @@ export default function Ask() {
                   )}
                 </div>
               ) : (
-                <div className="rounded-3xl border border-border/70 bg-hero p-6 shadow-soft space-y-3">
-                  <div className="flex items-center gap-2 text-primary font-bold text-sm">
-                    <Sparkles className="h-5 w-5" />
-                    <span>Personalized Health Q&A</span>
+                <div className="rounded-3xl border border-border/70 bg-hero p-6 shadow-soft space-y-4 text-center sm:text-left flex flex-col sm:flex-row items-center gap-4">
+                  <AskAssistantArt className="w-16 h-16 shrink-0" />
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-center sm:justify-start gap-2 text-primary font-bold text-sm">
+                      <Sparkles className="h-4 w-4" />
+                      <span>Personalized Health Q&A</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Type any menstrual or adolescent health question. Saheli explains symptoms,
+                      timing, and reassurance backed by verified medical references.
+                    </p>
                   </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Type any menstrual or adolescent health question. Saheli uses clinical reference
-                    data to explain symptoms, answer timing questions, and reassure you with
-                    evidence-backed guidance.
-                  </p>
                 </div>
               )}
             </div>

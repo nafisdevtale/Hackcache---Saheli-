@@ -11,6 +11,7 @@ import {
   ChevronRight,
   FileText,
   Lock,
+  BookOpen,
 } from "lucide-react";
 import { useApp } from "@/App.jsx";
 import { PageTitle } from "@/components/common/ui.jsx";
@@ -23,10 +24,16 @@ export default function More() {
       title: t("ins.title"),
       items: [
         {
+          to: "/learn",
+          key: "nav.learn",
+          icon: BookOpen,
+          color: "text-primary bg-primary/10",
+        },
+        {
           to: "/insights",
           key: "nav.insights",
           icon: BarChart3,
-          color: "text-primary bg-primary/10",
+          color: "text-period bg-period/10",
         },
         { to: "/doctor", key: "nav.doctor", icon: Stethoscope, color: "text-info bg-info/10" },
         {

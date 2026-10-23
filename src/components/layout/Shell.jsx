@@ -32,6 +32,7 @@ import { OnboardingFlow } from "@/components/onboarding/OnboardingFlow.jsx";
 import { LANGUAGES } from "@/i18n/languages.js";
 import { SaheliLogo, AmbientGlow } from "@/components/brand/SaheliLogo.jsx";
 import { QuickLogSheet } from "@/components/logging/QuickLogSheet.jsx";
+import { RhythmMotif } from "@/components/brand/SaheliArt.jsx";
 
 let failCount = 0;
 
@@ -107,8 +108,29 @@ function LockScreen() {
         id="main"
         className="relative w-full max-w-md overflow-hidden rounded-3xl border border-border/70 bg-card/90 p-8 shadow-2xl backdrop-blur-xl animate-fade-in"
       >
-        {/* Language selector in top right of lock screen */}
-        <div className="flex justify-end mb-4">
+        <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-15 overflow-hidden">
+          <RhythmMotif className="w-[500px] h-[500px] scale-125" />
+        </div>
+
+        {/* Utilities: Discreet toggle & Language selector */}
+        <div className="relative z-10 flex items-center justify-between mb-4">
+          <button
+            type="button"
+            onClick={() => setPrefs({ discreet: !prefs.discreet })}
+            className={cx(
+              "flex items-center gap-1.5 rounded-xl border px-2.5 py-1 text-xs font-semibold transition-all cursor-pointer",
+              prefs.discreet
+                ? "border-primary/40 bg-primary/10 text-primary"
+                : "border-border/80 bg-background/80 text-muted-foreground hover:bg-muted",
+            )}
+            aria-label="Toggle Discreet Mode"
+          >
+            {prefs.discreet ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+            <span className="text-[11px] font-bold">
+              {prefs.discreet ? "Discreet ON" : "Discreet"}
+            </span>
+          </button>
+
           <label htmlFor="lock-lang-select" className="sr-only">
             {t("nav.langToggleLabel")}
           </label>
@@ -618,12 +640,12 @@ export function Shell({ children }) {
           </div>
 
           <Link
-            to="/learn"
+            to="/insights"
             className="flex flex-col items-center justify-center gap-1 py-1 px-2.5 text-center text-[10px] font-bold text-muted-foreground transition-colors data-[status=active]:text-primary"
             activeProps={{ "aria-current": "page" }}
           >
-            <BookOpen aria-hidden className="h-5 w-5" />
-            <span className="leading-none">{t("nav.learn")}</span>
+            <BarChart3 aria-hidden className="h-5 w-5" />
+            <span className="leading-none">{t("nav.insights")}</span>
           </Link>
 
           <Link
