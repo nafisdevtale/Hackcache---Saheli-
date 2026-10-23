@@ -32,5 +32,8 @@ jobs:
       - name: Run Vitest Suite (Unit, Clinical Safety & Integration Tests)
         run: bun run test
 
+      - name: Verify Multilingual Translation Key Parity
+        run: bun run i18n:check
+
       - name: Verify Production PWA & SSR Build
         run: bun run build

@@ -139,7 +139,7 @@ Baseline statuses intentionally distinguish implementation from verified behavio
 
 ## Environment constraints
 
-- Production builds are managed by the Lovable harness; do not run a second manual build. Inspect its available build logs instead.
+- Production builds are verified locally and via automated CI workflows using `bun run build`.
 - No published URL is available. Hosted privacy and offline behavior remain NOT VERIFIED.
 - Security scan tool returned no results. Run a deep scan in the Security tab before making security assurances.
 - Automated UI checks use only synthetic records. No personal records are used or sent to external services.

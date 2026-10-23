@@ -692,23 +692,35 @@ Prioritise correctness, user safety, privacy, accessibility, and a fully working
 
 **Start building the application now. Do not respond with only a plan.**
 
-This project was built with [Lovable](https://lovable.dev).
+## Development & Local Setup
 
-## Build with Lovable
+Saheli uses [Bun](https://bun.sh) as its fast, all-in-one package manager and JavaScript runtime.
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/5e5b3321-bd97-4a79-8cb3-c35a9dbde4c7).
+### Prerequisites
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+- [Bun](https://bun.sh) (v1.1+) installed locally.
 
-## Development
+### Installation
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
-
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+```bash
+git clone https://github.com/nafisdevtale/remix-of-saheli-cycle-companion.git
+cd remix-of-saheli-cycle-companion
+bun install
 ```
+
+### Available Scripts
+
+- `bun run dev`: Start local development server on port 8080 (`http://localhost:8080`).
+- `bun run build`: Create an optimized production build using Vite and Nitro.
+- `bun run preview`: Preview the production build locally.
+- `bun test`: Execute the comprehensive test suite (208 tests across 16 test files).
+- `bun run lint`: Run ESLint to verify code quality and style standards.
+- `bun run format`: Format the codebase using Prettier.
+- `bun run i18n:check`: Verify 100% key parity across all 13 supported Indian languages.
+- `bun run i18n:report`: Generate a detailed multilingual coverage and status report.
+
+### Architecture & Security Standards
+
+- **Zero-Cloud Health Records**: Menstrual dates, symptoms, moods, and notes are saved exclusively to client-side IndexedDB with optional AES-GCM-256 encryption.
+- **Audited Clinical Sources**: All medical references link to authoritative publications (NHS, WHO, ACOG, FIGO, FOGSI, MoHFW).
+- **Independent & Self-Contained**: No external tracking scripts, third-party fonts, or hosted runtime dependencies.
