@@ -131,6 +131,16 @@ export default {
   "today.ovulation": "ସହେଲୀ",
   "today.fertileWindow": "ଆକଳନ: {range}",
   "today.fertilityIrregular": "ସହେଲୀ",
+  "today.fertility.insufficient":
+    "ସଠିକ୍ ଭାବରେ ଓଭୁଲେସନ୍ ଅନୁମାନ କରିବା ପାଇଁ ଅତି କମରେ ୩ଟି ସମ୍ପୂର୍ଣ୍ଣ ଋତୁଚକ୍ରର ରେକର୍ଡ ଆବଶ୍ୟକ।",
+  "today.fertility.irregular":
+    "ଆପଣଙ୍କ ଋତୁଚକ୍ରରେ ଅଧିକ ତାରତମ୍ୟ ଥିବାରୁ ଓଭୁଲେସନ୍ ଅନୁମାନ ଦେଖାଯାଉ ନାହିଁ।",
+  "today.fertility.adolescent":
+    "କିଶୋରାବସ୍ଥାରେ ଋତୁଚକ୍ର ପ୍ରାକୃତିକ ଭାବରେ ପରିବର୍ତ୍ତିତ ହେଉଥିବାରୁ ୧୮ ବର୍ଷରୁ କମ୍ ବ୍ୟକ୍ତିଙ୍କ ପାଇଁ ଓଭୁଲେସନ୍ ଅନୁମାନ ଲୁକ୍କାୟିତ ରଖାଯାଇଛି।",
+  "today.fertility.disabled": "ସେଟିଙ୍ଗ୍ସରେ ଓଭୁଲେସନ୍ ଅନୁମାନ ବନ୍ଦ କରାଯାଇଛି।",
+  "today.fertility.pregnancy": "ଗର୍ଭାବସ୍ଥା ମୋଡ୍ ଚାଲୁ ଥିବା ସମୟରେ ଓଭୁଲେସନ୍ ଅନୁମାନ ବନ୍ଦ ରହିଥାଏ।",
+  "today.fertility.unavailable":
+    "ଋତୁଚକ୍ର ଅନୁମାନ ପାଇବା ପାଇଁ ଅତି କମରେ ୩ଟି ସମ୍ପୂର୍ଣ୍ଣ ଚକ୍ର ଲଗ୍ କରନ୍ତୁ।",
   "today.paused": "ସହେଲୀ",
   "today.guidanceCount": "{n} ଡାକ୍ତରୀ ପରାମର୍ଶ",
   "today.basedOn": "{n} ଋତୁଚକ୍ର ଆକଳନ",

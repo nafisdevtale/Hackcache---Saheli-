@@ -131,6 +131,16 @@ export default {
   "today.ovulation": "સહેલી",
   "today.fertileWindow": "અંદાજ: {range}",
   "today.fertilityIrregular": "સહેલી",
+  "today.fertility.insufficient":
+    "જવાબદારીપૂર્વક ઓવ્યુલેશનનો અંદાજ કાઢવા માટે ઓછામાં ઓછા ૩ પૂર્ણ ચક્રોની નોંધણી જરૂરી છે.",
+  "today.fertility.irregular":
+    "તમારા ચક્રોમાં ઘણો તફાવત હોવાથી ઓવ્યુલેશનનો અંદાજ દર્શાવવામાં આવ્યો નથી.",
+  "today.fertility.adolescent":
+    "૧૮ વર્ષથી ઓછી ઉંમરના વપરાશકર્તાઓ માટે ઓવ્યુલેશન અંદાજ સુરક્ષિત રીતે છુપાવેલ છે કારણ કે કિશોરાવસ્થામાં ચક્રો કુદરતી રીતે બદલાય છે.",
+  "today.fertility.disabled": "સેટિંગ્સમાં ઓવ્યુલેશનનો અંદાજ બંધ કરવામાં આવ્યો છે.",
+  "today.fertility.pregnancy":
+    "ગર્ભાવસ્થા મોડ સક્રિય હોય ત્યારે ઓવ્યુલેશન અંદાજ થોભાવવામાં આવે છે.",
+  "today.fertility.unavailable": "ચક્રના અંદાજ મેળવવા માટે ઓછામાં ઓછા ૩ પૂર્ણ ચક્ર નોંધો.",
   "today.paused": "સહેલી",
   "today.guidanceCount": "{n} ડૉક્ટરની સલાહ",
   "today.basedOn": "{n} માસિક ચક્ર અંદાજ",

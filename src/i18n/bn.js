@@ -131,6 +131,16 @@ export default {
   "today.ovulation": "সহেলি",
   "today.fertileWindow": "অনুমান: {range}",
   "today.fertilityIrregular": "সহেলি",
+  "today.fertility.insufficient":
+    "দায়িত্বশীলভাবে ডিম্বস্ফোটনের পূর্বাভাস দিতে অন্তত ৩টি সম্পূর্ণ চক্রের তথ্য প্রয়োজন।",
+  "today.fertility.irregular":
+    "আপনার ঋতুচক্রের দৈর্ঘ্যে অতিরিক্ত তারতম্য থাকায় ডিম্বস্ফোটনের পূর্বাভাস দেখানো হচ্ছে না।",
+  "today.fertility.adolescent":
+    "১৮ বছরের কম বয়সীদের জন্য ডিম্বস্ফোটনের পূর্বাভাস গোপন রাখা হয়েছে কারণ কৈশোরে চক্রের পরিবর্তন স্বাভাবিক।",
+  "today.fertility.disabled": "সেটিংসে ডিম্বস্ফোটনের পূর্বাভাস বন্ধ রাখা হয়েছে।",
+  "today.fertility.pregnancy":
+    "গর্ভাবস্থা মোড সক্রিয় থাকা অবস্থায় ডিম্বস্ফোটনের পূর্বাভাস স্থগিত থাকে।",
+  "today.fertility.unavailable": "চক্রের পূর্বাভাস পেতে কমপক্ষে ৩টি সম্পূর্ণ চক্র লিপিবদ্ধ করুন।",
   "today.paused": "সহেলি",
   "today.guidanceCount": "{n} ডাক্তারি গাইড",
   "today.basedOn": "{n} মাসিক চক্র অনুমান",

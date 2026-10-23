@@ -131,6 +131,15 @@ export default {
   "today.ovulation": "ਸਹੇਲੀ",
   "today.fertileWindow": "ਅੰਦਾਜ਼ਾ: {range}",
   "today.fertilityIrregular": "ਸਹੇਲੀ",
+  "today.fertility.insufficient":
+    "ਜ਼ਿੰਮੇਵਾਰੀ ਨਾਲ ਓਵੂਲੇਸ਼ਨ ਦਾ ਅੰਦਾਜ਼ਾ ਲਗਾਉਣ ਲਈ ਘੱਟੋ-ਘੱਟ 3 ਪੂਰੇ ਚੱਕਰਾਂ ਦਾ ਰਿਕਾਰਡ ਲੋੜੀਂਦਾ ਹੈ।",
+  "today.fertility.irregular":
+    "ਤੁਹਾਡੇ ਮਾਹਵਾਰੀ ਚੱਕਰਾਂ ਵਿੱਚ ਬਹੁਤ ਜ਼ਿਆਦਾ ਫ਼ਰਕ ਹੋਣ ਕਰਕੇ ਓਵੂਲੇਸ਼ਨ ਦਾ ਅੰਦਾਜ਼ਾ ਨਹੀਂ ਦਿਖਾਇਆ ਜਾ ਰਿਹਾ।",
+  "today.fertility.adolescent":
+    "18 ਸਾਲ ਤੋਂ ਘੱਟ ਉਮਰ ਵਾਲਿਆਂ ਲਈ ਓਵੂਲੇਸ਼ਨ ਅੰਦਾਜ਼ੇ ਲੁਕਾਏ ਗਏ ਹਨ ਕਿਉਂਕਿ ਕਿਸ਼ੋਰ ਅਵਸਥਾ ਵਿੱਚ ਚੱਕਰ ਕੁਦਰਤੀ ਤੌਰ 'ਤੇ ਬਦਲਦੇ ਹਨ।",
+  "today.fertility.disabled": "ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਓਵੂਲੇਸ਼ਨ ਅੰਦਾਜ਼ੇ ਬੰਦ ਕੀਤੇ ਗਏ ਹਨ।",
+  "today.fertility.pregnancy": "ਗਰਭ ਅਵਸਥਾ ਮੋਡ ਚਾਲੂ ਹੋਣ ਦੌਰਾਨ ਓਵੂਲੇਸ਼ਨ ਅੰਦਾਜ਼ੇ ਰੋਕੇ ਗਏ ਹਨ।",
+  "today.fertility.unavailable": "ਚੱਕਰ ਦੇ ਅੰਦਾਜ਼ੇ ਦੇਖਣ ਲਈ ਘੱਟੋ-ਘੱਟ 3 ਪੂਰੇ ਚੱਕਰ ਦਰਜ ਕਰੋ।",
   "today.paused": "ਸਹੇਲੀ",
   "today.guidanceCount": "{n} ਡਾਕਟਰੀ ਸਲਾਹ",
   "today.basedOn": "{n} ਮਾਹਵਾਰੀ ਚੱਕਰ ਅੰਦਾਜ਼ਾ",

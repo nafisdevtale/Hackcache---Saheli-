@@ -340,6 +340,9 @@ export function computeCycleInsights({ record = {}, analysis = {}, today = today
     estimateWindow,
     fertility: analysis.fertility || null,
     fertilityUnavailable: analysis.fertilityUnavailable || null,
+    fertilityStatus: analysis.fertilityStatus || "unavailable_data",
+    fertilitySuppressionReason: analysis.fertilitySuppressionReason || null,
+    diagnosticInfo: analysis.diagnosticInfo || null,
 
     // Supportive guidance
     supportiveCards,

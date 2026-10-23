@@ -414,9 +414,13 @@ export function AppProvider({ children }) {
     () =>
       record
         ? analyze(record.days, {
-            ageGroup: settings.ageGroup,
+            ageGroup: settings?.ageGroup,
             today,
-            paused: record.pregnancy.active || settings.trackingPaused,
+            paused: record.pregnancy?.active || settings?.trackingPaused,
+            pregnancyActive: !!record.pregnancy?.active,
+            trackingPaused: !!settings?.trackingPaused,
+            showFertility: settings?.showFertility,
+            fertilityOptIn: settings?.fertilityOptIn,
           })
         : null,
     [record, today],

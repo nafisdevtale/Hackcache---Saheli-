@@ -71,8 +71,38 @@ export function isIrregular(lengths, ageGroup = "adult") {
   return { irregular: false, reason: null, spread };
 }
 
+export function getFertilitySuppressionMessageKey(reason) {
+  switch (reason) {
+    case "adolescent_safeguard":
+      return "today.fertility.adolescent";
+    case "insufficient_history":
+      return "today.fertility.insufficient";
+    case "irregular_cycles":
+      return "today.fertility.irregular";
+    case "disabled_by_user":
+      return "today.fertility.disabled";
+    case "pregnancy_mode":
+      return "today.fertility.pregnancy";
+    case "unavailable_data":
+      return "today.fertility.unavailable";
+    default:
+      return "today.fertilityIrregular";
+  }
+}
+
 export function analyze(days = {}, opts = {}) {
-  const { ageGroup = "adult", today = todayStr(), paused = false } = opts;
+  const {
+    ageGroup = "adult",
+    today = todayStr(),
+    paused = false,
+    pregnancyActive = false,
+    pregnancyMode = false,
+    trackingPaused = false,
+    showFertility = true,
+    fertilityOptIn = false,
+  } = opts;
+  const isPregnancyActive = !!(pregnancyActive || pregnancyMode || (paused && !trackingPaused));
+  const isPaused = paused || isPregnancyActive || trackingPaused;
   const periods = groupPeriods(
     periodDates(days).filter((d) => d <= today),
     CONFIG.periodGroupGapDays,
@@ -103,6 +133,7 @@ export function analyze(days = {}, opts = {}) {
     : null;
 
   const irr = isIrregular(lengths, ageGroup);
+  const spread = lengths.length > 1 ? Math.max(...lengths) - Math.min(...lengths) : 0;
   const base = {
     periods,
     cycles,
@@ -116,28 +147,81 @@ export function analyze(days = {}, opts = {}) {
     irregularReason: irr.reason,
   };
 
-  if (paused)
+  // Determine standard machine-readable fertility suppression state
+  let fertilityStatus = "estimate_available";
+  let fertilitySuppressionReason = null;
+
+  if (isPregnancyActive) {
+    fertilityStatus = "pregnancy_mode";
+    fertilitySuppressionReason = "pregnancy_mode";
+  } else if (periods.length === 0) {
+    fertilityStatus = "unavailable_data";
+    fertilitySuppressionReason = "unavailable_data";
+  } else if (ageGroup === "under18") {
+    fertilityStatus = "adolescent_safeguard";
+    fertilitySuppressionReason = "adolescent_safeguard";
+  } else if (showFertility === false || trackingPaused) {
+    fertilityStatus = "disabled_by_user";
+    fertilitySuppressionReason = "disabled_by_user";
+  } else if (recent.length < CONFIG.minCyclesForPrediction) {
+    fertilityStatus = "insufficient_history";
+    fertilitySuppressionReason = "insufficient_history";
+  } else if (irr.irregular) {
+    fertilityStatus = "irregular_cycles";
+    fertilitySuppressionReason = "irregular_cycles";
+  } else {
+    fertilityStatus = "estimate_available";
+    fertilitySuppressionReason = null;
+  }
+
+  // Backward-compatible fertilityUnavailable flag
+  let fertilityUnavailable = null;
+  if (fertilityStatus === "adolescent_safeguard") fertilityUnavailable = "under18";
+  else if (fertilityStatus === "irregular_cycles") fertilityUnavailable = "irregular";
+  else if (fertilityStatus === "insufficient_history") fertilityUnavailable = "insufficient";
+  else if (fertilityStatus === "pregnancy_mode") fertilityUnavailable = "paused";
+  else if (fertilityStatus === "disabled_by_user") fertilityUnavailable = "disabled";
+  else if (fertilityStatus === "unavailable_data") fertilityUnavailable = "insufficient";
+
+  const diagnosticInfo = {
+    cyclesConsidered: recent.length,
+    cycleLengths: lengths,
+    variationMeasure: spread,
+    activeAgeBand: ageGroup,
+    estimationPreference: showFertility !== false,
+    pregnancyMode: isPregnancyActive,
+    suppressionReason: fertilitySuppressionReason,
+    fertilityStatus,
+  };
+
+  if (isPaused)
     return {
       ...base,
       status: "paused",
       prediction: null,
       fertility: null,
       fertilityUnavailable: "paused",
+      fertilityStatus,
+      fertilitySuppressionReason,
+      diagnosticInfo,
       possibleMissedLog: false,
     };
+
   if (recent.length < CONFIG.minCyclesForPrediction) {
     return {
       ...base,
       status: "insufficient",
       prediction: null,
       fertility: null,
-      fertilityUnavailable: "insufficient",
+      fertilityUnavailable: fertilityUnavailable || "insufficient",
+      fertilityStatus,
+      fertilitySuppressionReason,
+      diagnosticInfo,
       possibleMissedLog: false,
     };
   }
 
   const med = median(lengths);
-  const spread = Math.max(...lengths) - Math.min(...lengths);
   const halfWidth =
     Math.max(CONFIG.minHalfWidth, spread) + (irr.irregular ? CONFIG.irregularExtraDays : 0);
   const center = addDays(lastStart, med);
@@ -156,10 +240,7 @@ export function analyze(days = {}, opts = {}) {
     gap > med * CONFIG.missingLogFactor && gap > med + CONFIG.missingLogMinExtra;
 
   let fertility = null;
-  let fertilityUnavailable = null;
-  if (ageGroup === "under18") fertilityUnavailable = "under18";
-  else if (irr.irregular) fertilityUnavailable = "irregular";
-  else {
+  if (fertilityStatus === "estimate_available") {
     const ovStart = addDays(prediction.start, -CONFIG.lutealDays);
     const ovEnd = addDays(prediction.end, -CONFIG.lutealDays);
     fertility = {
@@ -167,7 +248,18 @@ export function analyze(days = {}, opts = {}) {
       fertile: { start: addDays(ovStart, -CONFIG.fertileDaysBefore), end: ovEnd },
     };
   }
-  return { ...base, status: "ok", prediction, fertility, fertilityUnavailable, possibleMissedLog };
+
+  return {
+    ...base,
+    status: "ok",
+    prediction,
+    fertility,
+    fertilityUnavailable,
+    fertilityStatus,
+    fertilitySuppressionReason,
+    diagnosticInfo,
+    possibleMissedLog,
+  };
 }
 
 export function phaseKey(a, today = todayStr()) {

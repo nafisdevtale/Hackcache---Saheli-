@@ -151,6 +151,15 @@ export default {
   "today.fertileWindow": "Possible fertile window",
   "today.fertilityIrregular":
     "Ovulation estimates aren't shown because your cycles vary too much to estimate them sensibly.",
+  "today.fertility.insufficient":
+    "Ovulation estimates require at least 3 completed cycles to calculate responsibly.",
+  "today.fertility.irregular":
+    "Ovulation estimates aren't shown because your cycles vary too much to estimate them reliably.",
+  "today.fertility.adolescent":
+    "Ovulation estimates are hidden for users under 18 because adolescent cycles vary naturally during development.",
+  "today.fertility.disabled": "Ovulation estimates are currently turned off in Settings.",
+  "today.fertility.pregnancy": "Ovulation estimates are paused while pregnancy mode is active.",
+  "today.fertility.unavailable": "Log at least 3 completed cycles to receive cycle estimates.",
   "today.paused": "Period estimates are paused.",
   "today.guidanceCount": "{n} thing(s) worth discussing with a doctor",
   "today.basedOn": "Based on your last {n} complete cycles",

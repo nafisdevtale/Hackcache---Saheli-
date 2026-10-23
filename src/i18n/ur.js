@@ -131,6 +131,15 @@ export default {
   "today.ovulation": "سہیلی",
   "today.fertileWindow": "تخمینہ: {range}",
   "today.fertilityIrregular": "سہیلی",
+  "today.fertility.insufficient":
+    "ذمہ داری کے ساتھ بیضہ ریزی کا تخمینہ لگانے کے لیے کم از کم 3 مکمل ادوار کا ریکارڈ درکار ہے۔",
+  "today.fertility.irregular":
+    "آپ کے ماہانہ چکر کے دنوں میں زیادہ فرق ہونے کی وجہ سے بیضہ ریزی کا تخمینہ نہیں دکھایا جا رہا۔",
+  "today.fertility.adolescent":
+    "18 سال سے کم عمر افراد کے لیے بیضہ ریزی کے تخمینے چھپائے گئے ہیں کیونکہ بلوغت میں قدرتی تبدیلیاں ہوتی ہیں۔",
+  "today.fertility.disabled": "ترتیبات میں بیضہ ریزی کے تخمینے بند کر دیے گئے ہیں۔",
+  "today.fertility.pregnancy": "حمل موڈ کے دوران بیضہ ریزی کے تخمینے معطل کر دیے جاتے ہیں۔",
+  "today.fertility.unavailable": "چکر کے تخمینے حاصل کرنے کے لیے کم از کم 3 مکمل چکر درج کریں۔",
   "today.paused": "سہیلی",
   "today.guidanceCount": "{n} ڈاکٹر کا مشورہ",
   "today.basedOn": "{n} ماہواری کا چکر تخمینہ",

@@ -15,11 +15,12 @@ import {
   Info,
   Heart,
   TrendingUp,
+  Activity,
 } from "lucide-react";
 import { useApp } from "@/App.jsx";
 import { Card, PageTitle, Btn } from "@/components/common/ui.jsx";
 import { UrgentCard, MoodSupport } from "@/components/common/GuidanceCard.jsx";
-import { phaseKey, symptomPatterns } from "@/lib/cycle.js";
+import { phaseKey, symptomPatterns, getFertilitySuppressionMessageKey } from "@/lib/cycle.js";
 import { diffDays } from "@/lib/localDate.js";
 import { patternText } from "@/components/insights/patternText.js";
 import { RhythmRing } from "@/components/cycle/RhythmRing.jsx";
@@ -343,10 +344,10 @@ export default function Today() {
               )}
             </div>
 
-            {/* Fertility Window (Adult & Regular Only) */}
-            {fertilityVisible && a.status === "ok" && (
+            {/* Fertility Window (Adult & Regular Only) or Transparent Clinical Explanation */}
+            {fertilityVisible && (
               <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-xs text-xs space-y-2">
-                {a.fertility ? (
+                {a?.fertility ? (
                   <>
                     <p>
                       <strong>{t("today.fertileWindow")}:</strong>{" "}
@@ -361,10 +362,67 @@ export default function Today() {
                     </p>
                   </>
                 ) : (
-                  <p>{t("today.fertilityIrregular")}</p>
+                  <p className="text-muted-foreground leading-relaxed">
+                    {t(getFertilitySuppressionMessageKey(a?.fertilitySuppressionReason))}
+                  </p>
                 )}
               </div>
             )}
+
+            {/* Developer Diagnostics View (Strictly Dev / Debug only) */}
+            {typeof window !== "undefined" &&
+              (window.__SAHELI_DEV_DIAGNOSTICS__ === true ||
+                new URLSearchParams(window.location.search).get("debug") === "1" ||
+                (typeof process !== "undefined" && process.env?.NODE_ENV === "development") ||
+                !!import.meta.env?.DEV) &&
+              a?.diagnosticInfo && (
+                <div
+                  data-testid="dev-fertility-diagnostics"
+                  className="rounded-3xl border-2 border-dashed border-amber-500/60 bg-amber-500/10 p-4 text-xs font-mono space-y-2 text-foreground"
+                >
+                  <div className="flex items-center justify-between font-bold text-amber-700 dark:text-amber-400">
+                    <span className="flex items-center gap-1.5">
+                      <Activity className="h-4 w-4" />
+                      DEV DIAGNOSTICS: FERTILITY ENGINE
+                    </span>
+                    <span className="rounded-lg bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
+                      {a.diagnosticInfo.fertilityStatus}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 pt-1 text-[11px] text-muted-foreground">
+                    <div>
+                      <strong className="text-foreground">Cycles considered:</strong>{" "}
+                      {a.diagnosticInfo.cyclesConsidered}
+                    </div>
+                    <div>
+                      <strong className="text-foreground">Cycle lengths:</strong> [
+                      {a.diagnosticInfo.cycleLengths.join(", ") || "none"}]
+                    </div>
+                    <div>
+                      <strong className="text-foreground">Variation (spread):</strong>{" "}
+                      {a.diagnosticInfo.variationMeasure} days
+                    </div>
+                    <div>
+                      <strong className="text-foreground">Active age band:</strong>{" "}
+                      {a.diagnosticInfo.activeAgeBand}
+                    </div>
+                    <div>
+                      <strong className="text-foreground">Estimation pref:</strong>{" "}
+                      {a.diagnosticInfo.estimationPreference ? "Enabled" : "Disabled"}
+                    </div>
+                    <div>
+                      <strong className="text-foreground">Pregnancy mode:</strong>{" "}
+                      {a.diagnosticInfo.pregnancyMode ? "Active" : "Inactive"}
+                    </div>
+                    <div className="sm:col-span-2">
+                      <strong className="text-foreground">Suppression reason:</strong>{" "}
+                      <span className="font-semibold text-amber-600 dark:text-amber-400">
+                        {a.diagnosticInfo.suppressionReason || "none (estimate available)"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
 
             {/* Mood Support / Emotional Wellness */}
             <MoodSupport mood={safety.mood} />

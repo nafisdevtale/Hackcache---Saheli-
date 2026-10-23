@@ -131,6 +131,16 @@ export default {
   "today.ovulation": "సహేలి",
   "today.fertileWindow": "అంచనా: {range}",
   "today.fertilityIrregular": "సహేలి",
+  "today.fertility.insufficient":
+    "సహేతుకంగా అండవిడుదల అంచనా వేయడానికి కనీసం 3 పూర్తయిన సైకిల్స్ వివరాలు అవసరం.",
+  "today.fertility.irregular":
+    "మీ సైకిల్స్ వ్యవధిలో ఎక్కువ తేడాలు ఉండటం వల్ల అండవిడుదల అంచనా చూపించడం లేదు.",
+  "today.fertility.adolescent":
+    "కౌమారదశలో సైకిల్స్ సహజంగా మారే అవకాశం ఉన్నందున 18 ఏళ్ల లోపు వారికి అండవిడుదల అంచనాలు చూపబడవు.",
+  "today.fertility.disabled": "సెట్టింగ్స్‌లో అండవిడుదల అంచనాలు ఆపివేయబడ్డాయి.",
+  "today.fertility.pregnancy": "గర్భధారణ మోడ్ ఆన్‌లో ఉన్నప్పుడు అండవిడుదల అంచనాలు నిలిపివేయబడతాయి.",
+  "today.fertility.unavailable":
+    "సైకిల్ అంచనాలను పొందడానికి కనీసం 3 పూర్తి సైకిల్స్‌ను నమోదు చేయండి.",
   "today.paused": "సహేలి",
   "today.guidanceCount": "{n} వైద్యుని సంప్రదింపు",
   "today.basedOn": "{n} రుతు చక్రం అంచనా",

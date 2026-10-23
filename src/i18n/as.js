@@ -131,6 +131,16 @@ export default {
   "today.ovulation": "সহেলী",
   "today.fertileWindow": "আনুমানিক: {range}",
   "today.fertilityIrregular": "সহেলী",
+  "today.fertility.insufficient":
+    "দায়িত্বসহকাৰে ডিম্বস্ফোটনৰ অনুমান কৰিবলৈ অন্ততঃ ৩টা সম্পূৰ্ণ ঋতুচক্ৰৰ তথ্য প্ৰয়োজন।",
+  "today.fertility.irregular":
+    "আপোনাৰ ঋতুচক্ৰত অধিক তাৰতম্য থকাৰ বাবে ডিম্বস্ফোটনৰ অনুমান দেখুওৱা হোৱা নাই।",
+  "today.fertility.adolescent":
+    "১৮ বছৰৰ কম বয়সৰ বাবে ডিম্বস্ফোটনৰ অনুমান গোপনে ৰখা হৈছে কাৰণ কৈশোৰত চক্ৰৰ পৰিৱৰ্তন স্বাভাৱিক।",
+  "today.fertility.disabled": "ছেটিংছত ডিম্বস্ফোটনৰ অনুমান বন্ধ কৰা হৈছে।",
+  "today.fertility.pregnancy":
+    "গৰ্ভাৱস্থা ম’ড সক্ৰিয় হৈ থকাৰ সময়ত ডিম্বস্ফোটনৰ অনুমান স্থগিত ৰখা হৈছে।",
+  "today.fertility.unavailable": "চক্ৰৰ অনুমান পাবলৈ অন্ততঃ ৩টা সম্পূৰ্ণ চক্ৰ লিপিবদ্ধ কৰক।",
   "today.paused": "সহেলী",
   "today.guidanceCount": "{n} চিকিৎসকৰ পৰামৰ্শ",
   "today.basedOn": "{n} মাহেকীয়া চক্ৰ আনুমানিক",
