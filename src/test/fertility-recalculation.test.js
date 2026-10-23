@@ -1,4 +1,4 @@
-import { describe, it, expect } from "bun:test";
+import { describe, it, expect } from "vitest";
 import { analyze, getFertilitySuppressionMessageKey } from "@/lib/cycle.js";
 import { blankDay, emptyRecord } from "@/lib/exportImport.js";
 import { addDays } from "@/lib/localDate.js";
