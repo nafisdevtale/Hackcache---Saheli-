@@ -6,7 +6,12 @@
 
 ## 1. Executive Summary & Design Mission
 
-FLASH is Saheli's transparent, privacy-first recommender system for menstrual and self-care essentials. Unlike commercial e-commerce platforms and ad-driven health trackers that rank products based on affiliate commissions, sponsored bids, or user tracking cookies, FLASH operates under a strict **Ethical and Clinical Charter**:
+FLASH is Saheli's transparent, privacy-first recommender system for menstrual and self-care essentials.
+
+> **Algorithmic Transparency Statement**:
+> FLASH is a **deterministic, rule-based multi-criteria scoring engine**. It does **NOT** use a trained machine learning (ML) model, neural weights, training datasets, or held-out evaluation loss. In clinical and adolescent menstrual health, opaque black-box ML models pose safety risks (hallucinated claims, unpredictable bias, unverified product associations). A deterministic rule engine guarantees 100% predictable, auditable, safe recommendations that execute fully on-device without telemetry.
+
+Unlike commercial e-commerce platforms and ad-driven health trackers that rank products based on affiliate commissions, sponsored bids, or user tracking cookies, FLASH operates under a strict **Ethical and Clinical Charter**:
 
 1. **Zero Commercial Sponsorship**: Product ranking is 100% deterministic and driven solely by user needs, budget constraints, and clinical safety.
 2. **Zero Prescription Drugs or Diet Pills**: The catalogue strictly contains verified, non-prescription hygiene and self-care essentials. Prescription analgesics, hormonal drugs, and unverified weight-loss supplements are strictly excluded.

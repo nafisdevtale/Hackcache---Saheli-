@@ -51,12 +51,22 @@ export function saveChimeSettings(settings) {
   } catch {}
 }
 
+export function isQuietTime(timeStr, quietHours) {
+  if (!quietHours?.on || !quietHours?.start || !quietHours?.end) return false;
+  if (quietHours.start <= quietHours.end) {
+    return timeStr >= quietHours.start && timeStr < quietHours.end;
+  }
+  return timeStr >= quietHours.start || timeStr < quietHours.end;
+}
+
 /**
  * Synthesize and play the Saheli Chime
  * @param {Object} options
  * @param {number} [options.volume] - 0.0 to 1.0 override
  * @param {boolean} [options.reducedSensory] - Softer envelope
  * @param {boolean} [options.discreetMode] - If true, chime is silenced to protect privacy
+ * @param {Object} [options.quietHours] - Quiet hours settings object { on, start, end }
+ * @param {string} [options.time] - Time string (HH:MM) to evaluate for quiet hours
  * @returns {Promise<boolean>} true if played, false if silenced or unsupported
  */
 export async function playSaheliChime(options = {}) {
@@ -68,6 +78,19 @@ export async function playSaheliChime(options = {}) {
   // Strict silence conditions
   if (!current.enabled || current.silentMode || isDiscreet || volume <= 0) {
     return false;
+  }
+
+  // Quiet hours check
+  if (options.quietHours) {
+    const timeToCheck =
+      options.time ||
+      (() => {
+        const now = new Date();
+        return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+      })();
+    if (isQuietTime(timeToCheck, options.quietHours)) {
+      return false;
+    }
   }
 
   // Check Web Audio API availability

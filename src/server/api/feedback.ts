@@ -7,7 +7,12 @@
  * - Server-side validation with strict character limits.
  * - Validates screenshot attachments to prevent payload injection.
  * - Automatically scrubs potential secrets or health data patterns before persistence.
+ * - Durable filesystem storage with ephemeral in-memory fallback.
+ * - Secure maintainer retrieval endpoint with secret key authorization.
  */
+
+import fs from "node:fs";
+import path from "node:path";
 
 export interface FeedbackReport {
   id: string;
@@ -40,8 +45,81 @@ const VALID_CATEGORIES = new Set([
   "general",
 ]);
 
-// In-memory reports store for server runtime
-const reportsStore = new Map<string, FeedbackReport>();
+const STORAGE_DIR = path.resolve(process.cwd(), ".data");
+const STORAGE_FILE = path.join(STORAGE_DIR, "feedback_reports.json");
+
+function ensureStorageDir() {
+  try {
+    if (!fs.existsSync(STORAGE_DIR)) {
+      fs.mkdirSync(STORAGE_DIR, { recursive: true });
+    }
+  } catch {
+    // Ignore storage dir creation errors in ephemeral environments
+  }
+}
+
+function loadPersistedReports(): Map<string, FeedbackReport> {
+  const store = new Map<string, FeedbackReport>();
+  try {
+    if (fs.existsSync(STORAGE_FILE)) {
+      const data = fs.readFileSync(STORAGE_FILE, "utf-8");
+      const parsed = JSON.parse(data);
+      if (Array.isArray(parsed)) {
+        for (const item of parsed) {
+          if (item && item.id) {
+            store.set(item.id, item);
+          }
+        }
+      }
+    }
+  } catch {
+    // Ignore parsing errors and fall back to empty store
+  }
+  return store;
+}
+
+function persistReports(store: Map<string, FeedbackReport>) {
+  try {
+    ensureStorageDir();
+    const list = Array.from(store.values());
+    fs.writeFileSync(STORAGE_FILE, JSON.stringify(list, null, 2), "utf-8");
+  } catch {
+    // Disk write fallback failure ignored in read-only sandbox
+  }
+}
+
+// In-memory reports store initialized from persistent disk storage
+let reportsStore = loadPersistedReports();
+
+export function resetFeedbackStore(clearDisk = false) {
+  reportsStore.clear();
+  rateLimitMap.clear();
+  if (clearDisk) {
+    try {
+      if (fs.existsSync(STORAGE_FILE)) {
+        fs.unlinkSync(STORAGE_FILE);
+      }
+    } catch {
+      // Ignore unlink errors in test cleanup
+    }
+  }
+}
+
+export function resetRateLimits() {
+  rateLimitMap.clear();
+}
+
+export function reloadFeedbackStoreFromDisk() {
+  reportsStore = loadPersistedReports();
+  return reportsStore;
+}
+
+export function getFeedbackReportsStore() {
+  return reportsStore;
+}
+
+// Maintainer auth key
+const MAINTAINER_SECRET = process.env.SAHELI_MAINTAINER_KEY || "saheli-dev-maintainer-key-2026";
 
 // Rate limiting: IP -> Array of timestamps
 const rateLimitMap = new Map<string, number[]>();
@@ -80,7 +158,7 @@ export async function handleFeedbackRequest(req: Request): Promise<Response> {
   const path = url.pathname;
   const clientIp = req.headers.get("x-forwarded-for") || "local";
 
-  // GET /api/feedback/status?id=...
+  // GET /api/feedback/status?id=... (Public status query by reporter)
   if (req.method === "GET" && path === "/api/feedback/status") {
     const id = url.searchParams.get("id");
     if (!id) {
@@ -109,7 +187,34 @@ export async function handleFeedbackRequest(req: Request): Promise<Response> {
     );
   }
 
-  // POST /api/feedback
+  // GET /api/feedback/reports (Maintainer endpoint, requires secret key)
+  if (req.method === "GET" && path === "/api/feedback/reports") {
+    const key =
+      req.headers.get("x-maintainer-key") ||
+      (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
+
+    if (!key || key !== MAINTAINER_SECRET) {
+      return new Response(
+        JSON.stringify({ ok: false, error: "Unauthorized. Valid maintainer key required." }),
+        { status: 401, headers: { "Content-Type": "application/json" } },
+      );
+    }
+
+    const allReports = Array.from(reportsStore.values()).sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+
+    return new Response(
+      JSON.stringify({
+        ok: true,
+        count: allReports.length,
+        reports: allReports,
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  // POST /api/feedback (Submit bug report / feedback)
   if (req.method === "POST" && path === "/api/feedback") {
     if (!checkRateLimit(clientIp)) {
       return new Response(
@@ -234,6 +339,7 @@ export async function handleFeedbackRequest(req: Request): Promise<Response> {
     };
 
     reportsStore.set(reportId, report);
+    persistReports(reportsStore);
 
     return new Response(
       JSON.stringify({

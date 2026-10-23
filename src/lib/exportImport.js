@@ -482,10 +482,21 @@ export function generateDoctorSummaryPDF(record, analysis, options = {}) {
     td { padding: 8px 10px; border-bottom: 1px solid #f3f4f6; }
     .badge { display: inline-block; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: bold; background: #fce7f3; color: #be185d; }
     .disclaimer { margin-top: 32px; padding: 16px; border-radius: 12px; background: #f9fafb; border: 1px solid #e5e7eb; font-size: 12px; color: #4b5563; }
+    @media print {
+      body { margin: 15mm 20mm; font-size: 11pt; color: #000; }
+      .no-print { display: none !important; }
+      .stat-box { border: 1px solid #e5e7eb; background: #fff !important; }
+      table { page-break-inside: auto; }
+      tr { page-break-inside: avoid; page-break-after: auto; }
+    }
   </style>
 </head>
 <body>
   <!-- SAHELI_RECORD_PAYLOAD_V1:${base64Payload} -->
+  <div class="no-print" style="margin-bottom: 24px; display: flex; gap: 12px; align-items: center; background: #fdf2f8; padding: 12px 16px; border-radius: 12px; border: 1px solid #fbcfe8;">
+    <button onclick="window.print()" style="background: #9d174d; color: #ffffff; border: none; padding: 8px 18px; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer;">🖨️ Print / Save as PDF</button>
+    <span style="font-size: 12px; color: #6b7280;">Use this document for doctor appointments. For full database restoration, use Encrypted JSON.</span>
+  </div>
   <h1>Saheli · Clinical Health Summary</h1>
   <div class="subtitle">Generated on ${exportedAt} · Private On-Device Record</div>
 
@@ -535,7 +546,7 @@ export function generateDoctorSummaryPDF(record, analysis, options = {}) {
   </table>
 
   <div class="disclaimer">
-    <strong>Clinical Notice:</strong> This summary was generated from patient-recorded observations in the Saheli Menstrual Health Companion. Saheli operates 100% locally on-device. Ovulation estimates are educational and strictly suppressed when cycle variability exceeds clinical thresholds.
+    <strong>Clinical Notice:</strong> This summary was generated from patient-recorded observations in the Saheli Menstrual Health Companion for healthcare consultations. Saheli operates 100% locally on-device. Ovulation estimates are educational and strictly suppressed when cycle variability exceeds clinical thresholds. For full two-way diary backup and lossless data restoration, always use an Encrypted JSON backup.
   </div>
 </body>
 </html>`;

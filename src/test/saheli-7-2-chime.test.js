@@ -70,6 +70,18 @@ describe("Saheli 7.2 — Procedural Web Audio Chime Engine", () => {
       const playedSilent = await playSaheliChime();
       expect(playedSilent).toBe(false);
     });
+
+    it("strictly silences chime when within configured quiet hours", async () => {
+      const quietHours = { on: true, start: "22:00", end: "07:00" };
+
+      // Time during quiet hours (e.g. 23:30)
+      const playedNight = await playSaheliChime({ quietHours, time: "23:30" });
+      expect(playedNight).toBe(false);
+
+      // Time during quiet hours morning (e.g. 06:15)
+      const playedMorning = await playSaheliChime({ quietHours, time: "06:15" });
+      expect(playedMorning).toBe(false);
+    });
   });
 
   describe("Web Audio Triadic Synthesis", () => {

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, afterAll } from "vitest";
 import {
   saveDraft,
   loadDraft,
@@ -8,7 +8,12 @@ import {
   recordSubmittedReport,
   getSubmittedReports,
 } from "@/lib/feedbackClient.js";
-import { handleFeedbackRequest } from "@/server/api/feedback.ts";
+import {
+  handleFeedbackRequest,
+  reloadFeedbackStoreFromDisk,
+  resetFeedbackStore,
+  resetRateLimits,
+} from "@/server/api/feedback.ts";
 
 if (typeof globalThis.localStorage === "undefined") {
   const store = new Map();
@@ -23,10 +28,15 @@ if (typeof globalThis.localStorage === "undefined") {
 describe("Saheli 7.2 — In-App Bug Reporting & Feedback Center", () => {
   beforeEach(() => {
     localStorage.clear();
+    resetRateLimits();
   });
 
   afterEach(() => {
     localStorage.clear();
+  });
+
+  afterAll(() => {
+    resetFeedbackStore(true);
   });
 
   describe("Client Privacy & Sanitization", () => {
@@ -247,6 +257,67 @@ describe("Saheli 7.2 — In-App Bug Reporting & Feedback Center", () => {
       expect(statusJson.ok).toBe(true);
       expect(statusJson.status).toBe("received");
       expect(statusJson.reportId).toBe(json.reportId);
+    });
+
+    it("persists feedback reports across simulated server reloads", async () => {
+      const submitReq = new Request("http://localhost/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          category: "translation",
+          severity: "low",
+          title: "Durable persistence test report",
+          description: "Verifying report survives server restarts via disk storage.",
+          consent: true,
+        }),
+      });
+
+      const res = await handleFeedbackRequest(submitReq);
+      const json = await res.json();
+      expect(json.ok).toBe(true);
+      const savedId = json.reportId;
+
+      // Simulate server reboot by clearing in-memory state and reloading from disk
+      resetFeedbackStore(false); // clear memory only
+      const reloadedStore = reloadFeedbackStoreFromDisk();
+      expect(reloadedStore.has(savedId)).toBe(true);
+
+      const statusReq = new Request(`http://localhost/api/feedback/status?id=${savedId}`);
+      const statusRes = await handleFeedbackRequest(statusReq);
+      expect(statusRes.status).toBe(200);
+      const statusJson = await statusRes.json();
+      expect(statusJson.reportId).toBe(savedId);
+    });
+
+    it("requires maintainer authorization key for GET /api/feedback/reports", async () => {
+      // 1. Missing authorization
+      const unauthReq = new Request("http://localhost/api/feedback/reports", {
+        method: "GET",
+      });
+      const unauthRes = await handleFeedbackRequest(unauthReq);
+      expect(unauthRes.status).toBe(401);
+      const unauthJson = await unauthRes.json();
+      expect(unauthJson.ok).toBe(false);
+
+      // 2. Invalid authorization
+      const wrongKeyReq = new Request("http://localhost/api/feedback/reports", {
+        method: "GET",
+        headers: { "x-maintainer-key": "invalid-secret" },
+      });
+      const wrongKeyRes = await handleFeedbackRequest(wrongKeyReq);
+      expect(wrongKeyRes.status).toBe(401);
+
+      // 3. Authorized request with valid maintainer key
+      const authReq = new Request("http://localhost/api/feedback/reports", {
+        method: "GET",
+        headers: { "x-maintainer-key": "saheli-dev-maintainer-key-2026" },
+      });
+      const authRes = await handleFeedbackRequest(authReq);
+      expect(authRes.status).toBe(200);
+      const authJson = await authRes.json();
+      expect(authJson.ok).toBe(true);
+      expect(Array.isArray(authJson.reports)).toBe(true);
+      expect(authJson.count).toBe(authJson.reports.length);
     });
   });
 });

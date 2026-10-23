@@ -4,7 +4,7 @@
  * Evidence & Safety Standards:
  * - Accredited sources: WHO, NHS UK, ACOG, FOGSI, UNICEF, MoHFW India.
  * - ZERO unverified folk remedies, zero commercial endorsement.
- * - Dedicated clinically reviewed guidance for "When Supplies Are Unavailable"
+ * - Dedicated evidence-informed guidance for "When Supplies Are Unavailable"
  *   emphasising emergency dignity, school/health worker support, and strictly prohibiting
  *   unsafe internal improvisation or unhygienic materials.
  */
@@ -27,7 +27,8 @@ export const DISCOVER_ARTICLES = [
     summaryKey: "discover.art.emergencySupplies.summary",
     readTimeMinutes: 5,
     sourceIds: ["unicef_hygiene", "who_selfcare", "fogsi_adolescent_faq"],
-    medicalReviewStatus: "Clinically reviewed by Adolescent Health & Menstrual Hygiene Panel",
+    medicalReviewStatus:
+      "Evidence-informed educational guideline synthesized from WHO, UNICEF & FOGSI public health guidance",
     lastVerified: "October 2026",
     gradient: "from-amber-500/20 via-card to-primary/10",
     relatedFlashCategory: "disposable_pads",
@@ -118,7 +119,8 @@ export const DISCOVER_ARTICLES = [
     summaryKey: "discover.art.mythsFacts.summary",
     readTimeMinutes: 5,
     sourceIds: ["fogsi_adolescent_faq", "acog_dysmenorrhea"],
-    medicalReviewStatus: "Reviewed by FOGSI Adolescent Health Committee",
+    medicalReviewStatus:
+      "Evidence-informed adolescent education synthesized from FOGSI & ACOG guidance",
     lastVerified: "October 2026",
     gradient: "from-purple-500/20 via-card to-hero",
     relatedFlashCategory: "all",

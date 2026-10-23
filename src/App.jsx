@@ -40,6 +40,7 @@ import {
   promptPwaInstall,
   clearAppCaches,
 } from "./lib/pwa.js";
+import { playSaheliChime } from "./lib/chime.js";
 
 const Ctx = createContext(null);
 export const useApp = () => useContext(Ctx);
@@ -458,6 +459,10 @@ export function AppProvider({ children }) {
         }
       }
       if (!shown) setBanners((b) => [...b, { id: Date.now() + Math.random(), text }]);
+      playSaheliChime({
+        discreetMode: prefs.discreet,
+        quietHours: record?.reminders?.quietHours,
+      }).catch(() => {});
     },
     [prefs.discreet, prefs.lang, record],
   );

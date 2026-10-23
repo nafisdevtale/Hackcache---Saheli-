@@ -130,6 +130,13 @@ trailer << /Root 1 0 R >>
       expect(result.ok).toBe(false);
       expect(result.error).toBe("imp.unsupportedPdfNoPayload");
     });
+
+    it("safely rejects printed HTML/PDF when comments have been stripped by print drivers", () => {
+      const strippedHtml = `<!DOCTYPE html><html><body><h1>Saheli · Clinical Health Summary</h1><table><tr><td>2026-10-10</td><td>Period</td></tr></table></body></html>`;
+      const result = parsePDFImport(strippedHtml);
+      expect(result.ok).toBe(false);
+      expect(result.error).toBe("imp.unsupportedPdfNoPayload");
+    });
   });
 
   describe("JSON Full Record Portability", () => {
