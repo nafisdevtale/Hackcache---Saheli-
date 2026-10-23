@@ -536,13 +536,15 @@ export default function Settings() {
                   { id: "digestive", label: t("sym.catDigestive") },
                   { id: "sleep_energy", label: t("sym.catSleepEnergy") },
                 ].map((cat) => {
-                  const enabled = (record.settings?.symptomCategories || [
-                    "physical",
-                    "emotional",
-                    "digestive",
-                    "sleep_energy",
-                    "safety",
-                  ]).includes(cat.id);
+                  const enabled = (
+                    record.settings?.symptomCategories || [
+                      "physical",
+                      "emotional",
+                      "digestive",
+                      "sleep_energy",
+                      "safety",
+                    ]
+                  ).includes(cat.id);
                   return (
                     <button
                       key={cat.id}

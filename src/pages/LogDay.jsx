@@ -72,9 +72,7 @@ export default function LogDay() {
 
   const toggleSym = (id) => {
     const isSelected = form.symptoms.includes(id);
-    const newSymptoms = isSelected
-      ? form.symptoms.filter((s) => s !== id)
-      : [...form.symptoms, id];
+    const newSymptoms = isSelected ? form.symptoms.filter((s) => s !== id) : [...form.symptoms, id];
     const newIntensities = { ...(form.symptomIntensities || {}) };
     if (isSelected) {
       delete newIntensities[id];
