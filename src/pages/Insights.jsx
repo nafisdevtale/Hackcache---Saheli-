@@ -20,6 +20,16 @@ import {
 } from "lucide-react";
 import { useApp } from "@/App.jsx";
 import { Card, PageTitle, Chip, cx } from "@/components/common/ui.jsx";
+import {
+  NovaHeading,
+  NovaText,
+  NovaButton,
+  NovaCard,
+  NovaBadge,
+  NovaSegmented,
+  NovaPageHeader,
+  NovaDialog,
+} from "@/components/nova";
 import { BarChart } from "@/components/insights/BarChart.jsx";
 import { patternText } from "@/components/insights/patternText.js";
 import { computeCycleInsights } from "@/lib/insights.js";
@@ -44,47 +54,24 @@ export default function Insights() {
   const spread = insights.cycleSpread;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-border/60 pb-3">
-        <div>
-          <span className="text-xs font-bold uppercase tracking-wider text-primary">
-            {t("ins.title")}
-          </span>
-          <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-            {prefs.discreet ? t("app.discreetName") : t("ins.title")}
-          </h1>
-        </div>
-
-        {/* Filter Toggle: Recent 6 Cycles vs All Cycles */}
-        {insights.totalCyclesCount > 0 && (
-          <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-muted/70 border border-border/60 w-fit text-xs">
-            <button
-              type="button"
-              onClick={() => setCycleScope("recent")}
-              className={cx(
-                "px-3 py-1.5 font-bold rounded-xl transition-all",
-                cycleScope === "recent"
-                  ? "bg-card text-foreground shadow-2xs"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {t("ins.filterRecent", { n: CONFIG.historyWindow })}
-            </button>
-            <button
-              type="button"
-              onClick={() => setCycleScope("all")}
-              className={cx(
-                "px-3 py-1.5 font-bold rounded-xl transition-all",
-                cycleScope === "all"
-                  ? "bg-card text-foreground shadow-2xs"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {t("ins.filterAll", { n: insights.totalCyclesCount })}
-            </button>
-          </div>
-        )}
-      </div>
+    <div className="space-y-6 sm:space-y-8 animate-fade-in">
+      <NovaPageHeader
+        tag={t("ins.title")}
+        title={prefs.discreet ? t("app.discreetName") : t("ins.title")}
+        action={
+          insights.totalCyclesCount > 0 ? (
+            <NovaSegmented
+              size="sm"
+              value={cycleScope}
+              onChange={(val) => setCycleScope(val)}
+              options={[
+                { value: "recent", label: t("ins.filterRecent", { n: CONFIG.historyWindow }) },
+                { value: "all", label: t("ins.filterAll", { n: insights.totalCyclesCount }) },
+              ]}
+            />
+          ) : null
+        }
+      />
 
       {/* Empty state: No complete cycles yet */}
       {insights.totalCyclesCount === 0 ? (
@@ -93,7 +80,7 @@ export default function Insights() {
             <InsightEmptyArt className="w-36 h-36" />
           </div>
           <div className="space-y-1.5">
-            <h2 className="font-display text-2xl font-bold text-foreground">{t("ins.title")}</h2>
+            <NovaHeading level="h2">{t("ins.title")}</NovaHeading>
             <p className="text-sm font-semibold text-primary">{t("ins.noData")}</p>
             <p className="text-xs text-muted-foreground max-w-md mx-auto leading-relaxed">
               {t("ins.insufficientSubtitle")}
@@ -112,7 +99,7 @@ export default function Insights() {
           {/* Left Column: Key Stats, Next Window & Cycle History */}
           <div className="lg:col-span-6 space-y-4">
             {/* Section 1: Overview Summary Cards */}
-            <div className="bloom-card p-5 sm:p-6 space-y-4">
+            <NovaCard variant="elevated" padding="md" className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="rounded-2xl border border-border/60 bg-card/80 p-4">
                   <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
@@ -158,10 +145,10 @@ export default function Insights() {
                   </p>
                 )}
               </div>
-            </div>
+            </NovaCard>
 
             {/* Section 2: Future Estimate & Uncertainty Representation */}
-            <div className="bloom-card p-5 sm:p-6 space-y-3">
+            <div className="nova-card-elevated space-y-3">
               <div className="flex items-center gap-2">
                 <Clock className="h-5 w-5 text-primary" aria-hidden />
                 <h2 className="text-base font-bold text-foreground">{t("ins.nextWindow")}</h2>
@@ -215,7 +202,7 @@ export default function Insights() {
             </div>
 
             {/* Section 4: Detailed Cycle History Table */}
-            <div className="bloom-card p-5 sm:p-6 space-y-3">
+            <div className="nova-card-elevated space-y-3">
               <div className="flex items-center justify-between pb-2">
                 <h2 className="text-base font-bold text-foreground">{t("ins.history")}</h2>
                 <span className="text-xs text-muted-foreground">
@@ -274,7 +261,7 @@ export default function Insights() {
           {/* Right Column: Visual Charts, Flow Breakdown & Symptoms */}
           <div className="lg:col-span-6 space-y-4">
             {/* Section 3: Visual Charts */}
-            <div className="bloom-card p-5 sm:p-6 space-y-3">
+            <div className="nova-card-elevated space-y-3">
               <h2 className="text-base font-bold text-foreground">{t("ins.cycleChart")}</h2>
               <p className="text-xs text-muted-foreground">
                 {t("ins.chartSummaryCycle", {
@@ -301,7 +288,7 @@ export default function Insights() {
               </div>
             </div>
 
-            <div className="bloom-card p-5 sm:p-6 space-y-3">
+            <div className="nova-card-elevated space-y-3">
               <h2 className="text-base font-bold text-foreground">{t("ins.periodChart")}</h2>
               <p className="text-xs text-muted-foreground">
                 {t("ins.chartSummaryPeriod", {
@@ -330,7 +317,7 @@ export default function Insights() {
 
             {/* Section 5: Recorded Bleeding Patterns */}
             {insights.totalFlowDays > 0 && (
-              <div className="bloom-card p-5 sm:p-6 space-y-3">
+              <div className="nova-card-elevated space-y-3">
                 <div className="flex items-center gap-2">
                   <Droplets className="h-5 w-5 text-period" aria-hidden />
                   <h2 className="text-base font-bold text-foreground">{t("ins.flowTitle")}</h2>
@@ -392,7 +379,7 @@ export default function Insights() {
             )}
 
             {/* Section 6: Symptom Observations & Trends */}
-            <div className="bloom-card p-5 sm:p-6 space-y-4">
+            <div className="nova-card-elevated space-y-4">
               <div className="flex items-center gap-2">
                 <Activity className="h-5 w-5 text-primary" aria-hidden />
                 <h2 className="text-base font-bold text-foreground">{t("ins.symptomsTitle")}</h2>
@@ -547,7 +534,7 @@ export default function Insights() {
             </div>
 
             {/* Section 7: Supportive Health Guidance & Next Steps */}
-            <div className="bloom-card p-5 sm:p-6 space-y-4">
+            <div className="nova-card-elevated space-y-4">
               <div className="flex items-center gap-2">
                 <Stethoscope className="h-5 w-5 text-primary" aria-hidden />
                 <h2 className="text-base font-bold text-foreground">{t("ins.supportTitle")}</h2>
@@ -622,7 +609,7 @@ export default function Insights() {
       {/* Personalized Health Conditions Educational Overview */}
       {record?.healthConditions?.personalisationEnabled &&
         record?.healthConditions?.conditions?.length > 0 && (
-          <div className="bloom-card p-5 sm:p-6 space-y-4">
+          <div className="nova-card-elevated space-y-4">
             <div className="flex items-start justify-between gap-3 border-b border-border/40 pb-3">
               <div>
                 <span className="text-[11px] font-bold uppercase tracking-wider text-primary">
@@ -685,7 +672,7 @@ export default function Insights() {
         )}
 
       {/* Section: Cycle Phase & Ovulation Insights */}
-      <div className="bloom-card p-5 sm:p-6 space-y-4">
+      <div className="nova-card-elevated space-y-4">
         <div className="flex items-center justify-between border-b border-border/40 pb-3">
           <div className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />

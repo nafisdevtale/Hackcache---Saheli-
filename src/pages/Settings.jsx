@@ -35,6 +35,17 @@ import {
   Status,
   cx,
 } from "@/components/common/ui.jsx";
+import {
+  NovaHeading,
+  NovaText,
+  NovaButton,
+  NovaCard,
+  NovaBadge,
+  NovaPageHeader,
+  NovaSegmented,
+  NovaChip,
+  NovaDialog,
+} from "@/components/nova";
 import { SYMPTOMS } from "@/data/symptoms.js";
 import {
   exportJSON,
@@ -550,15 +561,11 @@ export default function Settings() {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="border-b border-border/60 pb-3">
-        <span className="text-xs font-bold uppercase tracking-wider text-primary">
-          {prefs.discreet ? t("app.discreetName") : t("app.name")}
-        </span>
-        <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-          {t("set.title")}
-        </h1>
-      </div>
+    <div className="space-y-6 pb-12 max-w-5xl mx-auto">
+      <NovaPageHeader
+        tag={prefs.discreet ? t("app.discreetName") : t("app.name")}
+        title={t("set.title")}
+      />
 
       {/* Settings Navigation Tabs */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 rounded-2xl bg-muted/60 p-1.5 border border-border/60">
@@ -584,7 +591,7 @@ export default function Settings() {
       {activeTab === "display" && (
         <div className="space-y-6 animate-fade-in">
           {/* Language Selector Grid with Native Scripts */}
-          <div className="bloom-card p-5 sm:p-6 space-y-4">
+          <div className="nova-card-elevated p-5 sm:p-6 space-y-4">
             <div className="flex items-center gap-2">
               <Globe className="h-5 w-5 text-primary" />
               <h2 className="font-bold text-sm sm:text-base text-foreground">
@@ -617,7 +624,7 @@ export default function Settings() {
           </div>
 
           {/* Theme, Text Size & Accessibility */}
-          <div className="bloom-card p-5 sm:p-6 space-y-4">
+          <div className="nova-card-elevated p-5 sm:p-6 space-y-4">
             <div className="flex items-center gap-2">
               <Palette className="h-5 w-5 text-primary" />
               <h2 className="font-bold text-sm sm:text-base text-foreground">{t("set.theme")}</h2>
@@ -668,7 +675,7 @@ export default function Settings() {
           </div>
 
           {/* Saheli Chime & Notification Audio */}
-          <div className="bloom-card p-5 sm:p-6 space-y-4">
+          <div className="nova-card-elevated p-5 sm:p-6 space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Volume2 className="h-5 w-5 text-primary" />
@@ -744,7 +751,7 @@ export default function Settings() {
       {activeTab === "cycle" && (
         <div className="space-y-6 animate-fade-in">
           {/* Age Group & Clinical Thresholds */}
-          <div className="bloom-card p-5 sm:p-6 space-y-4">
+          <div className="nova-card-elevated p-5 sm:p-6 space-y-4">
             <div>
               <h2 className="font-bold text-sm sm:text-base text-foreground">{t("set.age")}</h2>
               <p className="text-xs text-muted-foreground mt-0.5">{t("set.ageHelp")}</p>
@@ -779,7 +786,7 @@ export default function Settings() {
           </div>
 
           {/* Health Conditions Questionnaire & Educational Personalisation */}
-          <div className="bloom-card p-5 sm:p-6 space-y-4">
+          <div className="nova-card-elevated p-5 sm:p-6 space-y-4">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="font-bold text-sm sm:text-base text-foreground flex items-center gap-2">
@@ -952,7 +959,7 @@ export default function Settings() {
           </div>
 
           {/* Tracked Symptoms & Categories */}
-          <div className="bloom-card p-5 sm:p-6 space-y-5">
+          <div className="nova-card-elevated p-5 sm:p-6 space-y-5">
             <div>
               <h2 className="font-bold text-sm sm:text-base text-foreground">
                 {t("set.trackedSymptoms")}
@@ -1122,12 +1129,12 @@ export default function Settings() {
       {activeTab === "privacy" && (
         <div className="space-y-6 animate-fade-in">
           {/* PIN Lock Management */}
-          <div className="bloom-card p-5 sm:p-6 space-y-4">
+          <div className="nova-card-elevated p-5 sm:p-6 space-y-4">
             <PinSection />
           </div>
 
           {/* Discreet Mode Configuration */}
-          <div className="bloom-card p-5 sm:p-6 space-y-3">
+          <div className="nova-card-elevated p-5 sm:p-6 space-y-3">
             <Toggle
               label={t("set.discreet")}
               desc={t("set.discreetDesc")}
@@ -1137,7 +1144,7 @@ export default function Settings() {
           </div>
 
           {/* Shared Phone Privacy Guide */}
-          <div className="bloom-card p-5 sm:p-6 space-y-3">
+          <div className="nova-card-elevated p-5 sm:p-6 space-y-3">
             <h2 className="font-bold text-sm sm:text-base text-foreground">{t("guide.title")}</h2>
             <p className="text-xs text-muted-foreground leading-relaxed">{t("guide.intro")}</p>
             <div className="space-y-2 pt-2 border-t border-border/50 text-xs">
@@ -1158,7 +1165,7 @@ export default function Settings() {
       {activeTab === "data" && (
         <div className="space-y-6 animate-fade-in">
           {/* Export Records */}
-          <div className="bloom-card p-5 sm:p-6 space-y-3">
+          <div className="nova-card-elevated p-5 sm:p-6 space-y-3">
             <div>
               <h2 className="font-bold text-sm sm:text-base text-foreground">{t("set.export")}</h2>
               <p className="text-xs text-muted-foreground mt-0.5">{t("set.exportDesc")}</p>
@@ -1167,7 +1174,7 @@ export default function Settings() {
           </div>
 
           {/* Import Records */}
-          <div className="bloom-card p-5 sm:p-6 space-y-3">
+          <div className="nova-card-elevated p-5 sm:p-6 space-y-3">
             <div>
               <h2 className="font-bold text-sm sm:text-base text-foreground">{t("set.import")}</h2>
               <p className="text-xs text-muted-foreground mt-0.5">{t("set.importDesc")}</p>
@@ -1222,7 +1229,7 @@ export default function Settings() {
           </div>
 
           {/* Demo Controls */}
-          <div className="bloom-card p-5 sm:p-6 space-y-3">
+          <div className="nova-card-elevated p-5 sm:p-6 space-y-3">
             <h2 className="font-bold text-sm sm:text-base text-foreground">
               {isDemo ? t("set.demoActive") : t("set.tryDemo")}
             </h2>
@@ -1287,7 +1294,7 @@ export default function Settings() {
       {/* TAB 5: HELP & BUG REPORTING */}
       {activeTab === "feedback" && (
         <div className="space-y-6 animate-fade-in">
-          <div className="bloom-card p-6 space-y-4">
+          <div className="nova-card-elevated p-6 space-y-4">
             <div className="flex items-center gap-2.5">
               <MessageSquareWarning className="h-6 w-6 text-primary" />
               <div>

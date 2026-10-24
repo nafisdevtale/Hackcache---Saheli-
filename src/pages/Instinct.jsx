@@ -48,8 +48,18 @@ import {
   Info,
 } from "lucide-react";
 import { useApp } from "@/App.jsx";
-import { Btn, Card, cx } from "@/components/common/ui.jsx";
-import { AiBadge } from "@/components/bloom/index.js";
+import { cx } from "@/components/common/ui.jsx";
+import {
+  NovaHeading,
+  NovaText,
+  NovaButton,
+  NovaCard,
+  NovaBadge,
+  NovaAgentBadge,
+  NovaPageHeader,
+  NovaSegmented,
+  NovaDialog,
+} from "@/components/nova";
 import {
   VERIFIED_ENTERTAINMENT,
   MEDIA_TYPES,
@@ -237,7 +247,7 @@ export default function Instinct() {
               <div>
                 <div className="flex items-center gap-2">
                   <h1 className="text-xl font-extrabold tracking-tight">INSTINCT</h1>
-                  <AiBadge agent="instinct" />
+                  <NovaAgentBadge agent="instinct" />
                 </div>
                 <p className="text-xs text-muted-foreground font-medium">
                   {t("instinct.tagline", "Your Taste. Your Vibe. Your Next Favourite.")}

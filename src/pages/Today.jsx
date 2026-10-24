@@ -250,7 +250,7 @@ export default function Today() {
           {/* ========================================================================= */}
           <section
             aria-label="Cycle Overview"
-            className="overflow-hidden rounded-3xl border border-border/80 bg-card shadow-bloom-card"
+            className="overflow-hidden rounded-3xl border border-border/80 bg-card shadow-md"
           >
             <div className="grid grid-cols-1 lg:grid-cols-12 items-center">
               {/* Left Column: Rhythm Ring Visualizer */}
@@ -368,7 +368,7 @@ export default function Today() {
           {/* ========================================================================= */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
             {/* 1. Today's Log Card */}
-            <div className="flex flex-col justify-between rounded-3xl border border-border/80 bg-card p-5 shadow-bloom-card transition-all">
+            <div className="flex flex-col justify-between rounded-3xl border border-border/80 bg-card p-5 shadow-md transition-all">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -431,7 +431,7 @@ export default function Today() {
             </div>
 
             {/* 2. Calendar Progress Card */}
-            <div className="flex flex-col justify-between rounded-3xl border border-border/80 bg-card p-5 shadow-bloom-card transition-all">
+            <div className="flex flex-col justify-between rounded-3xl border border-border/80 bg-card p-5 shadow-md transition-all">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -471,7 +471,7 @@ export default function Today() {
             </div>
 
             {/* 3. Symptom & Rhythm Insights Card */}
-            <div className="flex flex-col justify-between rounded-3xl border border-border/80 bg-card p-5 shadow-bloom-card transition-all">
+            <div className="flex flex-col justify-between rounded-3xl border border-border/80 bg-card p-5 shadow-md transition-all">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -509,7 +509,7 @@ export default function Today() {
             {/* Saheli Pet Companion Card */}
             <Link
               to="/companion"
-              className="group flex flex-col justify-between rounded-3xl border border-period/30 bg-gradient-to-br from-card via-card to-period/10 p-5 shadow-bloom-card hover:border-period/60 transition-all cursor-pointer"
+              className="group flex flex-col justify-between rounded-3xl border border-period/30 bg-gradient-to-br from-card via-card to-period/10 p-5 shadow-md hover:border-period/60 transition-all cursor-pointer"
             >
               <div className="flex items-center gap-4">
                 <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-card border border-border/80 shadow-2xs overflow-hidden">
@@ -552,7 +552,7 @@ export default function Today() {
             {/* Self Care Sanctuary Card */}
             <Link
               to="/selfcare"
-              className="group flex flex-col justify-between rounded-3xl border border-primary/25 bg-gradient-to-br from-card via-card to-secondary/20 p-5 shadow-bloom-card hover:border-primary/50 transition-all cursor-pointer"
+              className="group flex flex-col justify-between rounded-3xl border border-primary/25 bg-gradient-to-br from-card via-card to-secondary/20 p-5 shadow-md hover:border-primary/50 transition-all cursor-pointer"
             >
               <div className="flex items-center gap-4">
                 <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary border border-primary/20 shadow-2xs">
@@ -597,7 +597,7 @@ export default function Today() {
             {/* Central Diva Hero Card */}
             <Link
               to="/diva"
-              className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-3xl border border-primary/30 bg-gradient-to-r from-primary/15 via-card to-accent/20 p-5 shadow-bloom-card hover:border-primary/60 transition-all cursor-pointer"
+              className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-3xl border border-primary/30 bg-gradient-to-r from-primary/15 via-card to-accent/20 p-5 shadow-md hover:border-primary/60 transition-all cursor-pointer"
             >
               <div className="flex items-center gap-3.5">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md">

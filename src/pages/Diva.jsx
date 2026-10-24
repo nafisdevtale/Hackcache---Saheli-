@@ -28,8 +28,16 @@ import {
   Star,
 } from "lucide-react";
 import { useApp } from "@/App.jsx";
-import { Btn, Card, cx, inputCls } from "@/components/common/ui.jsx";
-import { SegmentedControl, AiBadge } from "@/components/bloom/index.js";
+import { cx, inputCls } from "@/components/common/ui.jsx";
+import {
+  NovaHeading,
+  NovaText,
+  NovaButton,
+  NovaCard,
+  NovaBadge,
+  NovaAgentBadge,
+  NovaDialog,
+} from "@/components/nova";
 import { AGENT_REGISTRY } from "@/lib/divaRegistry.js";
 import { executeDivaRequest } from "@/lib/divaOrchestrator.js";
 
@@ -135,7 +143,7 @@ export default function Diva() {
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-24">
       {/* Diva Header */}
-      <div className="bloom-card p-6 space-y-4">
+      <NovaCard variant="elevated" className="p-6 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="h-12 w-12 rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center text-white shadow-md">
@@ -146,7 +154,7 @@ export default function Diva() {
                 <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground">
                   {t("diva.title", "Diva — Your Saheli AI Coordinator")}
                 </h1>
-                <AiBadge agent="diva" />
+                <NovaAgentBadge agent="diva" />
               </div>
               <p className="text-xs text-muted-foreground font-medium mt-0.5">
                 {t("diva.tagline", "One conversation. Three specialists.")}
@@ -194,7 +202,7 @@ export default function Diva() {
             <span className="text-[11px] text-muted-foreground">· Movies & Music</span>
           </div>
         </div>
-      </div>
+      </NovaCard>
 
       {/* Specialist Selector Bar */}
       <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
@@ -476,50 +484,49 @@ export default function Diva() {
           className="flex-1 px-4 py-2.5 text-xs bg-transparent focus:outline-none text-foreground placeholder:text-muted-foreground"
         />
 
-        <Btn type="submit" size="sm" disabled={isLoading || !inputValue.trim()} className="gap-1.5">
-          <Send className="h-3.5 w-3.5" />
-          <span>Ask</span>
-        </Btn>
+        <NovaButton
+          type="submit"
+          size="sm"
+          variant="primary"
+          disabled={isLoading || !inputValue.trim()}
+          leftIcon={<Send className="h-3.5 w-3.5" />}
+        >
+          Ask
+        </NovaButton>
       </form>
 
       {/* Privacy Firewall Modal */}
-      {activePrivacyModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <div className="relative w-full max-w-lg bg-card rounded-3xl border border-border p-6 space-y-4 shadow-2xl">
-            <button
-              onClick={() => setActivePrivacyModal(false)}
-              className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted text-muted-foreground"
-            >
-              <X className="h-4 w-4" />
-            </button>
-
-            <div className="flex items-center gap-2 text-primary font-bold text-base">
-              <ShieldCheck className="h-5 w-5" />
-              <h3>Diva Privacy Firewall Guarantees</h3>
-            </div>
-
-            <div className="text-xs space-y-2 text-muted-foreground leading-relaxed">
-              <p>
-                <strong>1. No Unified Surveillance Profile:</strong> Diva coordinates requests in
-                memory during the active session. It never writes a merged tracking history across
-                health, shopping, and entertainment.
-              </p>
-              <p>
-                <strong>2. Health Isolation:</strong> FLASH (Essentials) and INSTINCT
-                (Entertainment) can never read your period dates, symptoms, or health logs.
-              </p>
-              <p>
-                <strong>3. Discrete Specialist Memories:</strong> Eeve, FLASH, and INSTINCT maintain
-                strictly separate private storage buckets on your device.
-              </p>
-            </div>
-
-            <Btn size="sm" onClick={() => setActivePrivacyModal(false)} className="w-full">
-              Understood
-            </Btn>
-          </div>
+      <NovaDialog
+        open={activePrivacyModal}
+        onClose={() => setActivePrivacyModal(false)}
+        title="Diva Privacy Firewall Guarantees"
+        footer={
+          <NovaButton
+            size="sm"
+            variant="primary"
+            onClick={() => setActivePrivacyModal(false)}
+            className="w-full justify-center"
+          >
+            Understood
+          </NovaButton>
+        }
+      >
+        <div className="text-xs space-y-2 text-muted-foreground leading-relaxed">
+          <p>
+            <strong>1. No Unified Surveillance Profile:</strong> Diva coordinates requests in memory
+            during the active session. It never writes a merged tracking history across health,
+            shopping, and entertainment.
+          </p>
+          <p>
+            <strong>2. Health Isolation:</strong> FLASH (Essentials) and INSTINCT (Entertainment)
+            can never read your period dates, symptoms, or health logs.
+          </p>
+          <p>
+            <strong>3. Discrete Specialist Memories:</strong> Eeve, FLASH, and INSTINCT maintain
+            strictly separate private storage buckets on your device.
+          </p>
         </div>
-      )}
+      </NovaDialog>
     </div>
   );
 }

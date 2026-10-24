@@ -346,7 +346,7 @@ export function Shell({ children }) {
   if (status === "error")
     return (
       <div className="flex min-h-screen items-center justify-center p-8 text-center" role="alert">
-        <div className="max-w-md rounded-3xl border border-destructive/20 bg-card p-8 shadow-bloom-card space-y-3">
+        <div className="max-w-md rounded-3xl border border-destructive/20 bg-card p-8 shadow-md space-y-3">
           <p className="font-bold text-destructive">{t("set.failed")}</p>
         </div>
       </div>
@@ -466,7 +466,7 @@ export function Shell({ children }) {
               aria-live="polite"
               className="mx-auto my-3 w-full max-w-6xl px-4 print:hidden"
             >
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-accent p-3.5 text-sm text-accent-foreground shadow-bloom-card">
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-accent p-3.5 text-sm text-accent-foreground shadow-md">
                 <p className="font-semibold">
                   {prefs.discreet ? t("pwa.updateReadyDiscreet") : t("pwa.updateReady")}
                 </p>
