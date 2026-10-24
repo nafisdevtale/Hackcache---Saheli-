@@ -31,7 +31,24 @@ export const DICTS = {
   ur,
 };
 
-const KEY_ALIASES = {
+export const KEY_ALIASES = {
+  // Diva aliases
+  "diva.explorehub": "diva.exploreHub",
+  "diva.openchat": "diva.openChat",
+  // Text sizes
+  "text.normal": "text.md",
+  "text.large": "text.lg",
+  "text.extraLarge": "text.lg",
+  // Discover category aliases
+  "discover.cat.menstrual_awareness": "discover.cat.awareness",
+  "discover.cat.supplies_unavailable": "discover.cat.unavailable",
+  "discover.cat.self_care": "discover.cat.selfCare",
+  // Companion action toasts
+  "companion.actionToast.feed": "pet.actionToast.feed",
+  "companion.actionToast.play": "pet.actionToast.play",
+  "companion.actionToast.brush": "pet.actionToast.brush",
+  "companion.actionToast.rest": "pet.actionToast.rest",
+  "companion.actionToast.affection": "pet.actionToast.affection",
   // Companion / Pet aliases
   "pet.badge": "companion.badge",
   "pet.adoptTitle": "companion.adoptionTitle",
@@ -102,9 +119,31 @@ export function translate(lang, key, vars) {
     } else if (key.startsWith("companion.species.") && key.endsWith("Desc")) {
       const petKey = "pet." + key.slice(10);
       s = DICTS[lang]?.[petKey] ?? en[petKey];
+    } else if (key.startsWith("pet.quote.")) {
+      s = "Resting peacefully by your side.";
+    } else if (key.startsWith("pet.treat.")) {
+      const raw = key.slice(10);
+      s = raw
+        .replace(/([A-Z])/g, " $1")
+        .replace(/^./, (c) => c.toUpperCase())
+        .trim();
+    } else if (key.startsWith("pet.toy.")) {
+      const raw = key.slice(8);
+      s = raw
+        .replace(/([A-Z])/g, " $1")
+        .replace(/^./, (c) => c.toUpperCase())
+        .trim();
     }
   }
-  if (s === undefined) s = key;
+  if (s === undefined) {
+    if (
+      (typeof import.meta !== "undefined" && import.meta.env?.DEV) ||
+      (typeof process !== "undefined" && process.env?.NODE_ENV === "development")
+    ) {
+      console.warn(`[i18n] Missing translation for key "${key}" in language "${lang}".`);
+    }
+    s = key;
+  }
   if (vars && typeof s === "string") {
     for (const k of Object.keys(vars)) {
       s = s.split(`{${k}}`).join(String(vars[k]));

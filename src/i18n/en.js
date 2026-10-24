@@ -1805,4 +1805,11 @@ export default {
     "Permanently erase all your cycle logs, health conditions, companion progress and settings from this browser.",
   "set.wipeYes": "Yes, Delete Everything",
   "sym.reactivate": "Reactivate",
+  "diva.exploreHub": "Explore AI Specialists",
+  "diva.openChat": "Chat with Diva",
+  "lock.subtitle": "Your records are locked with a 4-digit PIN.",
+  "flow.none": "No bleeding",
+  "text.sm": "Small",
+  "text.md": "Normal",
+  "text.lg": "Large",
 };

@@ -595,7 +595,7 @@ export default function Today() {
               <div className="flex items-center gap-2">
                 <NovaAgentBadge agent="diva" size="sm" showLabel={false} />
                 <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                  {t("diva.title")} • Personal Intelligence
+                  {t("diva.title")}
                 </h2>
               </div>
               <Link to="/diva" className="text-xs font-bold text-primary hover:underline">
@@ -616,12 +616,12 @@ export default function Today() {
                   <div>
                     <div className="flex items-center gap-2">
                       <h3 className="font-display text-base font-extrabold text-foreground group-hover:text-primary transition-colors">
-                        DIVA Central Assistant
+                        {t("diva.shortcutToday")}
                       </h3>
                       <NovaAgentBadge agent="diva" size="sm" />
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                      One conversation. Three specialists for Health, Essentials & Entertainment.
+                      {t("diva.tagline")}
                     </p>
                   </div>
                 </div>
