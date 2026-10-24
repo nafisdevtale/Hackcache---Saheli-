@@ -7,10 +7,8 @@ import {
   Bell,
   Baby,
   Settings,
-  Shield,
   ChevronRight,
   FileText,
-  Lock,
   BookOpen,
   Sparkles,
   Compass,
@@ -21,7 +19,6 @@ import {
   Bot,
 } from "lucide-react";
 import { useApp } from "@/App.jsx";
-import { PageTitle } from "@/components/common/ui.jsx";
 
 export default function More() {
   const { t, pregnancyVisible, prefs } = useApp();
@@ -34,69 +31,84 @@ export default function More() {
           to: "/discover",
           key: "nav.discover",
           icon: Compass,
-          color: "text-primary bg-primary/10",
+          color: "text-primary bg-primary/10 border border-primary/20",
         },
         {
           to: "/flash",
           key: "nav.flash",
           icon: ShoppingBag,
-          color: "text-accent-foreground bg-accent",
+          color: "text-primary bg-primary/10 border border-primary/20",
         },
         {
           to: "/instinct",
           key: "nav.instinct",
           icon: Film,
-          color: "text-rose-500 bg-rose-500/10",
+          color: "text-accent-foreground bg-accent border border-accent-strong/25",
         },
         {
           to: "/diva",
           key: "nav.diva",
           icon: Bot,
-          color: "text-purple-600 bg-purple-500/10 dark:text-purple-400",
+          color: "text-primary bg-primary/15 border border-primary/30",
         },
         {
           to: "/selfcare",
           key: "nav.selfCare",
           icon: Sparkles,
-          color: "text-accent-foreground bg-accent",
+          color: "text-secondary-foreground bg-secondary border border-border/70",
         },
         {
           to: "/companion",
           key: "nav.companion",
           icon: Heart,
-          color: "text-period bg-period/10",
+          color: "text-period bg-period/15 border border-period/30",
         },
         {
           to: "/learn",
           key: "nav.learn",
           icon: BookOpen,
-          color: "text-primary bg-primary/10",
+          color: "text-primary bg-primary/10 border border-primary/20",
         },
         {
           to: "/insights",
           key: "nav.insights",
           icon: BarChart3,
-          color: "text-period bg-period/10",
+          color: "text-secondary-foreground bg-secondary border border-border/70",
         },
-        { to: "/doctor", key: "nav.doctor", icon: Stethoscope, color: "text-info bg-info/10" },
+        {
+          to: "/doctor",
+          key: "nav.doctor",
+          icon: Stethoscope,
+          color: "text-info bg-info/10 border border-info/25",
+        },
         {
           to: "/visit",
           key: "today.linkVisitSummary",
           icon: FileText,
-          color: "text-secondary-strong bg-secondary/20",
+          color: "text-secondary-foreground bg-secondary border border-border/70",
         },
-        { to: "/ask", key: "nav.ask", icon: MessageCircle, color: "text-primary bg-primary/10" },
+        {
+          to: "/ask",
+          key: "nav.ask",
+          icon: MessageCircle,
+          color: "text-primary bg-primary/10 border border-primary/20",
+        },
       ],
     },
     {
       title: t("nav.community"),
       items: [
-        { to: "/community", key: "nav.community", icon: Users, color: "text-period bg-period/10" },
+        {
+          to: "/community",
+          key: "nav.community",
+          icon: Users,
+          color: "text-period bg-period/15 border border-period/30",
+        },
         {
           to: "/reminders",
           key: "nav.reminders",
           icon: Bell,
-          color: "text-accent-foreground bg-accent",
+          color: "text-accent-foreground bg-accent border border-accent-strong/25",
         },
         ...(pregnancyVisible
           ? [
@@ -104,7 +116,7 @@ export default function More() {
                 to: "/pregnancy",
                 key: "nav.pregnancy",
                 icon: Baby,
-                color: "text-secondary-strong bg-secondary/20",
+                color: "text-secondary-foreground bg-secondary border border-border/70",
               },
             ]
           : []),
@@ -113,12 +125,17 @@ export default function More() {
     {
       title: t("nav.settings"),
       items: [
-        { to: "/settings", key: "nav.settings", icon: Settings, color: "text-foreground bg-muted" },
+        {
+          to: "/settings",
+          key: "nav.settings",
+          icon: Settings,
+          color: "text-foreground bg-muted border border-border/80",
+        },
         {
           to: "/feedback",
           key: "feedback.navReport",
           icon: MessageSquareWarning,
-          color: "text-primary bg-primary/10",
+          color: "text-primary bg-primary/10 border border-primary/20",
         },
       ],
     },
@@ -141,12 +158,12 @@ export default function More() {
             <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground px-1">
               {sec.title}
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {sec.items.map(({ to, key, icon: Icon, color }) => (
                 <Link
                   key={to}
                   to={to}
-                  className="group flex min-h-[58px] items-center justify-between rounded-2xl border border-border/70 bg-card p-3.5 shadow-xs transition-all hover:bg-muted/40 hover:border-primary/40 active:scale-98"
+                  className="group flex min-h-[60px] items-center justify-between rounded-2xl border border-border/80 bg-card p-3.5 shadow-bloom-subtle transition-all hover:bg-muted/40 hover:border-primary/40 active:scale-[0.99] cursor-pointer"
                 >
                   <div className="flex items-center gap-3">
                     <span
@@ -154,11 +171,11 @@ export default function More() {
                     >
                       <Icon aria-hidden className="h-5 w-5" />
                     </span>
-                    <span className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">
+                    <span className="font-bold text-sm text-foreground group-hover:text-primary transition-colors leading-snug">
                       {t(key)}
                     </span>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+                  <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform rtl-mirror shrink-0" />
                 </Link>
               ))}
             </div>

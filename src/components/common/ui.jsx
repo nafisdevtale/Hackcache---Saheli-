@@ -7,23 +7,26 @@ import { loc } from "@/lib/localDate.js";
 export const cx = (...a) => a.filter(Boolean).join(" ");
 
 export function Btn({ variant = "primary", className, ...p }) {
-  const v = {
-    primary:
-      "bg-primary text-primary-foreground hover:bg-primary/95 shadow-sm active:scale-[0.98] tactile-press",
-    secondary:
-      "bg-secondary text-secondary-foreground hover:bg-secondary/80 active:scale-[0.98] tactile-press",
-    outline:
-      "border border-border/80 bg-card text-foreground hover:bg-muted/60 active:scale-[0.98] tactile-press shadow-2xs",
-    danger:
-      "bg-destructive text-destructive-foreground hover:bg-destructive/90 active:scale-[0.98] tactile-press shadow-sm",
-    ghost: "text-foreground hover:bg-muted/60 active:scale-[0.98] tactile-press",
-  }[variant];
+  const v =
+    {
+      primary:
+        "bg-primary text-primary-foreground hover:bg-primary/95 shadow-bloom-subtle border border-primary/20 active:scale-[0.98] tactile-press",
+      secondary:
+        "bg-secondary text-secondary-foreground hover:bg-secondary/85 active:scale-[0.98] border border-border/60 tactile-press",
+      outline:
+        "border border-border bg-card text-foreground hover:bg-muted/60 active:scale-[0.98] tactile-press shadow-2xs",
+      danger:
+        "bg-destructive text-destructive-foreground hover:bg-destructive/90 active:scale-[0.98] tactile-press shadow-bloom-subtle border border-destructive/20",
+      ghost:
+        "text-foreground hover:bg-muted/60 active:scale-[0.98] tactile-press border border-transparent",
+    }[variant] || "";
 
   return (
     <button
       type="button"
       className={cx(
-        "inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-5 py-2.5 text-sm font-bold transition-all disabled:opacity-40 disabled:pointer-events-none cursor-pointer",
+        "inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-5 py-2.5 text-sm font-bold transition-all disabled:opacity-40 disabled:pointer-events-none cursor-pointer select-none",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         v,
         className,
       )}
@@ -36,7 +39,7 @@ export function Card({ className, ...p }) {
   return (
     <section
       className={cx(
-        "rounded-3xl border border-border/70 bg-card p-5 text-card-foreground shadow-soft transition-all",
+        "bloom-card p-5 sm:p-6 text-card-foreground shadow-bloom-card transition-all",
         className,
       )}
       {...p}
@@ -46,11 +49,13 @@ export function Card({ className, ...p }) {
 
 export function PageTitle({ children, sub, tag }) {
   return (
-    <header className="mb-4 space-y-1">
+    <header className="mb-6 space-y-1.5">
       {tag && (
-        <span className="text-xs font-bold uppercase tracking-wider text-primary">{tag}</span>
+        <span className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wide bg-primary/10 text-primary border border-primary/20">
+          {tag}
+        </span>
       )}
-      <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+      <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-foreground leading-snug">
         {children}
       </h1>
       {sub && <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{sub}</p>}
@@ -60,8 +65,8 @@ export function PageTitle({ children, sub, tag }) {
 
 export function Toggle({ checked, onChange, label, desc, disabled }) {
   return (
-    <label className="flex min-h-12 cursor-pointer items-center justify-between gap-3 py-2">
-      <span className="space-y-0.5">
+    <label className="flex min-h-12 cursor-pointer items-center justify-between gap-3 py-2 select-none">
+      <span className="space-y-0.5 text-start">
         <span className="block font-bold text-xs sm:text-sm text-foreground">{label}</span>
         {desc && (
           <span className="block text-xs text-muted-foreground leading-relaxed">{desc}</span>
@@ -87,17 +92,18 @@ export function Chip({ selected, onClick, children, icon: Icon, label, className
       onClick={onClick}
       aria-label={label}
       className={cx(
-        "inline-flex min-h-11 items-center gap-2 rounded-2xl border px-3.5 py-2 text-left text-xs font-semibold transition-all cursor-pointer",
+        "inline-flex min-h-[44px] items-center gap-2 rounded-2xl border px-3.5 py-2 text-start text-xs font-semibold transition-all cursor-pointer tactile-press select-none",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         selected
-          ? "border-primary bg-primary text-primary-foreground shadow-xs"
-          : "border-border/70 bg-card text-foreground hover:bg-muted/70 shadow-2xs",
+          ? "border-primary/40 bg-primary/15 text-primary shadow-xs font-bold ring-1 ring-primary/20"
+          : "border-border/80 bg-card text-foreground hover:bg-muted/70 shadow-2xs",
         className,
       )}
     >
       {Icon && <Icon aria-hidden className="h-4 w-4 shrink-0" />}
-      <span>{children}</span>
+      <span className="leading-normal">{children}</span>
       {selected && (
-        <span aria-hidden className="text-xs">
+        <span aria-hidden className="text-xs font-bold ms-auto">
           ✓
         </span>
       )}
@@ -110,11 +116,11 @@ export function Sources({ ids }) {
   const list = [...new Set(ids)].filter((i) => SOURCES[i]);
   if (!list.length) return null;
   return (
-    <div className="mt-3 border-t border-border/50 pt-2 text-xs">
-      <p className="font-bold text-foreground text-[11px] uppercase tracking-wider">
+    <div className="mt-4 border-t border-border/50 pt-3 text-xs">
+      <p className="font-bold text-foreground text-[11px] uppercase tracking-wider text-start">
         {t("common.sources")}
       </p>
-      <ul className="mt-1 space-y-1">
+      <ul className="mt-1.5 space-y-1.5 text-start">
         {list.map((id) => (
           <li key={id}>
             <a
@@ -124,7 +130,7 @@ export function Sources({ ids }) {
               rel="noopener noreferrer"
             >
               <span>{SOURCES[id].name}</span>
-              <ExternalLink aria-hidden className="h-3 w-3 shrink-0" />
+              <ExternalLink aria-hidden className="h-3 w-3 shrink-0 rtl-mirror" />
               <span className="sr-only">{t("common.external")}</span>
             </a>
           </li>
@@ -153,7 +159,7 @@ export function ListenButton({ text }) {
     <div>
       <Btn
         variant="outline"
-        className="min-h-10 text-xs py-1.5 px-3 rounded-xl"
+        className="min-h-10 text-xs py-1.5 px-3.5 rounded-xl gap-1.5"
         onClick={() => {
           if (on) {
             window.speechSynthesis?.cancel();
@@ -182,10 +188,12 @@ export function ListenButton({ text }) {
 
 export function Field({ label, children, hint, id }) {
   return (
-    <div className="space-y-1">
-      <label htmlFor={id} className="block font-bold text-xs text-foreground">
-        {label}
-      </label>
+    <div className="space-y-1.5 text-start">
+      {label && (
+        <label htmlFor={id} className="block font-bold text-xs sm:text-sm text-foreground">
+          {label}
+        </label>
+      )}
       {hint && <p className="text-xs text-muted-foreground leading-relaxed">{hint}</p>}
       {children}
     </div>
@@ -193,7 +201,7 @@ export function Field({ label, children, hint, id }) {
 }
 
 export const inputCls =
-  "min-h-12 w-full rounded-2xl border border-border bg-card px-3.5 py-2.5 text-xs sm:text-sm text-foreground hover:border-primary/40 focus:border-primary transition-all";
+  "min-h-12 w-full rounded-2xl border border-border bg-card px-4 py-2.5 text-xs sm:text-sm text-foreground hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-start";
 
 export function Status({ msg, tone = "ok" }) {
   if (!msg) return null;
@@ -201,10 +209,10 @@ export function Status({ msg, tone = "ok" }) {
     <p
       role="status"
       className={cx(
-        "rounded-2xl px-3.5 py-2.5 text-xs font-semibold leading-relaxed",
+        "rounded-2xl px-4 py-3 text-xs font-semibold leading-relaxed border text-start",
         tone === "err"
-          ? "bg-destructive/10 text-destructive border border-destructive/20"
-          : "bg-secondary text-secondary-foreground border border-secondary-strong/20",
+          ? "bg-destructive/10 text-destructive border-destructive/25"
+          : "bg-secondary text-secondary-foreground border-border/60",
       )}
     >
       {msg}
