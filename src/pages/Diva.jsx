@@ -355,8 +355,10 @@ export default function Diva() {
                                           <p className="text-[10px] text-muted-foreground">
                                             {card.brand} • {card.category}
                                           </p>
-                                          <p className="text-[10px] text-muted-foreground mt-1">
-                                            ₹{card.unitCost} / {card.unit}
+                                          <p className="text-[10px] text-muted-foreground mt-1 font-medium">
+                                            {String(card.unitCost).includes("/")
+                                              ? card.unitCost
+                                              : `${String(card.unitCost).startsWith("₹") ? "" : "₹"}${card.unitCost} / ${card.unit || "unit"}`}
                                           </p>
                                         </div>
                                         <div className="flex flex-wrap gap-1 pt-1">

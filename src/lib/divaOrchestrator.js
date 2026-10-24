@@ -9,7 +9,7 @@
  * Enforces:
  * - Strict Privacy Firewall (zero cross-specialist sensitive data leakage).
  * - Bounded Concurrency (max 2 specialists per request).
- * - Per-agent timeouts & graceful partial-failure handling.
+ * - Per-agent timeouts, cancellation & graceful partial-failure handling.
  * - Resilient Offline Fallback.
  */
 
@@ -18,7 +18,8 @@ import { routeDivaQuery } from "./divaRouter.js";
 import { matchFaq } from "../content/faq.js";
 import { VERIFIED_PRODUCTS } from "../content/products.js";
 import { VERIFIED_ENTERTAINMENT } from "../content/entertainment.js";
-import { searchCatalogue } from "./instinctRecommender.js";
+import { getFlashRecommendations } from "./flashRecommender.js";
+import { rankMediaCandidates, searchCatalogue } from "./instinctRecommender.js";
 
 /**
  * Execute Eeve (Health Specialist)
@@ -31,17 +32,31 @@ export async function executeEeveAgent(query, options = {}) {
     locale: options.locale || "en",
     allowedContext: options.allowedContext || {},
   });
-  return executeEeve(req);
+  return executeEeve(req, options.signal);
 }
 
-async function executeEeve(agentReq) {
+async function executeEeve(agentReq, externalSignal) {
   const query = agentReq.sanitizedQuery;
   const timeoutMs = AGENT_REGISTRY.eeve.timeoutMs;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
+  if (externalSignal) {
+    if (externalSignal.aborted) {
+      clearTimeout(timer);
+      return createAgentResult({
+        agentId: "eeve",
+        status: "error",
+        success: false,
+        text: "Health request was cancelled.",
+        errorCode: "REQUEST_ABORTED",
+      });
+    }
+    externalSignal.addEventListener("abort", () => controller.abort(), { once: true });
+  }
+
   try {
-    const isOnline = typeof navigator !== "undefined" ? navigator.onLine : false;
+    const isOnline = typeof navigator !== "undefined" ? Boolean(navigator.onLine) : false;
     if (isOnline) {
       const res = await fetch("/api/ask", {
         method: "POST",
@@ -70,8 +85,17 @@ async function executeEeve(agentReq) {
         });
       }
     }
-  } catch {
-    // Offline or network error
+  } catch (err) {
+    if (err.name === "AbortError") {
+      return createAgentResult({
+        agentId: "eeve",
+        status: "error",
+        success: false,
+        text: "Eeve response timed out or was cancelled.",
+        errorCode: "TIMEOUT_OR_ABORTED",
+      });
+    }
+    // Offline or network error -> proceed to verified local FAQ fallback
   } finally {
     clearTimeout(timer);
   }
@@ -116,61 +140,135 @@ export async function executeFlashAgent(query, options = {}) {
     locale: options.locale || "en",
     allowedContext: options.allowedContext || {},
   });
-  return executeFlash(req);
+  return executeFlash(req, options.signal);
 }
 
-async function executeFlash(agentReq) {
-  const query = agentReq.sanitizedQuery.toLowerCase();
-  const qTerms = query.split(/\s+/).filter(Boolean);
+async function executeFlash(agentReq, externalSignal) {
+  const query = (agentReq.sanitizedQuery || "").toLowerCase();
+  const timeoutMs = AGENT_REGISTRY.flash.timeoutMs;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
 
-  // Search verified product catalogue
-  let matched = VERIFIED_PRODUCTS.filter((prod) => {
-    const nameMatch = prod.name.toLowerCase().includes(query);
-    const catMatch = prod.category?.toLowerCase().includes(query);
-    const brandMatch = prod.brand?.toLowerCase().includes(query);
-    const anyTerm = qTerms.some(
-      (term) =>
-        prod.name.toLowerCase().includes(term) ||
-        prod.category?.toLowerCase().includes(term) ||
-        (prod.tags || []).some((t) => t.toLowerCase().includes(term)),
-    );
-    return nameMatch || catMatch || brandMatch || anyTerm;
-  });
-
-  if (matched.length === 0) {
-    // Default to top verified essentials
-    matched = VERIFIED_PRODUCTS.slice(0, 3);
-  } else {
-    matched = matched.slice(0, 3);
+  if (externalSignal) {
+    if (externalSignal.aborted) {
+      clearTimeout(timer);
+      return createAgentResult({
+        agentId: "flash",
+        status: "error",
+        success: false,
+        text: "Essentials request was cancelled.",
+        errorCode: "REQUEST_ABORTED",
+      });
+    }
+    externalSignal.addEventListener("abort", () => controller.abort(), { once: true });
   }
 
-  const cards = matched.map((p) => ({
-    type: "product_card",
-    id: p.id,
-    name: p.name,
-    brand: p.brand,
-    category: p.category,
-    price: p.price,
-    unitCost: p.unitCost,
-    unit: p.unit,
-    rating: p.rating,
-    tags: p.tags,
-    sustainable: p.sustainable,
-    certifications: p.certifications,
-  }));
+  try {
+    // Extract search criteria for FLASH 2.0 6-stage recommendation engine
+    let category = agentReq.allowedContext?.category || "all";
+    if (/\bcups?\b|\bmenstrual cup\b/i.test(query)) category = "menstrual_cups";
+    else if (/\breusable pad|\bcloth pad/i.test(query)) category = "reusable_pads";
+    else if (/\bpad|\bpads|\bsanitary\b/i.test(query)) category = "disposable_pads";
+    else if (/\bunderwear|\bpanties\b/i.test(query)) category = "period_underwear";
+    else if (/\bcompress|\bpatch|\bheat\b/i.test(query)) category = "warm_compress";
+    else if (/\bhygiene|\bwipes?\b/i.test(query)) category = "general_hygiene";
+    else category = "all";
 
-  const text = `FLASH found ${matched.length} verified essential options tailored to your request with transparent pricing and safety verification.`;
+    let maxBudget =
+      agentReq.allowedContext?.maxBudget || agentReq.allowedContext?.budgetMax || 1000;
+    const budgetMatch =
+      query.match(/(?:under|below|less than|within|budget of)\s*(?:rs\.?|inr|₹)?\s*(\d+)/i) ||
+      query.match(/(?:rs\.?|inr|₹)\s*(\d+)/i);
+    if (budgetMatch && budgetMatch[1]) {
+      maxBudget = parseInt(budgetMatch[1], 10);
+    }
 
-  return createAgentResult({
-    agentId: "flash",
-    status: "success",
-    success: true,
-    text,
-    data: matched,
-    cards,
-    sources: ["FLASH Verified Essentials Registry (BIS, FDA, ISO compliant)"],
-    attribution: "FLASH Essentials AI",
-  });
+    const preferReusable = /reusable|cloth|washable|cup/i.test(query)
+      ? true
+      : /disposable/i.test(query)
+        ? false
+        : null;
+
+    const sensitiveSkin = /rash|sensitive|organic|cotton|gentle|chlorine/i.test(query);
+
+    const criteria = {
+      category,
+      maxBudget,
+      preferReusable,
+      sensitiveSkin,
+      personalisationEnabled: true,
+    };
+
+    // Invoke actual FLASH 2.0 recommendation engine
+    let recommendations = getFlashRecommendations(criteria, VERIFIED_PRODUCTS);
+
+    // If specific category yielded no matches within budget, fallback to all categories
+    if (!recommendations || recommendations.length === 0) {
+      recommendations = getFlashRecommendations(
+        { ...criteria, category: "all" },
+        VERIFIED_PRODUCTS,
+      );
+    }
+
+    let topRecs = [];
+    if (recommendations && recommendations.length > 0) {
+      topRecs = recommendations.slice(0, 3);
+    } else {
+      // Fallback to top verified products
+      topRecs = VERIFIED_PRODUCTS.slice(0, 3).map((p) => ({ product: p, score: 70, reasons: [] }));
+    }
+
+    const matched = topRecs.map((r) => r.product);
+    const cards = topRecs.map(({ product: p, score, reasons, tradeOffs }) => ({
+      type: "product_card",
+      id: p.id,
+      name: p.name,
+      brand: p.brand,
+      category: p.category,
+      price: p.price,
+      unitCost: p.unitCost || p.pricePerUnit || `₹${p.price}`,
+      unit: p.unit || "item",
+      rating: p.rating || 4.5,
+      tags: p.tags || [],
+      sustainable: p.sustainable,
+      certifications: p.certifications || p.certificationEvidence,
+      score,
+      reasons: reasons || [],
+      tradeOffs: tradeOffs || [],
+    }));
+
+    const text = `FLASH found ${matched.length} verified essential options tailored to your request with transparent pricing and safety verification.`;
+
+    return createAgentResult({
+      agentId: "flash",
+      status: "success",
+      success: true,
+      text,
+      data: matched,
+      cards,
+      sources: ["FLASH Verified Essentials Registry (BIS, FDA, ISO compliant)"],
+      attribution: "FLASH Essentials AI",
+    });
+  } catch (err) {
+    if (err.name === "AbortError") {
+      return createAgentResult({
+        agentId: "flash",
+        status: "error",
+        success: false,
+        text: "FLASH recommendations timed out.",
+        errorCode: "TIMEOUT_OR_ABORTED",
+      });
+    }
+    return createAgentResult({
+      agentId: "flash",
+      status: "error",
+      success: false,
+      text: "Unable to retrieve essentials recommendations.",
+      errorCode: "FLASH_ENGINE_ERROR",
+    });
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 /**
@@ -184,17 +282,31 @@ export async function executeInstinctAgent(query, options = {}) {
     locale: options.locale || "en",
     allowedContext: options.allowedContext || {},
   });
-  return executeInstinct(req);
+  return executeInstinct(req, options.signal);
 }
 
-async function executeInstinct(agentReq) {
+async function executeInstinct(agentReq, externalSignal) {
   const query = agentReq.sanitizedQuery;
   const timeoutMs = AGENT_REGISTRY.instinct.timeoutMs;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
+  if (externalSignal) {
+    if (externalSignal.aborted) {
+      clearTimeout(timer);
+      return createAgentResult({
+        agentId: "instinct",
+        status: "error",
+        success: false,
+        text: "Entertainment request was cancelled.",
+        errorCode: "REQUEST_ABORTED",
+      });
+    }
+    externalSignal.addEventListener("abort", () => controller.abort(), { once: true });
+  }
+
   try {
-    const isOnline = typeof navigator !== "undefined" ? navigator.onLine : false;
+    const isOnline = typeof navigator !== "undefined" ? Boolean(navigator.onLine) : false;
     if (isOnline) {
       const res = await fetch("/api/instinct/chat", {
         method: "POST",
@@ -231,7 +343,16 @@ async function executeInstinct(agentReq) {
         });
       }
     }
-  } catch {
+  } catch (err) {
+    if (err.name === "AbortError") {
+      return createAgentResult({
+        agentId: "instinct",
+        status: "error",
+        success: false,
+        text: "INSTINCT recommendations timed out.",
+        errorCode: "TIMEOUT_OR_ABORTED",
+      });
+    }
     // Fall through to local fallback
   } finally {
     clearTimeout(timer);
@@ -239,7 +360,9 @@ async function executeInstinct(agentReq) {
 
   // Deterministic Local Fallback for INSTINCT
   const localMatches = searchCatalogue(query, "all", VERIFIED_ENTERTAINMENT);
-  const items = (localMatches.length > 0 ? localMatches : VERIFIED_ENTERTAINMENT).slice(0, 3);
+  const candidates = localMatches.length > 0 ? localMatches : VERIFIED_ENTERTAINMENT;
+  const ranked = rankMediaCandidates(candidates, agentReq.allowedContext || {});
+  const items = (ranked && ranked.length > 0 ? ranked.map((r) => r.item) : candidates).slice(0, 3);
 
   const cards = items.map((m) => ({
     type: "media_card",
@@ -271,7 +394,7 @@ async function executeInstinct(agentReq) {
 /**
  * Dispatch an individual agent request
  */
-async function dispatchSpecialist(agentId, sanitizedQuery, locale, allowedContext) {
+async function dispatchSpecialist(agentId, sanitizedQuery, locale, allowedContext, signal) {
   const req = createAgentRequest({
     agentId,
     intent: `${agentId}_inquiry`,
@@ -280,9 +403,9 @@ async function dispatchSpecialist(agentId, sanitizedQuery, locale, allowedContex
     allowedContext,
   });
 
-  if (agentId === "eeve") return executeEeve(req);
-  if (agentId === "flash") return executeFlash(req);
-  if (agentId === "instinct") return executeInstinct(req);
+  if (agentId === "eeve") return executeEeve(req, signal);
+  if (agentId === "flash") return executeFlash(req, signal);
+  if (agentId === "instinct") return executeInstinct(req, signal);
 
   throw new Error(`Unknown agent: ${agentId}`);
 }
@@ -297,9 +420,22 @@ export async function executeDivaRequest({
   manualAgent = "auto",
   locale = "en",
   allowedContext = {},
+  signal,
 }) {
   const startTime = Date.now();
   const trimmed = (query || "").trim();
+
+  if (signal?.aborted) {
+    return {
+      status: "cancelled",
+      success: false,
+      reason: "Execution cancelled by caller.",
+      agentsInvoked: [],
+      agentResults: [],
+      specialistResults: {},
+      durationMs: 0,
+    };
+  }
 
   // 1. Route Intent
   const route = routeArg || (await routeDivaQuery(trimmed, history, manualAgent));
@@ -336,8 +472,17 @@ export async function executeDivaRequest({
     if (agentId === "eeve" && allowedContext.optInCycleContext) {
       contextForAgent.optInCycleContext = allowedContext.optInCycleContext;
     }
+    if (agentId === "flash") {
+      if (allowedContext.maxBudget) contextForAgent.maxBudget = allowedContext.maxBudget;
+      if (allowedContext.category) contextForAgent.category = allowedContext.category;
+    }
+    if (agentId === "instinct") {
+      if (allowedContext.ageFilter) contextForAgent.ageFilter = allowedContext.ageFilter;
+      if (allowedContext.preferredGenres)
+        contextForAgent.preferredGenres = allowedContext.preferredGenres;
+    }
 
-    return dispatchSpecialist(agentId, trimmed, locale, contextForAgent);
+    return dispatchSpecialist(agentId, trimmed, locale, contextForAgent, signal);
   });
 
   const settled = await Promise.allSettled(dispatches);
@@ -347,10 +492,13 @@ export async function executeDivaRequest({
 
   settled.forEach((outcome, index) => {
     const agentId = targetAgents[index];
-    if (outcome.status === "fulfilled") {
+    if (outcome.status === "fulfilled" && outcome.value.success) {
       specialistResults[agentId] = outcome.value;
       agentResults.push(outcome.value);
       successCount++;
+    } else if (outcome.status === "fulfilled" && !outcome.value.success) {
+      specialistResults[agentId] = outcome.value;
+      agentResults.push(outcome.value);
     } else {
       const errResult = createAgentResult({
         agentId,

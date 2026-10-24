@@ -64,13 +64,13 @@ export default {
   "age.adult": "18 or over",
   "age.under18": "Under 18",
   "ai.acceptConsent": "I Understand and Accept",
-  "ai.askBtn": "Ask Assistant",
+  "ai.askBtn": "Ask Eeve",
   "ai.badge": "Informational AI",
   "ai.consentBtn": "I understand & continue",
   "ai.consentDesc":
     "When you submit a question, it is processed on our secure server. Your personal diary records, private notes, and device identity are never sent.",
   "ai.consentReq": "Please review and accept the privacy & safety notice to continue.",
-  "ai.consentTitle": "Saheli AI Health Assistant",
+  "ai.consentTitle": "Eeve — Health AI Companion",
   "ai.crisisTitle": "You Are Not Alone — Immediate Help Available",
   "ai.disclaimer":
     "Saheli AI provides general health information only and cannot diagnose conditions, prescribe medications, or replace a qualified healthcare professional.",
@@ -83,7 +83,7 @@ export default {
   "ai.includeSummary": "Include my cycle summary",
   "ai.includeSummaryDesc":
     "Shares only anonymous cycle length and irregularity status to provide more relevant answers. (Default: Off)",
-  "ai.inputLabel": "Ask Saheli Health Assistant",
+  "ai.inputLabel": "Ask Eeve (Health Companion)",
   "ai.inputPlaceholder": "e.g. Why might a period be late?",
   "ai.intro":
     "Ask confidential menstrual health questions. Answers are based on verified medical resources.",
@@ -99,10 +99,10 @@ export default {
     "You have asked several questions recently. Please wait a moment before asking again.",
   "ai.suggestDoctor": "When to consult a doctor",
   "ai.suggestVisit": "Tip: You can take your printable Doctor-Visit Summary to your appointment.",
-  "ai.tabAi": "Health Assistant",
+  "ai.tabAi": "Eeve (Health AI)",
   "ai.tabFaq": "Verified FAQ",
   "ai.thinking": "Consulting verified medical sources...",
-  "ai.title": "AI Health Assistant",
+  "ai.title": "Eeve — Health AI Companion",
   "ai.unconfigured":
     "AI service is currently unconfigured on the server. Local verified FAQs are always available.",
   "app.discreetName": "Diary",
