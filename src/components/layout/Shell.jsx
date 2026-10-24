@@ -423,9 +423,7 @@ export function Shell({ children }) {
                 </span>
               </Link>
               <p className="text-[11px] font-medium text-muted-foreground leading-tight px-0.5">
-                {prefs.discreet
-                  ? t("common.discreetDesc") || "Discreet health journal"
-                  : "Your cycle, your rhythm"}
+                {prefs.discreet ? t("common.discreetDesc") : t("app.tagline")}
               </p>
             </div>
 

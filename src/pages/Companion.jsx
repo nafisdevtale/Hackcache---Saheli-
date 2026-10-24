@@ -143,18 +143,22 @@ export default function Companion() {
         <div className="text-center space-y-2">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">
             <Heart className="h-3.5 w-3.5 fill-primary" />
-            <span>{t("pet.badge")}</span>
+            <span>{t("companion.badge")}</span>
           </div>
           <h1 className="font-display text-2xl sm:text-3xl font-extrabold text-foreground">
-            {t("pet.adoptTitle")}
+            {t("companion.adoptionTitle")}
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground max-w-xl mx-auto leading-relaxed">
-            {t("pet.adoptSubtitle")}
+            {t("companion.adoptionSubtitle")}
           </p>
         </div>
 
         {/* Live Preview Card */}
-        <div className="rounded-3xl border border-border/80 bg-gradient-to-b from-card via-card to-muted/30 p-6 shadow-soft flex flex-col items-center text-center space-y-3">
+        <div
+          role="region"
+          aria-label={`${t(activePreviewSpecies.nameKey)} preview`}
+          className="rounded-3xl border border-border/80 bg-gradient-to-b from-card via-card to-muted/30 p-6 shadow-soft flex flex-col items-center text-center space-y-3"
+        >
           <div className="relative">
             <PetArtwork
               speciesId={selectedSpeciesId}
@@ -165,7 +169,7 @@ export default function Companion() {
           </div>
           <div>
             <h2 className="font-bold text-lg text-foreground">{t(activePreviewSpecies.nameKey)}</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">
+            <p className="text-xs text-muted-foreground mt-0.5 max-w-md mx-auto leading-relaxed">
               {t(activePreviewSpecies.descriptionKey)}
             </p>
           </div>
@@ -174,11 +178,13 @@ export default function Companion() {
         {/* Pet Selection Grid: Exactly 15 Pets */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="font-bold text-sm text-foreground">{t("pet.chooseSpecies")}</h3>
-            <span className="text-xs font-bold text-primary">15 {t("pet.speciesAvailable")}</span>
+            <h3 className="font-bold text-sm text-foreground">{t("companion.chooseSpecies")}</h3>
+            <span className="text-xs font-bold text-primary">
+              {t("companion.speciesAvailable", { n: PET_SPECIES.length })}
+            </span>
           </div>
 
-          <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
             {PET_SPECIES.map((species) => {
               const isSelected = species.id === selectedSpeciesId;
               return (
@@ -190,15 +196,21 @@ export default function Companion() {
                     setCustomName(species.defaultName);
                   }}
                   className={cx(
-                    "rounded-2xl border p-3 flex flex-col items-center text-center transition-all cursor-pointer",
+                    "relative rounded-2xl border p-3 flex flex-col items-center justify-between text-center transition-all cursor-pointer min-h-[108px] min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                     isSelected
                       ? "border-primary bg-primary/10 ring-2 ring-primary/30 shadow-sm"
                       : "border-border/70 bg-card hover:bg-muted/50",
                   )}
                   aria-pressed={isSelected}
+                  aria-label={`${t(species.nameKey)} - ${t(species.descriptionKey)}`}
                 >
+                  {isSelected && (
+                    <span className="absolute top-2 end-2 h-4 w-4 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-xs">
+                      <Check className="h-2.5 w-2.5 stroke-[3]" />
+                    </span>
+                  )}
                   <PetArtwork speciesId={species.id} size={56} />
-                  <span className="font-bold text-xs text-foreground mt-1.5 line-clamp-1">
+                  <span className="font-bold text-xs text-foreground mt-2 line-clamp-1 w-full break-words">
                     {t(species.nameKey)}
                   </span>
                 </button>
@@ -214,7 +226,7 @@ export default function Companion() {
               htmlFor="companion-name-input"
               className="block font-bold text-xs text-foreground mb-1"
             >
-              {t("pet.nameLabel")}
+              {t("companion.namePrompt")}
             </label>
             <input
               id="companion-name-input"
@@ -222,20 +234,20 @@ export default function Companion() {
               value={customName}
               onChange={(e) => setCustomName(e.target.value)}
               maxLength={30}
-              placeholder={t("pet.namePlaceholder")}
+              placeholder={t("companion.namePlaceholder")}
               className={inputCls}
             />
             <span className="text-[11px] text-muted-foreground mt-1 block">
-              {t("pet.nameHelp")}
+              {t("companion.nameHelp")}
             </span>
           </div>
 
           {/* Habitat Choice */}
           <div>
             <label className="block font-bold text-xs text-foreground mb-1.5">
-              {t("pet.chooseHabitat")}
+              {t("companion.habitatPrompt")}
             </label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
               {HABITAT_THEMES.map((hab) => {
                 const IconComp = HABITAT_ICONS[hab.iconName] || Sun;
                 const isSelected = hab.id === selectedHabitat;
@@ -245,7 +257,7 @@ export default function Companion() {
                     type="button"
                     onClick={() => setSelectedHabitat(hab.id)}
                     className={cx(
-                      "rounded-xl border p-2.5 flex items-center gap-2 text-left transition-all",
+                      "rounded-xl border p-2.5 flex items-center gap-2 text-left transition-all min-h-[44px]",
                       isSelected
                         ? "border-primary bg-primary/10 font-bold"
                         : "border-border/60 bg-muted/30 hover:bg-muted",
@@ -262,9 +274,9 @@ export default function Companion() {
           {/* Accessory Choice */}
           <div>
             <label className="block font-bold text-xs text-foreground mb-1.5">
-              {t("pet.chooseAccessory")}
+              {t("companion.accessoryPrompt")}
             </label>
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
               {ACCESSORIES.map((acc) => {
                 const IconComp = ACCESSORY_ICONS[acc.iconName] || Ban;
                 const isSelected = acc.id === selectedAccessory;
@@ -274,7 +286,7 @@ export default function Companion() {
                     type="button"
                     onClick={() => setSelectedAccessory(acc.id)}
                     className={cx(
-                      "rounded-xl border p-2 flex flex-col items-center text-center transition-all",
+                      "rounded-xl border p-2 flex flex-col items-center text-center transition-all min-h-[44px] justify-center",
                       isSelected
                         ? "border-primary bg-primary/10 font-bold"
                         : "border-border/60 bg-muted/30 hover:bg-muted",
@@ -293,9 +305,14 @@ export default function Companion() {
 
         {/* Adopt Button */}
         <div className="pt-2 text-center">
-          <Btn variant="primary" size="lg" onClick={handleAdopt} className="w-full sm:w-auto px-8">
+          <Btn
+            variant="primary"
+            size="lg"
+            onClick={handleAdopt}
+            className="w-full sm:w-auto px-8 min-h-[44px]"
+          >
             <Heart className="h-4 w-4 fill-white" />
-            <span>{t("pet.confirmAdopt")}</span>
+            <span>{t("companion.adoptAction")}</span>
           </Btn>
         </div>
       </div>
@@ -317,7 +334,7 @@ export default function Companion() {
             <span>Today</span>
           </Link>
           <ChevronRight className="h-3 w-3 text-muted-foreground" />
-          <span className="text-xs font-bold text-foreground">{t("pet.navTitle")}</span>
+          <span className="text-xs font-bold text-foreground">{t("companion.title")}</span>
         </div>
 
         <Btn
@@ -333,7 +350,7 @@ export default function Companion() {
           className="rounded-xl text-xs font-bold flex items-center gap-1.5"
         >
           <Edit3 className="h-3.5 w-3.5 text-primary" />
-          <span>{t("pet.customiseBtn")}</span>
+          <span>{t("companion.customise")}</span>
         </Btn>
       </div>
 
@@ -345,25 +362,26 @@ export default function Companion() {
           currentHabitat.accentBorder,
         )}
       >
-        {/* Stage & Mood Pill */}
-        <div className="absolute top-4 left-4 flex flex-wrap gap-2">
-          <span className="inline-flex items-center gap-1 rounded-full bg-card/80 backdrop-blur-sm border border-border/60 px-3 py-1 text-[11px] font-bold text-foreground">
-            <Award className="h-3.5 w-3.5 text-primary" />
-            <span>{t(currentGrowthStage.labelKey)}</span>
-          </span>
-          <span className="inline-flex items-center gap-1 rounded-full bg-card/80 backdrop-blur-sm border border-border/60 px-3 py-1 text-[11px] font-bold text-foreground capitalize">
-            <Smile className="h-3.5 w-3.5 text-amber-500" />
-            <span>{t(`pet.mood.${state.currentMood}`)}</span>
-          </span>
-        </div>
-
-        {/* Action Animation Pill / Toast */}
-        {lastActionAnimation && (
-          <div className="absolute top-4 right-4 z-10 animate-bounce rounded-full bg-primary text-primary-foreground px-3 py-1 text-xs font-bold flex items-center gap-1 shadow-md">
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>{t(`pet.actionToast.${lastActionAnimation}`)}</span>
+        {/* Top Status Bar: Growth Stage, Mood & Interaction Toast */}
+        <div className="w-full flex flex-wrap items-center justify-between gap-2 mb-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-1 rounded-full bg-card/85 backdrop-blur-sm border border-border/60 px-3 py-1 text-[11px] font-bold text-foreground">
+              <Award className="h-3.5 w-3.5 text-primary" />
+              <span>{t(currentGrowthStage.labelKey)}</span>
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-card/85 backdrop-blur-sm border border-border/60 px-3 py-1 text-[11px] font-bold text-foreground capitalize">
+              <Smile className="h-3.5 w-3.5 text-amber-500" />
+              <span>{t(`pet.mood.${state.currentMood}`)}</span>
+            </span>
           </div>
-        )}
+
+          {lastActionAnimation && (
+            <div className="animate-bounce rounded-full bg-primary text-primary-foreground px-3 py-1 text-xs font-bold flex items-center gap-1 shadow-md">
+              <Sparkles className="h-3.5 w-3.5" />
+              <span>{t(`pet.actionToast.${lastActionAnimation}`)}</span>
+            </div>
+          )}
+        </div>
 
         {/* Speech Bubble with Friendly Quote */}
         <div className="mb-4 max-w-sm rounded-2xl bg-card/90 backdrop-blur-sm border border-border/70 p-3 shadow-soft text-xs text-foreground font-medium animate-fade-in">
@@ -399,7 +417,7 @@ export default function Companion() {
       <div className="rounded-3xl border border-border/80 bg-card p-5 shadow-soft space-y-3">
         <div className="flex items-center justify-between text-xs">
           <div>
-            <span className="font-bold text-foreground">{t("pet.growthLabel")}: </span>
+            <span className="font-bold text-foreground">{t("companion.stage")}: </span>
             <span className="text-primary font-bold">{t(currentGrowthStage.labelKey)}</span>
           </div>
           <span className="text-muted-foreground font-medium">
@@ -422,19 +440,19 @@ export default function Companion() {
 
       {/* Interactive Care Activities Bar */}
       <div className="space-y-3">
-        <h3 className="font-bold text-sm text-foreground">{t("pet.careActivitiesTitle")}</h3>
+        <h3 className="font-bold text-sm text-foreground">{t("companion.careActions")}</h3>
 
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           {/* 1. Feed */}
           <button
             type="button"
             onClick={() => handleCareAction("feed")}
-            className="rounded-2xl border border-border/80 bg-card p-3.5 flex flex-col items-center text-center hover:bg-muted/50 transition-all shadow-soft group"
+            className="rounded-2xl border border-border/80 bg-card p-3.5 flex flex-col items-center text-center hover:bg-muted/50 transition-all shadow-soft group min-h-[44px]"
           >
             <div className="rounded-full bg-pink-100 dark:bg-pink-950/40 p-2 text-pink-600 mb-1.5 group-hover:scale-110 transition-transform">
               <span className="text-lg">🍓</span>
             </div>
-            <span className="font-bold text-xs text-foreground">{t("pet.act.feed")}</span>
+            <span className="font-bold text-xs text-foreground">{t("companion.actionFeed")}</span>
             <span className="text-[10px] text-muted-foreground mt-0.5">
               {t(currentSpecies.favoriteTreatKey)}
             </span>
@@ -444,12 +462,12 @@ export default function Companion() {
           <button
             type="button"
             onClick={() => handleCareAction("play")}
-            className="rounded-2xl border border-border/80 bg-card p-3.5 flex flex-col items-center text-center hover:bg-muted/50 transition-all shadow-soft group"
+            className="rounded-2xl border border-border/80 bg-card p-3.5 flex flex-col items-center text-center hover:bg-muted/50 transition-all shadow-soft group min-h-[44px]"
           >
             <div className="rounded-full bg-amber-100 dark:bg-amber-950/40 p-2 text-amber-600 mb-1.5 group-hover:scale-110 transition-transform">
               <span className="text-lg">🎾</span>
             </div>
-            <span className="font-bold text-xs text-foreground">{t("pet.act.play")}</span>
+            <span className="font-bold text-xs text-foreground">{t("companion.actionPlay")}</span>
             <span className="text-[10px] text-muted-foreground mt-0.5">
               {t(currentSpecies.favoriteToyKey)}
             </span>
@@ -459,12 +477,12 @@ export default function Companion() {
           <button
             type="button"
             onClick={() => handleCareAction("brush")}
-            className="rounded-2xl border border-border/80 bg-card p-3.5 flex flex-col items-center text-center hover:bg-muted/50 transition-all shadow-soft group"
+            className="rounded-2xl border border-border/80 bg-card p-3.5 flex flex-col items-center text-center hover:bg-muted/50 transition-all shadow-soft group min-h-[44px]"
           >
             <div className="rounded-full bg-teal-100 dark:bg-teal-950/40 p-2 text-teal-600 mb-1.5 group-hover:scale-110 transition-transform">
               <span className="text-lg">🪮</span>
             </div>
-            <span className="font-bold text-xs text-foreground">{t("pet.act.brush")}</span>
+            <span className="font-bold text-xs text-foreground">{t("companion.actionGroom")}</span>
             <span className="text-[10px] text-muted-foreground mt-0.5">
               {t("pet.act.brushSub")}
             </span>
@@ -474,12 +492,12 @@ export default function Companion() {
           <button
             type="button"
             onClick={() => handleCareAction("rest")}
-            className="rounded-2xl border border-border/80 bg-card p-3.5 flex flex-col items-center text-center hover:bg-muted/50 transition-all shadow-soft group"
+            className="rounded-2xl border border-border/80 bg-card p-3.5 flex flex-col items-center text-center hover:bg-muted/50 transition-all shadow-soft group min-h-[44px]"
           >
             <div className="rounded-full bg-indigo-100 dark:bg-indigo-950/40 p-2 text-indigo-600 mb-1.5 group-hover:scale-110 transition-transform">
               <span className="text-lg">💤</span>
             </div>
-            <span className="font-bold text-xs text-foreground">{t("pet.act.rest")}</span>
+            <span className="font-bold text-xs text-foreground">{t("companion.actionRest")}</span>
             <span className="text-[10px] text-muted-foreground mt-0.5">{t("pet.act.restSub")}</span>
           </button>
 
@@ -487,12 +505,14 @@ export default function Companion() {
           <button
             type="button"
             onClick={() => handleCareAction("affection")}
-            className="col-span-2 sm:col-span-1 rounded-2xl border border-border/80 bg-card p-3.5 flex flex-col items-center text-center hover:bg-muted/50 transition-all shadow-soft group"
+            className="col-span-2 sm:col-span-1 rounded-2xl border border-border/80 bg-card p-3.5 flex flex-col items-center text-center hover:bg-muted/50 transition-all shadow-soft group min-h-[44px]"
           >
             <div className="rounded-full bg-rose-100 dark:bg-rose-950/40 p-2 text-rose-600 mb-1.5 group-hover:scale-110 transition-transform">
               <span className="text-lg">💖</span>
             </div>
-            <span className="font-bold text-xs text-foreground">{t("pet.act.affection")}</span>
+            <span className="font-bold text-xs text-foreground">
+              {t("companion.actionAffection")}
+            </span>
             <span className="text-[10px] text-muted-foreground mt-0.5">
               {t("pet.act.affectionSub")}
             </span>
@@ -504,8 +524,8 @@ export default function Companion() {
       <div className="rounded-3xl bg-muted/40 border border-border/60 p-4 text-xs text-muted-foreground flex items-start gap-3">
         <ShieldCheck className="h-5 w-5 text-primary shrink-0 mt-0.5" />
         <div className="space-y-1">
-          <span className="font-bold text-foreground">{t("pet.privacyTitle")}</span>
-          <p className="leading-relaxed">{t("pet.privacyDesc")}</p>
+          <span className="font-bold text-foreground">{t("companion.privacyBadge")}</span>
+          <p className="leading-relaxed">{t("companion.subtitle")}</p>
         </div>
       </div>
 
@@ -520,11 +540,10 @@ export default function Companion() {
             </div>
             <div>
               <h3 className="font-display font-extrabold text-xl text-foreground">
-                {t("pet.stageCelebrationTitle")}
+                {t("companion.celebrationTitle")}
               </h3>
-              <p className="text-xs text-muted-foreground mt-1">
-                {state.name} has grown into a{" "}
-                <strong className="text-primary">{t(currentGrowthStage.labelKey)}</strong>!
+              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                {t("companion.celebrationDesc")}
               </p>
             </div>
             <PetArtwork
@@ -535,7 +554,7 @@ export default function Companion() {
               className="mx-auto"
             />
             <Btn variant="primary" size="sm" onClick={handleDismissCelebration} className="w-full">
-              {t("pet.celebrateDismiss")}
+              {t("companion.celebrationContinue")}
             </Btn>
           </div>
         </div>
@@ -548,7 +567,7 @@ export default function Companion() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="w-full max-w-lg rounded-3xl border border-border bg-card p-6 shadow-xl space-y-4 max-h-[90vh] flex flex-col">
             <div className="flex items-center justify-between border-b border-border/50 pb-3">
-              <h3 className="font-bold text-foreground text-sm">{t("pet.customiseModalTitle")}</h3>
+              <h3 className="font-bold text-foreground text-sm">{t("companion.customise")}</h3>
               <button
                 type="button"
                 onClick={() => setShowSettingsModal(false)}
@@ -561,7 +580,9 @@ export default function Companion() {
             <div className="flex-1 overflow-auto space-y-4 pr-1 text-xs">
               {/* Rename */}
               <div>
-                <label className="block font-bold text-foreground mb-1">{t("pet.nameLabel")}</label>
+                <label className="block font-bold text-foreground mb-1">
+                  {t("companion.namePrompt")}
+                </label>
                 <input
                   type="text"
                   value={customName}
@@ -574,7 +595,7 @@ export default function Companion() {
               {/* Habitat */}
               <div>
                 <label className="block font-bold text-foreground mb-1.5">
-                  {t("pet.chooseHabitat")}
+                  {t("companion.habitatPrompt")}
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   {HABITAT_THEMES.map((hab) => {
@@ -601,7 +622,7 @@ export default function Companion() {
               {/* Accessories */}
               <div>
                 <label className="block font-bold text-foreground mb-1.5">
-                  {t("pet.chooseAccessory")}
+                  {t("companion.accessoryPrompt")}
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   {ACCESSORIES.map((acc) => {
@@ -632,7 +653,7 @@ export default function Companion() {
                   onClick={() => setShowResetConfirm(true)}
                   className="text-xs font-bold text-destructive hover:underline"
                 >
-                  {t("pet.resetBtn")}
+                  {t("companion.reset")}
                 </button>
               </div>
             </div>
@@ -653,16 +674,16 @@ export default function Companion() {
       {showResetConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
           <div className="w-full max-w-sm rounded-3xl border border-destructive/40 bg-card p-6 shadow-xl space-y-4 text-center">
-            <h4 className="font-bold text-foreground text-sm">{t("pet.resetConfirmTitle")}</h4>
+            <h4 className="font-bold text-foreground text-sm">{t("companion.resetConfirm")}</h4>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              {t("pet.resetConfirmDesc")}
+              {t("companion.resetConfirmDesc")}
             </p>
             <div className="flex gap-2 justify-center pt-2">
               <Btn variant="ghost" size="sm" onClick={() => setShowResetConfirm(false)}>
                 {t("common.cancel")}
               </Btn>
               <Btn variant="destructive" size="sm" onClick={handleReset}>
-                {t("pet.confirmResetBtn")}
+                {t("companion.resetYes")}
               </Btn>
             </div>
           </div>
