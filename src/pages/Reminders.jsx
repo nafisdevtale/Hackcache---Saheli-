@@ -15,7 +15,14 @@ import { Btn, PageTitle, Toggle, inputCls, Status } from "@/components/common/ui
 
 export default function Reminders() {
   const { t, record, update, fire, prefs } = useApp();
-  const r = record.reminders;
+  const r = record?.reminders || {
+    notify: false,
+    nextPeriod: false,
+    daily: { on: false, time: "20:00" },
+    medicines: [],
+    custom: { on: false, text: "", time: "09:00" },
+    quietHours: { on: false, start: "22:00", end: "07:00" },
+  };
   const [note, setNote] = useState("");
   const [med, setMed] = useState({ name: "", time: "08:00" });
 

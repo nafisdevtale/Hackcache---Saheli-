@@ -13,6 +13,7 @@ import {
 } from "@/components/nova";
 import { LESSONS } from "@/content/lessons.js";
 import { EducationTopicArt } from "@/components/brand/SaheliArt.jsx";
+import { pick } from "@/i18n/index.js";
 
 const CATEGORY_MAP = {
   cycle: "biology",
@@ -30,7 +31,8 @@ const CATEGORY_MAP = {
 };
 
 export default function Learn() {
-  const { t, L } = useApp();
+  const { t, L: appL, prefs } = useApp();
+  const L = appL || ((o) => pick(prefs?.lang || "en", o));
   const [selectedCat, setSelectedCat] = useState("all");
   const [search, setSearch] = useState("");
 

@@ -33,7 +33,7 @@ import {
   ArrowUpDown,
 } from "lucide-react";
 import { useApp } from "@/App.jsx";
-import { inputCls, cx } from "@/components/common/ui.jsx";
+import { Btn, Card, inputCls, cx } from "@/components/common/ui.jsx";
 import {
   NovaHeading,
   NovaText,

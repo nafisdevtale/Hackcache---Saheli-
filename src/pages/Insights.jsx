@@ -15,6 +15,7 @@ import {
   TrendingUp,
   Sparkles,
   Search,
+  BookOpen,
   X,
   ExternalLink,
 } from "lucide-react";

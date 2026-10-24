@@ -9,17 +9,19 @@ export function BarChart({ data = [], title, refLines = [], summary = "" }) {
     );
   }
 
-  const max = Math.max(...data.map((d) => d.value), ...refLines.map((r) => r.value), 1);
+  const cleanData = (data || []).map((d) => ({ ...d, value: Number(d?.value) || 0 }));
+  const cleanRefLines = (refLines || []).map((r) => ({ ...r, value: Number(r?.value) || 0 }));
+  const max = Math.max(...cleanData.map((d) => d.value), ...cleanRefLines.map((r) => r.value), 1);
   const w = 320,
     h = 160,
     pad = 24,
-    bw = (w - pad) / Math.max(data.length, 1);
-  const textSummary = summary || `${title}: ${data.map((d) => `${d.label} ${d.value}`).join(", ")}`;
+    bw = (w - pad) / Math.max(cleanData.length, 1);
+  const textSummary = summary || `${title}: ${cleanData.map((d) => `${d.label} ${d.value}`).join(", ")}`;
 
   return (
     <figure>
       <svg viewBox={`0 0 ${w} ${h + 28}`} role="img" aria-label={textSummary} className="w-full">
-        {refLines.map((r) => {
+        {cleanRefLines.map((r) => {
           const y = h - (r.value / max) * (h - 16);
           return (
             <g key={r.value}>
@@ -37,7 +39,7 @@ export function BarChart({ data = [], title, refLines = [], summary = "" }) {
             </g>
           );
         })}
-        {data.map((d, i) => {
+        {cleanData.map((d, i) => {
           const bh = (d.value / max) * (h - 16);
           const x = pad + i * bw + bw * 0.15;
           return (

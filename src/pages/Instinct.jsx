@@ -48,7 +48,7 @@ import {
   Info,
 } from "lucide-react";
 import { useApp } from "@/App.jsx";
-import { cx } from "@/components/common/ui.jsx";
+import { Btn, cx } from "@/components/common/ui.jsx";
 import {
   NovaHeading,
   NovaText,

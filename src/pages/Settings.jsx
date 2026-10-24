@@ -22,6 +22,7 @@ import {
   Play,
   Stethoscope,
   HeartPulse,
+  ChevronRight,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useApp } from "@/App.jsx";

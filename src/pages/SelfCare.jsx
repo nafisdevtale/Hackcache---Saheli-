@@ -32,7 +32,7 @@ import {
   Info,
 } from "lucide-react";
 import { useApp } from "@/App.jsx";
-import { Sources, inputCls, cx } from "@/components/common/ui.jsx";
+import { Btn, Sources, inputCls, cx } from "@/components/common/ui.jsx";
 import {
   NovaHeading,
   NovaText,

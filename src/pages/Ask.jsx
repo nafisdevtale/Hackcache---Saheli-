@@ -29,9 +29,11 @@ import {
 } from "@/components/nova";
 import { FAQ, SUGGESTED, matchFaq } from "@/content/faq.js";
 import { diffDays, todayStr } from "@/lib/localDate.js";
+import { pick } from "@/i18n/index.js";
 
 export default function Ask() {
-  const { t, L, record, prefs } = useApp();
+  const { t, L: appL, record, prefs } = useApp();
+  const L = appL || ((o) => pick(prefs?.lang || "en", o));
   const [activeTab, setActiveTab] = useState("faq"); // 'faq' | 'ai'
   const [q, setQ] = useState("");
   const [res, setRes] = useState(null);

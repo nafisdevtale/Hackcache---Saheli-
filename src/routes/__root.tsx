@@ -52,7 +52,10 @@ function NotFoundComponent() {
   );
 }
 
-function ErrorComponent({ reset }: ErrorComponentProps) {
+function ErrorComponent({ error, reset }: ErrorComponentProps) {
+  if (typeof console !== "undefined" && console.error) {
+    console.error("[TanStack Router Root ErrorComponent Caught]", error);
+  }
   const t = useFallbackTranslation();
   const router = useRouter();
 

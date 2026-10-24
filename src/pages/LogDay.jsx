@@ -76,7 +76,9 @@ export default function LogDay() {
   const tracked = [
     ...SYMPTOMS.filter(
       (s) =>
-        s.safety || record.settings.trackedSymptoms.includes(s.id) || form.symptoms.includes(s.id),
+        s.safety ||
+        (record?.settings?.trackedSymptoms || []).includes(s.id) ||
+        (form?.symptoms || []).includes(s.id),
     ),
     ...customSymptoms,
   ];

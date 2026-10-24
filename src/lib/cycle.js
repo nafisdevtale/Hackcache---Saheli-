@@ -283,7 +283,7 @@ export function phaseKey(a, today = todayStr()) {
 // Symptom patterns across cycles. Only reported when seen in >= patternMinCycles cycles.
 export function symptomPatterns(days, a) {
   const out = [];
-  const periods = a.periods.slice(0, -1).slice(-CONFIG.historyWindow);
+  const periods = (a?.periods || []).slice(0, -1).slice(-CONFIG.historyWindow);
   if (periods.length < CONFIG.patternMinCycles) return out;
   const symCounts = {};
   for (const p of periods) {
