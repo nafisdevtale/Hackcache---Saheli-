@@ -217,7 +217,7 @@ export default function Community() {
 
       {userAgeGroup === "under18" ? (
         /* TEEN SPACE COMPLIANCE NOTICE */
-        <div className="rounded-3xl border-2 border-primary/30 bg-hero p-6 sm:p-8 shadow-soft space-y-4 max-w-2xl mx-auto">
+        <div className="bloom-card p-6 sm:p-8 space-y-4 max-w-2xl mx-auto border-2 border-primary/30">
           <div className="flex items-center gap-2 font-bold text-lg text-primary">
             <Shield className="h-6 w-6" />
             <span>Teen Peer Forum Protection (DPDP Act 2023)</span>
@@ -258,7 +258,7 @@ export default function Community() {
           {/* Left Column: Identity, Safety Guidelines & Topic Filter */}
           <div className="lg:col-span-4 space-y-4">
             {/* Identity Card */}
-            <div className="rounded-3xl border border-primary/20 bg-hero p-5 shadow-soft space-y-3">
+            <div className="bloom-card p-5 space-y-3">
               <div className="flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2">
                   <Shield className="h-4 w-4 text-primary" />
@@ -280,7 +280,7 @@ export default function Community() {
             </div>
 
             {/* Topic Filter List */}
-            <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-3">
+            <div className="bloom-card p-5 space-y-3">
               <h2 className="font-bold text-xs uppercase tracking-wider text-muted-foreground">
                 Discussion Topics
               </h2>

@@ -266,22 +266,50 @@ function LockScreen() {
   );
 }
 
-const DESKTOP_NAV = [
-  { to: "/", key: "nav.today", icon: Home },
-  { to: "/calendar", key: "nav.calendar", icon: CalendarDays },
-  { to: "/log", key: "nav.log", icon: Droplet },
-  { to: "/insights", key: "nav.insights", icon: BarChart3 },
-  { to: "/selfcare", key: "nav.selfCare", icon: Sparkles },
-  { to: "/companion", key: "nav.companion", icon: Heart },
-  { to: "/discover", key: "nav.discover", icon: Compass },
-  { to: "/flash", key: "nav.flash", icon: ShoppingBag },
-  { to: "/instinct", key: "nav.instinct", icon: Film },
-  { to: "/diva", key: "nav.diva", icon: Bot },
-  { to: "/learn", key: "nav.learn", icon: BookOpen },
-  { to: "/community", key: "nav.community", icon: Users },
-  { to: "/ask", key: "nav.ask", icon: MessageCircle },
-  { to: "/more", key: "nav.more", icon: Menu },
-  { to: "/settings", key: "nav.settings", icon: Settings },
+const NAV_SECTIONS = [
+  {
+    id: "rhythm",
+    titleKey: "nav.rhythmSection",
+    defaultTitle: "Daily Rhythm",
+    items: [
+      { to: "/", key: "nav.today", icon: Home },
+      { to: "/calendar", key: "nav.calendar", icon: CalendarDays },
+      { to: "/log", key: "nav.log", icon: Droplet },
+      { to: "/insights", key: "nav.insights", icon: BarChart3 },
+    ],
+  },
+  {
+    id: "sanctuary",
+    titleKey: "nav.sanctuarySection",
+    defaultTitle: "Sanctuary",
+    items: [
+      { to: "/selfcare", key: "nav.selfCare", icon: Sparkles },
+      { to: "/companion", key: "nav.companion", icon: Heart },
+      { to: "/discover", key: "nav.discover", icon: Compass },
+      { to: "/learn", key: "nav.learn", icon: BookOpen },
+    ],
+  },
+  {
+    id: "ai",
+    titleKey: "nav.aiSection",
+    defaultTitle: "AI Intelligence",
+    items: [
+      { to: "/diva", key: "nav.diva", icon: Bot, badge: "Hub" },
+      { to: "/ask", key: "nav.ask", icon: MessageCircle },
+      { to: "/flash", key: "nav.flash", icon: ShoppingBag },
+      { to: "/instinct", key: "nav.instinct", icon: Film },
+    ],
+  },
+  {
+    id: "system",
+    titleKey: "nav.systemSection",
+    defaultTitle: "Account",
+    items: [
+      { to: "/community", key: "nav.community", icon: Users },
+      { to: "/settings", key: "nav.settings", icon: Settings },
+      { to: "/more", key: "nav.more", icon: Menu },
+    ],
+  },
 ];
 
 export function Shell({ children }) {
@@ -373,19 +401,35 @@ export function Shell({ children }) {
               <span>{t("today.logToday")}</span>
             </button>
 
-            {/* Navigation Links List */}
-            <nav className="space-y-1">
-              {DESKTOP_NAV.map(({ to, key, icon: Icon }) => (
-                <Link
-                  key={to}
-                  to={to}
-                  activeOptions={{ exact: to === "/" }}
-                  className="flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-xs font-bold text-muted-foreground hover:bg-muted/70 hover:text-foreground transition-all data-[status=active]:bg-primary/15 data-[status=active]:text-primary data-[status=active]:ring-1 data-[status=active]:ring-primary/25 shadow-2xs"
-                  activeProps={{ "aria-current": "page" }}
-                >
-                  <Icon aria-hidden className="h-4 w-4 shrink-0" />
-                  <span className="truncate">{t(key)}</span>
-                </Link>
+            {/* Grouped Navigation Sections */}
+            <nav className="space-y-4">
+              {NAV_SECTIONS.map((section) => (
+                <div key={section.id} className="space-y-1">
+                  <span className="block px-3 text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground/80">
+                    {t(section.titleKey, section.defaultTitle)}
+                  </span>
+                  <div className="space-y-0.5">
+                    {section.items.map(({ to, key, icon: Icon, badge }) => (
+                      <Link
+                        key={to}
+                        to={to}
+                        activeOptions={{ exact: to === "/" }}
+                        className="flex items-center justify-between rounded-2xl px-3 py-2 text-xs font-bold text-muted-foreground hover:bg-muted/70 hover:text-foreground transition-all data-[status=active]:bg-primary/15 data-[status=active]:text-primary data-[status=active]:ring-1 data-[status=active]:ring-primary/25 shadow-2xs"
+                        activeProps={{ "aria-current": "page" }}
+                      >
+                        <div className="flex items-center gap-2.5 truncate">
+                          <Icon aria-hidden className="h-4 w-4 shrink-0" />
+                          <span className="truncate">{t(key)}</span>
+                        </div>
+                        {badge && (
+                          <span className="rounded-full bg-primary/10 px-1.5 py-0.2 text-[9px] font-extrabold uppercase text-primary">
+                            {badge}
+                          </span>
+                        )}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
               ))}
             </nav>
           </div>
@@ -533,6 +577,44 @@ export function Shell({ children }) {
             </div>
           </header>
 
+          {/* Tablet Dedicated Navigation Strip (768px to 1023px) */}
+          <nav
+            aria-label="Tablet navigation"
+            className="hidden md:flex lg:hidden items-center justify-between gap-2 overflow-x-auto border-b border-border bg-card/75 px-4 py-2 backdrop-blur-md select-none print:hidden"
+          >
+            <div className="flex items-center gap-1 overflow-x-auto py-0.5">
+              {[
+                { to: "/", key: "nav.today", icon: Home },
+                { to: "/calendar", key: "nav.calendar", icon: CalendarDays },
+                { to: "/log", key: "nav.log", icon: Droplet },
+                { to: "/insights", key: "nav.insights", icon: BarChart3 },
+                { to: "/selfcare", key: "nav.selfCare", icon: Sparkles },
+                { to: "/companion", key: "nav.companion", icon: Heart },
+                { to: "/diva", key: "nav.diva", icon: Bot },
+                { to: "/more", key: "nav.more", icon: Menu },
+              ].map(({ to, key, icon: Icon }) => (
+                <Link
+                  key={to}
+                  to={to}
+                  activeOptions={{ exact: to === "/" }}
+                  className="inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs font-bold text-muted-foreground hover:bg-muted/70 hover:text-foreground transition-all data-[status=active]:bg-primary/15 data-[status=active]:text-primary"
+                  activeProps={{ "aria-current": "page" }}
+                >
+                  <Icon className="h-3.5 w-3.5 shrink-0" />
+                  <span className="whitespace-nowrap">{t(key)}</span>
+                </Link>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => setQuickLogOpen(true)}
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-gradient-to-r from-primary to-period text-primary-foreground px-3 py-1.5 text-xs font-bold shadow-2xs hover:opacity-95 cursor-pointer"
+            >
+              <Droplet className="h-3.5 w-3.5 fill-current" />
+              <span>{t("today.logToday")}</span>
+            </button>
+          </nav>
+
           {/* System Notification Banners */}
           {!isOnline && (
             <div
@@ -617,10 +699,10 @@ export function Shell({ children }) {
         </div>
       </div>
 
-      {/* Mobile Floating Frosted Bottom Dock (< 1024px) */}
+      {/* Mobile Floating Frosted Bottom Dock (< 768px) */}
       <nav
         aria-label={t("nav.main")}
-        className="fixed inset-x-0 bottom-4 z-40 mx-auto max-w-sm px-4 lg:hidden print:hidden"
+        className="fixed inset-x-0 bottom-4 z-40 mx-auto max-w-sm px-4 md:hidden print:hidden"
       >
         <div className="flex items-center justify-around rounded-3xl border border-border/80 bg-card/90 px-3 py-1.5 shadow-bloom-modal backdrop-blur-xl">
           <Link
@@ -655,12 +737,12 @@ export function Shell({ children }) {
           </div>
 
           <Link
-            to="/insights"
+            to="/diva"
             className="flex flex-col items-center justify-center gap-1 py-1 px-2.5 text-center text-[10px] font-bold text-muted-foreground transition-colors data-[status=active]:text-primary"
             activeProps={{ "aria-current": "page" }}
           >
-            <BarChart3 aria-hidden className="h-5 w-5" />
-            <span className="leading-none">{t("nav.insights")}</span>
+            <Bot aria-hidden className="h-5 w-5" />
+            <span className="leading-none">{t("nav.diva")}</span>
           </Link>
 
           <Link

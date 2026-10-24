@@ -77,7 +77,9 @@ const ROUTES = [
 
 async function main() {
   const screenshotsDir = path.resolve(process.cwd(), "docs/screenshots");
+  const afterDir = path.resolve(screenshotsDir, "after");
   await fs.mkdir(screenshotsDir, { recursive: true });
+  await fs.mkdir(afterDir, { recursive: true });
 
   const chromePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
   const userDataDir = "/tmp/saheli-chrome-verify-run";
@@ -171,6 +173,7 @@ async function main() {
 
         const ss = await cdp.send("Page.captureScreenshot", { format: "png" });
         await fs.writeFile(filepath, Buffer.from(ss.data, "base64"));
+        await fs.writeFile(path.join(afterDir, filename), Buffer.from(ss.data, "base64"));
 
         if (!pass) failures++;
         results.push({
@@ -240,6 +243,7 @@ async function main() {
 
         const ss = await cdp.send("Page.captureScreenshot", { format: "png" });
         await fs.writeFile(filepath, Buffer.from(ss.data, "base64"));
+        await fs.writeFile(path.join(afterDir, filename), Buffer.from(ss.data, "base64"));
 
         if (!pass) failures++;
         results.push({

@@ -5,3 +5,4 @@ export { PageHeader, SectionHeader } from "./Headers.jsx";
 export { TextField, SelectField } from "./FormFields.jsx";
 export { EmptyState, ErrorState, LoadingSkeleton } from "./States.jsx";
 export { ResponsiveDialog, ConfirmationDialog } from "./Dialog.jsx";
+export { SegmentedControl, StatCard, ActionCard, AiBadge } from "./Controls.jsx";

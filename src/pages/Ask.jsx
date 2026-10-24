@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useApp } from "@/App.jsx";
 import { Btn, Card, PageTitle, Sources, inputCls, Chip } from "@/components/common/ui.jsx";
+import { SegmentedControl, AiBadge } from "@/components/bloom/index.js";
 import { FAQ, SUGGESTED, matchFaq } from "@/content/faq.js";
 import { diffDays, todayStr } from "@/lib/localDate.js";
 import { AskAssistantArt } from "@/components/brand/SaheliArt.jsx";
@@ -128,9 +129,12 @@ export default function Ask() {
       {/* Header & Mode Switcher */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/60 pb-4">
         <div>
-          <span className="text-xs font-bold uppercase tracking-wider text-primary">
-            {activeTab === "ai" ? t("eeve.title", "Eeve") : t("ask.title")}
-          </span>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs font-bold uppercase tracking-wider text-primary">
+              {activeTab === "ai" ? t("eeve.title", "Eeve") : t("ask.title")}
+            </span>
+            {activeTab === "ai" && <AiBadge agent="eeve" />}
+          </div>
           <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
             {activeTab === "ai" ? t("eeve.title", "Eeve") : t("ask.title")}
           </h1>
@@ -139,33 +143,23 @@ export default function Ask() {
           </p>
         </div>
 
-        {/* Tab Switcher */}
-        <div className="inline-flex rounded-2xl bg-muted p-1 border border-border/40 shadow-xs">
-          <button
-            type="button"
-            onClick={() => setActiveTab("faq")}
-            className={`flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 text-xs font-bold transition-all ${
-              activeTab === "faq"
-                ? "bg-card text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <BookOpen aria-hidden className="h-4 w-4 text-secondary-strong" />
-            {t("ai.tabFaq") || "Verified Medical FAQ"}
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("ai")}
-            className={`flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 text-xs font-bold transition-all ${
-              activeTab === "ai"
-                ? "bg-card text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <Sparkles aria-hidden className="h-4 w-4 text-primary" />
-            {t("ai.tabAi") || "Eeve (Health AI)"}
-          </button>
-        </div>
+        {/* Tab Switcher using SegmentedControl */}
+        <SegmentedControl
+          value={activeTab}
+          onChange={setActiveTab}
+          options={[
+            {
+              value: "faq",
+              label: t("ai.tabFaq") || "Verified Medical FAQ",
+              icon: BookOpen,
+            },
+            {
+              value: "ai",
+              label: t("ai.tabAi") || "Eeve (Health AI)",
+              icon: Sparkles,
+            },
+          ]}
+        />
       </div>
 
       {activeTab === "faq" ? (
@@ -173,7 +167,7 @@ export default function Ask() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Left Column: Search & Questions List */}
           <div className="lg:col-span-5 space-y-4">
-            <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
+            <div className="bloom-card p-5 sm:p-6 space-y-4">
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-secondary-strong">
                 <ShieldCheck className="h-4 w-4" />
                 <span>Verified Offline Medical Knowledge</span>
@@ -215,7 +209,7 @@ export default function Ask() {
             </div>
 
             {/* Suggested Common Topics */}
-            <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-3">
+            <div className="bloom-card p-5 space-y-3">
               <h2 className="font-bold text-xs uppercase tracking-wider text-muted-foreground">
                 {t("ask.suggested")}
               </h2>
@@ -231,7 +225,7 @@ export default function Ask() {
             </div>
 
             {/* Full FAQ Library Drawer / Details */}
-            <details className="rounded-3xl border border-border/70 bg-card p-4 shadow-soft">
+            <details className="bloom-card p-4">
               <summary className="min-h-11 cursor-pointer font-bold text-sm text-foreground flex items-center justify-between">
                 <span>{t("ask.allFaq", { n: FAQ.length })}</span>
                 <span className="text-xs font-normal text-muted-foreground">
@@ -385,7 +379,7 @@ export default function Ask() {
           {/* Left Column: Context, Consent & AI Question Box */}
           <div className="lg:col-span-6 space-y-4">
             {!aiConsent ? (
-              <div className="rounded-3xl border-2 border-primary/30 bg-hero p-6 shadow-soft space-y-4">
+              <div className="bloom-card p-6 space-y-4 border-2 border-primary/30">
                 <div className="flex items-center gap-2 text-primary font-bold text-lg">
                   <Sparkles className="h-6 w-6" />
                   <h2>
@@ -417,10 +411,7 @@ export default function Ask() {
                 </Btn>
               </div>
             ) : (
-              <form
-                onSubmit={onAiSubmit}
-                className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4"
-              >
+              <form onSubmit={onAiSubmit} className="bloom-card p-5 sm:p-6 space-y-4">
                 <div>
                   <label htmlFor="ai-q" className="font-bold text-sm block mb-1 text-foreground">
                     {t("ai.inputLabel") || "Ask Eeve (Health Companion)"}

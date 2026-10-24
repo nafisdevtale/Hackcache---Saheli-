@@ -35,7 +35,7 @@ export default function Calendar() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between border-b border-border/60 pb-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/60 pb-3">
         <div>
           <span className="text-xs font-bold uppercase tracking-wider text-primary">
             {t("cal.title")}
@@ -53,9 +53,10 @@ export default function Calendar() {
               setSel(today);
               setYm([Number(today.slice(0, 4)), Number(today.slice(5, 7)) - 1]);
             }}
-            className="rounded-xl border border-border bg-card px-3 py-1.5 text-xs font-semibold text-primary hover:bg-muted transition-all"
+            className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-3.5 py-1.5 text-xs font-bold text-primary hover:bg-primary/20 transition-all active:scale-95"
           >
-            {t("cal.today")}
+            <CalendarIcon className="h-3.5 w-3.5" />
+            <span>{t("cal.today")}</span>
           </button>
         )}
       </div>
@@ -64,14 +65,14 @@ export default function Calendar() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column: Interactive Month Grid & Navigation */}
         <div className="lg:col-span-7 space-y-4">
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft">
+          <div className="bloom-card p-5 sm:p-6 space-y-4">
             {/* Month Switcher Controls */}
-            <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center justify-between pb-2 border-b border-border/40">
               <button
                 type="button"
                 aria-label={t("cal.prevMonth")}
                 onClick={() => move(-1)}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-border hover:bg-muted text-foreground transition-all active:scale-95"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-border bg-card hover:bg-muted text-foreground transition-all active:scale-95 shadow-2xs"
               >
                 <ChevronLeft aria-hidden className="h-5 w-5" />
               </button>
@@ -82,7 +83,7 @@ export default function Calendar() {
                 type="button"
                 aria-label={t("cal.nextMonth")}
                 onClick={() => move(1)}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-border hover:bg-muted text-foreground transition-all active:scale-95"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-border bg-card hover:bg-muted text-foreground transition-all active:scale-95 shadow-2xs"
               >
                 <ChevronRight aria-hidden className="h-5 w-5" />
               </button>
@@ -93,60 +94,60 @@ export default function Calendar() {
           </div>
 
           {/* Calendar Visual Legend */}
-          <div className="rounded-2xl border border-border/70 bg-card/60 p-4 shadow-xs text-xs">
-            <h3 className="font-bold text-muted-foreground uppercase tracking-wider mb-2.5 text-[11px]">
+          <div className="bloom-card p-4 text-xs space-y-2.5">
+            <h3 className="font-bold text-muted-foreground uppercase tracking-wider text-[11px]">
               {t("cal.legend")}
             </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-wrap gap-2">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-muted/60 border border-border/60 px-3 py-1">
                 <span
                   aria-hidden
-                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-period text-period-foreground"
+                  className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-period text-period-foreground"
                 >
-                  <Droplet className="h-3 w-3" fill="currentColor" />
+                  <Droplet className="h-2.5 w-2.5" fill="currentColor" />
                 </span>
-                <span className="font-medium">{t("cal.logged")}</span>
+                <span className="font-medium text-foreground">{t("cal.logged")}</span>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-muted/60 border border-border/60 px-3 py-1">
                 <span
                   aria-hidden
-                  className="predicted-pattern h-6 w-6 shrink-0 rounded-full border-2 border-dashed border-primary"
+                  className="predicted-pattern h-4 w-4 shrink-0 rounded-full border-2 border-dashed border-primary"
                 />
-                <span className="font-medium">{t("cal.predicted")}</span>
+                <span className="font-medium text-foreground">{t("cal.predicted")}</span>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-muted/60 border border-border/60 px-3 py-1">
                 <span
                   aria-hidden
-                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border bg-card"
+                  className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-border bg-card"
                 >
                   <span className="h-1.5 w-1.5 rounded-full bg-foreground" />
                 </span>
-                <span className="font-medium">{t("cal.symptom")}</span>
+                <span className="font-medium text-foreground">{t("cal.symptom")}</span>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-muted/60 border border-border/60 px-3 py-1">
                 <span
                   aria-hidden
-                  className="flex h-6 w-6 shrink-0 items-center justify-center font-bold underline decoration-2 underline-offset-2"
+                  className="flex h-4 w-4 shrink-0 items-center justify-center font-bold text-primary underline decoration-2 underline-offset-2 text-xs"
                 >
-                  1
+                  •
                 </span>
-                <span className="font-medium">{t("cal.today")}</span>
+                <span className="font-medium text-foreground">{t("cal.today")}</span>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-muted/60 border border-border/60 px-3 py-1">
                 <span
                   aria-hidden
-                  className="flex h-6 w-6 shrink-0 items-center justify-center text-sm"
+                  className="flex h-4 w-4 shrink-0 items-center justify-center text-xs"
                 >
                   ✨
                 </span>
-                <span className="font-medium">{t("cal.obsDay")}</span>
+                <span className="font-medium text-foreground">{t("cal.obsDay")}</span>
               </div>
             </div>
-            <p className="mt-3 text-[11px] text-muted-foreground">
+            <p className="text-[11px] text-muted-foreground pt-1 border-t border-border/40">
               {t("common.fertilityDisclaimer").split(".")[0]}.
             </p>
           </div>
@@ -154,7 +155,7 @@ export default function Calendar() {
 
         {/* Right Column: Selected Day Inspector & Quick Logger */}
         <div className="lg:col-span-5 space-y-4">
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
+          <div className="bloom-card p-5 sm:p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-border/50 pb-3">
               <div>
                 <span className="text-[11px] font-bold uppercase tracking-wider text-primary">

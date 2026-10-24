@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import { useApp } from "@/App.jsx";
 import { Btn, Card, Chip, inputCls, cx } from "@/components/common/ui.jsx";
+import { SegmentedControl, AiBadge } from "@/components/bloom/index.js";
 import { PRODUCT_CATEGORIES, VERIFIED_PRODUCTS } from "@/content/products.js";
 import {
   loadFlashState,
@@ -211,18 +212,20 @@ export default function FlashEssentials() {
       {/* Header */}
       <div className="border-b border-border/60 pb-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-accent-foreground">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <span>{t("flash.badge")}</span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-accent-foreground">
+              {t("flash.badge")}
+            </span>
+            <AiBadge agent="flash" />
           </div>
 
           {/* Personalisation / Anonymous Toggle */}
-          <div className="flex items-center gap-2 rounded-2xl bg-muted/60 p-1 border border-border/60 text-xs">
+          <div className="flex items-center gap-1.5 rounded-2xl bg-muted/60 p-1 border border-border/60 text-xs">
             <button
               type="button"
               onClick={() => handleTogglePersonalisation(true)}
               className={cx(
-                "rounded-xl px-3 py-1 font-bold transition-all flex items-center gap-1.5",
+                "rounded-xl px-3 py-1 font-bold transition-all flex items-center gap-1.5 active:scale-95",
                 state.preferences.personalisationEnabled
                   ? "bg-card text-foreground shadow-2xs border border-border/60"
                   : "text-muted-foreground hover:text-foreground",
@@ -235,7 +238,7 @@ export default function FlashEssentials() {
               type="button"
               onClick={() => handleTogglePersonalisation(false)}
               className={cx(
-                "rounded-xl px-3 py-1 font-bold transition-all flex items-center gap-1.5",
+                "rounded-xl px-3 py-1 font-bold transition-all flex items-center gap-1.5 active:scale-95",
                 !state.preferences.personalisationEnabled
                   ? "bg-card text-foreground shadow-2xs border border-border/60"
                   : "text-muted-foreground hover:text-foreground",

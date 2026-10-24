@@ -43,7 +43,7 @@ export default function DoctorGuidance() {
           <MoodSupport mood={safety.mood} />
 
           {/* Doctor Visit Summary Quick CTA */}
-          <div className="rounded-3xl border-2 border-primary/20 bg-hero p-6 shadow-soft flex flex-col sm:flex-row items-center gap-5">
+          <div className="bloom-card p-6 border-2 border-primary/20 flex flex-col sm:flex-row items-center gap-5">
             <DoctorPrepArt className="w-20 h-20 shrink-0" />
             <div className="space-y-2 text-center sm:text-left flex-1">
               <div className="flex items-center justify-center sm:justify-start gap-2 text-primary font-bold">
@@ -77,7 +77,7 @@ export default function DoctorGuidance() {
             {safety.cards.length ? (
               safety.cards.map((c) => <GuidanceCard key={c.id} card={c} />)
             ) : (
-              <div className="rounded-3xl border border-border/70 bg-card p-6 shadow-soft space-y-2 text-center">
+              <div className="bloom-card p-6 space-y-2 text-center">
                 <CalendarCheck className="mx-auto h-8 w-8 text-secondary-strong" />
                 <p className="text-sm font-bold text-foreground">{t("doc.none")}</p>
                 <p className="text-xs text-muted-foreground max-w-md mx-auto">
@@ -93,7 +93,7 @@ export default function DoctorGuidance() {
         {/* Right Column: Unloggable Red Flags & Helplines */}
         <div className="lg:col-span-5 space-y-4">
           {/* Healthcare Helplines */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-3">
+          <div className="bloom-card p-5 space-y-3">
             <h3 className="font-bold text-xs uppercase tracking-wider text-muted-foreground">
               Direct Health Resources
             </h3>

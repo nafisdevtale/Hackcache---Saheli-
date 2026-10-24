@@ -235,7 +235,7 @@ export default function LogDay() {
         {/* Left Column: Period, Flow & Pain */}
         <div className="lg:col-span-6 space-y-4">
           {/* Period & Flow Selector */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
+          <div className="bloom-card p-5 sm:p-6 space-y-4">
             <Toggle
               label={t("log.period")}
               checked={form.period}
@@ -243,7 +243,7 @@ export default function LogDay() {
             />
 
             {form.period && (
-              <fieldset className="pt-2 border-t border-border/50 animate-fade-in space-y-2">
+              <fieldset className="pt-3 border-t border-border/50 animate-fade-in space-y-2.5">
                 <legend className="font-bold text-xs uppercase tracking-wider text-period">
                   {t("log.flow")}
                 </legend>
@@ -256,7 +256,7 @@ export default function LogDay() {
                         type="button"
                         onClick={() => set({ flow: f })}
                         className={cx(
-                          "flex flex-col items-center justify-center rounded-2xl py-3 px-2 text-xs font-semibold transition-all border",
+                          "flex flex-col items-center justify-center rounded-2xl py-3 px-2 text-xs font-semibold transition-all border active:scale-95",
                           isSelected
                             ? "bg-period text-period-foreground border-period shadow-sm"
                             : "bg-card border-border/70 hover:bg-period/10 text-foreground",
@@ -296,7 +296,7 @@ export default function LogDay() {
           </div>
 
           {/* Pain Slider & Severity */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
+          <div className="bloom-card p-5 sm:p-6 space-y-4">
             <div className="flex items-center justify-between">
               <label htmlFor="pain" className="font-bold text-sm text-foreground">
                 {t("log.pain")}
@@ -350,7 +350,7 @@ export default function LogDay() {
         {/* Right Column: Symptoms, Mood, Energy, Notes & Extras */}
         <div className="lg:col-span-6 space-y-4">
           {/* Symptoms Chips & Intensity */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
+          <div className="bloom-card p-5 sm:p-6 space-y-4">
             <fieldset>
               <legend className="font-bold text-sm text-foreground mb-1">
                 {t("log.symptoms")}
@@ -428,7 +428,7 @@ export default function LogDay() {
                               type="button"
                               onClick={() => setIntensity(id, int.key)}
                               className={cx(
-                                "text-[10px] font-bold px-2 py-0.5 rounded-full transition-all",
+                                "text-[10px] font-bold px-2 py-0.5 rounded-full transition-all active:scale-95",
                                 intensity === int.key
                                   ? int.key === "severe"
                                     ? "bg-destructive text-destructive-foreground font-extrabold shadow-xs"
@@ -449,7 +449,7 @@ export default function LogDay() {
           </div>
 
           {/* Mood & Energy */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
+          <div className="bloom-card p-5 sm:p-6 space-y-4">
             <fieldset>
               <legend className="font-semibold text-xs text-muted-foreground uppercase tracking-wider mb-2">
                 {t("log.mood")}
@@ -654,7 +654,7 @@ export default function LogDay() {
       <Status msg={msg?.key && t(msg.key)} tone={msg?.tone} />
 
       {/* Floating Sticky Save Bar */}
-      <div className="sticky bottom-20 md:bottom-6 z-20 flex gap-3 rounded-2xl border border-border/70 bg-card/90 p-3 shadow-xl backdrop-blur-md">
+      <div className="sticky bottom-20 md:bottom-6 z-20 flex gap-3 rounded-2xl border border-primary/20 bg-card/95 p-3.5 shadow-xl backdrop-blur-md">
         <Btn type="submit" className="flex-1 min-h-12 rounded-xl text-base font-bold shadow-md">
           <Save className="h-4 w-4 me-1.5" />
           <span>{t("log.save")}</span>

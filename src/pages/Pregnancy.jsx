@@ -29,7 +29,7 @@ export default function Pregnancy() {
     return (
       <div className="space-y-4 max-w-xl mx-auto py-8">
         <PageTitle>{t("preg.title")}</PageTitle>
-        <div className="rounded-3xl border border-border/70 bg-card p-6 shadow-soft space-y-3">
+        <div className="bloom-card p-6 space-y-3">
           <p className="text-sm text-muted-foreground">{t("preg.hiddenUnder18")}</p>
           <Link
             to="/settings"
@@ -61,7 +61,7 @@ export default function Pregnancy() {
           <p className="text-sm text-muted-foreground mt-0.5">{t("preg.intro")}</p>
         </div>
 
-        <div className="rounded-3xl border border-border/70 bg-card p-6 shadow-soft space-y-4">
+        <div className="bloom-card p-6 space-y-4">
           <div className="flex items-center gap-2 text-primary font-bold text-sm">
             <Baby className="h-5 w-5" />
             <span>Enable Pregnancy Mode</span>

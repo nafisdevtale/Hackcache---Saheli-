@@ -49,6 +49,7 @@ import {
 } from "lucide-react";
 import { useApp } from "@/App.jsx";
 import { Btn, Card, cx } from "@/components/common/ui.jsx";
+import { AiBadge } from "@/components/bloom/index.js";
 import {
   VERIFIED_ENTERTAINMENT,
   MEDIA_TYPES,
@@ -236,9 +237,7 @@ export default function Instinct() {
               <div>
                 <div className="flex items-center gap-2">
                   <h1 className="text-xl font-extrabold tracking-tight">INSTINCT</h1>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-                    AI Discovery
-                  </span>
+                  <AiBadge agent="instinct" />
                 </div>
                 <p className="text-xs text-muted-foreground font-medium">
                   {t("instinct.tagline", "Your Taste. Your Vibe. Your Next Favourite.")}

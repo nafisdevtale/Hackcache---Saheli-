@@ -561,14 +561,14 @@ export default function Settings() {
       </div>
 
       {/* Settings Navigation Tabs */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 rounded-2xl bg-muted/60 p-1.5 border border-border/60">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 rounded-2xl bg-muted/60 p-1.5 border border-border/60">
         {TABS.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
             type="button"
             onClick={() => setActiveTab(id)}
             className={cx(
-              "flex min-h-[44px] items-center justify-center gap-2 rounded-xl text-xs font-bold transition-all",
+              "flex min-h-[44px] items-center justify-center gap-2 rounded-xl text-xs font-bold transition-all active:scale-95",
               activeTab === id
                 ? "bg-card text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground",
@@ -584,7 +584,7 @@ export default function Settings() {
       {activeTab === "display" && (
         <div className="space-y-6 animate-fade-in">
           {/* Language Selector Grid with Native Scripts */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
+          <div className="bloom-card p-5 sm:p-6 space-y-4">
             <div className="flex items-center gap-2">
               <Globe className="h-5 w-5 text-primary" />
               <h2 className="font-bold text-sm sm:text-base text-foreground">
@@ -600,7 +600,7 @@ export default function Settings() {
                     type="button"
                     onClick={() => setPrefs({ lang: l.code })}
                     className={cx(
-                      "flex flex-col items-start justify-center rounded-2xl p-3 text-left transition-all border",
+                      "flex flex-col items-start justify-center rounded-2xl p-3 text-left transition-all border active:scale-95",
                       isSelected
                         ? "border-primary bg-primary/10 text-primary font-bold shadow-xs ring-1 ring-primary/30"
                         : "border-border/60 bg-muted/20 hover:bg-muted text-foreground",
@@ -617,7 +617,7 @@ export default function Settings() {
           </div>
 
           {/* Theme, Text Size & Accessibility */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
+          <div className="bloom-card p-5 sm:p-6 space-y-4">
             <div className="flex items-center gap-2">
               <Palette className="h-5 w-5 text-primary" />
               <h2 className="font-bold text-sm sm:text-base text-foreground">{t("set.theme")}</h2>
@@ -668,7 +668,7 @@ export default function Settings() {
           </div>
 
           {/* Saheli Chime & Notification Audio */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
+          <div className="bloom-card p-5 sm:p-6 space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Volume2 className="h-5 w-5 text-primary" />
@@ -744,7 +744,7 @@ export default function Settings() {
       {activeTab === "cycle" && (
         <div className="space-y-6 animate-fade-in">
           {/* Age Group & Clinical Thresholds */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
+          <div className="bloom-card p-5 sm:p-6 space-y-4">
             <div>
               <h2 className="font-bold text-sm sm:text-base text-foreground">{t("set.age")}</h2>
               <p className="text-xs text-muted-foreground mt-0.5">{t("set.ageHelp")}</p>
@@ -779,7 +779,7 @@ export default function Settings() {
           </div>
 
           {/* Health Conditions Questionnaire & Educational Personalisation */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
+          <div className="bloom-card p-5 sm:p-6 space-y-4">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="font-bold text-sm sm:text-base text-foreground flex items-center gap-2">
@@ -952,7 +952,7 @@ export default function Settings() {
           </div>
 
           {/* Tracked Symptoms & Categories */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-5">
+          <div className="bloom-card p-5 sm:p-6 space-y-5">
             <div>
               <h2 className="font-bold text-sm sm:text-base text-foreground">
                 {t("set.trackedSymptoms")}
@@ -1122,12 +1122,12 @@ export default function Settings() {
       {activeTab === "privacy" && (
         <div className="space-y-6 animate-fade-in">
           {/* PIN Lock Management */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft">
+          <div className="bloom-card p-5 sm:p-6 space-y-4">
             <PinSection />
           </div>
 
           {/* Discreet Mode Configuration */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-3">
+          <div className="bloom-card p-5 sm:p-6 space-y-3">
             <Toggle
               label={t("set.discreet")}
               desc={t("set.discreetDesc")}
@@ -1137,7 +1137,7 @@ export default function Settings() {
           </div>
 
           {/* Shared Phone Privacy Guide */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-3">
+          <div className="bloom-card p-5 sm:p-6 space-y-3">
             <h2 className="font-bold text-sm sm:text-base text-foreground">{t("guide.title")}</h2>
             <p className="text-xs text-muted-foreground leading-relaxed">{t("guide.intro")}</p>
             <div className="space-y-2 pt-2 border-t border-border/50 text-xs">
@@ -1158,7 +1158,7 @@ export default function Settings() {
       {activeTab === "data" && (
         <div className="space-y-6 animate-fade-in">
           {/* Export Records */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-3">
+          <div className="bloom-card p-5 sm:p-6 space-y-3">
             <div>
               <h2 className="font-bold text-sm sm:text-base text-foreground">{t("set.export")}</h2>
               <p className="text-xs text-muted-foreground mt-0.5">{t("set.exportDesc")}</p>
@@ -1167,7 +1167,7 @@ export default function Settings() {
           </div>
 
           {/* Import Records */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-3">
+          <div className="bloom-card p-5 sm:p-6 space-y-3">
             <div>
               <h2 className="font-bold text-sm sm:text-base text-foreground">{t("set.import")}</h2>
               <p className="text-xs text-muted-foreground mt-0.5">{t("set.importDesc")}</p>
@@ -1222,7 +1222,7 @@ export default function Settings() {
           </div>
 
           {/* Demo Controls */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-3">
+          <div className="bloom-card p-5 sm:p-6 space-y-3">
             <h2 className="font-bold text-sm sm:text-base text-foreground">
               {isDemo ? t("set.demoActive") : t("set.tryDemo")}
             </h2>
@@ -1287,7 +1287,7 @@ export default function Settings() {
       {/* TAB 5: HELP & BUG REPORTING */}
       {activeTab === "feedback" && (
         <div className="space-y-6 animate-fade-in">
-          <div className="rounded-3xl border border-border/70 bg-card p-6 shadow-soft space-y-4">
+          <div className="bloom-card p-6 space-y-4">
             <div className="flex items-center gap-2.5">
               <MessageSquareWarning className="h-6 w-6 text-primary" />
               <div>

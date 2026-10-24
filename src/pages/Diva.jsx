@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { useApp } from "@/App.jsx";
 import { Btn, Card, cx, inputCls } from "@/components/common/ui.jsx";
+import { SegmentedControl, AiBadge } from "@/components/bloom/index.js";
 import { AGENT_REGISTRY } from "@/lib/divaRegistry.js";
 import { executeDivaRequest } from "@/lib/divaOrchestrator.js";
 
@@ -134,7 +135,7 @@ export default function Diva() {
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-24">
       {/* Diva Header */}
-      <div className="p-6 rounded-3xl bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-pink-500/10 border border-indigo-500/20 shadow-soft">
+      <div className="bloom-card p-6 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="h-12 w-12 rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center text-white shadow-md">
@@ -145,9 +146,7 @@ export default function Diva() {
                 <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground">
                   {t("diva.title", "Diva — Your Saheli AI Coordinator")}
                 </h1>
-                <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-                  Orchestrator
-                </span>
+                <AiBadge agent="diva" />
               </div>
               <p className="text-xs text-muted-foreground font-medium mt-0.5">
                 {t("diva.tagline", "One conversation. Three specialists.")}
@@ -158,7 +157,7 @@ export default function Diva() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setActivePrivacyModal(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-card border border-border/60 hover:bg-muted text-xs font-semibold text-muted-foreground transition-all shadow-2xs"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-card border border-border/60 hover:bg-muted text-xs font-semibold text-muted-foreground transition-all shadow-2xs active:scale-95"
             >
               <ShieldCheck className="h-3.5 w-3.5 text-primary" />
               <span>Privacy Firewall</span>
@@ -167,7 +166,7 @@ export default function Diva() {
             {messages.length > 0 && (
               <button
                 onClick={handleClearChat}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-card border border-border/60 hover:bg-muted text-xs font-semibold text-muted-foreground transition-all shadow-2xs"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-card border border-border/60 hover:bg-muted text-xs font-semibold text-muted-foreground transition-all shadow-2xs active:scale-95"
                 title="Clear current conversation"
               >
                 <RotateCcw className="h-3.5 w-3.5" />
@@ -178,7 +177,7 @@ export default function Diva() {
         </div>
 
         {/* Specialist Legend */}
-        <div className="mt-4 pt-4 border-t border-border/40 grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+        <div className="pt-3 border-t border-border/40 grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-primary/5 border border-primary/10">
             <Stethoscope className="h-4 w-4 text-primary shrink-0" />
             <span className="font-bold text-foreground">Eeve</span>
@@ -213,7 +212,7 @@ export default function Diva() {
               key={item.id}
               onClick={() => setSelectedAgent(item.id)}
               className={cx(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0",
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 active:scale-95",
                 isSelected
                   ? "bg-foreground text-background shadow-xs"
                   : "bg-muted/40 text-muted-foreground hover:bg-muted/70 hover:text-foreground",

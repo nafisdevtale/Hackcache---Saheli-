@@ -75,7 +75,7 @@ export default function Learn() {
 
       {/* Featured Editorial Hero Banner */}
       {!search && selectedCat === "all" && featured && (
-        <div className="rounded-3xl border border-primary/20 bg-hero p-6 sm:p-8 shadow-soft space-y-4">
+        <div className="bloom-card p-6 sm:p-8 space-y-4">
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
             <Sparkles className="h-4 w-4" />
             <span>{t("learn.featuredGuide")}</span>

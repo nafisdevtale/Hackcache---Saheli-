@@ -233,7 +233,7 @@ export default function SelfCare() {
             </div>
           </div>
         ) : (
-          <div className="rounded-3xl border border-primary/30 bg-gradient-to-br from-hero via-card to-card p-6 shadow-soft space-y-4">
+          <div className="bloom-card p-6 space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-border/50">
               <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
                 <Sparkles className="h-4 w-4" />
@@ -354,7 +354,7 @@ export default function SelfCare() {
               return (
                 <div
                   key={prog.id}
-                  className="flex flex-col justify-between rounded-3xl border border-border/70 bg-card p-5 shadow-soft hover:border-primary/40 transition-all space-y-4"
+                  className="bloom-card bloom-card-interactive p-5 space-y-4 flex flex-col justify-between"
                 >
                   <div className="space-y-3">
                     {/* Header tags: Category & Favorite */}
