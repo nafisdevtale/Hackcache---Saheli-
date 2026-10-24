@@ -412,6 +412,43 @@ class PetSoundEngine {
     }, 130);
   }
 
+  // Tickle giggle: playful rapid rising staccato notes
+  public playTickleGiggle() {
+    const notes = [587, 698, 784, 988, 1175];
+    notes.forEach((freq, idx) => {
+      setTimeout(() => {
+        this.playTone(freq, 0.07, "triangle", 0.5);
+      }, idx * 65);
+    });
+  }
+
+  // Mini-Game: Ball bounce
+  public playBallBounce(velocity = 1) {
+    const freq = Math.min(600, 320 + velocity * 40);
+    this.playTone(freq, 0.08, "sine", 0.6, freq * 0.7);
+  }
+
+  // Mini-Game: Pounce / batting catch
+  public playPounceCatch() {
+    this.playTone(480, 0.1, "triangle", 0.7, 720);
+    setTimeout(() => {
+      this.playTone(880, 0.14, "sine", 0.6, 660);
+    }, 90);
+  }
+
+  // Mini-Game: Cup shuffle swoosh
+  public playCupShuffle() {
+    this.playTone(240, 0.09, "sine", 0.35, 180);
+  }
+
+  // Mini-Game: Guess success chime
+  public playSuccessChime() {
+    this.playTone(659, 0.12, "sine", 0.5); // E5
+    setTimeout(() => {
+      this.playTone(1046, 0.25, "sine", 0.6); // C6
+    }, 110);
+  }
+
   // Celebration: triumphant bright fanfare
   public playCelebrationFanfare() {
     const melody = [523, 659, 784, 1046];

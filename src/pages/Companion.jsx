@@ -28,7 +28,7 @@ import {
   resetCompanion,
 } from "@/lib/companionStorage.js";
 import { PetArtwork } from "@/components/companion/PetArtwork.jsx";
-import { InteractiveHabitat } from "@/components/nova/companion/InteractiveHabitat";
+import { TalkingPetStage } from "@/components/nova/companion/TalkingPetStage";
 import { PetActionBar } from "@/components/nova/companion/PetActionBar";
 
 export default function Companion() {
@@ -273,8 +273,8 @@ export default function Companion() {
         }
       />
 
-      {/* Living Interactive Companion Sanctuary Habitat */}
-      <InteractiveHabitat
+      {/* Living Interactive Talking Companion Sanctuary Habitat */}
+      <TalkingPetStage
         speciesId={state.speciesId}
         name={state.name}
         habitatTheme={currentHabitat}
@@ -294,7 +294,9 @@ export default function Companion() {
       <NovaCard variant="elevated" className="p-5 sm:p-6 space-y-3">
         <div className="flex items-center justify-between text-xs sm:text-sm">
           <div>
-            <span className="font-bold text-foreground">{t("companion.stage")}: </span>
+            <span className="font-bold text-foreground">
+              {t("companion.stage", { n: currentGrowthStage.stage })}:{" "}
+            </span>
             <span className="text-primary font-extrabold">{t(currentGrowthStage.labelKey)}</span>
           </div>
           <span className="text-muted-foreground font-semibold text-xs">
