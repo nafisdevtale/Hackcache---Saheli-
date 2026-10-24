@@ -61,6 +61,18 @@
   --color-secondary-strong: var(--secondary-strong);
   --color-accent-strong: var(--accent-strong);
 
+  --color-nova-bg: var(--nova-bg);
+  --color-nova-surface: var(--nova-surface);
+  --color-nova-surface-subtle: var(--nova-surface-subtle);
+  --color-nova-primary: var(--nova-primary);
+  --color-nova-primary-soft: var(--nova-primary-soft);
+  --color-nova-period: var(--nova-period);
+  --color-nova-period-soft: var(--nova-period-soft);
+  --color-nova-text: var(--nova-text);
+  --color-nova-text-muted: var(--nova-text-muted);
+  --color-nova-border: var(--nova-border);
+  --color-nova-border-subtle: var(--nova-border-subtle);
+
   --font-display:
     "Plus Jakarta Sans", "Noto Serif Devanagari", "Rozha One", "Noto Nastaliq Urdu",
     "Noto Serif Bengali", "Noto Serif Tamil", "Noto Serif Telugu", Georgia, serif;
@@ -94,6 +106,19 @@
   --rose: #da8997;
   --sage: #89a99c;
   --dark-ink: #262536;
+
+  /* Saheli Nova Design System Tokens (Light Mode) */
+  --nova-bg: #faf8f5;
+  --nova-surface: #ffffff;
+  --nova-surface-subtle: #f4efea;
+  --nova-primary: #704875;
+  --nova-primary-soft: rgba(112, 72, 117, 0.12);
+  --nova-period: #c85265;
+  --nova-period-soft: rgba(200, 82, 101, 0.12);
+  --nova-text: #1f1a24;
+  --nova-text-muted: #665e6d;
+  --nova-border: rgba(112, 72, 117, 0.15);
+  --nova-border-subtle: rgba(112, 72, 117, 0.08);
 
   --background: #fcf9f6;
   --foreground: #262536;
@@ -156,6 +181,19 @@
   --rose: #e49ba8;
   --sage: #9bbdb0;
   --dark-ink: #f7f5f9;
+
+  /* Saheli Nova Design System Tokens (Dark Mode) */
+  --nova-bg: #141216;
+  --nova-surface: #1e1b22;
+  --nova-surface-subtle: #26222b;
+  --nova-primary: #c8a8cf;
+  --nova-primary-soft: rgba(200, 168, 207, 0.15);
+  --nova-period: #f28d9e;
+  --nova-period-soft: rgba(242, 141, 158, 0.15);
+  --nova-text: #f6f4f8;
+  --nova-text-muted: #a9a2af;
+  --nova-border: rgba(200, 168, 207, 0.16);
+  --nova-border-subtle: rgba(200, 168, 207, 0.08);
 
   --background: #16141d;
   --foreground: #f7f5f9;
@@ -361,4 +399,43 @@
     box-shadow: none !important;
     border: none !important;
   }
+}
+
+/* ========================================================================= */
+/* NOVA DESIGN SYSTEM UTILITIES                                              */
+/* ========================================================================= */
+.nova-card {
+  background-color: var(--nova-surface);
+  border: 1px solid var(--nova-border);
+  border-radius: 1.25rem;
+  padding: 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.nova-card-elevated {
+  background-color: var(--nova-surface);
+  border: 1px solid var(--nova-border);
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  box-shadow:
+    0 10px 28px -4px rgba(31, 26, 36, 0.06),
+    0 4px 10px -2px rgba(31, 26, 36, 0.03);
+}
+
+.nova-card-interactive {
+  background-color: var(--nova-surface);
+  border: 1px solid var(--nova-border);
+  border-radius: 1.25rem;
+  padding: 1.25rem;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.nova-card-interactive:hover {
+  border-color: rgba(112, 72, 117, 0.35);
+  box-shadow: 0 4px 16px -2px rgba(112, 72, 117, 0.08);
+}
+
+.nova-card-interactive:active {
+  transform: scale(0.985);
 }

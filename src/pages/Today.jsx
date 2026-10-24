@@ -40,6 +40,14 @@ import { loadCompanionState } from "@/lib/companionStorage.js";
 import { PetArtwork } from "@/components/companion/PetArtwork.jsx";
 import { PhaseCards } from "@/components/cycle/PhaseCards.jsx";
 import { StatCard, ActionCard, AiBadge } from "@/components/bloom/index.js";
+import {
+  NovaHeading,
+  NovaText,
+  NovaButton,
+  NovaCard,
+  NovaHeroCard,
+  NovaAgentBadge,
+} from "@/components/nova";
 
 export default function Today() {
   const app = useApp();
@@ -576,7 +584,7 @@ export default function Today() {
           <section aria-label="AI Intelligence Suite" className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Bot className="h-4 w-4 text-primary" />
+                <NovaAgentBadge agent="diva" size="sm" showLabel={false} />
                 <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   {t("diva.title")} • Personal Intelligence
                 </h2>
@@ -600,9 +608,7 @@ export default function Today() {
                     <h3 className="font-display text-base font-extrabold text-foreground group-hover:text-primary transition-colors">
                       DIVA Central Assistant
                     </h3>
-                    <span className="rounded-full bg-primary/15 text-primary px-2 py-0.2 text-[10px] font-extrabold uppercase">
-                      Orchestrator
-                    </span>
+                    <NovaAgentBadge agent="diva" size="sm" />
                   </div>
                   <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
                     One conversation. Three specialists for Health, Essentials & Entertainment.
@@ -619,14 +625,12 @@ export default function Today() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <Link
                 to="/ask"
-                className="group flex items-center justify-between rounded-2xl border border-border/80 bg-card p-3.5 shadow-2xs hover:border-emerald-500/40 hover:bg-emerald-500/5 transition-all"
+                className="group flex items-center justify-between rounded-2xl border border-border/80 bg-card p-3.5 shadow-2xs hover:border-period/40 hover:bg-period/5 transition-all"
               >
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-700 dark:text-emerald-400">
-                    <Stethoscope className="h-4 w-4" />
-                  </div>
+                  <NovaAgentBadge agent="eeve" size="sm" showLabel={false} />
                   <div>
-                    <h4 className="text-xs font-bold text-foreground group-hover:text-emerald-700 dark:group-hover:text-emerald-400">
+                    <h4 className="text-xs font-bold text-foreground group-hover:text-period">
                       EEVE
                     </h4>
                     <p className="text-[11px] text-muted-foreground">{t("nav.ask")}</p>
@@ -637,14 +641,12 @@ export default function Today() {
 
               <Link
                 to="/flash"
-                className="group flex items-center justify-between rounded-2xl border border-border/80 bg-card p-3.5 shadow-2xs hover:border-amber-500/40 hover:bg-amber-500/5 transition-all"
+                className="group flex items-center justify-between rounded-2xl border border-border/80 bg-card p-3.5 shadow-2xs hover:border-emerald-500/40 hover:bg-emerald-500/5 transition-all"
               >
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-400">
-                    <ShoppingBag className="h-4 w-4" />
-                  </div>
+                  <NovaAgentBadge agent="flash" size="sm" showLabel={false} />
                   <div>
-                    <h4 className="text-xs font-bold text-foreground group-hover:text-amber-700 dark:group-hover:text-amber-400">
+                    <h4 className="text-xs font-bold text-foreground group-hover:text-emerald-700 dark:group-hover:text-emerald-400">
                       FLASH
                     </h4>
                     <p className="text-[11px] text-muted-foreground">{t("nav.flash")}</p>
@@ -658,9 +660,7 @@ export default function Today() {
                 className="group flex items-center justify-between rounded-2xl border border-border/80 bg-card p-3.5 shadow-2xs hover:border-indigo-500/40 hover:bg-indigo-500/5 transition-all"
               >
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-500/15 text-indigo-700 dark:text-indigo-400">
-                    <Film className="h-4 w-4" />
-                  </div>
+                  <NovaAgentBadge agent="instinct" size="sm" showLabel={false} />
                   <div>
                     <h4 className="text-xs font-bold text-foreground group-hover:text-indigo-700 dark:group-hover:text-indigo-400">
                       INSTINCT
