@@ -17,6 +17,7 @@ import {
   ShoppingBag,
   MessageSquareWarning,
   Heart,
+  Film,
 } from "lucide-react";
 import { useApp } from "@/App.jsx";
 import { PageTitle } from "@/components/common/ui.jsx";
@@ -39,6 +40,12 @@ export default function More() {
           key: "nav.flash",
           icon: ShoppingBag,
           color: "text-accent-foreground bg-accent",
+        },
+        {
+          to: "/instinct",
+          key: "nav.instinct",
+          icon: Film,
+          color: "text-rose-500 bg-rose-500/10",
         },
         {
           to: "/selfcare",

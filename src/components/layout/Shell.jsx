@@ -26,6 +26,7 @@ import {
   Compass,
   ShoppingBag,
   Heart,
+  Film,
 } from "lucide-react";
 import { useApp } from "@/App.jsx";
 import { Btn, Card, speak, cx, inputCls } from "@/components/common/ui.jsx";
@@ -337,6 +338,7 @@ const DESKTOP_NAV = [
   { to: "/companion", key: "nav.companion", icon: Heart },
   { to: "/discover", key: "nav.discover", icon: Compass },
   { to: "/flash", key: "nav.flash", icon: ShoppingBag },
+  { to: "/instinct", key: "nav.instinct", icon: Film },
   { to: "/learn", key: "nav.learn", icon: BookOpen },
   { to: "/community", key: "nav.community", icon: Users },
   { to: "/ask", key: "nav.ask", icon: MessageCircle },
