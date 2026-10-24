@@ -1,16 +1,25 @@
 /**
- * Saheli 7.2 — FLASH Personal Essentials Recommendation Engine
+ * Saheli 7.5 — FLASH 2.0 Personal Essentials Recommendation Engine
  *
- * Architecture & Governance:
- * - Deterministic, rule-verified scoring system.
- * - Strict safety filters: Zero prescription drugs, unverified remedies, or diet supplements.
- * - Transparent explanation engine detailing matched criteria and trade-offs.
- * - 100% on-device scoring. Never transmits private menstrual logs or builds hidden tracking profiles.
+ * 6-Stage Hybrid Architecture:
+ * - Stage 1: Validation & Normalization
+ * - Stage 2: Strict Non-Prescription Safety & Contraindication Exclusions
+ * - Stage 3: Clinical & Preference Matching (Category, Budget, Reusable/Disposable, Sensitive Skin)
+ * - Stage 4: Machine Learned Relevance Scoring (7-dimensional feature vectors & trained weights)
+ * - Stage 5: Combined Ranking & Multi-Criteria Sorting
+ * - Stage 6: Transparent Faithfulness Explanation Engine (reasons, trade-offs, clinical guidance)
+ *
+ * Local-First Privacy:
+ * - 100% on-device scoring.
+ * - Zero reading of menstrual logs, cycle predictions, or private health conditions.
+ * - Optional Anonymous/General mode requiring zero preferences.
  */
 
 import { VERIFIED_PRODUCTS } from "@/content/products.js";
+import { normalizeProduct, validateProduct } from "@/lib/marketProvider.js";
+import { extractFeatures, predictRelevance, TRAINED_MODEL_WEIGHTS } from "@/lib/flashML.js";
 
-const FLASH_STORAGE_KEY = "saheli_flash_data";
+const FLASH_STORAGE_KEY = "saheli_flash_data_v2";
 
 export const DEFAULT_FLASH_STATE = {
   savedProductIds: [],
@@ -22,7 +31,9 @@ export const DEFAULT_FLASH_STATE = {
     sensitiveSkin: false, // prefers chlorine-free / organic cotton / hypoallergenic
     prioritizeValue: true,
     personalisationEnabled: true,
+    sortBy: "relevance", // "relevance" | "price_low_high" | "price_high_low" | "freshness"
   },
+  feedback: {}, // { [productId]: { helpful: boolean, timestamp: string, notes?: string } }
   queryHistory: [],
 };
 
@@ -35,6 +46,8 @@ export function loadFlashState() {
         return {
           savedProductIds: Array.isArray(parsed.savedProductIds) ? parsed.savedProductIds : [],
           preferences: { ...DEFAULT_FLASH_STATE.preferences, ...(parsed.preferences || {}) },
+          feedback:
+            typeof parsed.feedback === "object" && parsed.feedback !== null ? parsed.feedback : {},
           queryHistory: Array.isArray(parsed.queryHistory) ? parsed.queryHistory : [],
         };
       }
@@ -68,6 +81,17 @@ export function isProductSaved(productId) {
   return state.savedProductIds.includes(productId);
 }
 
+export function recordRecommendationFeedback(productId, helpful, notes = "") {
+  const state = loadFlashState();
+  state.feedback[productId] = {
+    helpful: Boolean(helpful),
+    timestamp: new Date().toISOString(),
+    notes: String(notes || ""),
+  };
+  saveFlashState(state);
+  return state.feedback[productId];
+}
+
 export function clearFlashData() {
   try {
     if (typeof localStorage !== "undefined") {
@@ -77,16 +101,13 @@ export function clearFlashData() {
 }
 
 /**
- * Score and rank verified products based on user criteria
- *
- * Scoring Model (Max 100 pts):
- * - Category Match: 30 pts
- * - Budget Compatibility: 25 pts (full points if within budget; partial if slightly above)
- * - Reusable / Disposable Preference: 20 pts
- * - Material & Sensitivity Match: 15 pts
- * - Price Verification Freshness: 10 pts
+ * 6-Stage FLASH 2.0 Hybrid Recommendation Engine
  */
-export function getFlashRecommendations(criteria = {}, catalogue = VERIFIED_PRODUCTS) {
+export function getFlashRecommendations(
+  criteria = {},
+  catalogue = VERIFIED_PRODUCTS,
+  options = {},
+) {
   const {
     category = "all",
     maxBudget = 600,
@@ -95,55 +116,66 @@ export function getFlashRecommendations(criteria = {}, catalogue = VERIFIED_PROD
     personalisationEnabled = true,
   } = criteria;
 
+  const sortBy = options.sortBy || criteria.sortBy || "relevance";
+
+  // General Safe Anonymous Mode
   if (!personalisationEnabled) {
-    // Return all safe products unpersonalized, sorted by affordability
-    return catalogue
+    const unpersonalized = catalogue
+      .map(normalizeProduct)
+      .filter((p) => validateProduct(p).valid)
       .map((prod) => ({
         product: prod,
         score: 50,
+        relevanceScore: 50,
         reasons: ["flash.reason.generalSafe"],
         tradeOffs: [],
-      }))
-      .sort((a, b) => a.product.unitPrice - b.product.unitPrice);
+        features: extractFeatures(prod, { category: "all", maxBudget: 600 }),
+      }));
+
+    return sortRecommendations(unpersonalized, sortBy);
   }
 
   const scored = [];
 
-  for (const prod of catalogue) {
-    // Absolute P0 Safety Filter: Must have verified review status
-    if (prod.reviewStatus !== "verified_safe_non_prescription") {
-      continue;
-    }
+  for (const rawProd of catalogue) {
+    // Stage 1: Normalize
+    const prod = normalizeProduct(rawProd);
+    if (!prod) continue;
 
-    let score = 0;
+    // Stage 2: Hard Safety & Non-Prescription Validation
+    const validation = validateProduct(prod);
+    if (!validation.valid) continue;
+
+    // Stage 3: Preference Matching
+    let ruleScore = 0;
     const reasons = [];
     const tradeOffs = [];
 
-    // 1. Category Matching (30 pts)
+    // Category matching (30 pts)
     if (category === "all" || prod.category === category) {
-      score += 30;
+      ruleScore += 30;
       reasons.push("flash.reason.catMatch");
     } else {
-      // Different category: heavily penalized if user explicitly filtered
+      // Filter out if user selected a specific category
       continue;
     }
 
-    // 2. Budget Compatibility (25 pts)
+    // Budget matching (25 pts)
     if (prod.unitPrice <= maxBudget) {
-      score += 25;
+      ruleScore += 25;
       reasons.push("flash.reason.budgetFit");
     } else if (prod.unitPrice <= maxBudget * 1.25) {
-      score += 10;
+      ruleScore += 10;
       tradeOffs.push("flash.tradeoff.slightlyOverBudget");
     } else {
       tradeOffs.push("flash.tradeoff.overBudget");
     }
 
-    // 3. Reusable Preference Matching (20 pts)
+    // Reusable / Disposable Preference (20 pts)
     if (preferReusable === null) {
-      score += 10; // Neutral bonus
+      ruleScore += 10; // Neutral bonus
     } else if (preferReusable === prod.reusable) {
-      score += 20;
+      ruleScore += 20;
       reasons.push(prod.reusable ? "flash.reason.reusableMatch" : "flash.reason.disposableMatch");
     } else {
       tradeOffs.push(
@@ -151,48 +183,76 @@ export function getFlashRecommendations(criteria = {}, catalogue = VERIFIED_PROD
       );
     }
 
-    // Add durability trade-off explanation for reusable goods
     if (prod.reusable) {
       tradeOffs.push("flash.tradeoff.reusableMaintenance");
     }
 
-    // 4. Material Sensitivity Matching (15 pts)
-    if (sensitiveSkin) {
-      const isSensitiveFriendly =
-        prod.materials.some((m) => /cotton|cornstarch|bamboo|medical-grade|silicone/i.test(m)) &&
-        !/perfume|fragrance|chlorine/i.test(prod.description);
+    // Material & Sensitivity Matching (15 pts)
+    const isSensitiveFriendly =
+      prod.materials.some((m) => /cotton|cornstarch|bamboo|medical-grade|silicone/i.test(m)) &&
+      !/perfume|fragrance|chlorine/i.test(prod.description);
 
+    if (sensitiveSkin) {
       if (isSensitiveFriendly) {
-        score += 15;
+        ruleScore += 15;
         reasons.push("flash.reason.sensitiveFriendly");
       } else {
         tradeOffs.push("flash.tradeoff.checkMaterials");
       }
     } else {
-      score += 10;
+      ruleScore += 10;
     }
 
-    // 5. Verification Freshness (10 pts)
+    // Price Freshness & Certification (10 pts)
     if (prod.priceVerificationStatus === "verified_current") {
-      score += 10;
+      ruleScore += 10;
       reasons.push("flash.reason.priceVerified");
     } else {
-      score += 5;
+      ruleScore += 5;
       tradeOffs.push("flash.tradeoff.olderPrice");
     }
 
+    // Stage 4: Machine Learned Relevance Scoring
+    const features = extractFeatures(prod, criteria);
+    const learnedRelevanceScore = predictRelevance(features, TRAINED_MODEL_WEIGHTS);
+
+    // Stage 5: Combined Hybrid Score (0..100)
+    // 55% rule match + 45% learned ranking score
+    const combinedScore = Math.round(ruleScore * 0.55 + (learnedRelevanceScore / 100) * 45);
+
+    // Stage 6: Faithfulness Explanation Assembly
     scored.push({
       product: prod,
-      score,
+      score: combinedScore,
+      ruleScore,
+      learnedRelevanceScore,
+      relevanceScore: combinedScore,
       reasons,
       tradeOffs,
+      features,
     });
   }
 
-  // Rank by score descending, then by affordability (lower unit price first)
-  scored.sort((a, b) => b.score - a.score || a.product.unitPrice - b.product.unitPrice);
+  return sortRecommendations(scored, sortBy);
+}
 
-  return scored;
+function sortRecommendations(items, sortBy) {
+  const sorted = [...items];
+  switch (sortBy) {
+    case "price_low_high":
+      return sorted.sort((a, b) => a.product.unitPrice - b.product.unitPrice || b.score - a.score);
+    case "price_high_low":
+      return sorted.sort((a, b) => b.product.unitPrice - a.product.unitPrice || b.score - a.score);
+    case "freshness":
+      return sorted.sort(
+        (a, b) =>
+          new Date(b.product.priceTimestamp).getTime() -
+            new Date(a.product.priceTimestamp).getTime() || b.score - a.score,
+      );
+    case "relevance":
+    default:
+      return sorted.sort((a, b) => b.score - a.score || a.product.unitPrice - b.product.unitPrice);
+  }
 }
 
 /**
@@ -201,40 +261,86 @@ export function getFlashRecommendations(criteria = {}, catalogue = VERIFIED_PROD
 export function compareProducts(prodA, prodB) {
   if (!prodA || !prodB) return null;
 
-  const priceDiff = Math.abs(prodA.unitPrice - prodB.unitPrice);
-  const cheaper = prodA.unitPrice < prodB.unitPrice ? prodA.productId : prodB.productId;
+  const normA = normalizeProduct(prodA);
+  const normB = normalizeProduct(prodB);
+
+  const priceDiff = Math.abs(normA.unitPrice - normB.unitPrice);
+  const cheaper = normA.unitPrice < normB.unitPrice ? normA.productId : normB.productId;
 
   return {
-    prodA,
-    prodB,
+    prodA: normA,
+    prodB: normB,
     cheaperId: cheaper,
     priceDifference: priceDiff,
     attributes: [
       {
         labelKey: "flash.compare.reusable",
-        valA: prodA.reusable ? "Yes (Washable)" : "No (Disposable)",
-        valB: prodB.reusable ? "Yes (Washable)" : "No (Disposable)",
+        valA: normA.reusable ? "Yes (Washable)" : "No (Disposable)",
+        valB: normB.reusable ? "Yes (Washable)" : "No (Disposable)",
       },
       {
         labelKey: "flash.compare.pricePerUnit",
-        valA: prodA.pricePerUnit,
-        valB: prodB.pricePerUnit,
+        valA: normA.pricePerUnit,
+        valB: normB.pricePerUnit,
       },
       {
         labelKey: "flash.compare.quantity",
-        valA: `${prodA.quantity} units`,
-        valB: `${prodB.quantity} units`,
+        valA: `${normA.packQuantity} units`,
+        valB: `${normB.packQuantity} units`,
       },
       {
         labelKey: "flash.compare.materials",
-        valA: prodA.materials.join(", "),
-        valB: prodB.materials.join(", "),
+        valA: normA.materials.join(", "),
+        valB: normB.materials.join(", "),
       },
       {
         labelKey: "flash.compare.safety",
-        valA: prodA.safetyInformation,
-        valB: prodB.safetyInformation,
+        valA: normA.safetyInformation,
+        valB: normB.safetyInformation,
+      },
+      {
+        labelKey: "flash.compare.care",
+        valA: normA.careInstructions,
+        valB: normB.careInstructions,
+      },
+      {
+        labelKey: "flash.compare.limitations",
+        valA: normA.contraindicationNotes,
+        valB: normB.contraindicationNotes,
       },
     ],
   };
+}
+
+/**
+ * Export Saved Bag items into shareable text summary
+ */
+export function exportSavedBagSummary(savedProductIds = [], catalogue = VERIFIED_PRODUCTS) {
+  const savedItems = catalogue
+    .filter((p) => savedProductIds.includes(p.productId || p.id))
+    .map(normalizeProduct);
+
+  if (savedItems.length === 0) {
+    return "Saheli FLASH Essentials Bag is empty.";
+  }
+
+  const dateStr = new Date().toISOString().slice(0, 10);
+  let summary = `SAHELI FLASH 2.0 — PERSONAL ESSENTIALS SUMMARY (${dateStr})\n`;
+  summary += `Non-commercial, verified menstrual and personal comfort essentials.\n\n`;
+
+  let totalEstimatedCost = 0;
+  savedItems.forEach((p, idx) => {
+    summary += `${idx + 1}. ${p.brand} — ${p.name}\n`;
+    summary += `   • Category: ${p.category} | Type: ${p.reusable ? "Reusable" : "Disposable"}\n`;
+    summary += `   • Unit Price: ₹${p.unitPrice.toFixed(2)} (${p.pricePerUnit})\n`;
+    summary += `   • Material: ${p.material}\n`;
+    summary += `   • Care & Hygiene: ${p.careInstructions}\n`;
+    summary += `   • Verified Merchant: ${p.merchant}\n\n`;
+    totalEstimatedCost += p.unitPrice;
+  });
+
+  summary += `Total Estimated Initial Outlay: ₹${totalEstimatedCost.toFixed(2)}\n`;
+  summary += `Exported from Saheli: Your Cycle, Your Rhythm (Local-First & Private)`;
+
+  return summary;
 }
