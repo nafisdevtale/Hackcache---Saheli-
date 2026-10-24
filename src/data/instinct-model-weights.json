@@ -1,0 +1,24 @@
+{
+  "trainedAt": "2026-10-24T09:23:20.705Z",
+  "datasetScenarios": 60,
+  "weights": {
+    "genreAffinity": 3.227364161757722,
+    "languageAffinity": 4.124674976276673,
+    "serviceAvailability": 4.7691979929064665,
+    "qualityScore": 2.5489236458050666,
+    "trendingVelocity": 1.145877378752557,
+    "hiddenGemDiscovery": 0.21647856785051614,
+    "noveltyDiversity": 1.957994353203521,
+    "ageSafetyCompliance": 3.9310571689452742,
+    "bias": 0
+  },
+  "metrics": {
+    "trainScenarioCount": 42,
+    "testScenarioCount": 18,
+    "ndcgAt5": 0.641,
+    "ndcgAt10": 0.707,
+    "precisionAt5": 0.178,
+    "precisionAt10": 0.117,
+    "meanReciprocalRank": 0.618
+  }
+}

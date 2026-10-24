@@ -19,6 +19,7 @@ import { Route as DoctorRouteImport } from './routes/doctor'
 import { Route as FeedbackRouteImport } from './routes/feedback'
 import { Route as FlashRouteImport } from './routes/flash'
 import { Route as InsightsRouteImport } from './routes/insights'
+import { Route as InstinctRouteImport } from './routes/instinct'
 import { Route as LearnRouteImport } from './routes/learn'
 import { Route as LogRouteImport } from './routes/log'
 import { Route as MoreRouteImport } from './routes/more'
@@ -78,6 +79,11 @@ const InsightsRoute = InsightsRouteImport.update({
   path: '/insights',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InstinctRoute = InstinctRouteImport.update({
+  id: '/instinct',
+  path: '/instinct',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LearnRoute = LearnRouteImport.update({
   id: '/learn',
   path: '/learn',
@@ -130,6 +136,7 @@ export interface FileRoutesByFullPath {
   '/feedback': typeof FeedbackRoute
   '/flash': typeof FlashRoute
   '/insights': typeof InsightsRoute
+  '/instinct': typeof InstinctRoute
   '/learn': typeof LearnRoute
   '/log': typeof LogRoute
   '/more': typeof MoreRoute
@@ -150,6 +157,7 @@ export interface FileRoutesByTo {
   '/feedback': typeof FeedbackRoute
   '/flash': typeof FlashRoute
   '/insights': typeof InsightsRoute
+  '/instinct': typeof InstinctRoute
   '/learn': typeof LearnRoute
   '/log': typeof LogRoute
   '/more': typeof MoreRoute
@@ -171,6 +179,7 @@ export interface FileRoutesById {
   '/feedback': typeof FeedbackRoute
   '/flash': typeof FlashRoute
   '/insights': typeof InsightsRoute
+  '/instinct': typeof InstinctRoute
   '/learn': typeof LearnRoute
   '/log': typeof LogRoute
   '/more': typeof MoreRoute
@@ -193,6 +202,7 @@ export interface FileRouteTypes {
     | '/feedback'
     | '/flash'
     | '/insights'
+    | '/instinct'
     | '/learn'
     | '/log'
     | '/more'
@@ -213,6 +223,7 @@ export interface FileRouteTypes {
     | '/feedback'
     | '/flash'
     | '/insights'
+    | '/instinct'
     | '/learn'
     | '/log'
     | '/more'
@@ -233,6 +244,7 @@ export interface FileRouteTypes {
     | '/feedback'
     | '/flash'
     | '/insights'
+    | '/instinct'
     | '/learn'
     | '/log'
     | '/more'
@@ -254,6 +266,7 @@ export interface RootRouteChildren {
   FeedbackRoute: typeof FeedbackRoute
   FlashRoute: typeof FlashRoute
   InsightsRoute: typeof InsightsRoute
+  InstinctRoute: typeof InstinctRoute
   LearnRoute: typeof LearnRoute
   LogRoute: typeof LogRoute
   MoreRoute: typeof MoreRoute
@@ -336,6 +349,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InsightsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/instinct': {
+      id: '/instinct'
+      path: '/instinct'
+      fullPath: '/instinct'
+      preLoaderRoute: typeof InstinctRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/learn': {
       id: '/learn'
       path: '/learn'
@@ -406,6 +426,7 @@ const rootRouteChildren: RootRouteChildren = {
   FeedbackRoute: FeedbackRoute,
   FlashRoute: FlashRoute,
   InsightsRoute: InsightsRoute,
+  InstinctRoute: InstinctRoute,
   LearnRoute: LearnRoute,
   LogRoute: LogRoute,
   MoreRoute: MoreRoute,
