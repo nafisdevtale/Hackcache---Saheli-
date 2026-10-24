@@ -35,7 +35,7 @@ import { LANGUAGES } from "@/i18n/languages.js";
 import { SaheliLogo, AmbientGlow } from "@/components/brand/SaheliLogo.jsx";
 import { QuickLogSheet } from "@/components/logging/QuickLogSheet.jsx";
 import { RhythmMotif } from "@/components/brand/SaheliArt.jsx";
-import { NovaSidebar, NovaTabletNav, NovaMobileDock } from "@/components/nova";
+import { NovaShell } from "@/components/nova";
 
 let failCount = 0;
 
@@ -356,184 +356,99 @@ export function Shell({ children }) {
   if (status === "locked") return <LockScreen />;
 
   return (
-    <div className="relative min-h-screen flex flex-col antialiased selection:bg-primary/20">
+    <>
       <AmbientGlow />
 
-      <a
-        href="#main"
-        className="sr-only focus:not-sr-only focus:fixed focus:inset-inline-start-4 focus:top-4 focus:z-50 focus:rounded-2xl focus:bg-card focus:p-3.5 focus:shadow-xl focus:ring-2 focus:ring-primary"
-      >
-        {t("common.skipToContent")}
-      </a>
-
-      {/* Main Responsive Layout: Sticky Rail on Desktop, Top Bar on Mobile & Tablet */}
-      <div className="flex-1 flex flex-col lg:flex-row min-w-0">
-        {/* ========================================================================= */}
-        {/* DESKTOP SIDEBAR / NAVIGATION RAIL (>= 1024px)                             */}
-        {/* ========================================================================= */}
-        <NovaSidebar
-          t={t}
-          prefs={prefs}
-          setPrefs={setPrefs}
-          isOnline={isOnline}
-          onQuickLog={() => setQuickLogOpen(true)}
-          onReadAloud={() =>
-            setSpeechFailed(!speak(document.getElementById("main")?.innerText || "", prefs.lang))
-          }
-        />
-
-        {/* ========================================================================= */}
-        {/* MAIN BODY AREA & RESPONSIVE CANVAS                                        */}
-        {/* ========================================================================= */}
-        <div className="flex-1 flex flex-col min-w-0">
-          {/* Mobile & Tablet Header (< 1024px) */}
-          <header className="lg:hidden sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-border bg-card/90 px-4 py-2.5 backdrop-blur-md transition-all print:hidden">
-            <Link
-              to="/"
-              className="flex items-center gap-2.5 font-display text-lg font-extrabold tracking-tight text-primary"
-            >
-              <SaheliLogo discreet={prefs.discreet} size={30} animated />
-              <span className="bg-gradient-to-r from-primary to-period bg-clip-text text-transparent">
-                {prefs.discreet ? t("app.discreetName") : t("app.name")}
-              </span>
-            </Link>
-
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setPrefs({ discreet: !prefs.discreet })}
-                className="p-1.5 rounded-xl text-muted-foreground hover:bg-muted transition-colors cursor-pointer"
-                aria-label="Toggle Discreet Mode"
+      <NovaShell
+        t={t}
+        prefs={prefs}
+        setPrefs={setPrefs}
+        isOnline={isOnline}
+        onQuickLog={() => setQuickLogOpen(true)}
+        onReadAloud={() =>
+          setSpeechFailed(!speak(document.getElementById("main")?.innerText || "", prefs.lang))
+        }
+        systemAlerts={
+          <>
+            {!isOnline && (
+              <div
+                role="status"
+                aria-live="polite"
+                className="flex items-center justify-center gap-2 border-b border-border bg-muted/80 px-4 py-1.5 text-center text-xs font-semibold text-muted-foreground print:hidden"
               >
-                {prefs.discreet ? (
-                  <EyeOff className="h-4 w-4 text-primary" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </button>
+                <WifiOff aria-hidden className="h-3.5 w-3.5" />
+                <span>{prefs.discreet ? t("pwa.offlineDiscreet") : t("pwa.offline")}</span>
+              </div>
+            )}
 
-              <label htmlFor="mobile-lang-select" className="sr-only">
-                {t("nav.langToggleLabel")}
-              </label>
-              <select
-                id="mobile-lang-select"
-                value={prefs.lang}
-                onChange={(e) => setPrefs({ lang: e.target.value })}
-                className="h-8 rounded-xl border border-border bg-background px-2 py-0.5 text-xs font-semibold text-foreground hover:bg-muted cursor-pointer"
+            {updateWaiting && (
+              <div
+                role="alert"
+                aria-live="polite"
+                className="mx-auto my-3 w-full max-w-6xl px-4 print:hidden"
               >
-                {LANGUAGES.map((l) => (
-                  <option key={l.code} value={l.code}>
-                    {l.nativeName}
-                  </option>
-                ))}
-              </select>
-
-              {prefs.readAloud && (
-                <button
-                  type="button"
-                  aria-label={t("common.readPage")}
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted cursor-pointer"
-                  onClick={() =>
-                    setSpeechFailed(
-                      !speak(document.getElementById("main")?.innerText || "", prefs.lang),
-                    )
-                  }
-                >
-                  <Volume2 aria-hidden className="h-4 w-4" />
-                </button>
-              )}
-            </div>
-          </header>
-
-          {/* Tablet Dedicated Navigation Strip (768px to 1023px) */}
-          <NovaTabletNav t={t} onQuickLog={() => setQuickLogOpen(true)} />
-
-          {/* System Notification Banners */}
-          {!isOnline && (
-            <div
-              role="status"
-              aria-live="polite"
-              className="flex items-center justify-center gap-2 border-b border-border bg-muted/80 px-4 py-1.5 text-center text-xs font-semibold text-muted-foreground print:hidden"
-            >
-              <WifiOff aria-hidden className="h-3.5 w-3.5" />
-              <span>{prefs.discreet ? t("pwa.offlineDiscreet") : t("pwa.offline")}</span>
-            </div>
-          )}
-
-          {updateWaiting && (
-            <div
-              role="alert"
-              aria-live="polite"
-              className="mx-auto my-3 w-full max-w-6xl px-4 print:hidden"
-            >
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-accent p-3.5 text-sm text-accent-foreground shadow-md">
-                <p className="font-semibold">
-                  {prefs.discreet ? t("pwa.updateReadyDiscreet") : t("pwa.updateReady")}
-                </p>
-                <div className="flex shrink-0 items-center gap-2">
-                  <Btn size="sm" onClick={applyUpdate}>
-                    {t("pwa.updateNow")}
-                  </Btn>
-                  <Btn size="sm" variant="ghost" onClick={dismissUpdate}>
-                    {t("pwa.updateLater")}
-                  </Btn>
+                <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-accent p-3.5 text-sm text-accent-foreground shadow-md">
+                  <p className="font-semibold">
+                    {prefs.discreet ? t("pwa.updateReadyDiscreet") : t("pwa.updateReady")}
+                  </p>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <Btn size="sm" onClick={applyUpdate}>
+                      {t("pwa.updateNow")}
+                    </Btn>
+                    <Btn size="sm" variant="ghost" onClick={dismissUpdate}>
+                      {t("pwa.updateLater")}
+                    </Btn>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {isDemo && (
-            <div className="bg-accent/40 border-b border-accent/60 px-4 py-1 text-center text-xs font-bold text-accent-foreground print:hidden">
-              {t("common.demoBadge")}
-            </div>
-          )}
-
-          {speechFailed && (
-            <p
-              role="status"
-              className="mx-auto max-w-6xl px-4 py-1 text-xs text-muted-foreground print:hidden"
-            >
-              {t("common.ttsUnsupported")}
-            </p>
-          )}
-
-          {/* Active User Banners */}
-          <div
-            aria-live="polite"
-            className="mx-auto w-full max-w-6xl space-y-2 px-4 pt-3 print:hidden"
-          >
-            {banners.map((b) => (
-              <div
-                key={b.id}
-                className="flex items-center justify-between gap-2 rounded-2xl bg-accent/80 p-3 text-sm text-accent-foreground shadow-2xs border border-accent-strong/20"
-              >
-                <span className="flex items-center gap-2">
-                  <Bell aria-hidden className="h-4 w-4 shrink-0" /> {b.text}
-                </span>
-                <button
-                  type="button"
-                  aria-label={t("rem.dismiss")}
-                  onClick={() => dismissBanner(b.id)}
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg hover:bg-background/40 cursor-pointer"
-                >
-                  <X aria-hidden className="h-4 w-4" />
-                </button>
+            {isDemo && (
+              <div className="bg-accent/40 border-b border-accent/60 px-4 py-1 text-center text-xs font-bold text-accent-foreground print:hidden">
+                {t("common.demoBadge")}
               </div>
-            ))}
-          </div>
+            )}
 
-          {/* Core Viewport Canvas */}
-          <main
-            id="main"
-            className="flex-1 w-full max-w-6xl mx-auto px-4 py-6 sm:px-6 lg:px-8 pb-32 lg:pb-12"
-          >
-            {children}
-          </main>
-        </div>
-      </div>
-
-      {/* Mobile Floating Frosted Bottom Dock (< 768px) */}
-      <NovaMobileDock t={t} onQuickLog={() => setQuickLogOpen(true)} />
+            {speechFailed && (
+              <p
+                role="status"
+                className="mx-auto max-w-6xl px-4 py-1 text-xs text-muted-foreground print:hidden"
+              >
+                {t("common.ttsUnsupported")}
+              </p>
+            )}
+          </>
+        }
+        banners={
+          banners.length > 0 && (
+            <div
+              aria-live="polite"
+              className="mx-auto w-full max-w-6xl space-y-2 px-4 pt-3 print:hidden"
+            >
+              {banners.map((b) => (
+                <div
+                  key={b.id}
+                  className="flex items-center justify-between gap-2 rounded-2xl bg-accent/80 p-3 text-sm text-accent-foreground shadow-2xs border border-accent-strong/20"
+                >
+                  <span className="flex items-center gap-2">
+                    <Bell aria-hidden className="h-4 w-4 shrink-0" /> {b.text}
+                  </span>
+                  <button
+                    type="button"
+                    aria-label={t("rem.dismiss")}
+                    onClick={() => dismissBanner(b.id)}
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg hover:bg-background/40 cursor-pointer"
+                  >
+                    <X aria-hidden className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )
+        }
+      >
+        {children}
+      </NovaShell>
 
       {/* Global Quick Log Sheet */}
       <QuickLogSheet
@@ -541,6 +456,6 @@ export function Shell({ children }) {
         onClose={() => setQuickLogOpen(false)}
         targetDate={today}
       />
-    </div>
+    </>
   );
 }

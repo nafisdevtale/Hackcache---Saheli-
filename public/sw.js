@@ -3,7 +3,7 @@
 // PRIVACY NOTICE: Personal cycle records, logs, encrypted payloads, and PINs
 // live strictly in client-side IndexedDB/WebCrypto and are NEVER cached or intercepted.
 
-const CACHE_VERSION = "v1";
+const CACHE_VERSION = "nova-v1";
 const CACHE_NAME = `saheli-app-shell-${CACHE_VERSION}`;
 
 // Explicitly approved static asset allowlist

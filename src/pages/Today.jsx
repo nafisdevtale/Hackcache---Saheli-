@@ -39,7 +39,6 @@ import { DEFAULT_DASHBOARD_WIDGETS } from "@/lib/exportImport.js";
 import { loadCompanionState } from "@/lib/companionStorage.js";
 import { PetArtwork } from "@/components/companion/PetArtwork.jsx";
 import { PhaseCards } from "@/components/cycle/PhaseCards.jsx";
-import { StatCard, ActionCard, AiBadge } from "@/components/bloom/index.js";
 import {
   NovaHeading,
   NovaText,
@@ -47,6 +46,7 @@ import {
   NovaCard,
   NovaHeroCard,
   NovaAgentBadge,
+  NovaBadge,
 } from "@/components/nova";
 
 export default function Today() {
@@ -136,7 +136,7 @@ export default function Today() {
   };
 
   return (
-    <div className="space-y-6 sm:space-y-8 animate-fade-in">
+    <div data-testid="nova-today-dashboard" className="space-y-6 sm:space-y-8 animate-fade-in">
       {/* ========================================================================= */}
       {/* 1. EDITORIAL HEADER & ACTION BAR                                          */}
       {/* ========================================================================= */}
@@ -150,32 +150,30 @@ export default function Today() {
               {fmt(today, { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
             </span>
           </div>
-          <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground">
-            {t("today.title")}
-          </h1>
+          <NovaHeading level={1}>{t("today.title")}</NovaHeading>
         </div>
 
         <div className="flex items-center gap-2.5">
           {dayCount > 0 && (
-            <button
-              type="button"
+            <NovaButton
+              variant="outline"
+              size="sm"
               onClick={openCustomizer}
-              className="inline-flex min-h-[42px] items-center gap-1.5 rounded-2xl border border-border/80 bg-card px-3.5 py-2 text-xs font-bold text-foreground hover:bg-muted/70 transition-all shadow-2xs cursor-pointer select-none tactile-press"
+              leftIcon={<SlidersHorizontal className="h-3.5 w-3.5 text-primary" />}
               aria-label={t("today.customize")}
             >
-              <SlidersHorizontal className="h-3.5 w-3.5 text-primary" />
-              <span>{t("today.customize")}</span>
-            </button>
+              {t("today.customize")}
+            </NovaButton>
           )}
 
-          <button
-            type="button"
+          <NovaButton
+            variant="period"
+            size="sm"
             onClick={() => setQuickLogTarget(today)}
-            className="inline-flex min-h-[42px] items-center gap-2 rounded-2xl bg-gradient-to-r from-primary to-period px-4 py-2 text-xs font-bold text-primary-foreground shadow-bloom-subtle hover:opacity-95 active:scale-98 transition-all cursor-pointer select-none"
+            leftIcon={<Droplet className="h-4 w-4 fill-current" />}
           >
-            <Droplet className="h-4 w-4 fill-current" />
-            <span>{currentDayEntry ? t("log.editing") : t("today.logToday")}</span>
-          </button>
+            {currentDayEntry ? t("log.editing") : t("today.logToday")}
+          </NovaButton>
         </div>
       </div>
 
@@ -186,28 +184,26 @@ export default function Today() {
 
       {/* Fresh / Empty Diary Welcome State */}
       {dayCount === 0 ? (
-        <div className="mx-auto max-w-xl rounded-3xl border-2 border-primary/20 bg-hero p-8 text-center shadow-soft space-y-6">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/20">
-            <HeartHandshake aria-hidden className="h-8 w-8 text-primary" />
-          </div>
-          <div>
-            <h2 className="font-display text-2xl font-bold text-foreground">
-              {t("today.welcomeTitle")}
-            </h2>
-            <p className="mt-2 text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
-              {t("today.welcomeSub")}
-            </p>
-          </div>
-
-          <div className="space-y-3 max-w-sm mx-auto text-left">
-            <button
-              type="button"
+        <NovaHeroCard
+          className="mx-auto max-w-xl text-center"
+          badge={
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/20">
+              <HeartHandshake aria-hidden className="h-8 w-8 text-primary" />
+            </div>
+          }
+          title={t("today.welcomeTitle")}
+          subtitle={t("today.welcomeSub")}
+        >
+          <div className="space-y-3 max-w-sm mx-auto text-left pt-2">
+            <NovaButton
+              variant="period"
+              size="lg"
+              className="w-full"
               onClick={() => setQuickLogTarget(today)}
-              className="flex min-h-[50px] w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary to-period px-5 font-bold text-sm text-primary-foreground shadow-md hover:opacity-95 transition-all active:scale-98"
+              leftIcon={<PenLine aria-hidden className="h-4 w-4" />}
             >
-              <PenLine aria-hidden className="h-4 w-4" />
-              <span>{t("today.startActionLog")}</span>
-            </button>
+              {t("today.startActionLog")}
+            </NovaButton>
 
             <Link
               to="/calendar"
@@ -225,8 +221,10 @@ export default function Today() {
               <span>{t("today.startActionLearn")}</span>
             </Link>
 
-            <Btn
+            <NovaButton
               variant="outline"
+              size="md"
+              className="w-full"
               disabled={demoBusy}
               onClick={async () => {
                 setDemoBusy(true);
@@ -236,25 +234,69 @@ export default function Today() {
                   setDemoBusy(false);
                 }
               }}
-              className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl text-xs font-semibold"
+              leftIcon={<Sparkles aria-hidden className="h-4 w-4 text-primary" />}
             >
-              <Sparkles aria-hidden className="h-4 w-4 text-primary" />
-              <span>{demoBusy ? t("set.working") : t("today.startActionDemo")}</span>
-            </Btn>
+              {demoBusy ? t("set.working") : t("today.startActionDemo")}
+            </NovaButton>
           </div>
-        </div>
+        </NovaHeroCard>
       ) : (
         <div className="space-y-6 sm:space-y-8">
           {/* ========================================================================= */}
           {/* TIER 1: HERO RHYTHM & CYCLE STATUS CARD                                  */}
           {/* ========================================================================= */}
-          <section
-            aria-label="Cycle Overview"
-            className="overflow-hidden rounded-3xl border border-border/80 bg-card shadow-md"
+          <NovaHeroCard
+            badge={
+              <div className="flex flex-wrap items-center gap-2">
+                <NovaBadge
+                  variant="primary"
+                  label={
+                    a?.currentCycleDay
+                      ? t("today.cycleDay", { n: a.currentCycleDay })
+                      : t("today.insufficient")
+                  }
+                />
+                {isPeriodToday && <NovaBadge variant="period" label={`🩸 ${t("cal.periodDay")}`} />}
+                <NovaBadge
+                  variant="secondary"
+                  label={
+                    cycleState?.activePhase === "follicular"
+                      ? t("phase.follicular.title")
+                      : cycleState?.activePhase === "luteal"
+                        ? t("phase.luteal.title")
+                        : t("phase.myPhaseTracker")
+                  }
+                />
+              </div>
+            }
+            title={
+              a?.prediction
+                ? fmtRange(a.prediction.start, a.prediction.end)
+                : a?.status === "insufficient"
+                  ? t("today.progressTitle")
+                  : t("today.title")
+            }
+            subtitle={
+              a?.prediction
+                ? t("today.basedOn", { n: a.prediction.basedOn })
+                : a?.status === "insufficient"
+                  ? t("today.progressDesc")
+                  : t("today.welcomeSub")
+            }
+            action={
+              <NovaButton
+                variant="period"
+                size="md"
+                onClick={() => setQuickLogTarget(today)}
+                leftIcon={<Droplet className="h-4 w-4 fill-current" />}
+              >
+                {currentDayEntry ? t("log.editing") : t("today.logToday")}
+              </NovaButton>
+            }
           >
-            <div className="grid grid-cols-1 lg:grid-cols-12 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-6">
               {/* Left Column: Rhythm Ring Visualizer */}
-              <div className="lg:col-span-5 p-6 sm:p-8 flex items-center justify-center border-b lg:border-b-0 lg:border-inline-end border-border/60 bg-gradient-to-b from-card via-card to-muted/20">
+              <div className="lg:col-span-5 flex items-center justify-center p-2">
                 <RhythmRing
                   analysis={a}
                   record={record}
@@ -263,46 +305,7 @@ export default function Today() {
               </div>
 
               {/* Right Column: Cycle Status Details */}
-              <div className="lg:col-span-7 p-6 sm:p-8 space-y-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-full bg-primary/15 text-primary border border-primary/25 px-3 py-1 text-xs font-bold">
-                    {a?.currentCycleDay
-                      ? t("today.cycleDay", { n: a.currentCycleDay })
-                      : t("today.insufficient")}
-                  </span>
-
-                  {isPeriodToday && (
-                    <span className="rounded-full bg-period/15 text-period border border-period/30 px-3 py-1 text-xs font-bold flex items-center gap-1">
-                      🩸 {t("cal.periodDay")}
-                    </span>
-                  )}
-
-                  <span className="rounded-full bg-secondary text-secondary-foreground border border-secondary-strong/20 px-3 py-1 text-xs font-semibold">
-                    {cycleState?.activePhase === "follicular"
-                      ? t("phase.follicular.title")
-                      : cycleState?.activePhase === "luteal"
-                        ? t("phase.luteal.title")
-                        : t("phase.myPhaseTracker")}
-                  </span>
-                </div>
-
-                <div className="space-y-1">
-                  <h2 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-                    {a?.prediction
-                      ? fmtRange(a.prediction.start, a.prediction.end)
-                      : a?.status === "insufficient"
-                        ? t("today.progressTitle")
-                        : t("today.title")}
-                  </h2>
-                  <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                    {a?.prediction
-                      ? t("today.basedOn", { n: a.prediction.basedOn })
-                      : a?.status === "insufficient"
-                        ? t("today.progressDesc")
-                        : t("today.welcomeSub")}
-                  </p>
-                </div>
-
+              <div className="lg:col-span-7 space-y-4">
                 {/* Progress bar if insufficient cycles */}
                 {a.status === "insufficient" && (
                   <div className="space-y-2 pt-1 max-w-md">
@@ -361,14 +364,14 @@ export default function Today() {
                 )}
               </div>
             </div>
-          </section>
+          </NovaHeroCard>
 
           {/* ========================================================================= */}
           {/* TIER 2: PRIMARY ACTIONS TRIO (Today Log · Calendar Progress · Patterns)   */}
           {/* ========================================================================= */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
             {/* 1. Today's Log Card */}
-            <div className="flex flex-col justify-between rounded-3xl border border-border/80 bg-card p-5 shadow-md transition-all">
+            <NovaCard variant="elevated" className="flex flex-col justify-between">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -428,10 +431,10 @@ export default function Today() {
                   <ChevronRight className="h-4 w-4 rtl-mirror" />
                 </button>
               </div>
-            </div>
+            </NovaCard>
 
             {/* 2. Calendar Progress Card */}
-            <div className="flex flex-col justify-between rounded-3xl border border-border/80 bg-card p-5 shadow-md transition-all">
+            <NovaCard variant="elevated" className="flex flex-col justify-between">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -468,10 +471,10 @@ export default function Today() {
                   <ChevronRight className="h-4 w-4 rtl-mirror" />
                 </Link>
               </div>
-            </div>
+            </NovaCard>
 
             {/* 3. Symptom & Rhythm Insights Card */}
-            <div className="flex flex-col justify-between rounded-3xl border border-border/80 bg-card p-5 shadow-md transition-all">
+            <NovaCard variant="elevated" className="flex flex-col justify-between">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -499,7 +502,7 @@ export default function Today() {
                   <ChevronRight className="h-4 w-4 rtl-mirror" />
                 </Link>
               </div>
-            </div>
+            </NovaCard>
           </div>
 
           {/* ========================================================================= */}
@@ -507,74 +510,80 @@ export default function Today() {
           {/* ========================================================================= */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             {/* Saheli Pet Companion Card */}
-            <Link
-              to="/companion"
-              className="group flex flex-col justify-between rounded-3xl border border-period/30 bg-gradient-to-br from-card via-card to-period/10 p-5 shadow-md hover:border-period/60 transition-all cursor-pointer"
-            >
-              <div className="flex items-center gap-4">
-                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-card border border-border/80 shadow-2xs overflow-hidden">
-                  <PetArtwork
-                    speciesId={companion.speciesId || "cat"}
-                    growthStage={companion.growthStage || 1}
-                    accessory={companion.accessory || "none"}
-                    mood={companion.currentMood || "happy"}
-                    size={52}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <Heart className="h-4 w-4 text-period fill-period" />
-                    <h3 className="font-display text-base font-bold text-foreground group-hover:text-primary transition-colors">
-                      {companion.isAdopted ? companion.name : t("companion.dashboardMeetTitle")}
-                    </h3>
+            <Link to="/companion" className="group block">
+              <NovaCard
+                variant="interactive"
+                className="h-full flex flex-col justify-between border-period/30 bg-gradient-to-br from-card via-card to-period/10"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-card border border-border/80 shadow-2xs overflow-hidden">
+                    <PetArtwork
+                      speciesId={companion.speciesId || "cat"}
+                      growthStage={companion.growthStage || 1}
+                      accessory={companion.accessory || "none"}
+                      mood={companion.currentMood || "happy"}
+                      size={52}
+                    />
                   </div>
-                  <p className="text-xs text-muted-foreground line-clamp-1">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Heart className="h-4 w-4 text-period fill-period" />
+                      <h3 className="font-display text-base font-bold text-foreground group-hover:text-primary transition-colors">
+                        {companion.isAdopted ? companion.name : t("companion.dashboardMeetTitle")}
+                      </h3>
+                    </div>
+                    <p className="text-xs text-muted-foreground line-clamp-1">
+                      {companion.isAdopted
+                        ? `${t(`companion.species.${companion.speciesId}`)} • ${t(`companion.mood.${companion.currentMood}`)}`
+                        : t("companion.dashboardMeetDesc")}
+                    </p>
+                    <span className="inline-block rounded-full bg-period/15 px-2.5 py-0.5 text-[10px] font-bold text-period">
+                      {companion.isAdopted
+                        ? `Level ${companion.growthStage || 1} Sanctuary`
+                        : t("companion.adoptAction")}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-4 flex items-center justify-between border-t border-border/40 pt-3 text-xs font-bold text-period">
+                  <span>
                     {companion.isAdopted
-                      ? `${t(`companion.species.${companion.speciesId}`)} • ${t(`companion.mood.${companion.currentMood}`)}`
-                      : t("companion.dashboardMeetDesc")}
-                  </p>
-                  <span className="inline-block rounded-full bg-period/15 px-2.5 py-0.5 text-[10px] font-bold text-period">
-                    {companion.isAdopted
-                      ? `Level ${companion.growthStage || 1} Sanctuary`
+                      ? t("companion.dashboardVisit")
                       : t("companion.adoptAction")}
                   </span>
+                  <ChevronRight className="h-4 w-4 rtl-mirror transition-transform group-hover:translate-x-1" />
                 </div>
-              </div>
-
-              <div className="mt-4 flex items-center justify-between border-t border-border/40 pt-3 text-xs font-bold text-period">
-                <span>
-                  {companion.isAdopted ? t("companion.dashboardVisit") : t("companion.adoptAction")}
-                </span>
-                <ChevronRight className="h-4 w-4 rtl-mirror transition-transform group-hover:translate-x-1" />
-              </div>
+              </NovaCard>
             </Link>
 
             {/* Self Care Sanctuary Card */}
-            <Link
-              to="/selfcare"
-              className="group flex flex-col justify-between rounded-3xl border border-primary/25 bg-gradient-to-br from-card via-card to-secondary/20 p-5 shadow-md hover:border-primary/50 transition-all cursor-pointer"
-            >
-              <div className="flex items-center gap-4">
-                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary border border-primary/20 shadow-2xs">
-                  <Sparkles className="h-8 w-8" />
+            <Link to="/selfcare" className="group block">
+              <NovaCard
+                variant="interactive"
+                className="h-full flex flex-col justify-between border-primary/25 bg-gradient-to-br from-card via-card to-secondary/20"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary border border-primary/20 shadow-2xs">
+                    <Sparkles className="h-8 w-8" />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="font-display text-base font-bold text-foreground group-hover:text-primary transition-colors">
+                      {t("selfcare.title")}
+                    </h3>
+                    <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                      {t("selfcare.subtitle")}
+                    </p>
+                    <span className="inline-block rounded-full bg-secondary text-secondary-foreground border border-secondary-strong/20 px-2.5 py-0.5 text-[10px] font-bold">
+                      Soundscapes • Breathing • Relief
+                    </span>
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <h3 className="font-display text-base font-bold text-foreground group-hover:text-primary transition-colors">
-                    {t("selfcare.title")}
-                  </h3>
-                  <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                    {t("selfcare.subtitle")}
-                  </p>
-                  <span className="inline-block rounded-full bg-secondary text-secondary-foreground border border-secondary-strong/20 px-2.5 py-0.5 text-[10px] font-bold">
-                    Soundscapes • Breathing • Relief
-                  </span>
-                </div>
-              </div>
 
-              <div className="mt-4 flex items-center justify-between border-t border-border/40 pt-3 text-xs font-bold text-primary">
-                <span>{t("selfcare.exploreAll")}</span>
-                <ChevronRight className="h-4 w-4 rtl-mirror transition-transform group-hover:translate-x-1" />
-              </div>
+                <div className="mt-4 flex items-center justify-between border-t border-border/40 pt-3 text-xs font-bold text-primary">
+                  <span>{t("selfcare.exploreAll")}</span>
+                  <ChevronRight className="h-4 w-4 rtl-mirror transition-transform group-hover:translate-x-1" />
+                </div>
+              </NovaCard>
             </Link>
           </div>
 
@@ -595,30 +604,32 @@ export default function Today() {
             </div>
 
             {/* Central Diva Hero Card */}
-            <Link
-              to="/diva"
-              className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-3xl border border-primary/30 bg-gradient-to-r from-primary/15 via-card to-accent/20 p-5 shadow-md hover:border-primary/60 transition-all cursor-pointer"
-            >
-              <div className="flex items-center gap-3.5">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md">
-                  <Bot className="h-6 w-6" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-display text-base font-extrabold text-foreground group-hover:text-primary transition-colors">
-                      DIVA Central Assistant
-                    </h3>
-                    <NovaAgentBadge agent="diva" size="sm" />
+            <Link to="/diva" className="group block">
+              <NovaCard
+                variant="interactive"
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-primary/30 bg-gradient-to-r from-primary/15 via-card to-accent/20"
+              >
+                <div className="flex items-center gap-3.5">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md">
+                    <Bot className="h-6 w-6" />
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                    One conversation. Three specialists for Health, Essentials & Entertainment.
-                  </p>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-display text-base font-extrabold text-foreground group-hover:text-primary transition-colors">
+                        DIVA Central Assistant
+                      </h3>
+                      <NovaAgentBadge agent="diva" size="sm" />
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                      One conversation. Three specialists for Health, Essentials & Entertainment.
+                    </p>
+                  </div>
                 </div>
-              </div>
 
-              <span className="shrink-0 rounded-2xl bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-bloom-subtle group-hover:scale-102 transition-transform">
-                {t("diva.openChat")}
-              </span>
+                <NovaButton variant="primary" size="sm">
+                  {t("diva.openChat")}
+                </NovaButton>
+              </NovaCard>
             </Link>
 
             {/* 3 Specialist Micro-Cards */}

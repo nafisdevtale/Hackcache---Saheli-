@@ -88,6 +88,7 @@ export const NovaSidebar: React.FC<NovaSidebarProps> = ({
   return (
     <aside
       aria-label={t("nav.main")}
+      data-testid="nova-sidebar"
       className="hidden lg:flex w-64 flex-col shrink-0 border-r border-border bg-card/85 backdrop-blur-md h-screen sticky top-0 z-30 select-none print:hidden"
     >
       {/* Brand Header */}

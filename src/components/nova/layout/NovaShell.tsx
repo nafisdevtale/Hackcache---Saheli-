@@ -36,7 +36,17 @@ export const NovaShell: React.FC<NovaShellProps> = ({
   systemAlerts,
 }) => {
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col lg:flex-row font-body selection:bg-primary/20">
+    <div
+      data-testid="nova-shell"
+      className="min-h-screen bg-background text-foreground flex flex-col lg:flex-row font-body selection:bg-primary/20"
+    >
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:fixed focus:inset-inline-start-4 focus:top-4 focus:z-50 focus:rounded-2xl focus:bg-card focus:p-3.5 focus:shadow-xl focus:ring-2 focus:ring-primary"
+      >
+        {t("common.skipToContent")}
+      </a>
+
       {/* Desktop 4-Pillar Sidebar (>= 1024px) */}
       <NovaSidebar
         t={t}

@@ -11,6 +11,7 @@ export const NovaMobileDock: React.FC<NovaMobileDockProps> = ({ t, onQuickLog })
   return (
     <nav
       aria-label={t("nav.main")}
+      data-testid="nova-mobile-dock"
       className="fixed inset-x-0 bottom-4 z-40 mx-auto max-w-sm px-4 md:hidden print:hidden pointer-events-none"
     >
       <div className="pointer-events-auto flex items-center justify-around rounded-3xl border border-border/80 bg-card/90 px-3 py-1.5 shadow-xl backdrop-blur-xl">
