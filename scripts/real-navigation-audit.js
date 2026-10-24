@@ -281,7 +281,9 @@ async function main() {
         expression: `document.body.innerText.includes("This page didn't load")`,
         returnByValue: true,
       });
-      console.log(`   INSTINCT tab [${tab}]: ${!hasError.result.value ? "✅ Stable" : "❌ Error boundary triggered"}`);
+      console.log(
+        `   INSTINCT tab [${tab}]: ${!hasError.result.value ? "✅ Stable" : "❌ Error boundary triggered"}`,
+      );
     }
 
     // 2. FLASH Product Details Modal
@@ -301,7 +303,9 @@ async function main() {
       expression: `document.body.innerText.includes("This page didn't load")`,
       returnByValue: true,
     });
-    console.log(`   FLASH Product Details Modal: ${!flashModalError.result.value ? "✅ Modal opened without crash" : "❌ Crash in modal"}`);
+    console.log(
+      `   FLASH Product Details Modal: ${!flashModalError.result.value ? "✅ Modal opened without crash" : "❌ Crash in modal"}`,
+    );
 
     // 3. Companion Care Actions
     console.log("Testing Companion care activity interaction...");
@@ -320,7 +324,9 @@ async function main() {
       expression: `document.body.innerText.includes("This page didn't load")`,
       returnByValue: true,
     });
-    console.log(`   Companion Care Action: ${!companionError.result.value ? "✅ Action executed safely" : "❌ Crash in companion"}`);
+    console.log(
+      `   Companion Care Action: ${!companionError.result.value ? "✅ Action executed safely" : "❌ Crash in companion"}`,
+    );
 
     // Phase 3: Mobile Viewport Navigation Dock Verification
     console.log("\n--- PHASE 3: MOBILE NAVIGATION DOCK (390x844) ---");
@@ -346,16 +352,22 @@ async function main() {
     const mda = mobileDockAudit.result.value;
     console.log(`   Mobile Dock Present: ${mda.dockPresent ? "✅ YES" : "❌ NO"}`);
     console.log(`   Mobile Dock Links: [${mda.dockLinks.join(", ")}]`);
-    console.log(`   Mobile Horizontal Overflow Free: ${mda.noHorizontalOverflow ? "✅ YES" : "❌ NO"}`);
+    console.log(
+      `   Mobile Horizontal Overflow Free: ${mda.noHorizontalOverflow ? "✅ YES" : "❌ NO"}`,
+    );
 
     console.log("\n=======================================================");
-    console.log(` NAVIGATION AUDIT FINISHED: ${auditResults.filter((r) => r.pass).length}/${auditResults.length} ROUTES PASSED`);
+    console.log(
+      ` NAVIGATION AUDIT FINISHED: ${auditResults.filter((r) => r.pass).length}/${auditResults.length} ROUTES PASSED`,
+    );
     console.log(` Captured Uncaught Exceptions: ${capturedExceptions.length}`);
     console.log("=======================================================\n");
 
     // Output final markdown table
     console.log("### AUDIT SUMMARY TABLE FOR SAHELI 10.2 REPORT\n");
-    console.log("| Route | Original Error | Root Cause | Fix | Click Tested | Reload Tested | Status |");
+    console.log(
+      "| Route | Original Error | Root Cause | Fix | Click Tested | Reload Tested | Status |",
+    );
     console.log("|---|---|---|---|---|---|---|");
 
     for (const res of auditResults) {

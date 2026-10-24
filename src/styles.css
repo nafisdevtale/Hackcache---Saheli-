@@ -439,3 +439,135 @@
 .nova-card-interactive:active {
   transform: scale(0.985);
 }
+
+/* ========================================================================= */
+/* LIVING COMPANION PROCEDURAL ANIMATIONS (SAHELI 10.3)                       */
+/* ========================================================================= */
+@keyframes pet-breathe {
+  0%,
+  100% {
+    transform: scale(1, 1) translateY(0);
+  }
+  50% {
+    transform: scale(1.025, 0.985) translateY(-1.5px);
+  }
+}
+
+@keyframes pet-waddle {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-5px) rotate(-4deg);
+  }
+  75% {
+    transform: translateY(-5px) rotate(4deg);
+  }
+}
+
+@keyframes pet-celebrate {
+  0%,
+  100% {
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-16px) scale(1.08) rotate(-5deg);
+  }
+  50% {
+    transform: translateY(0) scale(0.96) rotate(0deg);
+  }
+  75% {
+    transform: translateY(-14px) scale(1.06) rotate(5deg);
+  }
+}
+
+@keyframes pet-play {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-8px) rotate(-7deg);
+  }
+  75% {
+    transform: translateY(-8px) rotate(7deg);
+  }
+}
+
+@keyframes pet-chew {
+  0%,
+  100% {
+    transform: scale(1, 1) translateY(0);
+  }
+  50% {
+    transform: scale(1.03, 0.97) translateY(2.5px);
+  }
+}
+
+@keyframes pet-lean {
+  0%,
+  100% {
+    transform: rotate(2deg) translateY(1px);
+  }
+  50% {
+    transform: rotate(6deg) translateY(3px);
+  }
+}
+
+@keyframes float-particle {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(0.8);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-40px) scale(1.2);
+  }
+}
+
+.animate-pet-breathe {
+  animation: pet-breathe 2.8s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+.animate-pet-waddle {
+  animation: pet-waddle 0.5s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+.animate-pet-celebrate {
+  animation: pet-celebrate 1s cubic-bezier(0.2, 0.8, 0.3, 1) infinite;
+  transform-origin: center bottom;
+}
+
+.animate-pet-play {
+  animation: pet-play 0.65s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+.animate-pet-chew {
+  animation: pet-chew 0.4s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+.animate-pet-lean {
+  animation: pet-lean 1.2s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+.animate-float-particle {
+  animation: float-particle 1.6s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pet-breathe,
+  .animate-pet-waddle,
+  .animate-pet-celebrate,
+  .animate-pet-play,
+  .animate-pet-chew,
+  .animate-pet-lean,
+  .animate-float-particle {
+    animation: none !important;
+  }
+}

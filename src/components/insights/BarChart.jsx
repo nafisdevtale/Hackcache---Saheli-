@@ -16,7 +16,8 @@ export function BarChart({ data = [], title, refLines = [], summary = "" }) {
     h = 160,
     pad = 24,
     bw = (w - pad) / Math.max(cleanData.length, 1);
-  const textSummary = summary || `${title}: ${cleanData.map((d) => `${d.label} ${d.value}`).join(", ")}`;
+  const textSummary =
+    summary || `${title}: ${cleanData.map((d) => `${d.label} ${d.value}`).join(", ")}`;
 
   return (
     <figure>

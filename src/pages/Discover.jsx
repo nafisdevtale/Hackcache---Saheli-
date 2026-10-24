@@ -96,75 +96,89 @@ export default function Discover() {
         subtitle={t("discover.subtitle")}
       />
 
-      {/* Search & Category Filter Chips */}
+      {/* Search & Category Filter Bar (Zero Overlap Responsive Architecture) */}
       <div className="space-y-3">
-        {/* Search */}
+        {/* Search Input with Logical RTL/LTR Positioning */}
         <div className="relative">
-          <Search className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute start-3.5 top-3 h-4 w-4 text-muted-foreground pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t("discover.searchPlaceholder")}
-            className={cx(inputCls, "pl-10 text-xs sm:text-sm bg-background")}
+            className={cx(inputCls, "ps-10 pe-10 text-xs sm:text-sm bg-background")}
           />
           {searchQuery && (
             <button
               type="button"
               onClick={() => setSearchQuery("")}
-              className="absolute right-3.5 top-3 text-muted-foreground hover:text-foreground cursor-pointer"
+              aria-label="Clear search"
+              className="absolute end-3.5 top-3 text-muted-foreground hover:text-foreground cursor-pointer"
             >
               <X className="h-4 w-4" />
             </button>
           )}
         </div>
 
-        {/* Filter categories & Bookmarks Toggle */}
-        <div className="flex items-center justify-between gap-2 overflow-x-auto pb-1 scrollbar-none">
-          <div className="flex items-center gap-2">
-            {DISCOVER_CATEGORIES.map((cat) => {
-              const Icon = ICON_MAP[cat.iconName] || BookOpen;
-              const active = !showBookmarksOnly && activeCategory === cat.id;
-              return (
-                <button
-                  key={cat.id}
-                  type="button"
-                  onClick={() => {
-                    setShowBookmarksOnly(false);
-                    setActiveCategory(cat.id);
-                  }}
-                  className={cx(
-                    "shrink-0 inline-flex items-center gap-1.5 rounded-2xl px-3.5 py-2 text-xs font-bold transition-all border cursor-pointer",
-                    active
-                      ? "bg-primary text-primary-foreground border-primary shadow-xs"
-                      : "bg-card border-border/70 text-muted-foreground hover:bg-muted hover:text-foreground",
-                  )}
-                >
-                  <Icon className="h-3.5 w-3.5" />
-                  <span>{t(cat.labelKey)}</span>
-                </button>
-              );
-            })}
+        {/* Clean Responsive Filter Section: Category Scroll + Dedicated Bookmarks Button */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          {/* Scrollable Categories List */}
+          <div className="relative min-w-0 flex-1">
+            <div
+              role="tablist"
+              aria-label="Article categories"
+              className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none touch-pan-x"
+            >
+              {DISCOVER_CATEGORIES.map((cat) => {
+                const Icon = ICON_MAP[cat.iconName] || BookOpen;
+                const active = !showBookmarksOnly && activeCategory === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    role="tab"
+                    aria-selected={active}
+                    type="button"
+                    onClick={() => {
+                      setShowBookmarksOnly(false);
+                      setActiveCategory(cat.id);
+                    }}
+                    className={cx(
+                      "shrink-0 inline-flex items-center gap-1.5 rounded-2xl px-3.5 py-2 text-xs font-bold transition-all border cursor-pointer select-none tactile-press min-h-[38px] whitespace-nowrap",
+                      active
+                        ? "bg-primary text-primary-foreground border-primary shadow-xs"
+                        : "bg-card border-border/70 text-muted-foreground hover:bg-muted hover:text-foreground",
+                    )}
+                  >
+                    <Icon className="h-3.5 w-3.5 shrink-0" />
+                    <span>{t(cat.labelKey)}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setShowBookmarksOnly((prev) => !prev)}
-            className={cx(
-              "shrink-0 inline-flex items-center gap-1.5 rounded-2xl px-3.5 py-2 text-xs font-bold transition-all border ml-auto cursor-pointer",
-              showBookmarksOnly
-                ? "bg-secondary text-secondary-strong border-secondary-strong/40 shadow-xs"
-                : "bg-card border-border/70 text-muted-foreground hover:bg-muted",
-            )}
-          >
-            <Bookmark className="h-3.5 w-3.5" />
-            <span>{t("discover.savedBookmarks")}</span>
-            {bookmarks.length > 0 && (
-              <span className="rounded-full bg-foreground/10 px-1.5 py-0.2 text-[10px]">
-                {bookmarks.length}
-              </span>
-            )}
-          </button>
+          {/* Dedicated Bookmarks Toggle Button */}
+          <div className="shrink-0 flex items-center justify-start sm:justify-end">
+            <button
+              type="button"
+              onClick={() => setShowBookmarksOnly((prev) => !prev)}
+              aria-pressed={showBookmarksOnly}
+              className={cx(
+                "shrink-0 inline-flex items-center gap-1.5 rounded-2xl px-3.5 py-2 text-xs font-bold transition-all border cursor-pointer select-none tactile-press min-h-[38px] whitespace-nowrap",
+                showBookmarksOnly
+                  ? "bg-secondary text-secondary-strong border-secondary-strong/40 shadow-xs"
+                  : "bg-card border-border/70 text-muted-foreground hover:bg-muted hover:text-foreground",
+              )}
+            >
+              <Bookmark className="h-3.5 w-3.5 shrink-0" />
+              <span>{t("discover.savedBookmarks")}</span>
+              {bookmarks.length > 0 && (
+                <span className="rounded-full bg-foreground/10 px-1.5 py-0.2 text-[10px] font-extrabold">
+                  {bookmarks.length}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -214,12 +228,12 @@ export default function Discover() {
                 </NovaText>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-border/40 flex items-center justify-between text-[11px] text-muted-foreground font-semibold">
-                <span className="inline-flex items-center gap-1">
+              <div className="mt-4 pt-3 border-t border-border/40 flex flex-wrap items-center justify-between gap-2 text-[11px] text-muted-foreground font-semibold">
+                <span className="inline-flex items-center gap-1 shrink-0">
                   <Clock className="h-3 w-3" />
                   {t("discover.readTime", { n: art.readTimeMinutes })}
                 </span>
-                <span className="inline-flex items-center gap-1 text-primary font-bold group-hover:translate-x-1 transition-transform">
+                <span className="inline-flex items-center gap-1 text-primary font-bold group-hover:translate-x-1 transition-transform shrink-0">
                   <span>{t("discover.readNow")}</span>
                   <ArrowRight className="h-3 w-3" />
                 </span>
@@ -248,25 +262,25 @@ export default function Discover() {
           onClose={() => setActiveArticle(null)}
           title={t(activeArticle.titleKey)}
           subtitle={
-            <div className="flex items-center gap-3 text-xs text-muted-foreground pt-0.5">
+            <span className="flex flex-wrap items-center gap-2.5 text-xs text-muted-foreground pt-0.5">
               <NovaBadge variant="primary" size="sm">
                 {t(`discover.cat.${activeArticle.category}`)}
               </NovaBadge>
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-1 shrink-0">
                 <Clock className="h-3.5 w-3.5" />
                 {t("discover.readTime", { n: activeArticle.readTimeMinutes })}
               </span>
-              <span>·</span>
-              <span>{activeArticle.lastVerified}</span>
-            </div>
+              <span className="hidden sm:inline">·</span>
+              <span className="shrink-0">{activeArticle.lastVerified}</span>
+            </span>
           }
           maxWidth="lg"
           footer={
-            <div className="flex items-center justify-between w-full">
+            <div className="flex flex-wrap items-center justify-between gap-3 w-full">
               <button
                 type="button"
                 onClick={() => toggleBookmark(activeArticle.id)}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-foreground cursor-pointer"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-foreground cursor-pointer min-h-[38px] px-2 rounded-xl transition-colors select-none tactile-press"
               >
                 <Bookmark className="h-4 w-4" />
                 <span>
