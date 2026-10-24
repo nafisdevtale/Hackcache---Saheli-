@@ -18,6 +18,7 @@ import {
   MessageSquareWarning,
   Heart,
   Film,
+  Bot,
 } from "lucide-react";
 import { useApp } from "@/App.jsx";
 import { PageTitle } from "@/components/common/ui.jsx";
@@ -46,6 +47,12 @@ export default function More() {
           key: "nav.instinct",
           icon: Film,
           color: "text-rose-500 bg-rose-500/10",
+        },
+        {
+          to: "/diva",
+          key: "nav.diva",
+          icon: Bot,
+          color: "text-purple-600 bg-purple-500/10 dark:text-purple-400",
         },
         {
           to: "/selfcare",

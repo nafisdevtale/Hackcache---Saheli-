@@ -1,4 +1,20 @@
 export default {
+  "diva.shortcutToday": "દિવા સંયોજકને પૂછો",
+  "diva.emptyDesc":
+    "દિવા તમારા સ્વાસ્થ્ય પ્રશ્નો (ઇવ), માસિક ઉત્પાદનો (ફ્લેશ) અને મનોરંજન (ઇન્સ્ટિંક્ટ) ને એક વાતચીતમાં જોડે છે.",
+  "diva.emptyTitle": "આજે દિવા તમારા માટે કેવી રીતે સંકલન કરી શકે?",
+  "diva.clarificationPrompt":
+    "તમે ઇવ (સ્વાસ્થ્ય), ફ્લેશ (જરૂરી ચીજો), અથવા ઇન્સ્ટિંક્ટ (મનોરંજન) પાસેથી સલાહ ઇચ્છો છો?",
+  "diva.placeholder": "માસિક ચક્ર, જરૂરી ઉત્પાદનો, અથવા ફિલ્મો/સંગીત વિશે પૂછો...",
+  "diva.mode.auto": "ઑટો (દિવા નક્કી કરશે)",
+  "diva.specialists.instinct": "ઇન્સ્ટિંક્ટ · મનોરંજન",
+  "diva.specialists.flash": "ફ્લેશ · આવશ્યક ચીજો",
+  "diva.specialists.eeve": "ઇવ · સ્વાસ્થ્ય",
+  "eeve.subtitle": "તમારી સ્વાસ્થ્ય AI સાથી",
+  "eeve.title": "ઇવ (Eeve)",
+  "diva.tagline": "એક વાતચીત. ત્રણ નિષ્ણાતો.",
+  "diva.title": "દિવા — તમારી સહેલી AI સંયોજક",
+  "nav.diva": "દિવા (Diva AI)",
   "instinct.dataPortability": "ડેટા પોર્ટેબિલિટી",
   "instinct.tasteProfile": "પસંદગી પ્રોફાઇલ",
   "instinct.searchPlaceholder": "શીર્ષક, કલાકારો, દિગ્દર્શકો, સંગીતમય વાઇબ્સ શોધો...",

@@ -1,4 +1,20 @@
 export default {
+  "diva.shortcutToday": "দিভা সমন্বয়কক সোধক",
+  "diva.emptyDesc":
+    "দিভাই আপোনাৰ স্বাস্থ্য প্ৰশ্ন (ইভ), ঋতুস্ৰাৱ সামগ্ৰী (ফ্লেশ) আৰু আৰাম (ইনষ্টিঙ্কট)ক এটা কথা-বতৰাত সংযোগ কৰে।",
+  "diva.emptyTitle": "দিভাই আজি আপোনাৰ বাবে কেনেকৈ সমন্বয় কৰিব পাৰে?",
+  "diva.clarificationPrompt":
+    "আপুনি ইভ (স্বাস্থ্য), ফ্লেশ (সামগ্ৰী), নে ইনষ্টিঙ্কট (বিনোদন)ৰ পৰা পৰামৰ্শ বিচাৰে?",
+  "diva.placeholder": "ঋতুস্ৰাৱ, প্ৰয়োজনীয় সামগ্ৰী বা চলচ্চিত্ৰ/সংগীতৰ বিষয়ে সোধক...",
+  "diva.mode.auto": "স্বয়ংক্ৰিয় (দিভাই নিৰ্বাচন কৰিব)",
+  "diva.specialists.instinct": "ইনষ্টিঙ্কট · বিনোদন",
+  "diva.specialists.flash": "ফ্লেশ · প্ৰয়োজনীয় সামগ্ৰী",
+  "diva.specialists.eeve": "ইভ · স্বাস্থ্য",
+  "eeve.subtitle": "আপোনাৰ স্বাস্থ্য AI সংগী",
+  "eeve.title": "ইভ (Eeve)",
+  "diva.tagline": "এটা কথা-বতৰা। তিনিজন বিশেষজ্ঞ।",
+  "diva.title": "দিভা — আপোনাৰ সহেলি AI সমন্বয়কৰ্তা",
+  "nav.diva": "দিভা (Diva AI)",
   "instinct.dataPortability": "তথ্য পৰিবহনযোগ্যতা",
   "instinct.tasteProfile": "পছন্দৰ প্ৰ'ফাইল",
   "instinct.searchPlaceholder": "শীৰ্ষক, অভিনেতা, নিৰ্দেশক, সংগীত সন্ধান কৰক...",

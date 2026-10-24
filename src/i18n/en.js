@@ -1,4 +1,20 @@
 export default {
+  "diva.shortcutToday": "Ask Diva Coordinator",
+  "diva.emptyDesc":
+    "Diva connects your health questions (Eeve), menstrual products (FLASH), and relaxation (INSTINCT) under one unified conversation.",
+  "diva.emptyTitle": "How can Diva coordinate for you today?",
+  "diva.clarificationPrompt":
+    "Would you like advice from Eeve (Health), FLASH (Essentials), or INSTINCT (Entertainment)?",
+  "diva.placeholder": "Ask about your cycle, finding essentials, or movies/music...",
+  "diva.mode.auto": "Auto (Diva routes)",
+  "diva.specialists.instinct": "INSTINCT · Entertainment",
+  "diva.specialists.flash": "FLASH · Essentials",
+  "diva.specialists.eeve": "Eeve · Health",
+  "eeve.subtitle": "Your Health AI Companion",
+  "eeve.title": "Eeve",
+  "diva.tagline": "One conversation. Three specialists.",
+  "diva.title": "Diva — Your Saheli AI Coordinator",
+  "nav.diva": "Diva (Coordinator)",
   "instinct.dataPortability": "Data Portability",
   "instinct.tasteProfile": "Taste Profile",
   "instinct.searchPlaceholder": "Search titles, actors, directors, musical vibes...",

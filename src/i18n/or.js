@@ -1,4 +1,20 @@
 export default {
+  "diva.shortcutToday": "ଦିଭା ସଂଯୋଜକଙ୍କୁ ପଚାରନ୍ତୁ",
+  "diva.emptyDesc":
+    "ଦିଭା ଆପଣଙ୍କ ସ୍ୱାସ୍ଥ୍ୟ ପ୍ରଶ୍ନ (ଇଭ୍), ଋତୁସ୍ରାବ ଉତ୍ପାଦ (ଫ୍ଲାସ୍) ଏବଂ ମନୋରଞ୍ଜନ (ଇନଷ୍ଟିଙ୍କ୍ଟ) କୁ ଗୋଟିଏ କଥାବାର୍ତ୍ତାରେ ଯୋଡ଼ିଥାଏ।",
+  "diva.emptyTitle": "ଆଜି ଦିଭା ଆପଣଙ୍କ ପାଇଁ କିପରି ସଂଯୋଜନା କରିପାରିବ?",
+  "diva.clarificationPrompt":
+    "ଆପଣ ଇଭ୍ (ସ୍ୱାସ୍ଥ୍ୟ), ଫ୍ଲାସ୍ (ଆବଶ୍ୟକ ସାମଗ୍ରୀ) କିମ୍ବା ଇନଷ୍ଟିଙ୍କ୍ଟ (ମନୋରଞ୍ଜନ) ଠାରୁ ପରାମର୍ଶ ଚାହାଁନ୍ତି କି?",
+  "diva.placeholder": "ଋତୁସ୍ରାବ, ଆବଶ୍ୟକ ଉତ୍ପାଦ କିମ୍ବା ଚଳଚ୍ଚିତ୍ର/ସଙ୍ଗୀତ ବିଷୟରେ ପଚାରନ୍ତୁ...",
+  "diva.mode.auto": "ଅଟୋ (ଦିଭା ବାଛିବ)",
+  "diva.specialists.instinct": "ଇନଷ୍ଟିଙ୍କ୍ଟ · ମନୋରଞ୍ଜନ",
+  "diva.specialists.flash": "ଫ୍ଲାସ୍ · ଆବଶ୍ୟକ ସାମଗ୍ରୀ",
+  "diva.specialists.eeve": "ଇଭ୍ · ସ୍ୱାସ୍ଥ୍ୟ",
+  "eeve.subtitle": "ଆପଣଙ୍କ ସ୍ୱାସ୍ଥ୍ୟ AI ସାଥୀ",
+  "eeve.title": "ଇଭ୍ (Eeve)",
+  "diva.tagline": "ଗୋଟିଏ କଥାବାର୍ତ୍ତା। ତିନିଜଣ ବିଶେଷଜ୍ଞ।",
+  "diva.title": "ଦିଭା — ଆପଣଙ୍କ ସହେଲୀ AI ସଂଯୋଜକ",
+  "nav.diva": "ଦିଭା (Diva AI)",
   "instinct.dataPortability": "ଡାଟା ପୋର୍ଟେବିଲିଟି",
   "instinct.tasteProfile": "ପସନ୍ଦ ପ୍ରୋଫାଇଲ୍",
   "instinct.searchPlaceholder": "ଶୀର୍ଷକ, ଅଭିନେତା, ନିର୍ଦ୍ଦେଶକ, ସଙ୍ଗୀତ ଖୋଜନ୍ତୁ...",

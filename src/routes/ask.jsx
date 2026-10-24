@@ -4,15 +4,17 @@ import Ask from "@/pages/Ask.jsx";
 export const Route = createFileRoute("/ask")({
   head: () => ({
     meta: [
-      { title: "Saheli · Ask" },
+      { title: "Saheli · Eeve (Health AI Companion)" },
       {
         name: "description",
-        content: "Search 30+ trusted answers about periods in English and Hindi, offline.",
+        content:
+          "Eeve: Your Health AI Companion. Supportive, private menstrual health education and verified medical guidance.",
       },
-      { property: "og:title", content: "Saheli · Ask" },
+      { property: "og:title", content: "Saheli · Eeve (Health AI Companion)" },
       {
         property: "og:description",
-        content: "Search 30+ trusted answers about periods in English and Hindi, offline.",
+        content:
+          "Eeve: Your Health AI Companion. Supportive, private menstrual health education and verified medical guidance.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

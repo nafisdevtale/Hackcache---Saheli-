@@ -15,6 +15,7 @@ import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as CompanionRouteImport } from './routes/companion'
 import { Route as DiscoverRouteImport } from './routes/discover'
+import { Route as DivaRouteImport } from './routes/diva'
 import { Route as DoctorRouteImport } from './routes/doctor'
 import { Route as FeedbackRouteImport } from './routes/feedback'
 import { Route as FlashRouteImport } from './routes/flash'
@@ -57,6 +58,11 @@ const CompanionRoute = CompanionRouteImport.update({
 const DiscoverRoute = DiscoverRouteImport.update({
   id: '/discover',
   path: '/discover',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DivaRoute = DivaRouteImport.update({
+  id: '/diva',
+  path: '/diva',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DoctorRoute = DoctorRouteImport.update({
@@ -132,6 +138,7 @@ export interface FileRoutesByFullPath {
   '/community': typeof CommunityRoute
   '/companion': typeof CompanionRoute
   '/discover': typeof DiscoverRoute
+  '/diva': typeof DivaRoute
   '/doctor': typeof DoctorRoute
   '/feedback': typeof FeedbackRoute
   '/flash': typeof FlashRoute
@@ -153,6 +160,7 @@ export interface FileRoutesByTo {
   '/community': typeof CommunityRoute
   '/companion': typeof CompanionRoute
   '/discover': typeof DiscoverRoute
+  '/diva': typeof DivaRoute
   '/doctor': typeof DoctorRoute
   '/feedback': typeof FeedbackRoute
   '/flash': typeof FlashRoute
@@ -175,6 +183,7 @@ export interface FileRoutesById {
   '/community': typeof CommunityRoute
   '/companion': typeof CompanionRoute
   '/discover': typeof DiscoverRoute
+  '/diva': typeof DivaRoute
   '/doctor': typeof DoctorRoute
   '/feedback': typeof FeedbackRoute
   '/flash': typeof FlashRoute
@@ -198,6 +207,7 @@ export interface FileRouteTypes {
     | '/community'
     | '/companion'
     | '/discover'
+    | '/diva'
     | '/doctor'
     | '/feedback'
     | '/flash'
@@ -219,6 +229,7 @@ export interface FileRouteTypes {
     | '/community'
     | '/companion'
     | '/discover'
+    | '/diva'
     | '/doctor'
     | '/feedback'
     | '/flash'
@@ -240,6 +251,7 @@ export interface FileRouteTypes {
     | '/community'
     | '/companion'
     | '/discover'
+    | '/diva'
     | '/doctor'
     | '/feedback'
     | '/flash'
@@ -262,6 +274,7 @@ export interface RootRouteChildren {
   CommunityRoute: typeof CommunityRoute
   CompanionRoute: typeof CompanionRoute
   DiscoverRoute: typeof DiscoverRoute
+  DivaRoute: typeof DivaRoute
   DoctorRoute: typeof DoctorRoute
   FeedbackRoute: typeof FeedbackRoute
   FlashRoute: typeof FlashRoute
@@ -319,6 +332,13 @@ declare module '@tanstack/react-router' {
       path: '/discover'
       fullPath: '/discover'
       preLoaderRoute: typeof DiscoverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/diva': {
+      id: '/diva'
+      path: '/diva'
+      fullPath: '/diva'
+      preLoaderRoute: typeof DivaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/doctor': {
@@ -422,6 +442,7 @@ const rootRouteChildren: RootRouteChildren = {
   CommunityRoute: CommunityRoute,
   CompanionRoute: CompanionRoute,
   DiscoverRoute: DiscoverRoute,
+  DivaRoute: DivaRoute,
   DoctorRoute: DoctorRoute,
   FeedbackRoute: FeedbackRoute,
   FlashRoute: FlashRoute,

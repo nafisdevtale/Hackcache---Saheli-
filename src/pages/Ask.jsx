@@ -129,12 +129,14 @@ export default function Ask() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/60 pb-4">
         <div>
           <span className="text-xs font-bold uppercase tracking-wider text-primary">
-            {t("ask.title")}
+            {activeTab === "ai" ? t("eeve.title", "Eeve") : t("ask.title")}
           </span>
           <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-            {t("ask.title")}
+            {activeTab === "ai" ? t("eeve.title", "Eeve") : t("ask.title")}
           </h1>
-          <p className="text-sm text-muted-foreground mt-0.5">{t("ask.intro")}</p>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            {activeTab === "ai" ? t("eeve.subtitle", "Your Health AI Companion") : t("ask.intro")}
+          </p>
         </div>
 
         {/* Tab Switcher */}
@@ -161,7 +163,7 @@ export default function Ask() {
             }`}
           >
             <Sparkles aria-hidden className="h-4 w-4 text-primary" />
-            {t("ai.tabAi") || "AI Assistant"}
+            {t("ai.tabAi") || "Eeve (Health AI)"}
           </button>
         </div>
       </div>
@@ -386,11 +388,13 @@ export default function Ask() {
               <div className="rounded-3xl border-2 border-primary/30 bg-hero p-6 shadow-soft space-y-4">
                 <div className="flex items-center gap-2 text-primary font-bold text-lg">
                   <Sparkles className="h-6 w-6" />
-                  <h2>{t("ai.consentTitle") || "Saheli AI Health Assistant"}</h2>
+                  <h2>
+                    {t("eeve.title", "Eeve")} — {t("eeve.subtitle", "Your Health AI Companion")}
+                  </h2>
                 </div>
                 <p className="text-sm leading-relaxed text-muted-foreground">
                   {t("ai.consentDesc") ||
-                    "Saheli AI provides supportive, culturally-sensitive menstrual health information powered by Google Gemini. It is an educational tool, NOT a doctor or medical diagnosis system. Emergency red flags and mental health crises are screened locally."}
+                    "Eeve provides supportive, culturally-sensitive menstrual health information powered by Google Gemini. It is an educational tool, NOT a doctor or medical diagnosis system. Emergency red flags and mental health crises are screened locally."}
                 </p>
                 <div className="space-y-2 text-xs text-muted-foreground">
                   <div className="flex items-start gap-2">
@@ -419,7 +423,7 @@ export default function Ask() {
               >
                 <div>
                   <label htmlFor="ai-q" className="font-bold text-sm block mb-1 text-foreground">
-                    {t("ai.inputLabel") || "Ask Saheli Health Assistant"}
+                    {t("ai.inputLabel") || "Ask Eeve (Health Companion)"}
                   </label>
                   <textarea
                     id="ai-q"
@@ -456,7 +460,7 @@ export default function Ask() {
                   <Sparkles className="h-4 w-4" />
                   {aiLoading
                     ? t("ai.thinking") || "Consulting medical sources..."
-                    : t("ai.askBtn") || "Ask Assistant"}
+                    : t("ai.askBtn") || "Ask Eeve"}
                 </Btn>
               </form>
             )}

@@ -1,4 +1,20 @@
 export default {
+  "diva.shortcutToday": "దివా కోఆర్డినేటర్‌ను అడగండి",
+  "diva.emptyDesc":
+    "దివా మీ ఆరోగ్య ప్రశ్నలు (ఈవ్), పీరియడ్ ఉత్పత్తులు (ఫ్లాష్) మరియు విశ్రాంతి (ఇన్‌స్టింక్ట్) లను ఒకే సంభాషణ కింద అనుసంధానిస్తుంది.",
+  "diva.emptyTitle": "ఈరోజు దివా మీకు ఏ విధంగా సమన్వయం చేయగలదు?",
+  "diva.clarificationPrompt":
+    "మీరు ఈవ్ (ఆరోగ్యం), ఫ్లాష్ (అవసరాలు), లేదా ఇన్‌స్టింక్ట్ (వినోదం) నుండి సలహా కోరుకుంటున్నారా?",
+  "diva.placeholder": "పీరియడ్స్, అవసరమైన ఉత్పత్తులు లేదా సినిమాలు/సంగీతం గురించి అడగండి...",
+  "diva.mode.auto": "ఆటో (దివా రూట్ చేస్తుంది)",
+  "diva.specialists.instinct": "ఇన్‌స్టింక్ట్ · వినోదం",
+  "diva.specialists.flash": "ఫ్లాష్ · అవసరాలు",
+  "diva.specialists.eeve": "ఈవ్ · ఆరోగ్యం",
+  "eeve.subtitle": "మీ ఆరోగ్య AI సహచరి",
+  "eeve.title": "ఈవ్ (Eeve)",
+  "diva.tagline": "ఒకే సంభాషణ. ముగ్గురు నిపుణులు.",
+  "diva.title": "దివా — మీ సహేలి AI సమన్వయకర్త",
+  "nav.diva": "దివా (Diva AI)",
   "instinct.dataPortability": "డేటా పోర్టబిలిటీ",
   "instinct.tasteProfile": "అభిరుచి ప్రొఫైల్",
   "instinct.searchPlaceholder": "శీర్షికలు, నటులు, దర్శకులు, సంగీత వైబ్‌లను వెతకండి...",

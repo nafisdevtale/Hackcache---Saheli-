@@ -1,4 +1,20 @@
 export default {
+  "diva.shortcutToday": "دیوا کوآرڈینیٹر سے پوچھیں",
+  "diva.emptyDesc":
+    "دیوا آپ کی صحت کے سوالات (ایو)، حیض کی مصنوعات (فلیش)، اور تفریح (انسٹنکٹ) کو ایک بات چیت میں جوڑتی ہے۔",
+  "diva.emptyTitle": "آج دیوا آپ کے لیے کس طرح مدد کر سکتی ہے؟",
+  "diva.clarificationPrompt":
+    "کیا آپ ایو (صحت)، فلیش (ضروری اشیاء)، یا انسٹنکٹ (تفریح) سے مشورہ چاہتے ہیں؟",
+  "diva.placeholder": "حیض، ضروری مصنوعات، یا فلموں/موسیقی کے بارے میں پوچھیں...",
+  "diva.mode.auto": "خودکار (دیوا کا انتخاب)",
+  "diva.specialists.instinct": "انسٹنکٹ · تفریح",
+  "diva.specialists.flash": "فلیش · ضروری اشیاء",
+  "diva.specialists.eeve": "ایو · صحت",
+  "eeve.subtitle": "آپ کی صحت کی AI ساتھی",
+  "eeve.title": "ایو (Eeve)",
+  "diva.tagline": "ایک بات چیت۔ تین ماہرین۔",
+  "diva.title": "دیوا — آپ کی سہیلی AI کوآرڈینیٹر",
+  "nav.diva": "دیوا (Diva AI)",
   "instinct.dataPortability": "ڈیٹا پورٹیبلٹی",
   "instinct.tasteProfile": "پسند کا پروفائل",
   "instinct.searchPlaceholder": "عنوانات، اداکار، ہدایت کار، موسیقی تلاش کریں...",
