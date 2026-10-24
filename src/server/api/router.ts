@@ -3,6 +3,7 @@ import { handleCommunityRequest } from "./community";
 import { handlePushRequest } from "./push";
 import { handleFeedbackRequest } from "./feedback";
 import { handleInstinctRequest } from "./instinct";
+import { handleDivaRouteRequest } from "./diva";
 
 export async function routeApiRequest(req: Request): Promise<Response | null> {
   const url = new URL(req.url);
@@ -10,6 +11,10 @@ export async function routeApiRequest(req: Request): Promise<Response | null> {
 
   if (path === "/api/ask") {
     return handleAskRequest(req);
+  }
+
+  if (path.startsWith("/api/diva")) {
+    return handleDivaRouteRequest(req);
   }
 
   if (path.startsWith("/api/instinct")) {

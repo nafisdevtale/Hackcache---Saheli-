@@ -22,6 +22,7 @@ import {
   RotateCcw,
   X,
   ShieldCheck,
+  Bot,
 } from "lucide-react";
 import { useApp } from "@/App.jsx";
 import { Card, PageTitle, Btn } from "@/components/common/ui.jsx";
@@ -616,6 +617,17 @@ export default function Today() {
               >
                 <HelpCircle aria-hidden className="h-4 w-4 text-primary shrink-0" />
                 <span>{t("today.startActionAsk")}</span>
+              </Link>
+
+              <Link
+                to="/diva"
+                className="flex items-center gap-2.5 rounded-2xl border border-purple-500/30 bg-purple-500/5 p-3 text-xs font-semibold text-purple-700 dark:text-purple-300 hover:bg-purple-500/10 transition-all sm:col-span-2"
+              >
+                <Bot
+                  aria-hidden
+                  className="h-4 w-4 text-purple-600 dark:text-purple-400 shrink-0"
+                />
+                <span>{t("diva.shortcutToday")}</span>
               </Link>
             </div>
           </div>

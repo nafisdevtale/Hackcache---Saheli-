@@ -1,4 +1,20 @@
 export default {
+  "diva.shortcutToday": "দিভা সমন্বয়কারীকে জিজ্ঞাসা করুন",
+  "diva.emptyDesc":
+    "দিভা আপনার স্বাস্থ্য প্রশ্ন (ইভ), মাসিক পণ্য (ফ্ল্যাশ), এবং বিনোদন (ইন্সটিংক্ট)-কে এক সাথে যুক্ত করে।",
+  "diva.emptyTitle": "দিভা আজ আপনার জন্য কীভাবে সমন্বয় করতে পারে?",
+  "diva.clarificationPrompt":
+    "আপনি কি ইভ (স্বাস্থ্য), ফ্ল্যাশ (পণ্য), নাকি ইন্সটিংক্ট (বিনোদন) থেকে পরামর্শ চান?",
+  "diva.placeholder": "মাসিক, প্রয়োজনীয় পণ্য, বা চলচ্চিত্র/সঙ্গীত সম্পর্কে জিজ্ঞাসা করুন...",
+  "diva.mode.auto": "স্বয়ংক্রিয় (দিভা পথ দেখাবে)",
+  "diva.specialists.instinct": "ইন্সটিংক্ট · বিনোদন",
+  "diva.specialists.flash": "ফ্ল্যাশ · প্রয়োজনীয় সামগ্রী",
+  "diva.specialists.eeve": "ইভ · স্বাস্থ্য",
+  "eeve.subtitle": "আপনার স্বাস্থ্য এআই সঙ্গী",
+  "eeve.title": "ইভ (Eeve)",
+  "diva.tagline": "একটি কথোপকথন। তিনজন বিশেষজ্ঞ।",
+  "diva.title": "দিভা — আপনার সহেলি এআই সমন্বয়কারী",
+  "nav.diva": "দিভা (Diva AI)",
   "instinct.dataPortability": "ডেটা পোর্টেবিলিটি",
   "instinct.tasteProfile": "পছন্দের প্রোফাইল",
   "instinct.searchPlaceholder": "শিরোনাম, অভিনেতা, পরিচালক, সঙ্গীত খুঁজুন...",

@@ -1,4 +1,20 @@
 export default {
+  "diva.shortcutToday": "दीवा समन्वयक से पूछें",
+  "diva.emptyDesc":
+    "दीवा आपके स्वास्थ्य प्रश्नों (ईव), मासिक धर्म उत्पादों (फ्लैश) और विश्राम (इंस्टिंक्ट) को एक एकीकृत बातचीत में जोड़ती है।",
+  "diva.emptyTitle": "दीवा आज आपके लिए क्या समन्वय कर सकती है?",
+  "diva.clarificationPrompt":
+    "क्या आप ईव (स्वास्थ्य), फ्लैश (आवश्यक उत्पाद), या इंस्टिंक्ट (मनोरंजन) से सलाह चाहते हैं?",
+  "diva.placeholder": "मासिक धर्म, आवश्यक उत्पादों, या फ़िल्मों/संगीत के बारे में पूछें...",
+  "diva.mode.auto": "ऑटो (दीवा चुनेगी)",
+  "diva.specialists.instinct": "इंस्टिंक्ट · मनोरंजन",
+  "diva.specialists.flash": "फ्लैश · आवश्यक वस्तुएं",
+  "diva.specialists.eeve": "ईव · स्वास्थ्य",
+  "eeve.subtitle": "आपकी स्वास्थ्य एआई साथी",
+  "eeve.title": "ईव (Eeve)",
+  "diva.tagline": "एक बातचीत। तीन विशेषज्ञ।",
+  "diva.title": "दीवा — आपकी सहेली एआई समन्वयक",
+  "nav.diva": "दीवा (Diva AI)",
   "instinct.dataPortability": "डेटा पोर्टेबिलिटी",
   "instinct.tasteProfile": "पसंद प्रोफ़ाइल",
   "instinct.searchPlaceholder": "शीर्षक, अभिनेता, निर्देशक, संगीत शैली खोजें...",

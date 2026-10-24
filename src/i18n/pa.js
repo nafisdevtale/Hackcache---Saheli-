@@ -1,4 +1,20 @@
 export default {
+  "diva.shortcutToday": "ਦੀਵਾ ਕੋਆਰਡੀਨੇਟਰ ਨੂੰ ਪੁੱਛੋ",
+  "diva.emptyDesc":
+    "ਦੀਵਾ ਤੁਹਾਡੇ ਸਿਹਤ ਸਵਾਲਾਂ (ਈਵ), ਮਾਹਵਾਰੀ ਉਤਪਾਦਾਂ (ਫਲੈਸ਼) ਅਤੇ ਆਰਾਮ (ਇੰਸਟਿੰਕਟ) ਨੂੰ ਇੱਕ ਗੱਲਬਾਤ ਵਿੱਚ ਜੋੜਦੀ ਹੈ।",
+  "diva.emptyTitle": "ਅੱਜ ਦੀਵਾ ਤੁਹਾਡੇ ਲਈ ਕੀ ਤਾਲਮੇਲ ਕਰ ਸਕਦੀ ਹੈ?",
+  "diva.clarificationPrompt":
+    "ਕੀ ਤੁਸੀਂ ਈਵ (ਸਿਹਤ), ਫਲੈਸ਼ (ਜ਼ਰੂਰੀ ਵਸਤਾਂ) ਜਾਂ ਇੰਸਟਿੰਕਟ (ਮਨੋਰੰਜਨ) ਤੋਂ ਸਲਾਹ ਲੈਣਾ ਚਾਹੁੰਦੇ ਹੋ?",
+  "diva.placeholder": "ਮਾਹਵਾਰੀ, ਜ਼ਰੂਰੀ ਚੀਜ਼ਾਂ ਜਾਂ ਫ਼ਿਲਮਾਂ/ਸੰਗੀਤ ਬਾਰੇ ਪੁੱਛੋ...",
+  "diva.mode.auto": "ਆਟੋ (ਦੀਵਾ ਰੂਟ ਕਰੇਗੀ)",
+  "diva.specialists.instinct": "ਇੰਸਟਿੰਕਟ · ਮਨੋਰੰਜਨ",
+  "diva.specialists.flash": "ਫਲੈਸ਼ · ਲੋੜੀਂਦੀਆਂ ਚੀਜ਼ਾਂ",
+  "diva.specialists.eeve": "ਈਵ · ਸਿਹਤ",
+  "eeve.subtitle": "ਤੁਹਾਡੀ ਸਿਹਤ AI ਸਾਥੀ",
+  "eeve.title": "ਈਵ (Eeve)",
+  "diva.tagline": "ਇੱਕ ਗੱਲਬਾਤ। ਤਿੰਨ ਮਾਹਰ।",
+  "diva.title": "ਦੀਵਾ — ਤੁਹਾਡੀ ਸਹੇਲੀ AI ਕੋਆਰਡੀਨੇਟਰ",
+  "nav.diva": "ਦੀਵਾ (Diva AI)",
   "instinct.dataPortability": "ਡੇਟਾ ਪੋਰਟੇਬਿਲਟੀ",
   "instinct.tasteProfile": "ਪਸੰਦ ਪ੍ਰੋਫਾਈਲ",
   "instinct.searchPlaceholder": "ਸਿਰਲੇਖ, ਅਦਾਕਾਰ, ਨਿਰਦੇਸ਼ਕ, ਸੰਗੀਤ ਵਾਈਬਸ ਖੋਜੋ...",
