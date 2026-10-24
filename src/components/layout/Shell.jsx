@@ -113,7 +113,7 @@ function LockScreen() {
                 ? "border-primary/40 bg-primary/10 text-primary font-bold"
                 : "border-border/80 bg-background/80 text-muted-foreground hover:bg-muted",
             )}
-            aria-label="Toggle Discreet Mode"
+            aria-label={t("aria.discreetToggle") || "Toggle Discreet Mode"}
           >
             {prefs.discreet ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
             <span className="text-[11px] font-bold">

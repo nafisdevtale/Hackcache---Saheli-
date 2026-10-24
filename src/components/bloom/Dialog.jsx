@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { X } from "lucide-react";
+import { useApp } from "@/App.jsx";
 import { Button } from "@/components/bloom/Button.jsx";
 import { cx } from "@/components/common/ui.jsx";
 
@@ -16,6 +17,13 @@ export function ResponsiveDialog({
   maxWidth = "max-w-lg",
   className,
 }) {
+  let t = (k, fallback) => fallback || k;
+  try {
+    const app = useApp();
+    if (app?.t) t = app.t;
+  } catch (_err) {
+    // Standalone render without AppProvider
+  }
   const dialogRef = useRef(null);
 
   useEffect(() => {
@@ -69,7 +77,7 @@ export function ResponsiveDialog({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close dialog"
+            aria-label={t("aria.closeDialog") || "Close dialog"}
             className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
           >
             <X className="h-4 w-4" aria-hidden="true" />

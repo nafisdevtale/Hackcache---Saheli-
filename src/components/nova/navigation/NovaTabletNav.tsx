@@ -21,7 +21,7 @@ export const NovaTabletNav: React.FC<NovaTabletNavProps> = ({ t, onQuickLog }) =
 
   return (
     <nav
-      aria-label="Tablet navigation"
+      aria-label={t("aria.tabletNav") || "Tablet navigation"}
       data-testid="nova-tablet-nav"
       className="hidden md:flex lg:hidden items-center justify-between gap-3 overflow-x-auto border-b border-border bg-card/85 px-4 py-2 backdrop-blur-md select-none print:hidden"
     >

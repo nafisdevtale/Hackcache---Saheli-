@@ -69,7 +69,7 @@ export function RhythmRing({ analysis, record, onOpenLogger, className }) {
   return (
     <div
       role="region"
-      aria-label="Interactive cycle rhythm ring"
+      aria-label={t("aria.cycleRing") || "Interactive cycle rhythm ring"}
       className={cx("relative mx-auto flex flex-col items-center justify-center p-2", className)}
     >
       <div className="relative flex items-center justify-center w-full max-w-[340px] aspect-square">
@@ -197,7 +197,7 @@ export function RhythmRing({ analysis, record, onOpenLogger, className }) {
                 className="cursor-pointer transition-transform hover:scale-110 focus:outline-none"
                 tabIndex={0}
                 role="button"
-                aria-label={`Cycle Day ${dayNum}`}
+                aria-label={t("today.cycleDay", { n: dayNum })}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     setSelectedDayNum(dayNum);

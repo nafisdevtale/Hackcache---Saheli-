@@ -699,14 +699,14 @@ export const TalkingPetStage: React.FC<TalkingPetStageProps> = ({
         <button
           type="button"
           onClick={handleAnchorRest}
-          aria-label="Resting Nook"
+          aria-label={t("aria.restingNook") || "Resting Nook"}
           className="absolute bottom-4 left-[8%] sm:left-[12%] -translate-x-1/2 flex flex-col items-center group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-2xl p-2 transition-transform active:scale-95 z-10"
         >
           <div className="w-16 h-8 sm:w-20 sm:h-10 rounded-full bg-indigo-500/20 dark:bg-indigo-400/20 border border-indigo-400/40 shadow-inner flex items-center justify-center group-hover:scale-105 transition-transform">
             <span className="text-sm sm:text-base">🛋️</span>
           </div>
           <span className="text-[10px] sm:text-xs font-bold text-muted-foreground mt-1 group-hover:text-foreground transition-colors">
-            Nook
+            {t("pet.habitatNook") || "Nook"}
           </span>
         </button>
 
@@ -714,14 +714,14 @@ export const TalkingPetStage: React.FC<TalkingPetStageProps> = ({
         <button
           type="button"
           onClick={handleAnchorPlay}
-          aria-label="Play Area"
+          aria-label={t("aria.playArea") || "Play Area"}
           className="absolute bottom-4 left-1/2 -translate-x-1/2 flex flex-col items-center group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-2xl p-2 transition-transform active:scale-95 z-10"
         >
           <div className="w-16 h-8 sm:w-20 sm:h-10 rounded-full bg-amber-500/20 dark:bg-amber-400/20 border border-amber-400/40 shadow-inner flex items-center justify-center group-hover:scale-105 transition-transform">
             <span className="text-sm sm:text-base">{personality.toyEmoji}</span>
           </div>
           <span className="text-[10px] sm:text-xs font-bold text-muted-foreground mt-1 group-hover:text-foreground transition-colors">
-            Toys
+            {t("pet.habitatToys") || "Toys"}
           </span>
         </button>
 
@@ -729,14 +729,14 @@ export const TalkingPetStage: React.FC<TalkingPetStageProps> = ({
         <button
           type="button"
           onClick={handleAnchorFeed}
-          aria-label="Feeding Bowl"
+          aria-label={t("aria.feedingBowl") || "Feeding Bowl"}
           className="absolute bottom-4 right-[8%] sm:right-[12%] translate-x-1/2 flex flex-col items-center group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-2xl p-2 transition-transform active:scale-95 z-10"
         >
           <div className="w-16 h-8 sm:w-20 sm:h-10 rounded-full bg-pink-500/20 dark:bg-pink-400/20 border border-pink-400/40 shadow-inner flex items-center justify-center group-hover:scale-105 transition-transform">
             <span className="text-sm sm:text-base">{personality.treatEmoji}</span>
           </div>
           <span className="text-[10px] sm:text-xs font-bold text-muted-foreground mt-1 group-hover:text-foreground transition-colors">
-            Bowl
+            {t("pet.habitatBowl") || "Bowl"}
           </span>
         </button>
 

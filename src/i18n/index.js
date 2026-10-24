@@ -13,7 +13,43 @@ import as from "./as.js";
 import ur from "./ur.js";
 import { LANGUAGES } from "./languages.js";
 
-export { LANGUAGES };
+import {
+  LOCALE_MAP,
+  SCRIPT_MAP,
+  NATIVE_NUMBERING_SYSTEMS,
+  getLocaleTag,
+  isRTL,
+  getLanguageMetadata,
+  formatNumber,
+  formatInteger,
+  formatPercent,
+  formatCurrency,
+  formatUnit,
+  formatDate,
+  formatTime,
+  formatRelativeTime,
+  formatList,
+  parseLocalizedNumber,
+} from "../lib/locale.js";
+
+export {
+  LOCALE_MAP,
+  SCRIPT_MAP,
+  NATIVE_NUMBERING_SYSTEMS,
+  getLocaleTag,
+  isRTL,
+  getLanguageMetadata,
+  formatNumber,
+  formatInteger,
+  formatPercent,
+  formatCurrency,
+  formatUnit,
+  formatDate,
+  formatTime,
+  formatRelativeTime,
+  formatList,
+  parseLocalizedNumber,
+};
 
 export const DICTS = {
   en,
@@ -119,20 +155,6 @@ export function translate(lang, key, vars) {
     } else if (key.startsWith("companion.species.") && key.endsWith("Desc")) {
       const petKey = "pet." + key.slice(10);
       s = DICTS[lang]?.[petKey] ?? en[petKey];
-    } else if (key.startsWith("pet.quote.")) {
-      s = "Resting peacefully by your side.";
-    } else if (key.startsWith("pet.treat.")) {
-      const raw = key.slice(10);
-      s = raw
-        .replace(/([A-Z])/g, " $1")
-        .replace(/^./, (c) => c.toUpperCase())
-        .trim();
-    } else if (key.startsWith("pet.toy.")) {
-      const raw = key.slice(8);
-      s = raw
-        .replace(/([A-Z])/g, " $1")
-        .replace(/^./, (c) => c.toUpperCase())
-        .trim();
     }
   }
   if (s === undefined) {
@@ -146,7 +168,9 @@ export function translate(lang, key, vars) {
   }
   if (vars && typeof s === "string") {
     for (const k of Object.keys(vars)) {
-      s = s.split(`{${k}}`).join(String(vars[k]));
+      const rawVal = vars[k];
+      const formatted = typeof rawVal === "number" ? formatNumber(rawVal, lang) : String(rawVal);
+      s = s.split(`{${k}}`).join(formatted);
     }
   }
   return s;

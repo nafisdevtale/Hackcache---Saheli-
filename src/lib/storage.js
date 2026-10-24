@@ -65,6 +65,7 @@ export const DEFAULT_PREFS = {
   theme: "system", // "light" | "dark" | "system"
   readAloud: false,
   discreet: false,
+  nativeNumerals: false,
 };
 let memoryStore = {};
 

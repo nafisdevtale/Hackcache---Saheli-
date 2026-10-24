@@ -510,7 +510,7 @@ export default function SelfCare() {
                     <button
                       type="button"
                       onClick={() => handleToggleFav(sound.id)}
-                      aria-label="Toggle favourite sound"
+                      aria-label={t("aria.toggleFavouriteSound") || "Toggle favourite sound"}
                       className={cx(
                         "p-1.5 rounded-full transition-colors cursor-pointer",
                         isFav
@@ -793,7 +793,7 @@ export default function SelfCare() {
                 type="button"
                 onClick={closeProgrammeModal}
                 className="rounded-full p-1.5 text-muted-foreground hover:bg-muted cursor-pointer"
-                aria-label="Close"
+                aria-label={t("aria.close") || "Close"}
               >
                 <X className="h-4 w-4" />
               </button>
@@ -957,7 +957,7 @@ function BreathingGuideModal({ onClose }) {
             type="button"
             onClick={handleClose}
             className="rounded-full p-1.5 text-muted-foreground hover:bg-muted cursor-pointer"
-            aria-label="Close"
+            aria-label={t("aria.close") || "Close"}
           >
             <X className="h-4 w-4" />
           </button>

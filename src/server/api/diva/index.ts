@@ -43,8 +43,11 @@ export async function handleDivaRouteRequest(req: Request): Promise<Response> {
     const body = (await req.json().catch(() => ({}))) as {
       query?: string;
       history?: Array<{ role: string; content: string }>;
+      locale?: string;
+      lang?: string;
     };
     const query = (body.query || "").trim();
+    const locale = body.locale || body.lang || "en";
 
     if (!query) {
       return new Response(
@@ -71,7 +74,16 @@ export async function handleDivaRouteRequest(req: Request): Promise<Response> {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            systemInstruction: { parts: [{ text: GEMINI_SYSTEM_ROUTER_PROMPT }] },
+            systemInstruction: {
+              parts: [
+                {
+                  text:
+                    locale && locale !== "en"
+                      ? `${GEMINI_SYSTEM_ROUTER_PROMPT}\nInput language/locale is '${locale}'. Route queries accurately regardless of whether query is in English, Hindi, Bengali, Tamil, Telugu, Marathi, Urdu, etc.`
+                      : GEMINI_SYSTEM_ROUTER_PROMPT,
+                },
+              ],
+            },
             contents: [{ role: "user", parts: [{ text: query }] }],
             generationConfig: {
               temperature: 0.1,

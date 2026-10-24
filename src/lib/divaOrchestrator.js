@@ -20,6 +20,7 @@ import { VERIFIED_PRODUCTS } from "../content/products.js";
 import { VERIFIED_ENTERTAINMENT } from "../content/entertainment.js";
 import { getFlashRecommendations } from "./flashRecommender.js";
 import { rankMediaCandidates, searchCatalogue } from "./instinctRecommender.js";
+import { translate } from "../i18n/index.js";
 
 /**
  * Execute Eeve (Health Specialist)
@@ -108,9 +109,14 @@ async function executeEeve(agentReq, externalSignal) {
       status: "partial",
       success: true,
       text:
+        matched.item.a?.[agentReq.locale] ||
         matched.item.a?.en ||
         matched.item.a?.hi ||
-        "Here is verified offline medical guidance from Eeve.",
+        translate(
+          agentReq.locale,
+          "eeve.offlineGuidance",
+          "Here is verified offline medical guidance from Eeve.",
+        ),
       data: [matched.item],
       sources: ["Saheli Verified Offline Medical Library (NHS/WHO/FOGSI)"],
       warnings: ["Operating in offline mode."],
@@ -311,7 +317,7 @@ async function executeInstinct(agentReq, externalSignal) {
       const res = await fetch("/api/instinct/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: query }),
+        body: JSON.stringify({ message: query, locale: agentReq.locale, lang: agentReq.locale }),
         signal: controller.signal,
       });
 
@@ -451,13 +457,13 @@ export async function executeDivaRequest({
       specialistResults: {},
       clarificationPrompt:
         route.clarificationPrompt ||
-        "Would you like advice from Eeve (Health), FLASH (Essentials), or INSTINCT (Entertainment)?",
+        translate(locale, "diva.clarificationTitle", "Diva needs a quick clarification:"),
       options: route.options || [
-        { id: "eeve", label: "Health Guidance (Eeve)" },
-        { id: "flash", label: "Find Products (FLASH)" },
-        { id: "instinct", label: "Entertainment & Vibe (INSTINCT)" },
+        { id: "eeve", label: `Eeve (${translate(locale, "diva.specialistEeveSub")})` },
+        { id: "flash", label: `FLASH (${translate(locale, "diva.specialistFlashSub")})` },
+        { id: "instinct", label: `INSTINCT (${translate(locale, "diva.specialistInstinctSub")})` },
       ],
-      compositeSummary: "Clarification requested.",
+      compositeSummary: translate(locale, "diva.clarificationTitle"),
       durationMs: Date.now() - startTime,
     };
   }
@@ -515,9 +521,7 @@ export async function executeDivaRequest({
   const overallStatus =
     successCount === targetAgents.length ? "success" : successCount > 0 ? "partial" : "error";
 
-  const compositeSummary = targetAgents
-    .map((a) => AGENT_REGISTRY[a]?.displayName || a)
-    .join(" and ");
+  const compositeSummary = targetAgents.map((a) => AGENT_REGISTRY[a]?.displayName || a).join(" & ");
 
   return {
     status: overallStatus,
@@ -526,7 +530,7 @@ export async function executeDivaRequest({
     agentsInvoked: targetAgents,
     specialistResults,
     agentResults,
-    compositeSummary: `Response coordinated by Diva across ${compositeSummary}.`,
+    compositeSummary: `${translate(locale, "diva.compositePrefix")} ${compositeSummary}.`,
     durationMs: Date.now() - startTime,
   };
 }

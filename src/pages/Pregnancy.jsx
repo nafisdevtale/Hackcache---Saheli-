@@ -64,7 +64,7 @@ export default function Pregnancy() {
         <div className="nova-card-elevated p-6 space-y-4">
           <div className="flex items-center gap-2 text-primary font-bold text-sm">
             <Baby className="h-5 w-5" />
-            <span>Enable Pregnancy Mode</span>
+            <span>{t("preg.enableMode") || "Enable Pregnancy Mode"}</span>
           </div>
 
           <label className="flex min-h-12 items-start gap-3 cursor-pointer">
@@ -156,7 +156,7 @@ export default function Pregnancy() {
           <div className="rounded-3xl border-2 border-primary/20 bg-hero p-6 shadow-soft space-y-3">
             <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-wider">
               <Baby className="h-4 w-4" />
-              <span>Current Gestational Age</span>
+              <span>{t("preg.currentAge") || "Current Gestational Age"}</span>
             </div>
             <p className="font-display text-3xl sm:text-4xl font-extrabold text-foreground">
               {t("preg.week", { w, d })}

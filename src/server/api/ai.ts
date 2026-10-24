@@ -305,11 +305,14 @@ export async function handleAskRequest(req: Request): Promise<Response> {
     });
   }
 
-  const { question, context, consent } = (body || {}) as {
+  const { question, context, consent, lang, locale } = (body || {}) as {
     question?: string;
     context?: Record<string, unknown>;
     consent?: boolean;
+    lang?: string;
+    locale?: string;
   };
+  const targetLang = lang || locale || "en";
 
   // Consent validation
   if (!consent) {
@@ -396,7 +399,7 @@ CRITICAL SAFETY & CLINICAL RULES:
 2. Recommend consulting a qualified healthcare professional (gynaecologist or primary care physician) for diagnosis, persistent symptoms, or severe pain.
 3. Keep answers clear, accessible, culturally sensitive, non-judgmental, and practical.
 4. Ground all advice in established clinical guidelines (NHS, WHO, ACOG, FOGSI).
-5. If the question is in Hindi, Marathi, Bengali, Tamil, Telugu, Urdu, or another Indian language, respond naturally in that language.
+5. The user's active application language is '${targetLang}'. Respond fluently, naturally, and completely in the language corresponding to '${targetLang}' (or the user's Indian language if asking in Hindi, Marathi, Bengali, Tamil, Telugu, Urdu, Gujarati, Kannada, Malayalam, Odia, Punjabi, Assamese).
 6. Maximum answer length: 3 concise paragraphs.`;
 
   try {

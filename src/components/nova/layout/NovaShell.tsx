@@ -73,7 +73,7 @@ export const NovaShell: React.FC<NovaShellProps> = ({
               type="button"
               onClick={() => setPrefs({ discreet: !prefs.discreet })}
               className="p-1.5 rounded-xl text-muted-foreground hover:bg-muted transition-colors cursor-pointer"
-              aria-label="Toggle Discreet Mode"
+              aria-label={t("aria.discreetToggle") || "Toggle Discreet Mode"}
             >
               {prefs.discreet ? (
                 <EyeOff className="h-4 w-4 text-primary" />

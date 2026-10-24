@@ -1,5 +1,7 @@
 import { isValidDate } from "./localDate.js";
 import { SYMPTOM_IDS, MOODS, ENERGY, FLOWS } from "../data/symptoms.js";
+import { translate } from "../i18n/index.js";
+import { formatDate, formatInteger } from "./locale.js";
 
 export const DEFAULT_DASHBOARD_WIDGETS = [
   { id: "rhythmRing", visible: true },
@@ -643,6 +645,9 @@ export function parseCSVImport(csvText) {
  * Generate a printable / PDF document with embedded machine-readable payload
  */
 export function generateDoctorSummaryPDF(record, analysis, options = {}) {
+  const lang = options.lang || record?.settings?.lang || "en";
+  const isRTL = lang === "ur";
+  const dir = isRTL ? "rtl" : "ltr";
   const jsonPayload = exportJSON(record);
   let base64Payload = "";
   try {
@@ -656,23 +661,25 @@ export function generateDoctorSummaryPDF(record, analysis, options = {}) {
   const periodDays = Object.values(record.days).filter((d) => d.period);
   const cycleCount = analysis?.cycles?.length || 0;
   const avgLength = analysis?.stats?.meanLength ? Math.round(analysis.stats.meanLength) : "N/A";
-  const exportedAt = new Date().toLocaleDateString();
+  const exportedAt = formatDate(new Date(), lang, { dateStyle: "medium" });
+
+  const t = (k, vars) => translate(lang, k, vars) || "";
 
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="${lang}" dir="${dir}">
 <head>
   <meta charset="utf-8">
-  <title>Saheli Menstrual Health Summary</title>
+  <title>${t("export.summaryTitle") || "Saheli Menstrual Health Summary"}</title>
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 40px; color: #1f2937; line-height: 1.5; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 40px; color: #1f2937; line-height: 1.5; direction: ${dir}; }
     h1 { color: #831843; margin-bottom: 4px; font-size: 24px; }
     .subtitle { color: #6b7280; font-size: 14px; margin-bottom: 24px; }
     .stat-grid { display: flex; gap: 16px; margin-bottom: 24px; }
     .stat-box { background: #fdf2f8; border: 1px solid #fbcfe8; border-radius: 12px; padding: 12px 16px; flex: 1; }
     .stat-val { font-size: 20px; font-weight: bold; color: #9d174d; }
     .stat-lbl { font-size: 11px; text-transform: uppercase; color: #6b7280; font-weight: bold; }
-    table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 13px; }
-    th { background: #f3f4f6; text-align: left; padding: 10px; border-bottom: 2px solid #e5e7eb; font-weight: bold; }
+    table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 13px; text-align: ${isRTL ? "right" : "left"}; }
+    th { background: #f3f4f6; text-align: ${isRTL ? "right" : "left"}; padding: 10px; border-bottom: 2px solid #e5e7eb; font-weight: bold; }
     td { padding: 8px 10px; border-bottom: 1px solid #f3f4f6; }
     .badge { display: inline-block; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: bold; background: #fce7f3; color: #be185d; }
     .disclaimer { margin-top: 32px; padding: 16px; border-radius: 12px; background: #f9fafb; border: 1px solid #e5e7eb; font-size: 12px; color: #4b5563; }
@@ -688,36 +695,36 @@ export function generateDoctorSummaryPDF(record, analysis, options = {}) {
 <body>
   <!-- SAHELI_RECORD_PAYLOAD_V1:${base64Payload} -->
   <div class="no-print" style="margin-bottom: 24px; display: flex; gap: 12px; align-items: center; background: #fdf2f8; padding: 12px 16px; border-radius: 12px; border: 1px solid #fbcfe8;">
-    <button onclick="window.print()" style="background: #9d174d; color: #ffffff; border: none; padding: 8px 18px; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer;">🖨️ Print / Save as PDF</button>
-    <span style="font-size: 12px; color: #6b7280;">Use this document for doctor appointments. For full database restoration, use Encrypted JSON.</span>
+    <button onclick="window.print()" style="background: #9d174d; color: #ffffff; border: none; padding: 8px 18px; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer;">🖨️ ${t("common.print") || "Print / Save as PDF"}</button>
+    <span style="font-size: 12px; color: #6b7280;">${t("export.summaryDocNote") || "Use this document for doctor appointments. For full database restoration, use Encrypted JSON."}</span>
   </div>
-  <h1>Saheli · Clinical Health Summary</h1>
-  <div class="subtitle">Generated on ${exportedAt} · Private On-Device Record</div>
+  <h1>${lang === "en" ? "Saheli · Clinical Health Summary" : t("export.summaryTitle") || "Saheli · Clinical Health Summary"}</h1>
+  <div class="subtitle">${t("export.generatedOn", { date: exportedAt }) || `Generated on ${exportedAt}`} · ${t("export.privateRecord") || "Private On-Device Record"}</div>
 
   <div class="stat-grid">
     <div class="stat-box">
-      <div class="stat-lbl">Completed Cycles</div>
-      <div class="stat-val">${cycleCount}</div>
+      <div class="stat-lbl">${t("export.completedCycles") || "Completed Cycles"}</div>
+      <div class="stat-val">${formatInteger(cycleCount, lang)}</div>
     </div>
     <div class="stat-box">
-      <div class="stat-lbl">Average Cycle Length</div>
-      <div class="stat-val">${avgLength} days</div>
+      <div class="stat-lbl">${t("export.avgCycleLength") || "Average Cycle Length"}</div>
+      <div class="stat-val">${typeof avgLength === "number" ? `${formatInteger(avgLength, lang)} ${lang === "en" ? "days" : t("common.days", { n: avgLength }) || "days"}` : avgLength}</div>
     </div>
     <div class="stat-box">
-      <div class="stat-lbl">Total Period Days Logged</div>
-      <div class="stat-val">${periodDays.length}</div>
+      <div class="stat-lbl">${t("export.totalPeriodDays") || "Total Period Days Logged"}</div>
+      <div class="stat-val">${formatInteger(periodDays.length, lang)}</div>
     </div>
   </div>
 
-  <h2>Recent Period & Symptom Log</h2>
+  <h2>${t("export.recentLog") || "Recent Period & Symptom Log"}</h2>
   <table>
     <thead>
       <tr>
-        <th>Date</th>
-        <th>Period</th>
-        <th>Flow</th>
-        <th>Pain (0-5)</th>
-        <th>Symptoms</th>
+        <th>${t("export.colDate") || "Date"}</th>
+        <th>${t("export.colPeriod") || "Period"}</th>
+        <th>${t("export.colFlow") || "Flow"}</th>
+        <th>${t("export.colPain") || "Pain (0-5)"}</th>
+        <th>${t("export.colSymptoms") || "Symptoms"}</th>
       </tr>
     </thead>
     <tbody>
@@ -729,10 +736,10 @@ export function generateDoctorSummaryPDF(record, analysis, options = {}) {
           const d = record.days[k];
           return `<tr>
             <td><strong>${k}</strong></td>
-            <td>${d.period ? '<span class="badge">Period</span>' : "-"}</td>
-            <td>${d.flow || "-"}</td>
-            <td>${d.pain > 0 ? d.pain : "0"}</td>
-            <td>${d.symptoms?.length ? d.symptoms.join(", ") : "-"}</td>
+            <td>${d.period ? `<span class="badge">${t("export.colPeriod") || "Period"}</span>` : "-"}</td>
+            <td>${d.flow ? t(`flow.${d.flow}`) || d.flow : "-"}</td>
+            <td>${d.pain > 0 ? formatInteger(d.pain, lang) : "0"}</td>
+            <td>${d.symptoms?.length ? d.symptoms.map((s) => t(`sym.${s}`) || s).join(", ") : "-"}</td>
           </tr>`;
         })
         .join("")}
@@ -745,15 +752,15 @@ export function generateDoctorSummaryPDF(record, analysis, options = {}) {
       .sort(([a], [b]) => b.localeCompare(a))
       .slice(0, 15);
     if (!obsEntries.length) return "";
-    return `<h2>Recorded Ovulation & Fertility Observations</h2>
+    return `<h2>${t("export.recordedOvulation") || "Recorded Ovulation & Fertility Observations"}</h2>
   <table>
     <thead>
       <tr>
-        <th>Date</th>
-        <th>LH / OPK Test</th>
-        <th>Basal Body Temp</th>
-        <th>Cervical Fluid</th>
-        <th>Notes</th>
+        <th>${t("export.colDate") || "Date"}</th>
+        <th>${t("export.colLh") || "LH / OPK Test"}</th>
+        <th>${t("export.colBbt") || "Basal Body Temp"}</th>
+        <th>${t("export.colFluid") || "Cervical Fluid"}</th>
+        <th>${t("export.colNotes") || "Notes"}</th>
       </tr>
     </thead>
     <tbody>
@@ -773,7 +780,7 @@ export function generateDoctorSummaryPDF(record, analysis, options = {}) {
   })()}
 
   <div class="disclaimer">
-    <strong>Clinical Notice:</strong> This summary was generated from patient-recorded observations in the Saheli Menstrual Health Companion for healthcare consultations. Saheli operates 100% locally on-device. Ovulation estimates are educational and strictly suppressed when cycle variability exceeds clinical thresholds. For full two-way diary backup and lossless data restoration, always use an Encrypted JSON backup.
+    <strong>${t("export.clinicalNoticeHeading") || "Clinical Notice:"}</strong> ${t("export.clinicalNotice") || "This summary was generated from patient-recorded observations in the Saheli Menstrual Health Companion for healthcare consultations. Saheli operates 100% locally on-device. Ovulation estimates are educational and strictly suppressed when cycle variability exceeds clinical thresholds. For full two-way diary backup and lossless data restoration, always use an Encrypted JSON backup."}
   </div>
 </body>
 </html>`;

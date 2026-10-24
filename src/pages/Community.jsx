@@ -36,7 +36,7 @@ const TOPICS = [
 ];
 
 export default function Community() {
-  const { t, record } = useApp();
+  const { t, record, fmtDate } = useApp();
   const userAgeGroup =
     record?.settings?.ageGroup === "under18" || record?.settings?.ageGroup === "teen"
       ? "under18"
@@ -220,21 +220,25 @@ export default function Community() {
         <div className="nova-card-elevated p-6 sm:p-8 space-y-4 max-w-2xl mx-auto border-2 border-primary/30">
           <div className="flex items-center gap-2 font-bold text-lg text-primary">
             <Shield className="h-6 w-6" />
-            <span>Teen Peer Forum Protection (DPDP Act 2023)</span>
+            <span>{t("comm.teenNoticeTitle") || "Teen Peer Forum Protection (DPDP Act 2023)"}</span>
           </div>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            In compliance with Section 9 of India's Digital Personal Data Protection Act (DPDP Act
-            2023), the online community forum for under-18 users is paused until legal age-assurance
-            and verifiable parental consent frameworks are certified.
+            {t("comm.teenNoticeDesc") ||
+              "In compliance with Section 9 of India's Digital Personal Data Protection Act (DPDP Act 2023), the online community forum for under-18 users is paused until legal age-assurance and verifiable parental consent frameworks are certified."}
           </p>
           <div className="rounded-2xl bg-card p-4 border border-border/70 text-xs text-foreground space-y-2">
-            <p className="font-bold">Safe, verified resources available right now:</p>
+            <p className="font-bold">
+              {t("comm.teenResourcesTitle") || "Safe, verified resources available right now:"}
+            </p>
             <ul className="list-disc pl-4 space-y-1 text-muted-foreground">
               <li>
-                Verified adolescent health lessons (First Period, Cramps, Normal Cycle variation)
+                {t("comm.teenResource1") ||
+                  "Verified adolescent health lessons (First Period, Cramps, Normal Cycle variation)"}
               </li>
-              <li>Doctor appointment guidance and question lists</li>
-              <li>Local-only cycle diary (never leaves your phone)</li>
+              <li>{t("comm.teenResource2") || "Doctor appointment guidance and question lists"}</li>
+              <li>
+                {t("comm.teenResource3") || "Local-only cycle diary (never leaves your phone)"}
+              </li>
             </ul>
           </div>
           <div className="flex flex-wrap gap-3 pt-2">
@@ -242,13 +246,13 @@ export default function Community() {
               href="/learn"
               className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-primary px-5 text-xs font-bold text-primary-foreground shadow-sm hover:bg-primary/90 transition-all"
             >
-              Browse Health Lessons
+              {t("comm.browseLessons") || "Browse Health Lessons"}
             </a>
             <a
               href="/doctor"
               className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-border bg-card px-5 text-xs font-bold hover:bg-muted text-foreground transition-all"
             >
-              Doctor Guidance
+              {t("comm.doctorChecklist") || "Doctor Guidance"}
             </a>
           </div>
         </div>
@@ -309,13 +313,13 @@ export default function Community() {
             {/* Safe Community Rules */}
             <div className="rounded-3xl border border-border/70 bg-card/60 p-4 shadow-xs text-xs space-y-1.5">
               <p className="font-bold text-foreground flex items-center gap-1.5 text-xs">
-                <Sparkles className="h-3.5 w-3.5 text-primary" /> Community Rules
+                <Sparkles className="h-3.5 w-3.5 text-primary" />{" "}
+                {t("comm.rulesTitle") || "Community Rules"}
               </p>
-              <ul className="text-[11px] text-muted-foreground space-y-1 list-disc pl-3.5 leading-relaxed">
-                <li>Be respectful, supportive, and kind.</li>
-                <li>Do not share prescription instructions or medical diagnoses.</li>
-                <li>Never post phone numbers, WhatsApp links, or personal addresses.</li>
-              </ul>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                {t("comm.rulesDesc") ||
+                  "Be respectful, supportive, and kind. Do not share prescription instructions or medical diagnoses. Never post phone numbers, WhatsApp links, or personal addresses."}
+              </p>
             </div>
           </div>
 
@@ -407,7 +411,7 @@ export default function Community() {
                             {post.topic.replace("_", " ")}
                           </span>
                           <span className="text-xs text-muted-foreground">
-                            {new Date(post.created_at).toLocaleDateString()}
+                            {fmtDate(post.created_at)}
                           </span>
                         </div>
 
@@ -420,7 +424,7 @@ export default function Community() {
 
                         <div className="flex items-center justify-between pt-3 border-t border-border/60 text-xs">
                           <span className="text-muted-foreground font-medium">
-                            {post.author_alias} {post.is_own && "(You)"}
+                            {post.author_alias} {post.is_own && `(${t("common.you") || "You"})`}
                           </span>
 
                           <div className="flex items-center gap-3">
@@ -430,7 +434,9 @@ export default function Community() {
                               className="flex items-center gap-1.5 font-bold text-primary hover:underline"
                             >
                               <MessageCircle className="h-4 w-4" />
-                              <span>{post.reply_count || 0} Replies</span>
+                              <span>
+                                {post.reply_count || 0} {t("comm.repliesCount") || "Replies"}
+                              </span>
                             </button>
 
                             <button
@@ -438,7 +444,7 @@ export default function Community() {
                               onClick={() => setReportingTarget({ type: "post", id: post.id })}
                               className="text-muted-foreground hover:text-destructive text-xs"
                             >
-                              Report
+                              {t("comm.report") || "Report"}
                             </button>
                           </div>
                         </div>
@@ -447,7 +453,7 @@ export default function Community() {
                         {selectedPostId === post.id && (
                           <div className="mt-4 pt-4 border-t border-border space-y-3 bg-muted/40 p-4 rounded-2xl">
                             <h4 className="font-bold text-xs text-muted-foreground uppercase tracking-wider">
-                              Replies
+                              {t("comm.repliesTitle") || "Replies"}
                             </h4>
 
                             {selectedPostDetail?.replies?.length > 0 ? (
@@ -461,7 +467,7 @@ export default function Community() {
                                       <span className="font-bold text-foreground">
                                         {reply.author_alias}
                                       </span>
-                                      <span>{new Date(reply.created_at).toLocaleDateString()}</span>
+                                      <span>{fmtDate(reply.created_at)}</span>
                                     </div>
                                     <p className="text-foreground leading-relaxed">
                                       {reply.content}
@@ -471,7 +477,7 @@ export default function Community() {
                               </div>
                             ) : (
                               <p className="text-xs text-muted-foreground">
-                                No approved replies yet.
+                                {t("comm.noRepliesYet") || "No approved replies yet."}
                               </p>
                             )}
 
@@ -480,7 +486,9 @@ export default function Community() {
                               <input
                                 value={replyContent}
                                 onChange={(e) => setReplyContent(e.target.value)}
-                                placeholder="Write a supportive reply..."
+                                placeholder={
+                                  t("comm.placeholderReply") || "Write a supportive reply..."
+                                }
                                 className={`${inputCls} text-xs py-2`}
                                 maxLength={300}
                               />
@@ -527,7 +535,7 @@ export default function Community() {
                       htmlFor="post-topic"
                       className="block text-xs font-bold mb-1 text-foreground"
                     >
-                      Topic
+                      {t("comm.topicLabel") || "Topic"}
                     </label>
                     <select
                       id="post-topic"
@@ -548,13 +556,15 @@ export default function Community() {
                       htmlFor="post-title"
                       className="block text-xs font-bold mb-1 text-foreground"
                     >
-                      Title
+                      {t("comm.titleLabel") || "Title"}
                     </label>
                     <input
                       id="post-title"
                       value={newTitle}
                       onChange={(e) => setNewTitle(e.target.value)}
-                      placeholder="Brief summary of your question or experience"
+                      placeholder={
+                        t("comm.placeholderTitle") || "Brief summary of your question or experience"
+                      }
                       className={inputCls}
                       maxLength={100}
                       required
@@ -566,13 +576,16 @@ export default function Community() {
                       htmlFor="post-content"
                       className="block text-xs font-bold mb-1 text-foreground"
                     >
-                      Details
+                      {t("comm.detailsLabel") || "Details"}
                     </label>
                     <textarea
                       id="post-content"
                       value={newContent}
                       onChange={(e) => setNewContent(e.target.value)}
-                      placeholder="Share your experience or question respectfully. Do not share personal names or contact information."
+                      placeholder={
+                        t("comm.placeholderContent") ||
+                        "Share your experience or question respectfully. Do not share personal names or contact information."
+                      }
                       className={`${inputCls} min-h-36 py-3 resize-none`}
                       maxLength={1000}
                       required
@@ -593,7 +606,7 @@ export default function Community() {
                     disabled={submitting || !newTitle.trim() || !newContent.trim()}
                   >
                     {submitting
-                      ? "Submitting..."
+                      ? t("comm.submitting") || "Submitting..."
                       : t("comm.submitPost") || "Submit Post for Review"}
                   </Btn>
                 </form>
@@ -608,13 +621,14 @@ export default function Community() {
                     {t("comm.myPostsTitle") || "My Community Submissions"}
                   </h2>
                   <p className="text-xs text-muted-foreground">
-                    These are posts submitted from this phone. You can view their moderation status
-                    or wipe all your contributions at any time.
+                    {t("comm.myPostsDesc") ||
+                      "These are posts submitted from this phone. You can view their moderation status or wipe all your contributions at any time."}
                   </p>
 
                   {myPosts.length === 0 ? (
                     <p className="text-sm text-muted-foreground py-6 text-center">
-                      You have not submitted any posts from this device yet.
+                      {t("comm.noSubmissionsYet") ||
+                        "You have not submitted any posts from this device yet."}
                     </p>
                   ) : (
                     <div className="space-y-3 pt-2">
@@ -660,21 +674,22 @@ export default function Community() {
                   {confirmDelete ? (
                     <div className="space-y-3 pt-2">
                       <p className="text-xs font-bold text-destructive">
-                        Are you absolutely sure? This cannot be undone.
+                        {t("comm.confirmWipeDesc") ||
+                          "Are you absolutely sure? This cannot be undone."}
                       </p>
                       <div className="flex gap-2">
                         <Btn
                           onClick={handleDeleteAll}
                           className="bg-destructive text-destructive-foreground hover:bg-destructive/90 text-xs"
                         >
-                          Yes, Permanently Delete
+                          {t("comm.confirmWipeBtn") || "Yes, Permanently Delete"}
                         </Btn>
                         <button
                           type="button"
                           onClick={() => setConfirmDelete(false)}
                           className="px-4 py-2 text-xs font-bold rounded-xl bg-card border border-border"
                         >
-                          Cancel
+                          {t("comm.cancel") || "Cancel"}
                         </button>
                       </div>
                     </div>
@@ -700,37 +715,46 @@ export default function Community() {
           <div className="w-full max-w-sm rounded-3xl border border-border bg-card p-6 shadow-xl space-y-4">
             <div className="flex items-center gap-2 text-destructive font-bold">
               <AlertCircle className="h-5 w-5" />
-              <span>Report Content</span>
+              <span>{t("comm.reportTitle") || "Report Content"}</span>
             </div>
             <p className="text-xs text-muted-foreground">
-              Help keep Saheli safe. Please specify why this content should be reviewed:
+              {t("comm.reportPrompt") ||
+                "Help keep Saheli safe. Please specify why this content should be reviewed:"}
             </p>
             <select
               value={reportReason}
               onChange={(e) => setReportReason(e.target.value)}
               className={inputCls}
             >
-              <option value="Inappropriate language">Inappropriate language</option>
-              <option value="Medical misinformation">Medical misinformation</option>
-              <option value="Contains personal contact info / PII">
-                Contains personal contact info / PII
+              <option value="Inappropriate language">
+                {t("comm.reportReasonInappropriate") || "Inappropriate language"}
               </option>
-              <option value="Bullying or harassment">Bullying or harassment</option>
-              <option value="Spam or promotional">Spam or promotional</option>
+              <option value="Medical misinformation">
+                {t("comm.reportReasonMedical") || "Medical misinformation"}
+              </option>
+              <option value="Contains personal contact info / PII">
+                {t("comm.reportReasonPii") || "Contains personal contact info / PII"}
+              </option>
+              <option value="Bullying or harassment">
+                {t("comm.reportReasonBullying") || "Bullying or harassment"}
+              </option>
+              <option value="Spam or promotional">
+                {t("comm.reportReasonSpam") || "Spam or promotional"}
+              </option>
             </select>
             <div className="flex gap-2 pt-2">
               <Btn
                 onClick={handleReport}
                 className="flex-1 bg-destructive text-destructive-foreground text-xs"
               >
-                Submit Report
+                {t("comm.submitReport") || "Submit Report"}
               </Btn>
               <button
                 type="button"
                 onClick={() => setReportingTarget(null)}
                 className="px-4 py-2 text-xs font-bold rounded-xl bg-muted"
               >
-                Cancel
+                {t("comm.cancel") || "Cancel"}
               </button>
             </div>
           </div>

@@ -95,7 +95,7 @@ export default function DoctorGuidance() {
           {/* Healthcare Helplines */}
           <div className="nova-card-elevated p-5 space-y-3">
             <h3 className="font-bold text-xs uppercase tracking-wider text-muted-foreground">
-              Direct Health Resources
+              {t("doc.directResources") || "Direct Health Resources"}
             </h3>
             <div className="space-y-2">
               <a
@@ -107,9 +107,11 @@ export default function DoctorGuidance() {
                 <div className="flex items-center gap-2.5">
                   <Stethoscope className="h-5 w-5 text-primary" />
                   <div>
-                    <p className="text-xs font-bold text-foreground">eSanjeevani OPD</p>
+                    <p className="text-xs font-bold text-foreground">
+                      {t("doc.eSanjeevani") || "eSanjeevani OPD"}
+                    </p>
                     <p className="text-[10px] text-muted-foreground">
-                      Free Govt of India Teleconsultation
+                      {t("doc.optEsan") || "Free Govt of India Teleconsultation"}
                     </p>
                   </div>
                 </div>
@@ -139,8 +141,12 @@ export default function DoctorGuidance() {
                 <div className="flex items-center gap-2.5">
                   <Phone className="h-5 w-5 text-urgent" />
                   <div>
-                    <p className="text-xs font-bold text-urgent">Emergency Helpline: 112</p>
-                    <p className="text-[10px] text-muted-foreground">National Emergency Number</p>
+                    <p className="text-xs font-bold text-urgent">
+                      {t("doc.emergencyNumber") || "Emergency Helpline: 112"}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {t("doc.nationalEmergency") || "National Emergency Number"}
+                    </p>
                   </div>
                 </div>
                 <ArrowRight className="h-4 w-4 text-urgent group-hover:translate-x-0.5 transition-transform" />

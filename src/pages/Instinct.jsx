@@ -277,7 +277,7 @@ export default function Instinct() {
           {/* Desktop Controls */}
           <div className="hidden md:flex items-center gap-2">
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-muted/40 border border-border/60 text-xs text-muted-foreground font-medium">
-              <span>Suitability:</span>
+              <span>{t("instinct.suitability")}:</span>
               <span className="font-bold text-foreground capitalize">
                 {profile.ageFilter.replace("_", " ")}
               </span>
@@ -290,7 +290,7 @@ export default function Instinct() {
               className="gap-2 text-xs"
             >
               <SlidersHorizontal className="h-3.5 w-3.5" />
-              Taste Profile
+              {t("instinct.personalizeTaste")}
             </Btn>
 
             <Btn
@@ -300,7 +300,7 @@ export default function Instinct() {
               className="gap-2 text-xs"
             >
               <Download className="h-3.5 w-3.5" />
-              Export / Import
+              {t("instinct.dataPortability")}
             </Btn>
           </div>
         </div>
@@ -363,7 +363,7 @@ export default function Instinct() {
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <input
                   type="text"
-                  placeholder="Search titles, actors, directors, musical vibes..."
+                  placeholder={t("instinct.searchPlaceholder")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-muted/40 border border-border/60 text-xs focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
@@ -545,7 +545,9 @@ export default function Instinct() {
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-muted-foreground">Watching:</span>
+                <span className="text-xs font-semibold text-muted-foreground">
+                  {t("instinct.watching")}:
+                </span>
                 <span className="text-xs font-bold text-primary px-2.5 py-1 rounded-full bg-primary/10">
                   {Object.keys(library.currentlyWatching).length} Series
                 </span>
@@ -711,7 +713,7 @@ export default function Instinct() {
             <div className="p-4 rounded-2xl bg-muted/40 border border-border/60 text-xs flex items-start gap-3">
               <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
               <div>
-                <p className="font-bold">Ask INSTINCT Entertainment Companion</p>
+                <p className="font-bold">{t("instinct.assistantTitle")}</p>
                 <p className="text-muted-foreground">
                   Ask for recommendations by mood, era, streaming platform, or specific tropes.
                   Instant on-device privacy guaranteed: INSTINCT has zero access to your cycle or
@@ -803,7 +805,7 @@ export default function Instinct() {
             >
               <input
                 type="text"
-                placeholder="Ask INSTINCT anything about movies, shows, music..."
+                placeholder={t("instinct.assistantPlaceholder")}
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
                 className="flex-1 px-4 py-3 rounded-2xl bg-card border border-border/80 text-xs focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
@@ -1085,31 +1087,33 @@ function MediaDetailModal({
             {/* Meta Row */}
             <div className="text-[11px] text-muted-foreground space-y-0.5 pt-2">
               <p>
-                <strong>Release:</strong> {item.releaseYear || item.releaseDate || "Verified"}
+                <strong>{t("instinct.metaRelease")}:</strong>{" "}
+                {item.releaseYear || item.releaseDate || "Verified"}
               </p>
               {item.runtime && (
                 <p>
-                  <strong>Runtime:</strong> {item.runtime}
+                  <strong>{t("instinct.metaRuntime")}:</strong> {item.runtime}
                 </p>
               )}
               {item.episodes && (
                 <p>
-                  <strong>Episodes:</strong> {item.episodes} episodes ({item.seasons || 1} seasons)
+                  <strong>{t("instinct.metaEpisodes")}:</strong> {item.episodes} episodes (
+                  {item.seasons || 1} seasons)
                 </p>
               )}
               {item.cast && item.cast.length > 0 && (
                 <p className="line-clamp-2">
-                  <strong>Cast:</strong> {item.cast.join(", ")}
+                  <strong>{t("instinct.metaCast")}:</strong> {item.cast.join(", ")}
                 </p>
               )}
               {item.creators && item.creators.length > 0 && (
                 <p>
-                  <strong>Creators:</strong> {item.creators.join(", ")}
+                  <strong>{t("instinct.metaCreators")}:</strong> {item.creators.join(", ")}
                 </p>
               )}
               {item.artist && (
                 <p>
-                  <strong>Artist:</strong> {item.artist}
+                  <strong>{t("instinct.metaArtist")}:</strong> {item.artist}
                 </p>
               )}
             </div>
@@ -1274,7 +1278,9 @@ function MediaDetailModal({
 
           {/* User Star Rating (1-10) */}
           <div className="flex items-center gap-2 pt-2">
-            <span className="text-xs text-muted-foreground font-semibold">Your Rating:</span>
+            <span className="text-xs text-muted-foreground font-semibold">
+              {t("instinct.yourRating")}:
+            </span>
             <div className="flex items-center gap-1">
               {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => (
                 <button
@@ -1374,7 +1380,7 @@ function EpisodeTrackerModal({ drama, library, onClose, onUpdateLibrary }) {
           />
           <div>
             <h3 className="text-sm font-bold">{drama.title}</h3>
-            <p className="text-xs text-muted-foreground">Track Your Watching Progress</p>
+            <p className="text-xs text-muted-foreground">{t("instinct.trackProgress")}</p>
           </div>
         </div>
 
@@ -1383,7 +1389,7 @@ function EpisodeTrackerModal({ drama, library, onClose, onUpdateLibrary }) {
           {totalSeasons > 1 && (
             <div className="space-y-1">
               <div className="flex justify-between text-xs font-semibold">
-                <span>Season</span>
+                <span>{t("instinct.season")}</span>
                 <span className="text-primary font-bold">
                   {season} of {totalSeasons}
                 </span>
@@ -1401,7 +1407,7 @@ function EpisodeTrackerModal({ drama, library, onClose, onUpdateLibrary }) {
 
           <div className="space-y-1">
             <div className="flex justify-between text-xs font-semibold">
-              <span>Episode</span>
+              <span>{t("instinct.episode")}</span>
               <span className="text-primary font-bold">
                 {episode} of {totalEpisodes}
               </span>
@@ -1534,6 +1540,7 @@ function LibraryView({ library, profile, onUpdateLibrary, onSelectMedia, onOpenP
  * Taste Profile & Onboarding Modal
  */
 function TasteOnboardingModal({ profile, onClose, onSave }) {
+  const { t } = useApp();
   const [ageFilter, setAgeFilter] = useState(profile.ageFilter || "all");
   const [preferredLanguages, setPreferredLanguages] = useState(
     profile.preferredLanguages || ["en", "hi"],
@@ -1587,7 +1594,7 @@ function TasteOnboardingModal({ profile, onClose, onSave }) {
         </button>
 
         <div className="space-y-1">
-          <h2 className="text-lg font-bold">Personalize Your INSTINCT Taste</h2>
+          <h2 className="text-lg font-bold">{t("instinct.personalizeTaste")}</h2>
           <p className="text-xs text-muted-foreground">
             Tune your preferences for movies, series, K-dramas, and music. 100% on-device.
           </p>
@@ -1747,6 +1754,7 @@ function TasteOnboardingModal({ profile, onClose, onSave }) {
  * Data Portability (Export & Import) Modal
  */
 function DataPortabilityModal({ library, onClose, onImport }) {
+  const { t } = useApp();
   const [importText, setImportText] = useState("");
   const [importFormat, setImportFormat] = useState("json");
   const [errorMsg, setErrorMsg] = useState(null);
@@ -1801,7 +1809,7 @@ function DataPortabilityModal({ library, onClose, onImport }) {
         </button>
 
         <div>
-          <h2 className="text-lg font-bold">INSTINCT Data Portability</h2>
+          <h2 className="text-lg font-bold">{t("instinct.dataPortability")}</h2>
           <p className="text-xs text-muted-foreground">
             Export your watchlist, favorites, and music to keep, or restore them anytime.
           </p>
@@ -1809,7 +1817,9 @@ function DataPortabilityModal({ library, onClose, onImport }) {
 
         {/* Export Options */}
         <div className="p-4 rounded-2xl bg-muted/40 border border-border/60 space-y-3">
-          <h4 className="text-xs font-bold uppercase text-muted-foreground">Export Your Library</h4>
+          <h4 className="text-xs font-bold uppercase text-muted-foreground">
+            {t("instinct.exportLibrary")}
+          </h4>
           <div className="flex gap-2">
             <Btn size="sm" variant="outline" onClick={handleDownloadJson} className="gap-2 text-xs">
               <Download className="h-3.5 w-3.5" /> Download JSON

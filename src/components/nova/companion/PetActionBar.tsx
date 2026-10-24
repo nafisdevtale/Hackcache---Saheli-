@@ -39,7 +39,7 @@ export const PetActionBar: React.FC<PetActionBarProps> = ({
   };
 
   return (
-    <section aria-label="Care Actions" className="space-y-3">
+    <section aria-label={t("aria.careActions") || "Care Actions"} className="space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="font-extrabold text-sm sm:text-base text-foreground tracking-tight">
           {t("companion.careActions")}

@@ -174,7 +174,9 @@ export default function Ask() {
             <NovaCard variant="elevated" className="p-5 sm:p-6 space-y-4">
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-secondary-strong">
                 <ShieldCheck className="h-4 w-4" />
-                <span>Verified Offline Medical Knowledge</span>
+                <span>
+                  {t("ask.verifiedOfflineKnowledge") || "Verified Offline Medical Knowledge"}
+                </span>
               </div>
 
               <form

@@ -43,23 +43,23 @@ import { executeDivaRequest } from "@/lib/divaOrchestrator.js";
 
 const SUGGESTED_PROMPTS = [
   {
-    label: "Why is my period late and what can I do?",
+    key: "diva.suggested.1",
     agentHint: "eeve",
   },
   {
-    label: "Recommend an affordable reusable menstrual cup",
+    key: "diva.suggested.2",
     agentHint: "flash",
   },
   {
-    label: "Suggest a heartwarming K-drama to unwind",
+    key: "diva.suggested.3",
     agentHint: "instinct",
   },
   {
-    label: "Explain period cramps and suggest an affordable heating pad",
+    key: "diva.suggested.4",
     agentHint: "multi_agent",
   },
   {
-    label: "I have cramps. Recommend something relaxing to watch",
+    key: "diva.suggested.5",
     agentHint: "multi_agent",
   },
 ];
@@ -129,7 +129,7 @@ export default function Diva() {
         {
           id: `msg_${Date.now()}_err`,
           role: "assistant",
-          error: "Diva encountered a temporary communication glitch. Please try again.",
+          error: t("diva.errorGlitch"),
           timestamp: new Date().toISOString(),
         },
       ]);
@@ -170,17 +170,17 @@ export default function Diva() {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-card border border-border/60 hover:bg-muted text-xs font-semibold text-muted-foreground transition-all shadow-2xs active:scale-95"
             >
               <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-              <span>Privacy Firewall</span>
+              <span>{t("diva.privacyTitle", "Privacy Firewall")}</span>
             </button>
 
             {messages.length > 0 && (
               <button
                 onClick={handleClearChat}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-card border border-border/60 hover:bg-muted text-xs font-semibold text-muted-foreground transition-all shadow-2xs active:scale-95"
-                title="Clear current conversation"
+                title={t("common.reset", "Reset")}
               >
                 <RotateCcw className="h-3.5 w-3.5" />
-                <span>Reset</span>
+                <span>{t("common.reset", "Reset")}</span>
               </button>
             )}
           </div>
@@ -191,29 +191,41 @@ export default function Diva() {
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-primary/5 border border-primary/10">
             <Stethoscope className="h-4 w-4 text-primary shrink-0" />
             <span className="font-bold text-foreground">Eeve</span>
-            <span className="text-[11px] text-muted-foreground">· Health & Guidance</span>
+            <span className="text-[11px] text-muted-foreground">
+              · {t("diva.specialistEeveSub")}
+            </span>
           </div>
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/5 border border-amber-500/10">
             <ShoppingBag className="h-4 w-4 text-amber-500 shrink-0" />
             <span className="font-bold text-foreground">FLASH</span>
-            <span className="text-[11px] text-muted-foreground">· Verified Essentials</span>
+            <span className="text-[11px] text-muted-foreground">
+              · {t("diva.specialistFlashSub")}
+            </span>
           </div>
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-rose-500/5 border border-rose-500/10">
             <Film className="h-4 w-4 text-rose-500 shrink-0" />
             <span className="font-bold text-foreground">INSTINCT</span>
-            <span className="text-[11px] text-muted-foreground">· Movies & Music</span>
+            <span className="text-[11px] text-muted-foreground">
+              · {t("diva.specialistInstinctSub")}
+            </span>
           </div>
         </div>
       </NovaCard>
 
       {/* Specialist Selector Bar */}
       <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-        <span className="text-xs font-bold text-muted-foreground shrink-0">Routing:</span>
+        <span className="text-xs font-bold text-muted-foreground shrink-0">
+          {t("diva.routing")}:
+        </span>
         {[
           { id: "auto", label: t("diva.mode.auto", "Auto (Diva routes)"), icon: Sparkles },
-          { id: "eeve", label: "Eeve (Health)", icon: Stethoscope },
-          { id: "flash", label: "FLASH (Essentials)", icon: ShoppingBag },
-          { id: "instinct", label: "INSTINCT (Entertainment)", icon: Film },
+          { id: "eeve", label: t("diva.mode.eeve", "Eeve (Health)"), icon: Stethoscope },
+          { id: "flash", label: t("diva.mode.flash", "FLASH (Essentials)"), icon: ShoppingBag },
+          {
+            id: "instinct",
+            label: t("diva.mode.instinct", "INSTINCT (Entertainment)"),
+            icon: Film,
+          },
         ].map((item) => {
           const Icon = item.icon;
           const isSelected = selectedAgent === item.id;
@@ -256,15 +268,18 @@ export default function Diva() {
 
             {/* Suggested Prompts */}
             <div className="flex flex-wrap items-center justify-center gap-2 pt-2 max-w-xl mx-auto">
-              {SUGGESTED_PROMPTS.map((prompt, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => handleSend(prompt.label)}
-                  className="px-3 py-1.5 rounded-full bg-background border border-border/70 hover:border-primary text-xs text-muted-foreground hover:text-foreground transition-all shadow-2xs text-left"
-                >
-                  {prompt.label}
-                </button>
-              ))}
+              {SUGGESTED_PROMPTS.map((prompt, idx) => {
+                const promptText = t(prompt.key);
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => handleSend(promptText)}
+                    className="px-3 py-1.5 rounded-full bg-background border border-border/70 hover:border-primary text-xs text-muted-foreground hover:text-foreground transition-all shadow-2xs text-left"
+                  >
+                    {promptText}
+                  </button>
+                );
+              })}
             </div>
           </div>
         ) : (
@@ -290,7 +305,7 @@ export default function Diva() {
                     <div className="p-5 rounded-3xl bg-card border border-border shadow-xs space-y-3">
                       <div className="flex items-center gap-2 text-xs font-bold text-foreground">
                         <Bot className="h-4 w-4 text-primary" />
-                        <span>Diva needs a quick clarification:</span>
+                        <span>{t("diva.clarificationTitle")}</span>
                       </div>
                       <p className="text-xs text-muted-foreground leading-relaxed">
                         {msg.response.clarificationPrompt}
@@ -437,7 +452,7 @@ export default function Diva() {
                             {/* Specialist Sources */}
                             {result.sources && result.sources.length > 0 && (
                               <div className="text-[10px] text-muted-foreground pt-1 flex items-center gap-1.5 flex-wrap">
-                                <strong>Sources:</strong>
+                                <strong>{t("diva.sources")}:</strong>
                                 {result.sources.map((s, sIdx) => (
                                   <span key={sIdx} className="underline">
                                     {s}
@@ -459,7 +474,7 @@ export default function Diva() {
         {isLoading && (
           <div className="flex items-center gap-2 p-4 rounded-2xl bg-card border border-border/70 text-xs text-muted-foreground">
             <Bot className="h-4 w-4 animate-spin text-primary" />
-            <span>Diva is coordinating specialists...</span>
+            <span>{t("diva.coordinating")}</span>
           </div>
         )}
 

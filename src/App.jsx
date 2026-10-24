@@ -38,6 +38,17 @@ import {
   defaultOvulationObservation,
 } from "./lib/exportImport.js";
 import { todayStr, formatDate, formatRange, addDays, isValidDate } from "./lib/localDate.js";
+import {
+  formatNumber,
+  formatInteger,
+  formatPercent,
+  formatCurrency,
+  formatUnit,
+  formatTime,
+  formatRelativeTime,
+  formatList,
+  isRTL,
+} from "./lib/locale.js";
 import { translate, pick } from "./i18n/index.js";
 import {
   isStandalone,
@@ -82,6 +93,36 @@ export function AppProvider({ children }) {
   const L = useCallback((o) => pick(prefs.lang, o), [prefs.lang]);
   const fmt = useCallback((d, o) => formatDate(d, prefs.lang, o), [prefs.lang]);
   const fmtRange = useCallback((a, b) => formatRange(a, b, prefs.lang), [prefs.lang]);
+  const fmtNumber = useCallback(
+    (n, o) => formatNumber(n, prefs.lang, { useNativeNumerals: prefs.nativeNumerals, ...o }),
+    [prefs.lang, prefs.nativeNumerals],
+  );
+  const fmtInteger = useCallback(
+    (n, o) => formatInteger(n, prefs.lang, { useNativeNumerals: prefs.nativeNumerals, ...o }),
+    [prefs.lang, prefs.nativeNumerals],
+  );
+  const fmtPercent = useCallback(
+    (n, o) => formatPercent(n, prefs.lang, { useNativeNumerals: prefs.nativeNumerals, ...o }),
+    [prefs.lang, prefs.nativeNumerals],
+  );
+  const fmtCurrency = useCallback(
+    (n, cur, o) =>
+      formatCurrency(n, cur || "INR", prefs.lang, {
+        useNativeNumerals: prefs.nativeNumerals,
+        ...o,
+      }),
+    [prefs.lang, prefs.nativeNumerals],
+  );
+  const fmtUnit = useCallback(
+    (n, u, o) => formatUnit(n, u, prefs.lang, { useNativeNumerals: prefs.nativeNumerals, ...o }),
+    [prefs.lang, prefs.nativeNumerals],
+  );
+  const fmtTime = useCallback((v, o) => formatTime(v, prefs.lang, o), [prefs.lang]);
+  const fmtRelative = useCallback(
+    (v, u, o) => formatRelativeTime(v, u, prefs.lang, o),
+    [prefs.lang],
+  );
+  const fmtList = useCallback((items, o) => formatList(items, prefs.lang, o), [prefs.lang]);
 
   // Initial load
   useEffect(() => {
@@ -557,6 +598,15 @@ export function AppProvider({ children }) {
     L,
     fmt,
     fmtRange,
+    fmtNumber,
+    fmtInteger,
+    fmtPercent,
+    fmtCurrency,
+    fmtUnit,
+    fmtTime,
+    fmtRelative,
+    fmtList,
+    isRTL: isRTL(prefs.lang),
     lang: prefs.lang,
     today,
     status,

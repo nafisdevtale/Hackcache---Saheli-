@@ -333,7 +333,7 @@ export default function Reminders() {
           <div className="rounded-3xl border border-border/70 bg-hero p-5 shadow-soft space-y-2">
             <div className="flex items-center gap-2 text-xs font-bold text-foreground">
               <Sparkles className="h-4 w-4 text-primary" />
-              <span>Discreet Notifications on Shared Devices</span>
+              <span>{t("rem.discreetTitle") || "Discreet Notifications on Shared Devices"}</span>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
               When discreet mode is active in Settings, all reminder push messages use neutral,

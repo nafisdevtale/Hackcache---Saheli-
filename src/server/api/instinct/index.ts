@@ -146,9 +146,10 @@ export async function handleInstinctRequest(req: Request): Promise<Response> {
       const body = await req.json().catch(() => ({}));
       const message = body.message || "";
       const history = body.history || [];
+      const locale = body.locale || body.lang || "en";
       const clientIp = req.headers.get("x-forwarded-for") || "local";
 
-      const chatResponse = await handleInstinctChat(message, history, clientIp);
+      const chatResponse = await handleInstinctChat(message, history, clientIp, locale);
       return new Response(JSON.stringify(chatResponse), {
         status: 200,
         headers,

@@ -1,5 +1,6 @@
 import React, { useEffect, type ReactNode } from "react";
 import { X } from "lucide-react";
+import { useApp } from "@/App.jsx";
 
 export interface NovaDialogProps {
   isOpen?: boolean;
@@ -35,6 +36,13 @@ export const NovaDialog: React.FC<NovaDialogProps> = ({
   className = "",
   testId,
 }) => {
+  let t = (k: string, fallback?: string) => fallback || k;
+  try {
+    const app = useApp();
+    if (app?.t) t = app.t;
+  } catch (_err) {
+    // Standalone render without AppProvider
+  }
   const visible = Boolean(isOpen ?? open);
 
   useEffect(() => {
@@ -71,7 +79,7 @@ export const NovaDialog: React.FC<NovaDialogProps> = ({
             type="button"
             onClick={onClose}
             className="rounded-full p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer shrink-0"
-            aria-label="Close"
+            aria-label={t("aria.close") || "Close"}
           >
             <X className="h-4 w-4" />
           </button>

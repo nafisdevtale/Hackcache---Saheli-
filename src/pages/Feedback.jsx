@@ -202,7 +202,7 @@ export default function Feedback() {
             {t("feedback.successDesc")}
           </p>
           <div className="inline-flex items-center gap-2 rounded-xl bg-muted px-3 py-1.5 font-mono text-xs font-bold text-foreground">
-            <span>Report ID:</span>
+            <span>{t("feedback.reportId") || "Report ID"}:</span>
             <span>{submittedReportId}</span>
           </div>
           <div className="pt-4 flex flex-wrap justify-center gap-3">
@@ -406,7 +406,9 @@ export default function Feedback() {
                     <ImageIcon className="h-4 w-4 text-primary" />
                     <span>{t("feedback.attachScreenshot")}</span>
                   </label>
-                  <span className="text-[11px] text-muted-foreground">PNG/JPEG up to 2MB</span>
+                  <span className="text-[11px] text-muted-foreground">
+                    {t("feedback.maxFileSize") || "PNG/JPEG up to 2MB"}
+                  </span>
                 </div>
               )}
             </div>
