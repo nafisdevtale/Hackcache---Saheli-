@@ -161,13 +161,14 @@ async function main() {
             scrollWidth: document.documentElement.scrollWidth,
             clientWidth: document.documentElement.clientWidth,
             bodyScrollWidth: document.body.scrollWidth,
-            hasHorizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1
+            hasHorizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+            hasErrorBoundary: document.body.innerText.includes("This page didn't load")
           })`,
           returnByValue: true,
         });
 
         const m = metrics.result.value;
-        const pass = !m.hasHorizontalOverflow;
+        const pass = !m.hasHorizontalOverflow && !m.hasErrorBoundary;
         const filename = `vp_${vp.name}_${route.id}.png`;
         const filepath = path.join(screenshotsDir, filename);
 
@@ -226,6 +227,7 @@ async function main() {
             scrollWidth: document.documentElement.scrollWidth,
             clientWidth: document.documentElement.clientWidth,
             hasHorizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+            hasErrorBoundary: document.body.innerText.includes("This page didn't load"),
             // Check for raw unparsed translation keys like 'today.', 'companion.'
             rawKeyCount: (document.body.innerText.match(/\\b(pet|today|cal|nav|insights|companion)\\.[a-zA-Z0-9_]+/g) || []).length
           })`,
@@ -236,7 +238,8 @@ async function main() {
         const dirCorrect = lang.code === "ur" ? lc.htmlDir === "rtl" : lc.htmlDir === "ltr";
         const noRawKeys = lc.rawKeyCount === 0;
         const noOverflow = !lc.hasHorizontalOverflow;
-        const pass = dirCorrect && noRawKeys && noOverflow;
+        const noCrash = !lc.hasErrorBoundary;
+        const pass = dirCorrect && noRawKeys && noOverflow && noCrash;
 
         const filename = `lang_${lang.code}_${route.id}.png`;
         const filepath = path.join(screenshotsDir, filename);
@@ -292,6 +295,7 @@ async function main() {
           scrollWidth: document.documentElement.scrollWidth,
           clientWidth: document.documentElement.clientWidth,
           hasHorizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+          hasErrorBoundary: document.body.innerText.includes("This page didn't load"),
           bloomCards: document.querySelectorAll(".bloom-card, .bloom-card-elevated, [class*='rounded-3xl'], [class*='rounded-2xl']").length,
           buttons: document.querySelectorAll("button, [role='button']").length,
           minTouchTargetsPass: Array.from(document.querySelectorAll("button, a")).every(el => {
@@ -304,7 +308,7 @@ async function main() {
       });
 
       const a = audit.result.value;
-      const pass = !a.hasHorizontalOverflow;
+      const pass = !a.hasHorizontalOverflow && !a.hasErrorBoundary;
       const filename = `page_${route.id}.png`;
       const filepath = path.join(screenshotsDir, filename);
 

@@ -43,7 +43,17 @@ import { StatCard, ActionCard, AiBadge } from "@/components/bloom/index.js";
 
 export default function Today() {
   const app = useApp();
-  const { t, fmt, fmtRange, analysis: a, safety, record, today, fertilityVisible } = app;
+  const {
+    t,
+    fmt,
+    fmtRange,
+    analysis: a,
+    cycleState,
+    safety,
+    record,
+    today,
+    fertilityVisible,
+  } = app;
   const [missedAnswered, setMissedAnswered] = useState(false);
   const [demoBusy, setDemoBusy] = useState(false);
   const [quickLogTarget, setQuickLogTarget] = useState(null);
@@ -53,10 +63,10 @@ export default function Today() {
   const [companion] = useState(() => loadCompanionState());
 
   const dayCount = Object.keys(record?.days || {}).length;
-  const patterns = symptomPatterns(record?.days || {}, a);
+  const patterns = a?.periods ? symptomPatterns(record?.days || {}, a) : [];
   const insight = patterns[0]
     ? patternText(patterns[0], t)
-    : a.stats && a.stats.count >= 2
+    : a?.stats && a.stats.count >= 2
       ? t("today.insightStats", a.stats)
       : null;
 
@@ -162,7 +172,7 @@ export default function Today() {
       </div>
 
       {/* Urgent Clinical Red Flags: Always pinned at the top */}
-      {safety.urgent.map((c) => (
+      {safety?.urgent?.map((c) => (
         <UrgentCard key={c.id} card={c} />
       ))}
 
@@ -248,36 +258,40 @@ export default function Today() {
               <div className="lg:col-span-7 p-6 sm:p-8 space-y-4">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="rounded-full bg-primary/15 text-primary border border-primary/25 px-3 py-1 text-xs font-bold">
-                    {a.currentCycleDay
-                      ? `${t("today.day")} ${a.currentCycleDay}`
+                    {a?.currentCycleDay
+                      ? t("today.cycleDay", { n: a.currentCycleDay })
                       : t("today.insufficient")}
                   </span>
 
                   {isPeriodToday && (
                     <span className="rounded-full bg-period/15 text-period border border-period/30 px-3 py-1 text-xs font-bold flex items-center gap-1">
-                      🩸 {t("today.periodActive")}
+                      🩸 {t("cal.periodDay")}
                     </span>
                   )}
 
                   <span className="rounded-full bg-secondary text-secondary-foreground border border-secondary-strong/20 px-3 py-1 text-xs font-semibold">
-                    {t(phaseKey(a.phase))}
+                    {cycleState?.activePhase === "follicular"
+                      ? t("phase.follicular.title")
+                      : cycleState?.activePhase === "luteal"
+                        ? t("phase.luteal.title")
+                        : t("phase.myPhaseTracker")}
                   </span>
                 </div>
 
                 <div className="space-y-1">
                   <h2 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-                    {a.prediction
+                    {a?.prediction
                       ? fmtRange(a.prediction.start, a.prediction.end)
-                      : a.status === "insufficient"
+                      : a?.status === "insufficient"
                         ? t("today.progressTitle")
-                        : t("today.rhythm")}
+                        : t("today.title")}
                   </h2>
                   <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                    {a.prediction
+                    {a?.prediction
                       ? t("today.basedOn", { n: a.prediction.basedOn })
-                      : a.status === "insufficient"
+                      : a?.status === "insufficient"
                         ? t("today.progressDesc")
-                        : t("today.tagline")}
+                        : t("today.welcomeSub")}
                   </p>
                 </div>
 
@@ -402,9 +416,7 @@ export default function Today() {
                   onClick={() => setQuickLogTarget(today)}
                   className="flex items-center justify-between w-full text-xs font-bold text-primary hover:underline cursor-pointer"
                 >
-                  <span>
-                    {currentDayEntry ? t("today.updateEntry") : t("today.startActionLog")}
-                  </span>
+                  <span>{currentDayEntry ? t("log.editing") : t("today.startActionLog")}</span>
                   <ChevronRight className="h-4 w-4 rtl-mirror" />
                 </button>
               </div>
@@ -421,20 +433,20 @@ export default function Today() {
                     <h3 className="font-bold text-foreground text-sm">{t("cal.title")}</h3>
                   </div>
                   <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                    {a.stats?.median ? `${a.stats.median}d avg` : t("today.cycle")}
+                    {a?.stats?.median ? `${a.stats.median}d avg` : t("cal.title")}
                   </span>
                 </div>
 
                 <div className="space-y-1 py-1">
                   <p className="font-display text-xl font-bold text-foreground">
-                    {a.prediction
+                    {a?.prediction
                       ? fmtRange(a.prediction.start, a.prediction.end)
-                      : t("today.rhythm")}
+                      : t("cal.title")}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {a.lastStart
-                      ? `${t("today.cycleStarted")} ${fmt(a.lastStart, { month: "short", day: "numeric" })}`
-                      : t("today.keepLogging")}
+                    {a?.lastStart
+                      ? t("phase.startedOn", { date: fmt(a.lastStart) })
+                      : t("today.noInsight")}
                   </p>
                 </div>
               </div>
@@ -461,7 +473,7 @@ export default function Today() {
                     <h3 className="font-bold text-foreground text-sm">{t("today.insight")}</h3>
                   </div>
                   <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
-                    {patterns[0] ? t("insights.detected") : t("insights.title")}
+                    {patterns[0] ? t("ins.patterns") : t("ins.title")}
                   </span>
                 </div>
 
@@ -669,7 +681,7 @@ export default function Today() {
           </section>
 
           {/* Doctor Guidance Link if safety triggers exist */}
-          {safety.cards.length > 0 && (
+          {safety?.cards?.length > 0 && (
             <Link
               to="/doctor"
               className="flex min-h-14 items-center justify-between gap-3 rounded-3xl border-2 border-info bg-card p-4 font-semibold text-xs shadow-xs hover:bg-info/5 transition-all"

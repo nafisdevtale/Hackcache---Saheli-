@@ -270,7 +270,7 @@ export function analyze(days = {}, opts = {}) {
 }
 
 export function phaseKey(a, today = todayStr()) {
-  if (!a.lastStart || a.status === "paused") return "phase.unknown";
+  if (!a?.lastStart || a?.status === "paused") return "phase.unknown";
   if (a.inPeriod) return "phase.period";
   if (!a.prediction) return "phase.dayOnly";
   if (today > a.prediction.end) return "phase.late";

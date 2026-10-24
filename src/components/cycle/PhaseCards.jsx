@@ -460,7 +460,7 @@ export function PhaseCards({ showAll = true, allowObservationLog = true, classNa
       )}
 
       {/* 5. Two Functional Tracker Cards (Follicular & Luteal) */}
-      {isViewingCurrent && (
+      {isViewingCurrent && follicularTracker && lutealTracker && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Card A: Follicular Phase Tracker */}
           <div
