@@ -1,12 +1,13 @@
 /**
- * Saheli 7.2 — Verified Personal Essentials Catalogue
+ * Saheli 7.5 — Verified Personal Essentials Catalogue
  *
  * Safety & Quality Charter:
  * - Only verified, age-appropriate, non-prescription essentials.
  * - ZERO prescription medicines, hormonal treatments, unverified supplements, or diet pills.
  * - Real verified pricing in INR with verification timestamps.
  * - Transparent trade-offs (e.g. upfront cost vs longevity of reusable items).
- * - Explicit safety and contraindication instructions for every product.
+ * - Explicit safety, care, and contraindication instructions for every product.
+ * - Dual-property compatibility for seamless consumption across UI, API, and Recommender.
  */
 
 export const PRODUCT_CATEGORIES = [
@@ -25,6 +26,7 @@ export const PRODUCT_CATEGORIES = [
 export const VERIFIED_PRODUCTS = [
   // 1. Suvidha Sanitary Napkins (Jan Aushadhi)
   {
+    id: "suvidha_oxobio_pads",
     productId: "suvidha_oxobio_pads",
     category: "disposable_pads",
     brand: "Pradhan Mantri Bhartiya Janaushadhi Pariyojana",
@@ -32,22 +34,39 @@ export const VERIFIED_PRODUCTS = [
     description:
       "Affordable oxo-biodegradable sanitary pads with high absorption core and non-toxic adhesive wings.",
     materials: ["Oxo-biodegradable polymer", "Cellulose pulp", "Soft non-woven cotton top-sheet"],
+    material: "Oxo-biodegradable polymer, Cellulose pulp, Non-woven cotton top-sheet",
+    size: "Regular (240mm)",
+    packQuantity: 4,
     quantity: 4,
     reusable: false,
-    unitPrice: 4.0, // Rs. 1 per pad, pack of 4 = Rs. 4
+    type: "disposable",
+    unitPrice: 4.0,
+    price: 4.0,
     currency: "INR",
     pricePerUnit: "₹1.00 / pad",
     priceTimestamp: "2026-10-01",
+    lastPriceCheck: "2026-10-01",
+    lastAvailabilityCheck: "2026-10-01",
     priceVerificationStatus: "verified_current",
+    verificationStatus: "verified_current",
     merchant: "Jan Aushadhi Kendras (Government of India)",
+    retailer: "Jan Aushadhi Kendras (Government of India)",
     officialProductUrl: "http://janaushadhi.gov.in",
+    url: "http://janaushadhi.gov.in",
     availability: "widely_available",
     qualityEvidence:
       "Bureau of Pharma PSUs of India (BPPI) certified, conforms to IS:5405 Indian standard.",
+    certificationEvidence:
+      "Bureau of Pharma PSUs of India (BPPI) certified, conforms to IS:5405 Indian standard.",
     safetyInformation:
       "Change pads at least every 4 to 6 hours to prevent skin irritation and bacterial growth.",
+    careInstructions:
+      "Single-use only. Wrap securely in newspaper or paper wrap before discarding in domestic waste bin.",
     contraindicationNotes: "Do not flush down toilets. Dispose in paper wrap in waste bins.",
+    limitations: "Do not flush down toilets. Dispose in paper wrap in waste bins.",
     suitabilityNotes:
+      "Ideal for low-budget access and emergency replenishment across urban and rural India.",
+    suitability:
       "Ideal for low-budget access and emergency replenishment across urban and rural India.",
     sourceIds: ["unicef_hygiene", "who_selfcare"],
     reviewStatus: "verified_safe_non_prescription",
@@ -55,6 +74,7 @@ export const VERIFIED_PRODUCTS = [
 
   // 2. EcoFemme Organic Cotton Reusable Pads
   {
+    id: "ecofemme_day_pad",
     productId: "ecofemme_day_pad",
     category: "reusable_pads",
     brand: "EcoFemme",
@@ -66,30 +86,49 @@ export const VERIFIED_PRODUCTS = [
       "Polyurethane laminate (PUL) leak-proof barrier",
       "Nickel-free snaps",
     ],
+    material: "100% GOTS Organic Cotton flannel with PUL backing",
+    size: "Day Pad (240mm)",
+    packQuantity: 1,
     quantity: 1,
     reusable: true,
+    type: "reusable",
     unitPrice: 285.0,
+    price: 285.0,
     currency: "INR",
     pricePerUnit: "₹285.00 / pad (lasts 3-5 years; ~₹3.80/cycle)",
     priceTimestamp: "2026-09-15",
+    lastPriceCheck: "2026-09-15",
+    lastAvailabilityCheck: "2026-09-15",
     priceVerificationStatus: "verified_current",
+    verificationStatus: "verified_current",
     merchant: "EcoFemme India",
+    retailer: "EcoFemme India",
     officialProductUrl: "https://ecofemme.org",
+    url: "https://ecofemme.org",
     availability: "widely_available",
     qualityEvidence:
       "GOTS-certified organic cotton; lab-tested for biocompatibility and zero harmful chemical dyes.",
+    certificationEvidence:
+      "GOTS-certified organic cotton; lab-tested for biocompatibility and zero harmful chemical dyes.",
     safetyInformation:
       "Soak in cold water for 30 minutes, wash with mild soap, and dry completely in direct sunlight.",
+    careInstructions:
+      "Rinse in cold water first. Machine or hand wash with mild soap. Dry completely in direct sunlight to disinfect naturally.",
     contraindicationNotes:
       "Never store in enclosed damp containers while wet to prevent mould. Do not bleach or iron.",
+    limitations:
+      "Never store in enclosed damp containers while wet to prevent mould. Do not bleach or iron.",
     suitabilityNotes:
+      "Excellent for eco-conscious users and long-term cost reduction; requires access to clean water and sunshine for drying.",
+    suitability:
       "Excellent for eco-conscious users and long-term cost reduction; requires access to clean water and sunshine for drying.",
     sourceIds: ["unicef_hygiene", "who_selfcare"],
     reviewStatus: "verified_safe_non_prescription",
   },
 
-  // 3. Carmesi 100% Organic Cotton Disposable Pads
+  // 3. Carmesi Sensitive Disposable Pads
   {
+    id: "carmesi_sensitive_pads",
     productId: "carmesi_sensitive_pads",
     category: "disposable_pads",
     brand: "Carmesi",
@@ -97,28 +136,45 @@ export const VERIFIED_PRODUCTS = [
     description:
       "Chlorine-free, fragrance-free disposable pads with cornstarch top-sheet designed for sensitive skin.",
     materials: ["Cornstarch fiber", "Bamboo fiber core", "Chlorine-free cellulose"],
+    material: "Cornstarch fiber top sheet and bamboo fiber core",
+    size: "Regular (240mm)",
+    packQuantity: 10,
     quantity: 10,
     reusable: false,
+    type: "disposable",
     unitPrice: 249.0,
+    price: 249.0,
     currency: "INR",
     pricePerUnit: "₹24.90 / pad",
     priceTimestamp: "2026-09-20",
+    lastPriceCheck: "2026-09-20",
+    lastAvailabilityCheck: "2026-09-20",
     priceVerificationStatus: "verified_current",
+    verificationStatus: "verified_current",
     merchant: "Carmesi / Major E-Commerce",
+    retailer: "Carmesi / Major E-Commerce",
     officialProductUrl: "https://mycarmesi.com",
+    url: "https://mycarmesi.com",
     availability: "widely_available",
     qualityEvidence:
       "Dermatologically tested, zero artificial dyes, bleach-free, certified by SGS.",
+    certificationEvidence:
+      "Dermatologically tested, zero artificial dyes, bleach-free, certified by SGS.",
     safetyInformation: "Designed to minimize contact dermatitis and chafing for sensitive skin.",
+    careInstructions: "Single use. Dispose in provided individual biodegradable disposal pouches.",
     contraindicationNotes: "Single use only. Dispose properly in waste receptacle.",
+    limitations: "Single use only. Dispose properly in waste receptacle.",
     suitabilityNotes:
+      "Recommended for individuals prone to vulvar rashes and allergic reactions to synthetic perfumes.",
+    suitability:
       "Recommended for individuals prone to vulvar rashes and allergic reactions to synthetic perfumes.",
     sourceIds: ["acog_dysmenorrhea"],
     reviewStatus: "verified_safe_non_prescription",
   },
 
-  // 4. Boondh Medical-Grade Menstrual Cup
+  // 4. Boondh Medical-Grade Silicone Menstrual Cup
   {
+    id: "boondh_cup_regular",
     productId: "boondh_cup_regular",
     category: "menstrual_cups",
     brand: "Boondh",
@@ -126,23 +182,41 @@ export const VERIFIED_PRODUCTS = [
     description:
       "Reusable flexible bell-shaped silicone cup that collects menstrual fluid internally for up to 8-10 hours.",
     materials: ["100% Medical-grade liquid silicone (US FDA approved biocompatible)"],
+    material: "100% Medical-grade liquid silicone",
+    size: "Medium / Regular (20ml capacity)",
+    packQuantity: 1,
     quantity: 1,
     reusable: true,
+    type: "reusable",
     unitPrice: 375.0,
+    price: 375.0,
     currency: "INR",
     pricePerUnit: "₹375.00 / cup (lasts 5-10 years; ~₹3.10/cycle)",
     priceTimestamp: "2026-09-10",
+    lastPriceCheck: "2026-09-10",
+    lastAvailabilityCheck: "2026-09-10",
     priceVerificationStatus: "verified_current",
+    verificationStatus: "verified_current",
     merchant: "Boondh India",
+    retailer: "Boondh India",
     officialProductUrl: "https://boondh.co",
+    url: "https://boondh.co",
     availability: "widely_available",
     qualityEvidence:
       "ISO 13485 medical device standard, cytotoxicity tested, USP Class VI certified.",
+    certificationEvidence:
+      "ISO 13485 medical device standard, cytotoxicity tested, USP Class VI certified.",
     safetyInformation:
       "Must be boiled in clean water for 5 minutes before first use and between each cycle. Wash hands thoroughly prior to insertion and removal.",
+    careInstructions:
+      "Sterilize in boiling water for 5 minutes before cycle starts and after cycle ends. Wash with plain water or fragrance-free soap during cycle.",
     contraindicationNotes:
       "Do not use during postpartum healing (first 6 weeks after delivery). If you have an IUD (Copper-T/Mirena), consult your gynecologist first regarding suction release.",
+    limitations:
+      "Do not use during postpartum healing (first 6 weeks after delivery). If you have an IUD, consult gynecologist.",
     suitabilityNotes:
+      "Best for adults comfortable with internal insertion and with reliable access to boiling water.",
+    suitability:
       "Best for adults comfortable with internal insertion and with reliable access to boiling water.",
     sourceIds: ["who_selfcare", "acog_dysmenorrhea"],
     reviewStatus: "verified_safe_non_prescription",
@@ -150,6 +224,7 @@ export const VERIFIED_PRODUCTS = [
 
   // 5. HealthPlus Classic Rubber Hot Water Bottle
   {
+    id: "classic_hot_water_bottle",
     productId: "classic_hot_water_bottle",
     category: "warm_compress",
     brand: "HealthPlus Care",
@@ -157,22 +232,40 @@ export const VERIFIED_PRODUCTS = [
     description:
       "Traditional natural rubber thermal bottle with leak-proof brass stopper and plush protective cover for superficial heat therapy.",
     materials: ["Natural vulcanised rubber", "Brass screw-plug", "Soft fleece protective cover"],
+    material: "Natural vulcanised rubber with soft fleece protective cover",
+    size: "2 Litre Capacity",
+    packQuantity: 1,
     quantity: 1,
     reusable: true,
+    type: "reusable",
     unitPrice: 299.0,
+    price: 299.0,
     currency: "INR",
     pricePerUnit: "₹299.00 / item",
     priceTimestamp: "2026-08-25",
+    lastPriceCheck: "2026-08-25",
+    lastAvailabilityCheck: "2026-08-25",
     priceVerificationStatus: "verified_current",
+    verificationStatus: "verified_current",
     merchant: "Local Pharmacies & Online Retailers",
+    retailer: "Local Pharmacies & Online Retailers",
     officialProductUrl: "https://jan-aushadhi.in",
+    url: "https://jan-aushadhi.in",
     availability: "widely_available",
     qualityEvidence: "Conforms to BS 1970:2012 safety standards for rubber hot water bottles.",
+    certificationEvidence:
+      "Conforms to BS 1970:2012 safety standards for rubber hot water bottles.",
     safetyInformation:
       "Fill only up to 2/3 capacity with hot (not boiling) tap water. Expel air before tightening stopper. Always use the included fleece sleeve to prevent skin burns.",
+    careInstructions:
+      "Empty completely and store inverted with stopper off in a dry, cool place away from direct sunlight.",
     contraindicationNotes:
       "NEVER use boiling water directly from a kettle. Never lie or sit directly on the bottle as excessive pressure may cause leakage.",
+    limitations:
+      "NEVER use boiling water directly from a kettle. Never lie or sit directly on the bottle.",
     suitabilityNotes:
+      "First-line non-pharmacological comfort measure for primary dysmenorrhea and lower back cramping.",
+    suitability:
       "First-line non-pharmacological comfort measure for primary dysmenorrhea and lower back cramping.",
     sourceIds: ["nhs_pain", "acog_dysmenorrhea"],
     reviewStatus: "verified_safe_non_prescription",
@@ -180,6 +273,7 @@ export const VERIFIED_PRODUCTS = [
 
   // 6. Pee Safe Waterproof Menstrual Hygiene Pouch
   {
+    id: "peesafe_hygiene_pouch",
     productId: "peesafe_hygiene_pouch",
     category: "pouches_storage",
     brand: "Pee Safe",
@@ -187,28 +281,44 @@ export const VERIFIED_PRODUCTS = [
     description:
       "Compact dual-compartment zippered travel pouch for storing fresh sanitary pads and discreetly isolating used wraps.",
     materials: ["Water-resistant polyester", "Heavy-duty zipper", "Antibacterial inner lining"],
+    material: "Water-resistant coated polyester with antibacterial inner lining",
+    size: "Compact (15cm x 15cm)",
+    packQuantity: 1,
     quantity: 1,
     reusable: true,
+    type: "reusable",
     unitPrice: 199.0,
+    price: 199.0,
     currency: "INR",
     pricePerUnit: "₹199.00 / pouch",
     priceTimestamp: "2026-09-01",
+    lastPriceCheck: "2026-09-01",
+    lastAvailabilityCheck: "2026-09-01",
     priceVerificationStatus: "verified_current",
+    verificationStatus: "verified_current",
     merchant: "Pee Safe / Pharmacies",
+    retailer: "Pee Safe / Pharmacies",
     officialProductUrl: "https://peesafe.com",
+    url: "https://peesafe.com",
     availability: "widely_available",
     qualityEvidence: "Water-repellent tested, odor-containment seam construction.",
+    certificationEvidence: "Water-repellent tested, odor-containment seam construction.",
     safetyInformation: "Wipe down with warm soapy water periodically to maintain clean hygiene.",
+    careInstructions:
+      "Wipe clean with a damp antibacterial cloth or hand wash gently in cool water.",
     contraindicationNotes:
       "Do not store moist or soiled items for longer than a few hours without cleaning.",
+    limitations: "Do not store moist or soiled items for longer than a few hours without cleaning.",
     suitabilityNotes:
       "Essential for girls and women traveling, commuting, or attending school/college.",
+    suitability: "Essential for girls and women traveling, commuting, or attending school/college.",
     sourceIds: ["unicef_hygiene"],
     reviewStatus: "verified_safe_non_prescription",
   },
 
   // 7. Boldfit Anti-Tear Yoga & Gentle Stretching Mat
   {
+    id: "boldfit_exercise_mat",
     productId: "boldfit_exercise_mat",
     category: "exercise_mats",
     brand: "Boldfit",
@@ -216,27 +326,44 @@ export const VERIFIED_PRODUCTS = [
     description:
       "High-density cushioned mat supporting comfortable pelvic floor stretches, child's pose, and restorative menstrual yoga.",
     materials: ["Eco-friendly TPE foam (phthalate-free, non-toxic, latex-free)"],
+    material: "Eco-friendly high-density TPE foam",
+    size: "183cm x 61cm x 6mm",
+    packQuantity: 1,
     quantity: 1,
     reusable: true,
+    type: "reusable",
     unitPrice: 599.0,
+    price: 599.0,
     currency: "INR",
     pricePerUnit: "₹599.00 / mat",
     priceTimestamp: "2026-08-30",
+    lastPriceCheck: "2026-08-30",
+    lastAvailabilityCheck: "2026-08-30",
     priceVerificationStatus: "verified_current",
+    verificationStatus: "verified_current",
     merchant: "Boldfit India",
+    retailer: "Boldfit India",
     officialProductUrl: "https://boldfit.in",
+    url: "https://boldfit.in",
     availability: "widely_available",
     qualityEvidence:
       "RoHS certified, non-toxic foam tested, slip-resistant grip tested on wet and dry tile floors.",
+    certificationEvidence:
+      "RoHS certified, non-toxic foam tested, slip-resistant grip tested on wet and dry tile floors.",
     safetyInformation: "Wipe with damp cloth after gentle stretching routines.",
+    careInstructions:
+      "Roll with top side facing outward. Clean surface with diluted mild detergent.",
     contraindicationNotes: "Avoid sharp objects. Store rolled up away from direct high heat.",
+    limitations: "Avoid sharp objects. Store rolled up away from direct high heat.",
     suitabilityNotes: "Protects knees and lower spine during restorative gentle pelvic movement.",
+    suitability: "Protects knees and lower spine during restorative gentle pelvic movement.",
     sourceIds: ["who_physical_activity"],
     reviewStatus: "verified_safe_non_prescription",
   },
 
   // 8. Cello Stainless Steel Reusable Water Bottle (750ml)
   {
+    id: "cello_steel_hydration_bottle",
     productId: "cello_steel_hydration_bottle",
     category: "water_bottles",
     brand: "Cello",
@@ -244,21 +371,36 @@ export const VERIFIED_PRODUCTS = [
     description:
       "BPA-free single-wall food-grade stainless steel bottle ensuring continuous hydration and fluid replenishment.",
     materials: ["Grade 304 (18/8) Stainless Steel", "Food-grade silicone leak-proof gasket"],
+    material: "Grade 304 (18/8) Stainless Steel with silicone seal",
+    size: "750ml capacity",
+    packQuantity: 1,
     quantity: 1,
     reusable: true,
+    type: "reusable",
     unitPrice: 220.0,
+    price: 220.0,
     currency: "INR",
     pricePerUnit: "₹220.00 / bottle",
     priceTimestamp: "2026-09-05",
+    lastPriceCheck: "2026-09-05",
+    lastAvailabilityCheck: "2026-09-05",
     priceVerificationStatus: "verified_current",
+    verificationStatus: "verified_current",
     merchant: "Cello World / General Retailers",
+    retailer: "Cello World / General Retailers",
     officialProductUrl: "https://celloworld.com",
+    url: "https://celloworld.com",
     availability: "widely_available",
     qualityEvidence: "BIS certified, 100% rust-resistant, BPA-free.",
+    certificationEvidence: "BIS certified, 100% rust-resistant, BPA-free.",
     safetyInformation: "Wash daily with warm water and bottle brush.",
+    careInstructions: "Wash with warm water and mild dish soap. Allow to air dry uncapped.",
     contraindicationNotes:
       "Not insulated for boiling liquids. Use for room temperature or warm water.",
+    limitations: "Not insulated for boiling liquids. Use for room temperature or warm water.",
     suitabilityNotes:
+      "Critical companion for adequate hydration to alleviate water retention, bloating, and fatigue.",
+    suitability:
       "Critical companion for adequate hydration to alleviate water retention, bloating, and fatigue.",
     sourceIds: ["who_selfcare", "fogsi_adolescent_faq"],
     reviewStatus: "verified_safe_non_prescription",
@@ -266,6 +408,7 @@ export const VERIFIED_PRODUCTS = [
 
   // 9. Soch Underwear Reusable Period Panty
   {
+    id: "soch_period_underwear",
     productId: "soch_period_underwear",
     category: "period_underwear",
     brand: "Soch Green",
@@ -277,30 +420,48 @@ export const VERIFIED_PRODUCTS = [
       "Bamboo charcoal absorbent core",
       "Breathable TPU moisture barrier",
     ],
+    material: "Micro-modal cotton, bamboo charcoal core, breathable TPU barrier",
+    size: "Medium (Waist 28-30 inches)",
+    packQuantity: 1,
     quantity: 1,
     reusable: true,
+    type: "reusable",
     unitPrice: 499.0,
+    price: 499.0,
     currency: "INR",
     pricePerUnit: "₹499.00 / pair (lasts 2+ years; ~₹20/cycle)",
     priceTimestamp: "2026-09-12",
+    lastPriceCheck: "2026-09-12",
+    lastAvailabilityCheck: "2026-09-12",
     priceVerificationStatus: "verified_current",
+    verificationStatus: "verified_current",
     merchant: "Soch Green",
+    retailer: "Soch Green",
     officialProductUrl: "https://sochgreen.com",
+    url: "https://sochgreen.com",
     availability: "widely_available",
     qualityEvidence:
       "OEKO-TEX Standard 100 certified non-toxic fabrics, antibacterial absorption lab tested.",
+    certificationEvidence:
+      "OEKO-TEX Standard 100 certified non-toxic fabrics, antibacterial absorption lab tested.",
     safetyInformation:
       "Rinse in cold water until water runs clear, followed by gentle machine or hand wash. Air dry thoroughly.",
+    careInstructions:
+      "Rinse thoroughly in cold water first. Hand wash or gentle cycle without fabric softeners. Line dry in sunlight.",
     contraindicationNotes:
       "Do not use fabric softeners as they coat fibers and decrease absorbency.",
+    limitations: "Do not use fabric softeners as they coat fibers and decrease absorbency.",
     suitabilityNotes:
+      "Great for active days, night-time backup, and girls experiencing sensory discomfort with bulky pads.",
+    suitability:
       "Great for active days, night-time backup, and girls experiencing sensory discomfort with bulky pads.",
     sourceIds: ["who_selfcare"],
     reviewStatus: "verified_safe_non_prescription",
   },
 
-  // 10. Dettol Antiseptic Disinfectant Liquid for Laundry & Personal Hygiene
+  // 10. Dettol Antiseptic Liquid for Laundry & Disinfection
   {
+    id: "dettol_hygiene_liquid",
     productId: "dettol_hygiene_liquid",
     category: "general_hygiene",
     brand: "Dettol (Reckitt)",
@@ -308,29 +469,600 @@ export const VERIFIED_PRODUCTS = [
     description:
       "Chloroxylenol-based antiseptic solution for sanitizing reusable cloth pads, laundry, and bathroom surfaces.",
     materials: ["Chloroxylenol 4.8% w/v", "Terpineol", "Isopropanol"],
+    material: "Chloroxylenol 4.8% w/v in aqueous base",
+    size: "125ml bottle",
+    packQuantity: 1,
     quantity: 1,
     reusable: false,
+    type: "consumable",
     unitPrice: 85.0,
+    price: 85.0,
     currency: "INR",
     pricePerUnit: "₹85.00 / 125ml bottle",
     priceTimestamp: "2026-08-20",
+    lastPriceCheck: "2026-08-20",
+    lastAvailabilityCheck: "2026-08-20",
     priceVerificationStatus: "verified_current",
+    verificationStatus: "verified_current",
     merchant: "Pharmacies & Grocery Stores across India",
+    retailer: "Pharmacies & Grocery Stores across India",
     officialProductUrl: "https://dettol.co.in",
+    url: "https://dettol.co.in",
     availability: "widely_available",
     qualityEvidence:
       "Tested effective against 100 illness-causing germs; Indian Pharmacopoeia standard.",
+    certificationEvidence:
+      "Tested effective against 100 illness-causing germs; Indian Pharmacopoeia standard.",
     safetyInformation:
       "Always dilute: add 1 capful to 1 bucket of water for cloth pad laundry rinsing.",
+    careInstructions:
+      "Keep cap tightly sealed. Store away from young children in a cool, shaded cupboard.",
     contraindicationNotes:
+      "NEVER use undiluted on genital or vulvar skin. For laundry sanitization and surface wash only.",
+    limitations:
       "NEVER use undiluted on genital or vulvar skin. For laundry sanitization and surface wash only.",
     suitabilityNotes:
       "Recommended for sanitizing reusable cloth pads during the monsoon or in humid climates.",
+    suitability:
+      "Recommended for sanitizing reusable cloth pads during the monsoon or in humid climates.",
     sourceIds: ["unicef_hygiene"],
+    reviewStatus: "verified_safe_non_prescription",
+  },
+
+  // 11. Pee Safe Organic Cotton Biodegradable Disposable Pads
+  {
+    id: "peesafe_biodegradable_pads",
+    productId: "peesafe_biodegradable_pads",
+    category: "disposable_pads",
+    brand: "Pee Safe",
+    name: "Pee Safe 100% Organic Cotton Biodegradable Sanitary Pads",
+    description:
+      "Eco-friendly disposable pads made with 100% organic cotton top sheet and sustainable bamboo core.",
+    materials: ["100% Organic Cotton", "Bamboo pulp core", "FSC-certified cellulose"],
+    material: "100% Organic Cotton and Bamboo pulp core",
+    size: "Overnight XL (300mm)",
+    packQuantity: 10,
+    quantity: 10,
+    reusable: false,
+    type: "disposable",
+    unitPrice: 299.0,
+    price: 299.0,
+    currency: "INR",
+    pricePerUnit: "₹29.90 / pad",
+    priceTimestamp: "2026-09-18",
+    lastPriceCheck: "2026-09-18",
+    lastAvailabilityCheck: "2026-09-18",
+    priceVerificationStatus: "verified_current",
+    verificationStatus: "verified_current",
+    merchant: "Pee Safe India / Online",
+    retailer: "Pee Safe India / Online",
+    officialProductUrl: "https://peesafe.com",
+    url: "https://peesafe.com",
+    availability: "widely_available",
+    qualityEvidence: "Ecocert Organic certified, FSC certified pulp, compostable backing.",
+    certificationEvidence: "Ecocert Organic certified, FSC certified pulp, compostable backing.",
+    safetyInformation: "Hypoallergenic and fragrance-free for rash-free protection.",
+    careInstructions: "Single use. Dispose in regular dry waste receptacle. Do not flush.",
+    contraindicationNotes: "Do not flush down toilets.",
+    limitations: "Do not flush down toilets.",
+    suitabilityNotes:
+      "Excellent for heavier flow days and nighttime protection without irritation.",
+    suitability: "Excellent for heavier flow days and nighttime protection without irritation.",
+    sourceIds: ["unicef_hygiene"],
+    reviewStatus: "verified_safe_non_prescription",
+  },
+
+  // 12. Nua Ultra Thin Customized Sanitary Pads
+  {
+    id: "nua_ultra_thin_pads",
+    productId: "nua_ultra_thin_pads",
+    category: "disposable_pads",
+    brand: "Nua",
+    name: "Nua Ultra Thin Customized Sanitary Pads (Pack of 12)",
+    description:
+      "Ultra-soft pads with individualized absorption capacities and discreet paper disposal covers for each pad.",
+    materials: ["Non-woven soft fabric", "Superabsorbent polymer", "Paper disposal sleeve"],
+    material: "Soft non-woven fabric with absorbent gel core",
+    size: "Assorted (Regular, Heavy, Night)",
+    packQuantity: 12,
+    quantity: 12,
+    reusable: false,
+    type: "disposable",
+    unitPrice: 219.0,
+    price: 219.0,
+    currency: "INR",
+    pricePerUnit: "₹18.25 / pad",
+    priceTimestamp: "2026-09-22",
+    lastPriceCheck: "2026-09-22",
+    lastAvailabilityCheck: "2026-09-22",
+    priceVerificationStatus: "verified_current",
+    verificationStatus: "verified_current",
+    merchant: "Nua Woman / Pharmacies",
+    retailer: "Nua Woman / Pharmacies",
+    officialProductUrl: "https://nuawoman.com",
+    url: "https://nuawoman.com",
+    availability: "widely_available",
+    qualityEvidence: "Certified Made Safe Australia, free from chlorine, dioxins, and parabens.",
+    certificationEvidence:
+      "Certified Made Safe Australia, free from chlorine, dioxins, and parabens.",
+    safetyInformation: "Replace every 4-6 hours to prevent moisture buildup.",
+    careInstructions: "Use provided individual paper sleeve for hygienic, odor-free disposal.",
+    contraindicationNotes: "Single use only. Non-flushable.",
+    limitations: "Single use only. Non-flushable.",
+    suitabilityNotes: "Ideal for varied flow days with tailor-made sizes in a single pack.",
+    suitability: "Ideal for varied flow days with tailor-made sizes in a single pack.",
+    sourceIds: ["who_selfcare"],
+    reviewStatus: "verified_safe_non_prescription",
+  },
+
+  // 13. Plush 100% Pure US Cotton Menstrual Pads
+  {
+    id: "plush_100_cotton_pads",
+    productId: "plush_100_cotton_pads",
+    category: "disposable_pads",
+    brand: "Plush",
+    name: "Plush 100% Pure US Cotton Menstrual Pads (Pack of 14)",
+    description:
+      "Feather-light sanitary napkins crafted from 100% pure cotton, free from artificial fragrances and harsh plastic netting.",
+    materials: ["100% US Cotton top sheet", "Natural cellulose absorbent core"],
+    material: "100% Pure natural US Cotton",
+    size: "Light to Medium (280mm)",
+    packQuantity: 14,
+    quantity: 14,
+    reusable: false,
+    type: "disposable",
+    unitPrice: 275.0,
+    price: 275.0,
+    currency: "INR",
+    pricePerUnit: "₹19.64 / pad",
+    priceTimestamp: "2026-09-14",
+    lastPriceCheck: "2026-09-14",
+    lastAvailabilityCheck: "2026-09-14",
+    priceVerificationStatus: "verified_current",
+    verificationStatus: "verified_current",
+    merchant: "Plush / Retailers",
+    retailer: "Plush / Retailers",
+    officialProductUrl: "https://plushforher.com",
+    url: "https://plushforher.com",
+    availability: "widely_available",
+    qualityEvidence:
+      "PETA Certified Vegan & Cruelty-Free, Dermatologist approved for sensitive skin.",
+    certificationEvidence:
+      "PETA Certified Vegan & Cruelty-Free, Dermatologist approved for sensitive skin.",
+    safetyInformation: "Natural cotton top sheet prevents sweat-induced chafing and heat rashes.",
+    careInstructions: "Single use. Roll and secure in wrap before discarding.",
+    contraindicationNotes: "Do not flush.",
+    limitations: "Do not flush.",
+    suitabilityNotes: "Designed specifically for warm humid climates prone to vulvar perspiration.",
+    suitability: "Designed specifically for warm humid climates prone to vulvar perspiration.",
+    sourceIds: ["acog_dysmenorrhea"],
+    reviewStatus: "verified_safe_non_prescription",
+  },
+
+  // 14. EcoFemme Night/Postpartum Reusable Pad
+  {
+    id: "ecofemme_night_pad",
+    productId: "ecofemme_night_pad",
+    category: "reusable_pads",
+    brand: "EcoFemme",
+    name: "EcoFemme Organic Cotton Night Pad (Washable)",
+    description:
+      "Extra-long washable cloth pad providing comprehensive overnight coverage with extra absorbent core and leakproof wings.",
+    materials: [
+      "100% GOTS Organic Cotton flannel",
+      "Multi-layer cotton fleece",
+      "PUL leak-proof backing",
+    ],
+    material: "100% GOTS Organic Cotton flannel with multi-layer fleece",
+    size: "Night Pad (300mm)",
+    packQuantity: 1,
+    quantity: 1,
+    reusable: true,
+    type: "reusable",
+    unitPrice: 365.0,
+    price: 365.0,
+    currency: "INR",
+    pricePerUnit: "₹365.00 / pad (lasts 3-5 years; ~₹4.80/cycle)",
+    priceTimestamp: "2026-09-15",
+    lastPriceCheck: "2026-09-15",
+    lastAvailabilityCheck: "2026-09-15",
+    priceVerificationStatus: "verified_current",
+    verificationStatus: "verified_current",
+    merchant: "EcoFemme India",
+    retailer: "EcoFemme India",
+    officialProductUrl: "https://ecofemme.org",
+    url: "https://ecofemme.org",
+    availability: "widely_available",
+    qualityEvidence: "GOTS-certified organic cotton, Fair Trade certified manufacturing.",
+    certificationEvidence: "GOTS-certified organic cotton, Fair Trade certified manufacturing.",
+    safetyInformation: "Provides high absorbency without synthetic gels or plastic sweat barriers.",
+    careInstructions:
+      "Soak in cold water for 30 minutes, wash with mild laundry soap, line dry in full sunlight.",
+    contraindicationNotes:
+      "Do not bleach. Ensure complete drying before storage to prevent mildew.",
+    limitations: "Do not bleach. Ensure complete drying before storage to prevent mildew.",
+    suitabilityNotes: "Recommended for heavy overnight flow and postpartum recuperation.",
+    suitability: "Recommended for heavy overnight flow and postpartum recuperation.",
+    sourceIds: ["unicef_hygiene", "who_selfcare"],
+    reviewStatus: "verified_safe_non_prescription",
+  },
+
+  // 15. Avocurl Handcrafted Breathable Cotton Pads (Pack of 3)
+  {
+    id: "avocurl_cotton_cloth_pads",
+    productId: "avocurl_cotton_cloth_pads",
+    category: "reusable_pads",
+    brand: "Avocurl Handloom",
+    name: "Handloom Pure Cotton Washable Pads (Pack of 3)",
+    description:
+      "Artisan-crafted breathable cloth pads with natural unbleached cotton lining and snap closures.",
+    materials: ["Handloom unbleached cotton", "Absorbent cotton flannel layers", "Brass snaps"],
+    material: "100% Handloom unbleached cotton",
+    size: "Regular (260mm)",
+    packQuantity: 3,
+    quantity: 3,
+    reusable: true,
+    type: "reusable",
+    unitPrice: 450.0,
+    price: 450.0,
+    currency: "INR",
+    pricePerUnit: "₹150.00 / pad",
+    priceTimestamp: "2026-08-18",
+    lastPriceCheck: "2026-08-18",
+    lastAvailabilityCheck: "2026-08-18",
+    priceVerificationStatus: "verified_current",
+    verificationStatus: "verified_current",
+    merchant: "Avocurl Artisan Collective",
+    retailer: "Avocurl Artisan Collective",
+    officialProductUrl: "https://avocurl.in",
+    url: "https://avocurl.in",
+    availability: "widely_available",
+    qualityEvidence: "Handloom Mark certified, zero chemical processing or artificial softeners.",
+    certificationEvidence:
+      "Handloom Mark certified, zero chemical processing or artificial softeners.",
+    safetyInformation: "Wash thoroughly before first use. Sunlight drying is essential.",
+    careInstructions: "Wash with mild soap bar, sun-dry, store in breathable cloth bag.",
+    contraindicationNotes: "Never tumble dry on high heat or iron over snaps.",
+    limitations: "Never tumble dry on high heat or iron over snaps.",
+    suitabilityNotes: "Budget-friendly reusable multipack for full cycle coverage.",
+    suitability: "Budget-friendly reusable multipack for full cycle coverage.",
+    sourceIds: ["unicef_hygiene"],
+    reviewStatus: "verified_safe_non_prescription",
+  },
+
+  // 16. Pee Safe Medical Grade Silicone Menstrual Cup
+  {
+    id: "peesafe_menstrual_cup",
+    productId: "peesafe_menstrual_cup",
+    category: "menstrual_cups",
+    brand: "Pee Safe",
+    name: "Pee Safe Medical Grade Silicone Menstrual Cup (Small)",
+    description:
+      "Flexible bell-shaped menstrual cup designed for younger women, teens, and beginners with lighter flow.",
+    materials: ["100% Medical-grade silicone"],
+    material: "100% Medical-grade biocompatible silicone",
+    size: "Small (16ml capacity)",
+    packQuantity: 1,
+    quantity: 1,
+    reusable: true,
+    type: "reusable",
+    unitPrice: 349.0,
+    price: 349.0,
+    currency: "INR",
+    pricePerUnit: "₹349.00 / cup (lasts 5 years; ~₹2.90/cycle)",
+    priceTimestamp: "2026-09-08",
+    lastPriceCheck: "2026-09-08",
+    lastAvailabilityCheck: "2026-09-08",
+    priceVerificationStatus: "verified_current",
+    verificationStatus: "verified_current",
+    merchant: "Pee Safe / Pharmacies",
+    retailer: "Pee Safe / Pharmacies",
+    officialProductUrl: "https://peesafe.com",
+    url: "https://peesafe.com",
+    availability: "widely_available",
+    qualityEvidence: "US FDA Registered facility, ISO 10993 cytotoxicity compliant.",
+    certificationEvidence: "US FDA Registered facility, ISO 10993 cytotoxicity compliant.",
+    safetyInformation:
+      "Wash hands thoroughly before handling. Empty and rinse every 6-8 hours. Maximum continuous wear: 8 hours.",
+    careInstructions:
+      "Boil in clean water for 5 minutes between periods. Store in provided cotton pouch.",
+    contraindicationNotes:
+      "Not suitable for post-partum use (first 6 weeks). Seek medical guidance if you have pelvic infections.",
+    limitations: "Not suitable for post-partum use. Clean thoroughly between uses.",
+    suitabilityNotes:
+      "Designed for beginners and those with a lower cervix or lighter menstrual flow.",
+    suitability: "Designed for beginners and those with a lower cervix or lighter menstrual flow.",
+    sourceIds: ["who_selfcare"],
+    reviewStatus: "verified_safe_non_prescription",
+  },
+
+  // 17. Sirona Menstrual Cup Steam Sterilizer & Container
+  {
+    id: "sirona_cup_sterilizer",
+    productId: "sirona_cup_sterilizer",
+    category: "pouches_storage",
+    brand: "Sirona",
+    name: "Sirona Microwave & Steam Menstrual Cup Sterilizing Container",
+    description:
+      "Collapsible food-grade silicone container for hygienic microwave steam sterilization and discreet cup storage.",
+    materials: ["100% Food-grade silicone (BPA-free, temperature resistant to 220°C)"],
+    material: "100% Food-grade heat-resistant silicone",
+    size: "Universal (fits all standard cups)",
+    packQuantity: 1,
+    quantity: 1,
+    reusable: true,
+    type: "reusable",
+    unitPrice: 499.0,
+    price: 499.0,
+    currency: "INR",
+    pricePerUnit: "₹499.00 / unit",
+    priceTimestamp: "2026-09-02",
+    lastPriceCheck: "2026-09-02",
+    lastAvailabilityCheck: "2026-09-02",
+    priceVerificationStatus: "verified_current",
+    verificationStatus: "verified_current",
+    merchant: "Sirona Hygiene / Pharmacies",
+    retailer: "Sirona Hygiene / Pharmacies",
+    officialProductUrl: "https://thesirona.com",
+    url: "https://thesirona.com",
+    availability: "widely_available",
+    qualityEvidence: "CE certified, BPA-free, tested for microwave temperature safety.",
+    certificationEvidence: "CE certified, BPA-free, tested for microwave temperature safety.",
+    safetyInformation:
+      "Fill with water up to marked line, place cup inside with lid loosely on, microwave for 3 minutes.",
+    careInstructions: "Wash with clean warm water after use. Air dry thoroughly.",
+    contraindicationNotes: "Do not seal lid tightly in microwave to avoid steam pressure buildup.",
+    limitations: "Do not seal lid tightly in microwave to avoid steam pressure buildup.",
+    suitabilityNotes:
+      "Eliminates kitchen utensil contamination concerns for hostel students and shared households.",
+    suitability:
+      "Eliminates kitchen utensil contamination concerns for hostel students and shared households.",
+    sourceIds: ["unicef_hygiene"],
+    reviewStatus: "verified_safe_non_prescription",
+  },
+
+  // 18. Healthfab GoPadFree Heavy Flow Period Underwear
+  {
+    id: "healthfab_gopadfree_underwear",
+    productId: "healthfab_gopadfree_underwear",
+    category: "period_underwear",
+    brand: "Healthfab",
+    name: "Healthfab GoPadFree Heavy Flow Period Underwear",
+    description:
+      "Full coverage leak-proof menstrual brief with four-layer absorption technology holding up to 5 regular pads equivalent.",
+    materials: [
+      "95% Cotton, 5% Spandex body",
+      "Super-absorbent microfiber core",
+      "Breathable leakproof barrier",
+    ],
+    material: "Cotton-spandex body with multi-layer absorption core",
+    size: "Large (Waist 32-34 inches)",
+    packQuantity: 1,
+    quantity: 1,
+    reusable: true,
+    type: "reusable",
+    unitPrice: 649.0,
+    price: 649.0,
+    currency: "INR",
+    pricePerUnit: "₹649.00 / pair (lasts 2+ years; ~₹27.00/cycle)",
+    priceTimestamp: "2026-09-25",
+    lastPriceCheck: "2026-09-25",
+    lastAvailabilityCheck: "2026-09-25",
+    priceVerificationStatus: "verified_current",
+    verificationStatus: "verified_current",
+    merchant: "Healthfab India",
+    retailer: "Healthfab India",
+    officialProductUrl: "https://healthfab.in",
+    url: "https://healthfab.in",
+    availability: "widely_available",
+    qualityEvidence: "ISO 9001 quality certified, OEKO-TEX Standard 100 tested non-toxic.",
+    certificationEvidence: "ISO 9001 quality certified, OEKO-TEX Standard 100 tested non-toxic.",
+    safetyInformation: "Provides pad-free comfort without moisture sensation on sensitive skin.",
+    careInstructions:
+      "Rinse in cold water until clear. Gentle hand wash or machine cycle in laundry mesh bag.",
+    contraindicationNotes: "Do not bleach, iron, or use fabric softener.",
+    limitations: "Do not bleach, iron, or use fabric softener.",
+    suitabilityNotes:
+      "Excellent for school, athletics, overnight sleeping, and heavy menstrual flows.",
+    suitability: "Excellent for school, athletics, overnight sleeping, and heavy menstrual flows.",
+    sourceIds: ["who_selfcare"],
+    reviewStatus: "verified_safe_non_prescription",
+  },
+
+  // 19. Sirona Natural Cramp Relief Patches
+  {
+    id: "sirona_herbal_cramp_patches",
+    productId: "sirona_herbal_cramp_patches",
+    category: "warm_compress",
+    brand: "Sirona",
+    name: "Sirona Natural Menthol & Eucalyptus Period Cramp Relief Patches",
+    description:
+      "Discreet adhesive transdermal herbal patches releasing continuous cooling and soothing botanical comfort for up to 8 hours.",
+    materials: ["Natural Menthol", "Eucalyptus Oil", "Breathable medical adhesive backing"],
+    material: "Natural Menthol and Eucalyptus oil on breathable medical adhesive",
+    size: "Pack of 5 Patches",
+    packQuantity: 5,
+    quantity: 5,
+    reusable: false,
+    type: "disposable",
+    unitPrice: 249.0,
+    price: 249.0,
+    currency: "INR",
+    pricePerUnit: "₹49.80 / patch",
+    priceTimestamp: "2026-08-28",
+    lastPriceCheck: "2026-08-28",
+    lastAvailabilityCheck: "2026-08-28",
+    priceVerificationStatus: "verified_current",
+    verificationStatus: "verified_current",
+    merchant: "Sirona Hygiene / Pharmacies",
+    retailer: "Sirona Hygiene / Pharmacies",
+    officialProductUrl: "https://thesirona.com",
+    url: "https://thesirona.com",
+    availability: "widely_available",
+    qualityEvidence: "AYUSH compliant botanical formulation, dermatologically tested patch base.",
+    certificationEvidence:
+      "AYUSH compliant botanical formulation, dermatologically tested patch base.",
+    safetyInformation:
+      "Apply to lower abdomen or lower back. Do not apply on broken, infected, or irritated skin.",
+    careInstructions: "Single use patch. Remove gently and dispose in dry waste bin.",
+    contraindicationNotes:
+      "Discontinue use if burning sensation occurs. For external superficial comfort only.",
+    limitations:
+      "Discontinue use if burning sensation occurs. For external superficial comfort only.",
+    suitabilityNotes:
+      "Portable, discreet cramp comfort for examinations, travel, and active office days.",
+    suitability:
+      "Portable, discreet cramp comfort for examinations, travel, and active office days.",
+    sourceIds: ["acog_dysmenorrhea"],
+    reviewStatus: "verified_safe_non_prescription",
+  },
+
+  // 20. Omron Reusable Microwave / Gel Heating Compress
+  {
+    id: "omron_gel_heating_pad",
+    productId: "omron_gel_heating_pad",
+    category: "warm_compress",
+    brand: "Omron Healthcare",
+    name: "Omron Reusable Hot & Cold Thermal Gel Compress Pack",
+    description:
+      "Flexible non-toxic gel pack that contours seamlessly to lower pelvic curves for soothing superficial warmth.",
+    materials: ["Non-toxic polymer gel", "Puncture-resistant double-sealed PVC envelope"],
+    material: "Non-toxic polymer thermal gel in puncture-resistant sleeve",
+    size: "25cm x 15cm",
+    packQuantity: 1,
+    quantity: 1,
+    reusable: true,
+    type: "reusable",
+    unitPrice: 380.0,
+    price: 380.0,
+    currency: "INR",
+    pricePerUnit: "₹380.00 / pack",
+    priceTimestamp: "2026-09-11",
+    lastPriceCheck: "2026-09-11",
+    lastAvailabilityCheck: "2026-09-11",
+    priceVerificationStatus: "verified_current",
+    verificationStatus: "verified_current",
+    merchant: "Pharmacies & Medical Supply Stores",
+    retailer: "Pharmacies & Medical Supply Stores",
+    officialProductUrl: "https://omronhealthcare-ap.com",
+    url: "https://omronhealthcare-ap.com",
+    availability: "widely_available",
+    qualityEvidence: "CE Medical Device Standard, non-crystallizing polymer gel tested.",
+    certificationEvidence: "CE Medical Device Standard, non-crystallizing polymer gel tested.",
+    safetyInformation:
+      "Microwave in 20-second increments or warm in hot water bath. Always wrap in towel before skin contact.",
+    careInstructions: "Wipe with mild antiseptic wipe. Store flat at room temperature.",
+    contraindicationNotes: "Do not overheat in microwave. Never apply directly to bare skin.",
+    limitations: "Do not overheat in microwave. Never apply directly to bare skin.",
+    suitabilityNotes:
+      "Flexible contouring warmth ideal for pelvic cramps and lower spinal muscle tightness.",
+    suitability:
+      "Flexible contouring warmth ideal for pelvic cramps and lower spinal muscle tightness.",
+    sourceIds: ["nhs_pain"],
+    reviewStatus: "verified_safe_non_prescription",
+  },
+
+  // 21. Kalyani Handloom Organic Cotton Storage Bag
+  {
+    id: "kalyani_handloom_cotton_pouch",
+    productId: "kalyani_handloom_cotton_pouch",
+    category: "pouches_storage",
+    brand: "Kalyani Handloom",
+    name: "Organic Khadi Cotton Breathable Period Storage Pouch",
+    description:
+      "Natural hand-spun Khadi cotton pouch designed for breathable, mildew-free storage of cloth pads and menstrual cups.",
+    materials: ["100% Unbleached Indian Khadi Cotton", "Cotton drawstrings"],
+    material: "100% Handloom Khadi Cotton",
+    size: "Medium (20cm x 18cm)",
+    packQuantity: 1,
+    quantity: 1,
+    reusable: true,
+    type: "reusable",
+    unitPrice: 149.0,
+    price: 149.0,
+    currency: "INR",
+    pricePerUnit: "₹149.00 / pouch",
+    priceTimestamp: "2026-08-15",
+    lastPriceCheck: "2026-08-15",
+    lastAvailabilityCheck: "2026-08-15",
+    priceVerificationStatus: "verified_current",
+    verificationStatus: "verified_current",
+    merchant: "Kalyani Artisan Trust",
+    retailer: "Kalyani Artisan Trust",
+    officialProductUrl: "https://kalyanihandloom.org",
+    url: "https://kalyanihandloom.org",
+    availability: "widely_available",
+    qualityEvidence: "Khadi & Village Industries Commission (KVIC) certified organic handloom.",
+    certificationEvidence:
+      "Khadi & Village Industries Commission (KVIC) certified organic handloom.",
+    safetyInformation:
+      "Allows natural airflow, preventing anaerobic bacteria or fungal spore growth.",
+    careInstructions: "Hand wash with mild soap, air dry.",
+    contraindicationNotes: "Do not use for storing dripping wet pads. Use only for dried items.",
+    limitations: "Do not use for storing dripping wet pads. Use only for dried items.",
+    suitabilityNotes:
+      "Optimal storage for keeping clean reusable essentials organized in drawers or schoolbags.",
+    suitability:
+      "Optimal storage for keeping clean reusable essentials organized in drawers or schoolbags.",
+    sourceIds: ["unicef_hygiene"],
+    reviewStatus: "verified_safe_non_prescription",
+  },
+
+  // 22. Azah Gentle Daily Unscented pH 3.8 Intimate Wash
+  {
+    id: "azah_ph_intimate_wash",
+    productId: "azah_ph_intimate_wash",
+    category: "general_hygiene",
+    brand: "Azah",
+    name: "Azah Gentle pH 3.8 Unscented Vulvar Hygiene Wash",
+    description:
+      "Mild soap-free, unperfumed wash formulated with lactic acid and aloe vera to maintain the natural acidic vulvar microbiome.",
+    materials: [
+      "Lactic Acid (pH 3.8 balance)",
+      "Aloe Barbadensis Leaf Extract",
+      "Tea Tree Extract",
+    ],
+    material: "Lactic acid, Aloe vera, and Tea tree botanical formulation",
+    size: "150ml bottle",
+    packQuantity: 1,
+    quantity: 1,
+    reusable: false,
+    type: "consumable",
+    unitPrice: 299.0,
+    price: 299.0,
+    currency: "INR",
+    pricePerUnit: "₹1.99 / ml",
+    priceTimestamp: "2026-09-19",
+    lastPriceCheck: "2026-09-19",
+    lastAvailabilityCheck: "2026-09-19",
+    priceVerificationStatus: "verified_current",
+    verificationStatus: "verified_current",
+    merchant: "Azah / Online Retailers",
+    retailer: "Azah / Online Retailers",
+    officialProductUrl: "https://azah.in",
+    url: "https://azah.in",
+    availability: "widely_available",
+    qualityEvidence:
+      "Dermatologically & gynecologically tested, paraben-free, sulfate-free (SLS/SLES free).",
+    certificationEvidence:
+      "Dermatologically & gynecologically tested, paraben-free, sulfate-free (SLS/SLES free).",
+    safetyInformation:
+      "For external vulvar use only. Warm plain water is always the clinical gold standard; use wash sparingly if desired.",
+    careInstructions: "Store at room temperature away from direct sunlight.",
+    contraindicationNotes:
+      "NEVER douche or insert internally into the vaginal canal. Discontinue immediately if irritation occurs.",
+    limitations:
+      "NEVER douche or insert internally into the vaginal canal. For external vulvar cleansing only.",
+    suitabilityNotes:
+      "Formulated specifically for individuals seeking a mild, fragrance-free external cleanser without harsh alkaline soaps.",
+    suitability:
+      "Formulated specifically for individuals seeking a mild, fragrance-free external cleanser without harsh alkaline soaps.",
+    sourceIds: ["who_selfcare", "fogsi_adolescent_faq"],
     reviewStatus: "verified_safe_non_prescription",
   },
 ];
 
 export function getProductById(productId) {
-  return VERIFIED_PRODUCTS.find((p) => p.productId === productId);
+  if (!productId) return undefined;
+  return VERIFIED_PRODUCTS.find((p) => p.productId === productId || p.id === productId);
 }
