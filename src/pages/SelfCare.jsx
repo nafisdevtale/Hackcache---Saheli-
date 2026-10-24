@@ -483,7 +483,7 @@ export default function SelfCare() {
                         {isPlaying ? (
                           <Pause className="h-5 w-5 fill-current" />
                         ) : (
-                          <Play className="h-5 w-5 fill-current ml-0.5" />
+                          <Play className="h-5 w-5 fill-current ms-0.5" />
                         )}
                       </button>
 
@@ -651,7 +651,7 @@ export default function SelfCare() {
                           onClick={() => soundscapeEngine.toggle(snd.id)}
                           className="text-[11px] font-bold px-2.5 py-1 min-h-8"
                         >
-                          <Volume2 className="h-3 w-3 mr-1" />
+                          <Volume2 className="h-3 w-3 me-1" />
                           {t("selfcare.sound.title")}
                         </Btn>
                       </div>
@@ -835,7 +835,7 @@ export default function SelfCare() {
                     disabled={activeStepIndex === 0}
                     className="text-xs font-bold min-h-10 px-4"
                   >
-                    <ChevronLeft className="h-3.5 w-3.5 mr-1" />
+                    <ChevronLeft className="h-3.5 w-3.5 me-1 rtl-mirror" />
                     {t("selfcare.prog.prev")}
                   </Btn>
 
@@ -847,7 +847,7 @@ export default function SelfCare() {
                     {activeStepIndex === activeModalProg.steps.length - 1
                       ? t("selfcare.prog.finish")
                       : t("selfcare.prog.next")}
-                    <ChevronRight className="h-3.5 w-3.5 ml-1" />
+                    <ChevronRight className="h-3.5 w-3.5 ms-1 rtl-mirror" />
                   </Btn>
                 </div>
               </div>

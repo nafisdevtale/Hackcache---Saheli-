@@ -643,7 +643,7 @@ export default function LogDay() {
           className="rounded-2xl bg-destructive/10 p-4 text-destructive text-xs space-y-1"
         >
           <p className="font-bold">{t("log.fixErrors")}</p>
-          <ul className="ml-5 list-disc">
+          <ul className="ms-5 list-disc">
             {errors.map((e) => (
               <li key={e}>{t(e)}</li>
             ))}
@@ -656,7 +656,7 @@ export default function LogDay() {
       {/* Floating Sticky Save Bar */}
       <div className="sticky bottom-20 md:bottom-6 z-20 flex gap-3 rounded-2xl border border-border/70 bg-card/90 p-3 shadow-xl backdrop-blur-md">
         <Btn type="submit" className="flex-1 min-h-12 rounded-xl text-base font-bold shadow-md">
-          <Save className="h-4 w-4 mr-1.5" />
+          <Save className="h-4 w-4 me-1.5" />
           <span>{t("log.save")}</span>
         </Btn>
         {exists && (
@@ -673,7 +673,7 @@ export default function LogDay() {
               }
             }}
           >
-            <Trash2 className="h-4 w-4 mr-1.5" />
+            <Trash2 className="h-4 w-4 me-1.5" />
             <span>{t("common.delete")}</span>
           </Btn>
         )}

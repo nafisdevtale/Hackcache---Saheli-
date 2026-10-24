@@ -470,7 +470,7 @@ export default function Insights() {
                                     provenance: s.provenance,
                                   })
                                 }
-                                className="ml-1 inline-flex items-center gap-0.5 font-bold text-primary hover:underline"
+                                className="ms-1 inline-flex items-center gap-0.5 font-bold text-primary hover:underline"
                               >
                                 <Search className="h-3 w-3" />
                                 <span>{t("ins.inspectEvidence")}</span>
@@ -751,7 +751,7 @@ export default function Insights() {
                     <span className="font-semibold text-foreground">
                       {t(`sym.${pattern.symptom}`)}
                     </span>
-                    <span className="text-[11px] text-muted-foreground ml-1.5">
+                    <span className="text-[11px] text-muted-foreground ms-1.5">
                       ({t("phase.currentCycleDay", { day: pattern.cycleDay })})
                     </span>
                   </div>
@@ -795,11 +795,11 @@ export default function Insights() {
                       {fmt(obs.date, { month: "short", day: "numeric" })}
                     </span>
                     {obs.cycleDay && (
-                      <span className="text-muted-foreground ml-2 text-[11px]">
+                      <span className="text-muted-foreground ms-2 text-[11px]">
                         (Day {obs.cycleDay})
                       </span>
                     )}
-                    <span className="text-primary font-semibold ml-2 text-[11px]">
+                    <span className="text-primary font-semibold ms-2 text-[11px]">
                       {obs.testResult && obs.testResult !== "none"
                         ? `LH: ${obs.testResult}`
                         : obs.bbt != null

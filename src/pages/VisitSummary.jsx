@@ -204,7 +204,7 @@ export default function VisitSummary() {
           {includeGuidance && (
             <section className="space-y-1">
               <h2 className="font-bold text-base">{t("visit.guidance")}</h2>
-              <ul className="ml-5 list-disc text-sm">
+              <ul className="ms-5 list-disc text-sm">
                 {[
                   ...safety.urgent.map((c) => t(`urgent.${c.id}.title`)),
                   ...safety.cards.map((c) => t(`rf.${c.id}.title`, c.params)),
@@ -221,7 +221,7 @@ export default function VisitSummary() {
       {includeQuestions && (
         <section className="space-y-2">
           <h2 className="font-bold text-base">{t("visit.questions")}</h2>
-          <ol className="ml-5 list-decimal text-sm space-y-1">
+          <ol className="ms-5 list-decimal text-sm space-y-1">
             {["q1", "q2", "q3", "q4"].map((q) => (
               <li key={q}>{t(`visit.${q}`)}</li>
             ))}

@@ -421,7 +421,7 @@ export default function Feedback() {
                 <p className="text-muted-foreground">{t("feedback.offlineFallbackNotice")}</p>
                 <div className="pt-1 flex gap-2">
                   <Btn type="button" variant="outline" size="sm" onClick={handleExportText}>
-                    <Download className="h-3.5 w-3.5 mr-1" />
+                    <Download className="h-3.5 w-3.5 me-1" />
                     {t("feedback.exportReport")}
                   </Btn>
                 </div>
@@ -456,11 +456,11 @@ export default function Feedback() {
                     alert(t("feedback.draftSavedAlert"));
                   }}
                 >
-                  <Save className="h-4 w-4 mr-1.5" />
+                  <Save className="h-4 w-4 me-1.5" />
                   {t("feedback.saveDraft")}
                 </Btn>
                 <Btn type="button" variant="ghost" size="sm" onClick={handleExportText}>
-                  <Download className="h-4 w-4 mr-1.5" />
+                  <Download className="h-4 w-4 me-1.5" />
                   {t("feedback.exportReport")}
                 </Btn>
               </div>
@@ -474,12 +474,12 @@ export default function Feedback() {
               >
                 {submissionState === "sending" ? (
                   <>
-                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    <RefreshCw className="h-4 w-4 me-2 animate-spin" />
                     {t("feedback.sending")}
                   </>
                 ) : (
                   <>
-                    <Send className="h-4 w-4 mr-2" />
+                    <Send className="h-4 w-4 me-2" />
                     {t("feedback.submitReport")}
                   </>
                 )}

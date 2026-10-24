@@ -216,7 +216,7 @@ export default function Reminders() {
               className="w-full text-xs font-semibold min-h-11"
               onClick={() => fire("rem.msg.daily")}
             >
-              <Bell className="h-4 w-4 mr-2" />
+              <Bell className="h-4 w-4 me-2" />
               {t("rem.test")}
             </Btn>
           </div>
@@ -316,7 +316,7 @@ export default function Reminders() {
               </div>
 
               <Btn type="submit" variant="secondary" className="w-full text-xs font-bold min-h-11">
-                <Plus className="h-4 w-4 mr-1.5" />
+                <Plus className="h-4 w-4 me-1.5" />
                 {t("rem.addMed")}
               </Btn>
             </form>

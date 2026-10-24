@@ -1284,7 +1284,7 @@ function MediaDetailModal({
               ))}
             </div>
             {currentRating > 0 && (
-              <span className="text-xs font-bold text-amber-500 ml-1">{currentRating}/10</span>
+              <span className="text-xs font-bold text-amber-500 ms-1">{currentRating}/10</span>
             )}
           </div>
         </div>

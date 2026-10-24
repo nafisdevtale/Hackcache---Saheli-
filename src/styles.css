@@ -62,11 +62,11 @@
   --color-accent-strong: var(--accent-strong);
 
   --font-display:
-    "Noto Serif Devanagari", "Rozha One", "Noto Nastaliq Urdu", "Noto Serif Bengali",
-    "Noto Serif Tamil", "Noto Serif Telugu", Georgia, serif;
+    "Plus Jakarta Sans", "Noto Serif Devanagari", "Rozha One", "Noto Nastaliq Urdu",
+    "Noto Serif Bengali", "Noto Serif Tamil", "Noto Serif Telugu", Georgia, serif;
   --font-body:
-    system-ui, -apple-system, "Inter", "Noto Sans Devanagari", "Kohinoor Devanagari", "Mukta",
-    "Noto Sans Bengali", "Kohinoor Bangla", "Noto Sans Tamil", "Tamil Sangam MN",
+    "Plus Jakarta Sans", system-ui, -apple-system, "Noto Sans Devanagari", "Kohinoor Devanagari",
+    "Mukta", "Noto Sans Bengali", "Kohinoor Bangla", "Noto Sans Tamil", "Tamil Sangam MN",
     "Noto Sans Telugu", "Kohinoor Telugu", "Noto Sans Gujarati", "Kohinoor Gujarati",
     "Noto Sans Kannada", "Kannada Sangam MN", "Noto Sans Malayalam", "Malayalam Sangam MN",
     "Noto Sans Gurmukhi", "Gurmukhi MN", "Noto Sans Oriya", "Noto Nastaliq Urdu",

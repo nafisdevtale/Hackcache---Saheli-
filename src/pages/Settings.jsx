@@ -219,7 +219,7 @@ function PinSection() {
         </div>
         {enabled && (
           <Btn size="sm" variant="outline" className="rounded-xl text-xs font-bold" onClick={lock}>
-            <Lock className="h-3 w-3 mr-1" />
+            <Lock className="h-3 w-3 me-1" />
             {t("set.lockNow")}
           </Btn>
         )}
@@ -828,7 +828,7 @@ export default function Settings() {
                           <div className="font-bold text-foreground">
                             {info ? t(info.labelKey) : item.id}
                             {item.id === "other" && healthConditions.otherText && (
-                              <span className="font-normal text-muted-foreground ml-1">
+                              <span className="font-normal text-muted-foreground ms-1">
                                 ("{healthConditions.otherText}")
                               </span>
                             )}
@@ -1067,7 +1067,7 @@ export default function Settings() {
                   className={cx(inputCls, "h-11 rounded-2xl text-xs")}
                 />
                 <Btn type="submit" size="sm" className="rounded-2xl px-4">
-                  <Plus className="h-4 w-4 mr-1" />
+                  <Plus className="h-4 w-4 me-1" />
                   {t("common.add")}
                 </Btn>
               </form>
@@ -1241,7 +1241,7 @@ export default function Settings() {
                   disabled={Object.keys(record.days).length > 0}
                   onClick={tryDemo}
                 >
-                  <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+                  <RefreshCw className="h-3.5 w-3.5 me-1.5" />
                   {t("set.startDemo")}
                 </Btn>
               )}
@@ -1260,7 +1260,7 @@ export default function Settings() {
                 className="rounded-2xl border-destructive/40 text-destructive hover:bg-destructive/10 text-xs font-bold"
                 onClick={() => setConfirmWipe(true)}
               >
-                <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                <Trash2 className="h-3.5 w-3.5 me-1.5" />
                 {t("set.wipeBtn")}
               </Btn>
             ) : (

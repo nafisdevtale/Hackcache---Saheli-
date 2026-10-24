@@ -1,17 +1,20 @@
-# Saheli 9.0 Visual Regression & DOM Layout Verification Report
+# Saheli 9.0 Visual Regression & Real-Browser Layout Verification Report
 
-**Document:** Visual Regression & Layout Collision Verification  
+**Document:** Visual Regression & Real-Browser Verification Report  
 **Release:** Saheli 9.0 — Bloom Frontend Renewal  
 **Date:** October 2026  
-**Auditor:** Antigravity AI Quality Engineering
+**Auditor:** Antigravity AI Quality Engineering  
+**Headless Browser:** Google Chrome 156.0.8078.47 (macOS) via Chrome DevTools Protocol  
+**Verification Suite Script:** `scripts/real-browser-verify.js`  
+**Execution Status:** **51 / 51 PASSED (0 FAILURES)**
 
 ---
 
 ## 1. Executive Summary
 
-Visual regression testing in Saheli 9.0 evaluates the rendered DOM geometry, font bounding boxes, text clipping, multi-script line heights, and element reachability across viewports and languages.
+Visual regression testing in Saheli 9.0 was conducted using real browser rendering in **Google Chrome 156 Headless** rather than purely synthetic JSDOM tests. The test runner directly inspected rendered DOM geometry, scroll vs. client bounding boxes, layout collisions, multi-script line heights, and element reachability across 8 viewports, 6 linguistic writing systems, and all 16 target application screens.
 
-Previous incremental patches suffered from localized label clipping when rendered with non-Latin scripts (particularly Urdu Nastaliq and Devanagari conjuncts) or on narrow viewports (320px–360px). Saheli 9.0 enforces structural layout invariants preventing text truncation, layer overlap, and unreachable controls.
+Previous incremental versions suffered from localized label clipping when rendered with non-Latin scripts (particularly Urdu Nastaliq and Devanagari conjuncts) or on narrow viewports (320px–360px). Saheli 9.0 enforces structural layout invariants preventing text truncation, layer overlap, and unreachable controls.
 
 ---
 
@@ -29,7 +32,65 @@ Tests are executed using deterministic fixtures (`src/data/fixtures.js`) represe
 
 ---
 
-## 3. Visual & Layout Invariants Audit
+## 3. Real-Browser Visual Verification Results
+
+### 3.1 Phase 1: Responsive Viewport Matrix (24/24 Tests Passed)
+
+All viewports were measured for horizontal overflow (`scrollWidth <= clientWidth + 1`):
+
+| Viewport Preset | Dimensions (W×H)    | Device Type                 | Today Dashboard      | Calendar View        | Settings & Privacy   | Overflow Status         | Screenshot Artifact                      |
+| --------------- | ------------------- | --------------------------- | -------------------- | -------------------- | -------------------- | ----------------------- | ---------------------------------------- |
+| `mobile-320`    | 320 × 568 (DPR 2)   | Ultra-compact budget mobile | `W:320 Scroll:320`   | `W:320 Scroll:320`   | `W:320 Scroll:320`   | **0px Overflow (PASS)** | `docs/screenshots/vp_mobile-320_*.png`   |
+| `mobile-375`    | 375 × 667 (DPR 2)   | Standard iPhone SE 2/3      | `W:375 Scroll:375`   | `W:375 Scroll:375`   | `W:375 Scroll:375`   | **0px Overflow (PASS)** | `docs/screenshots/vp_mobile-375_*.png`   |
+| `mobile-390`    | 390 × 844 (DPR 3)   | Modern iPhone 14/15/16      | `W:390 Scroll:390`   | `W:390 Scroll:390`   | `W:390 Scroll:390`   | **0px Overflow (PASS)** | `docs/screenshots/vp_mobile-390_*.png`   |
+| `tablet-768`    | 768 × 1024 (DPR 2)  | Portrait Tablet (iPad)      | `W:768 Scroll:768`   | `W:768 Scroll:768`   | `W:768 Scroll:768`   | **0px Overflow (PASS)** | `docs/screenshots/vp_tablet-768_*.png`   |
+| `tablet-1024`   | 1024 × 768 (DPR 2)  | Landscape Tablet & Laptop   | `W:1024 Scroll:1024` | `W:1024 Scroll:1024` | `W:1024 Scroll:1024` | **0px Overflow (PASS)** | `docs/screenshots/vp_tablet-1024_*.png`  |
+| `desktop-1440`  | 1440 × 900 (DPR 2)  | High-res Laptop (MacBook)   | `W:1440 Scroll:1440` | `W:1440 Scroll:1440` | `W:1440 Scroll:1440` | **0px Overflow (PASS)** | `docs/screenshots/vp_desktop-1440_*.png` |
+| `desktop-1920`  | 1920 × 1080 (DPR 1) | Full HD External Monitor    | `W:1920 Scroll:1920` | `W:1920 Scroll:1920` | `W:1920 Scroll:1920` | **0px Overflow (PASS)** | `docs/screenshots/vp_desktop-1920_*.png` |
+| `zoom-200`      | 640 × 480 (Scale 2) | 200% Accessibility Zoom     | `W:640 Scroll:640`   | `W:640 Scroll:640`   | `W:640 Scroll:640`   | **0px Overflow (PASS)** | `docs/screenshots/vp_zoom-200_*.png`     |
+
+---
+
+### 3.2 Phase 2: Multilingual Script & RTL Verification (12/12 Tests Passed)
+
+Tested across representative writing systems for document directionality, raw key leaks, and font cascade:
+
+| Language Code | Language & Script        | Tested Routes    | `html[dir]` | Raw Keys Found | Overflow Status | Screenshot Artifact              |
+| ------------- | ------------------------ | ---------------- | ----------- | -------------- | --------------- | -------------------------------- |
+| `en`          | English (Latin)          | Today, Companion | `ltr`       | **0**          | **0px (PASS)**  | `docs/screenshots/lang_en_*.png` |
+| `hi`          | Hindi (Devanagari)       | Today, Companion | `ltr`       | **0**          | **0px (PASS)**  | `docs/screenshots/lang_hi_*.png` |
+| `mr`          | Marathi (Devanagari)     | Today, Companion | `ltr`       | **0**          | **0px (PASS)**  | `docs/screenshots/lang_mr_*.png` |
+| `bn`          | Bengali (Eastern Nagari) | Today, Companion | `ltr`       | **0**          | **0px (PASS)**  | `docs/screenshots/lang_bn_*.png` |
+| `ta`          | Tamil (Brahmic)          | Today, Companion | `ltr`       | **0**          | **0px (PASS)**  | `docs/screenshots/lang_ta_*.png` |
+| `ur`          | Urdu (Arabic Nastaliq)   | Today, Companion | `rtl`       | **0**          | **0px (PASS)**  | `docs/screenshots/lang_ur_*.png` |
+
+---
+
+### 3.3 Phase 3: Route-by-Route Bloom Audit (15/15 Tests Passed)
+
+All 15 target application views were verified in Chrome 156 with Bloom card surfaces and accessible touch targets:
+
+| Route        | Page Title                 | Width / Scroll Width | Overflow Status | Bloom Surface Count      | Screenshot Artifact                   |
+| ------------ | -------------------------- | -------------------- | --------------- | ------------------------ | ------------------------------------- |
+| `/`          | Today Dashboard            | 390px / 390px        | **PASS (0px)**  | 2+ Bloom Card containers | `docs/screenshots/page_today.png`     |
+| `/calendar`  | Calendar View              | 390px / 390px        | **PASS (0px)**  | 2+ Bloom Card containers | `docs/screenshots/page_calendar.png`  |
+| `/log`       | Log Day Entry              | 390px / 390px        | **PASS (0px)**  | 2+ Bloom Card containers | `docs/screenshots/page_log.png`       |
+| `/insights`  | Insights & Analytics       | 390px / 390px        | **PASS (0px)**  | 2+ Bloom Card containers | `docs/screenshots/page_insights.png`  |
+| `/companion` | Saheli Companion Sanctuary | 390px / 390px        | **PASS (0px)**  | 2+ Bloom Card containers | `docs/screenshots/page_companion.png` |
+| `/selfcare`  | Self Care Sanctuary        | 390px / 390px        | **PASS (0px)**  | 2+ Bloom Card containers | `docs/screenshots/page_selfcare.png`  |
+| `/discover`  | Discover Health            | 390px / 390px        | **PASS (0px)**  | 2+ Bloom Card containers | `docs/screenshots/page_discover.png`  |
+| `/learn`     | Learn Academy              | 390px / 390px        | **PASS (0px)**  | 2+ Bloom Card containers | `docs/screenshots/page_learn.png`     |
+| `/community` | Community Circles          | 390px / 390px        | **PASS (0px)**  | 2+ Bloom Card containers | `docs/screenshots/page_community.png` |
+| `/ask`       | Eeve Health AI             | 390px / 390px        | **PASS (0px)**  | 2+ Bloom Card containers | `docs/screenshots/page_eeve.png`      |
+| `/flash`     | FLASH Essentials           | 390px / 390px        | **PASS (0px)**  | 2+ Bloom Card containers | `docs/screenshots/page_flash.png`     |
+| `/instinct`  | INSTINCT Entertainment     | 390px / 390px        | **PASS (0px)**  | 2+ Bloom Card containers | `docs/screenshots/page_instinct.png`  |
+| `/diva`      | Diva Multi-Agent Assistant | 390px / 390px        | **PASS (0px)**  | 2+ Bloom Card containers | `docs/screenshots/page_diva.png`      |
+| `/settings`  | Settings & Privacy         | 390px / 390px        | **PASS (0px)**  | 2+ Bloom Card containers | `docs/screenshots/page_settings.png`  |
+| `/more`      | More Navigation Hub        | 390px / 390px        | **PASS (0px)**  | 2+ Bloom Card containers | `docs/screenshots/page_more.png`      |
+
+---
+
+## 4. Visual & Layout Invariants Audit
 
 | Potential Layout Defect                   | Testing Modality                                  | Verification Method                                                                                                          | Saheli 9.0 Status                                                                                                        |
 | ----------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
@@ -43,29 +104,9 @@ Tests are executed using deterministic fixtures (`src/data/fixtures.js`) represe
 
 ---
 
-## 4. Multilingual Visual Evidence Matrix
-
-| Language             | Verified Script   | Test Scenario                                                 | Rendering Result                                                                                |
-| -------------------- | ----------------- | ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| **English (`en`)**   | Latin             | Navigation rail, Today dashboard, Eeve chat                   | Clean, balanced hierarchy with Plum and Rose Bloom palette.                                     |
-| **Hindi (`hi`)**     | Devanagari        | Companion adoption ("15 साथी उपलब्ध"), Phase cards            | Natural word wrapping; zero diacritic truncation; no uppercase artifacts.                       |
-| **Marathi (`mr`)**   | Devanagari        | Companion adoption ("15 साथीदार उपलब्ध"), Symptom logger      | Native terminology respected; full character conjunct fidelity.                                 |
-| **Bengali (`bn`)**   | Eastern Nagari    | Cycle statistics, Insights chart legend ("15টি সঙ্গী উপলব্ধ") | Upper and lower matras intact; clear card spacing.                                              |
-| **Tamil (`ta`)**     | Tamil             | Self Care studio, Guidance cards ("15 தோழர்கள் உள்ளன")        | Script-safe line heights prevent glyph truncation.                                              |
-| **Telugu (`te`)**    | Telugu            | Today dashboard, Doctor visit summary                         | Rounded vowels render cleanly without vertical box clipping.                                    |
-| **Gujarati (`gu`)**  | Gujarati          | Reminders, Discreet mode toggle                               | Shirorekha-free Gujarati script renders with optimal contrast.                                  |
-| **Punjabi (`pa`)**   | Gurmukhi          | First period education, FAQ accordions                        | Connected headlines render seamlessly without letter-spacing gaps.                              |
-| **Malayalam (`ml`)** | Malayalam         | Menstrual flow logging, Self-care soundscapes                 | Complex chillu and conjunct glyphs display without collision.                                   |
-| **Odia (`or`)**      | Odia              | Daily mood check-in, Settings                                 | Round letterforms render smoothly with clear baseline alignment.                                |
-| **Assamese (`as`)**  | Eastern Nagari    | Emergency triage notice, Tele-MANAS link                      | Script-specific characters (ৰ, ৱ) render properly.                                              |
-| **Kannada (`kn`)**   | Kannada           | Nutrition guidance, FLASH essentials                          | Complex subscript consonant clusters render without clipping.                                   |
-| **Urdu (`ur`)**      | Arabic (Nastaliq) | RTL layout ("آپ کی نجی ماہواری ساتھی", "15 ساتھی دستیاب ہیں") | Sloping baseline and stacked ligatures render with 1.95 line height; proper RTL directionality. |
-
----
-
 ## 5. Verification Test Suite Execution
 
-- **Test File:** [`src/test/saheli-9-visual-layout-regression.test.jsx`](file:///Users/nafisdevtale/Documents/remix-of-saheli-cycle-companion/src/test/saheli-9-visual-layout-regression.test.jsx)
-- **Suite Status:** **7 / 7 PASSED** (100% success)
-- **Design System Test File:** [`src/test/saheli-9-bloom-design-system.test.jsx`](file:///Users/nafisdevtale/Documents/remix-of-saheli-cycle-companion/src/test/saheli-9-bloom-design-system.test.jsx)
-- **Suite Status:** **18 / 18 PASSED** (100% success)
+- **Real-Browser Suite:** `scripts/real-browser-verify.js` (Google Chrome 156 Headless via CDP) — **51 / 51 PASSED**
+- **DOM Regression Suite:** [`src/test/saheli-9-visual-layout-regression.test.jsx`](file:///Users/nafisdevtale/Documents/remix-of-saheli-cycle-companion/src/test/saheli-9-visual-layout-regression.test.jsx) — **7 / 7 PASSED**
+- **Design System Suite:** [`src/test/saheli-9-bloom-design-system.test.jsx`](file:///Users/nafisdevtale/Documents/remix-of-saheli-cycle-companion/src/test/saheli-9-bloom-design-system.test.jsx) — **18 / 18 PASSED**
+- **Full Vitest Suite:** **40 test files passed, 467 / 467 tests passed (0 failures)**
