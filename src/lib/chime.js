@@ -59,6 +59,36 @@ export function isQuietTime(timeStr, quietHours) {
   return timeStr >= quietHours.start || timeStr < quietHours.end;
 }
 
+let chimeCtx = null;
+let activeOscillators = [];
+let activeGainNodes = [];
+
+export function getChimeContext() {
+  if (typeof window === "undefined") return null;
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  if (!AudioCtx) return null;
+  if (!chimeCtx || chimeCtx.state === "closed" || chimeCtx.constructor !== AudioCtx) {
+    chimeCtx = new AudioCtx();
+  }
+  return chimeCtx;
+}
+
+export function stopSaheliChime() {
+  activeOscillators.forEach((osc) => {
+    try {
+      osc.stop();
+      osc.disconnect();
+    } catch {}
+  });
+  activeGainNodes.forEach((gain) => {
+    try {
+      gain.disconnect();
+    } catch {}
+  });
+  activeOscillators = [];
+  activeGainNodes = [];
+}
+
 /**
  * Synthesize and play the Saheli Chime
  * @param {Object} options
@@ -67,6 +97,7 @@ export function isQuietTime(timeStr, quietHours) {
  * @param {boolean} [options.discreetMode] - If true, chime is silenced to protect privacy
  * @param {Object} [options.quietHours] - Quiet hours settings object { on, start, end }
  * @param {string} [options.time] - Time string (HH:MM) to evaluate for quiet hours
+ * @param {boolean} [options.preview] - If true, explicit user preview
  * @returns {Promise<boolean>} true if played, false if silenced or unsupported
  */
 export async function playSaheliChime(options = {}) {
@@ -74,14 +105,22 @@ export async function playSaheliChime(options = {}) {
   const volume = options.volume ?? current.volume;
   const isReduced = options.reducedSensory ?? current.reducedSensory;
   const isDiscreet = !!options.discreetMode;
+  const isPreview = !!options.preview;
 
-  // Strict silence conditions
-  if (!current.enabled || current.silentMode || isDiscreet || volume <= 0) {
-    return false;
+  // Strict silence conditions for notifications
+  if (!isPreview) {
+    if (!current.enabled || current.silentMode || isDiscreet || volume <= 0) {
+      return false;
+    }
+  } else {
+    // In preview mode, allow playing unless volume is explicitly 0
+    if (volume <= 0) {
+      return false;
+    }
   }
 
   // Quiet hours check
-  if (options.quietHours) {
+  if (!isPreview && options.quietHours) {
     const timeToCheck =
       options.time ||
       (() => {
@@ -94,22 +133,24 @@ export async function playSaheliChime(options = {}) {
   }
 
   // Check Web Audio API availability
-  const AudioCtx =
-    typeof window !== "undefined" && (window.AudioContext || window.webkitAudioContext);
-  if (!AudioCtx) {
+  const ctx = getChimeContext();
+  if (!ctx) {
     return false;
   }
 
   try {
-    const ctx = new AudioCtx();
     if (ctx.state === "suspended") {
       await ctx.resume().catch(() => {});
     }
+
+    // Stop any previous chime to prevent overlapping
+    stopSaheliChime();
 
     const now = ctx.currentTime;
     const masterGain = ctx.createGain();
     masterGain.gain.setValueAtTime(volume * 0.7, now);
     masterGain.connect(ctx.destination);
+    activeGainNodes.push(masterGain);
 
     // Warm, soothing triadic frequencies (E5 chord: E5, G#5, B5, with soft E6 shimmer)
     const tones = [
@@ -137,22 +178,24 @@ export async function playSaheliChime(options = {}) {
       osc.connect(noteGain);
       noteGain.connect(masterGain);
 
+      activeOscillators.push(osc);
+      activeGainNodes.push(noteGain);
+
       osc.start(now + delay);
       osc.stop(now + delay + duration + 0.1);
     });
 
-    // Clean up audio context after decay
+    // Cleanup active node references after sound finishes
     setTimeout(
       () => {
-        try {
-          ctx.close();
-        } catch {}
+        stopSaheliChime();
       },
-      (duration + 0.5) * 1000,
+      (duration + 0.2) * 1000,
     );
 
     return true;
   } catch {
+    stopSaheliChime();
     return false;
   }
 }

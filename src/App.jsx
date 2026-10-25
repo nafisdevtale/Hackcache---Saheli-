@@ -167,10 +167,60 @@ export function AppProvider({ children }) {
         const m = await idbGet("meta");
         if (!m?.onboarded) return setStatus("onboarding");
         setMeta(m);
-        if (vm || m.pin?.enabled) return setStatus("locked");
+
+        if (vm) {
+          if (vm.activeLockMethod === "none") {
+            try {
+              const res = await unlockVault("", "none");
+              const dek = res.vaultDEK;
+              dekRef.current = dek;
+              keyRef.current = dek;
+              const payload = await idbGet(storeKey(m));
+              let r = emptyRecord();
+              if (payload) {
+                if (payload.v === 2 || isEncrypted(payload)) {
+                  r = await decryptVaultRecord(dek, payload);
+                } else {
+                  r = payload;
+                }
+              }
+              const normalized = normalizeRecord(r);
+              stateRef.current = { meta: m, record: normalized };
+              setRecord(normalized);
+              setStatus("ready");
+              const activeRole = normalized?.settings?.role || m?.role || "owner";
+              if (
+                activeRole === "partner" &&
+                typeof window !== "undefined" &&
+                (window.location.hash === "" ||
+                  window.location.hash === "#/" ||
+                  window.location.hash === "#")
+              ) {
+                window.location.hash = "#/partner";
+              }
+              return;
+            } catch {
+              // Fallback to locked if auto-unlock fails
+            }
+          }
+          return setStatus("locked");
+        }
+        if (m.pin?.enabled) return setStatus("locked");
+
         const r = await idbGet(storeKey(m));
         if (isEncrypted(r)) return setStatus("locked");
         const normalized = normalizeRecord(r);
+
+        // Transparently upgrade legacy plaintext to local device-encrypted vault
+        try {
+          const { vaultDEK: dek, vaultMeta: newVm } = await initializeVault({ lockMethod: "none" });
+          dekRef.current = dek;
+          keyRef.current = dek;
+          setVaultMeta(newVm);
+          const ct = await encryptVaultRecord(dek, normalized);
+          await idbWrite([[storeKey(m), ct]]);
+        } catch {}
+
         stateRef.current = { meta: m, record: normalized };
         setRecord(normalized);
         setStatus("ready");
@@ -469,8 +519,31 @@ export function AppProvider({ children }) {
         stateRef.current = { meta: nextMeta, record: r };
         setStatus("ready");
       } else {
-        const nextMeta = { onboarded: true, mode: "real", role, pin: { enabled: false } };
-        await writeRecord(r, nextMeta, ["demo"]);
+        const { vaultMeta: newVm, vaultDEK: dek } = await initializeVault({
+          lockMethod: "none",
+        });
+        dekRef.current = dek;
+        keyRef.current = dek;
+        setVaultMeta(newVm);
+
+        const nextMeta = {
+          onboarded: true,
+          mode: "real",
+          role,
+          pin: { enabled: false },
+        };
+        const ct = await encryptVaultRecord(dek, r);
+        await idbWrite(
+          [
+            ["meta", nextMeta],
+            [storeKey(nextMeta), ct],
+          ],
+          ["demo"],
+        );
+        keyRef.current = dek;
+        setMeta(nextMeta);
+        setRecord(r);
+        stateRef.current = { meta: nextMeta, record: r };
         setStatus("ready");
       }
 
@@ -603,30 +676,62 @@ export function AppProvider({ children }) {
     },
     async setupVaultLock(method, secret) {
       const currentRecord = stateRef.current.record || record || emptyRecord();
-      const res = await initializeVault({
-        lockMethod: method === "device" ? "none" : method,
-        secret,
-      });
-      const newVm = res.vaultMeta;
-      const dek = res.vaultDEK;
-      const recoveryKey = res.recoveryKey;
-      dekRef.current = dek;
-      keyRef.current = dek;
-      let finalVm = newVm;
-      if (method === "device") {
-        const { identity: idRecord } = await getOrCreateIdentity();
-        const { credentialId, wrapper } = await registerDeviceAuthenticator(dek, idRecord.serialId);
-        finalVm = {
-          ...newVm,
-          activeLockMethod: "device",
-          deviceCredentialId: credentialId,
-          wrappers: {
-            ...newVm.wrappers,
-            device: wrapper,
-          },
-        };
-        await idbWrite([["vault_meta", finalVm]]);
+      let dek = dekRef.current;
+      let finalVm;
+      let recoveryKey;
+
+      if (dek) {
+        let updatedMeta;
+        if (method === "device") {
+          const { identity: idRecord } = await getOrCreateIdentity();
+          const { credentialId, wrapper } = await registerDeviceAuthenticator(
+            dek,
+            idRecord.serialId,
+          );
+          const vm = vaultMeta || (await idbGet("vault_meta"));
+          updatedMeta = {
+            ...vm,
+            activeLockMethod: "device",
+            deviceCredentialId: credentialId,
+            wrappers: {
+              ...vm.wrappers,
+              device: wrapper,
+            },
+          };
+          await idbWrite([["vault_meta", updatedMeta]]);
+        } else {
+          updatedMeta = await updateVaultLockMethod(dek, method, secret);
+        }
+        finalVm = updatedMeta;
+      } else {
+        const res = await initializeVault({
+          lockMethod: method === "device" ? "none" : method,
+          secret,
+        });
+        finalVm = res.vaultMeta;
+        dek = res.vaultDEK;
+        recoveryKey = res.recoveryKey;
+        dekRef.current = dek;
+        keyRef.current = dek;
+        if (method === "device") {
+          const { identity: idRecord } = await getOrCreateIdentity();
+          const { credentialId, wrapper } = await registerDeviceAuthenticator(
+            dek,
+            idRecord.serialId,
+          );
+          finalVm = {
+            ...finalVm,
+            activeLockMethod: "device",
+            deviceCredentialId: credentialId,
+            wrappers: {
+              ...finalVm.wrappers,
+              device: wrapper,
+            },
+          };
+          await idbWrite([["vault_meta", finalVm]]);
+        }
       }
+
       setVaultMeta(finalVm);
       const encrypted = await encryptVaultRecord(dek, currentRecord);
       const nextMeta = {
@@ -643,24 +748,30 @@ export function AppProvider({ children }) {
     },
     async disableVaultLock(secret, method = null) {
       const vm = vaultMeta || (await idbGet("vault_meta"));
-      if (vm) {
+      let activeDek = dekRef.current;
+      if (!activeDek && vm) {
         const determinedMethod = method || vm.activeLockMethod || "pin";
-        await unlockVault(secret, determinedMethod);
-        await idbDel("vault_meta");
-        setVaultMeta(null);
-      } else if (meta?.pin?.enabled) {
+        const res = await unlockVault(secret, determinedMethod);
+        activeDek = res.vaultDEK;
+        dekRef.current = activeDek;
+        keyRef.current = activeDek;
+      } else if (!activeDek && meta?.pin?.enabled) {
         await api.verifyPin(secret);
       }
-      dekRef.current = null;
-      keyRef.current = null;
-      const currentRecord = stateRef.current.record || record;
-      const nextMeta = { ...meta, pin: { enabled: false } };
-      await idbWrite([
-        ["meta", nextMeta],
-        [storeKey(nextMeta), currentRecord],
-      ]);
-      setMeta(nextMeta);
-      stateRef.current = { meta: nextMeta, record: currentRecord };
+
+      if (activeDek) {
+        const updatedMeta = await updateVaultLockMethod(activeDek, "none", "");
+        setVaultMeta(updatedMeta);
+        const currentRecord = stateRef.current.record || record || emptyRecord();
+        const nextMeta = { ...meta, pin: { enabled: false } };
+        const encrypted = await encryptVaultRecord(activeDek, currentRecord);
+        await idbWrite([
+          ["meta", nextMeta],
+          [storeKey(nextMeta), encrypted],
+        ]);
+        setMeta(nextMeta);
+        stateRef.current = { meta: nextMeta, record: currentRecord };
+      }
     },
     async changeVaultLock(newMethod, newSecret) {
       if (!dekRef.current) throw new Error("Vault is locked");
@@ -985,6 +1096,8 @@ export function AppProvider({ children }) {
     pregnancyVisible,
     identity,
     vaultMeta,
+    isVaultLocked: !dekRef.current && Boolean(vaultMeta) && vaultMeta.activeLockMethod !== "none",
+    isVaultUnlocked: Boolean(dekRef.current),
     isDemo: meta?.mode === "demo",
     isOnline,
     canInstall,

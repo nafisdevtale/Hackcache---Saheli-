@@ -12,6 +12,7 @@ import {
   Download,
   Upload,
   AlertTriangle,
+  AlertCircle,
   Check,
   Plus,
   RefreshCw,
@@ -20,6 +21,7 @@ import {
   Bell,
   MessageSquareWarning,
   Play,
+  Square,
   Stethoscope,
   HeartPulse,
   ChevronRight,
@@ -71,17 +73,24 @@ import {
   importPreview,
   parseCSVImport,
   generateDoctorSummaryPDF,
+  generateClinicalSummaryPDF,
   parsePDFImport,
   defaultHealthConditions,
 } from "@/lib/exportImport.js";
 import { QUESTIONNAIRE_CONDITIONS, CONFIRMATION_STATUSES } from "@/content/conditions.js";
-import { loadChimeSettings, saveChimeSettings, playSaheliChime } from "@/lib/chime.js";
+import {
+  loadChimeSettings,
+  saveChimeSettings,
+  playSaheliChime,
+  stopSaheliChime,
+} from "@/lib/chime.js";
 import { isValidPin, isValidPassphrase, isValidSecret } from "@/lib/encryption.js";
 import { todayStr } from "@/lib/localDate.js";
 import { LANGUAGES } from "@/i18n/languages.js";
 
-function download(name, text, type) {
-  const url = URL.createObjectURL(new Blob([text], { type }));
+function download(name, data, type) {
+  const blob = data instanceof Blob ? data : new Blob([data], { type });
+  const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
   a.download = name;
@@ -160,13 +169,13 @@ function ExportBlock() {
                 if (pending === "json") {
                   download(`${base}.json`, exportJSON(record), "application/json");
                 } else if (pending === "csv") {
-                  download(`${base}.csv`, exportCSV(record), "text/csv");
+                  download(`${base}.csv`, "\uFEFF" + exportCSV(record), "text/csv;charset=utf-8");
                 } else if (pending === "pdf") {
-                  download(
-                    `${base}-health-summary.html`,
-                    generateDoctorSummaryPDF(record, analysis),
-                    "text/html",
-                  );
+                  const pdfBytes = generateClinicalSummaryPDF(record, analysis, {
+                    lang: prefs.lang,
+                    today: todayStr(),
+                  });
+                  download(`${base}-health-summary.pdf`, pdfBytes, "application/pdf");
                 }
                 setPending(null);
               }}
@@ -188,6 +197,9 @@ function AppLockSection() {
     t,
     meta,
     vaultMeta,
+    isVaultLocked,
+    isVaultUnlocked,
+    unlock,
     setupVaultLock,
     changeVaultLock,
     disableVaultLock,
@@ -214,6 +226,9 @@ function AppLockSection() {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState(null);
   const [warnChecked, setWarnChecked] = useState(false);
+  const [unlockInput, setUnlockInput] = useState("");
+  const [unlocking, setUnlocking] = useState(false);
+  const [unlockErr, setUnlockErr] = useState("");
 
   useEffect(() => {
     isDeviceAuthenticatorAvailable().then(setDeviceSupported);
@@ -348,8 +363,65 @@ function AppLockSection() {
 
   return (
     <div className="space-y-5">
+      {/* 3-Point Security & Vault Status Indicators */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-3xl bg-muted/30 border border-border/70 text-xs">
+        <div className="space-y-1">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+            Storage Encryption
+          </span>
+          <div className="flex items-center gap-1.5 font-bold text-emerald-600 dark:text-emerald-400">
+            <ShieldCheck className="h-4 w-4 shrink-0" />
+            <span>Active (AES-256-GCM)</span>
+          </div>
+          <p className="text-[11px] text-muted-foreground leading-relaxed">
+            All period logs and diary notes are cryptographically sealed locally.
+          </p>
+        </div>
+
+        <div className="space-y-1">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+            App Lock
+          </span>
+          <div className="flex items-center gap-1.5 font-bold text-foreground">
+            <Lock className="h-4 w-4 text-primary shrink-0" />
+            <span>
+              {enabled ? `Enabled (${getMethodLabel(activeMethod)})` : "Disabled (No PIN)"}
+            </span>
+          </div>
+          <p className="text-[11px] text-muted-foreground leading-relaxed">
+            {enabled
+              ? "Unlocking required before viewing or changing protected settings."
+              : "App launches directly without requiring a PIN or password."}
+          </p>
+        </div>
+
+        <div className="space-y-1">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+            Vault Session
+          </span>
+          <div className="flex items-center gap-1.5 font-bold">
+            {isVaultLocked ? (
+              <span className="text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                Locked (Auth Required)
+              </span>
+            ) : (
+              <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                <Check className="h-4 w-4 shrink-0" />
+                Unlocked & Ready
+              </span>
+            )}
+          </div>
+          <p className="text-[11px] text-muted-foreground leading-relaxed">
+            {isVaultLocked
+              ? "Authenticate below to view recovery keys or modify security settings."
+              : "Active encryption keys are loaded in memory for this session."}
+          </p>
+        </div>
+      </div>
+
       {/* Header with Active Method Badge and Lock Now Action */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
         <div>
           <h3 className="font-bold text-sm sm:text-base text-foreground flex items-center gap-2">
             <Lock className="h-4 w-4 text-primary" />
@@ -360,7 +432,7 @@ function AppLockSection() {
           </p>
         </div>
 
-        {enabled && (
+        {enabled && !isVaultLocked && (
           <Btn
             type="button"
             size="sm"
@@ -373,6 +445,79 @@ function AppLockSection() {
           </Btn>
         )}
       </div>
+
+      {/* When Vault is Locked: Display Dedicated Unlock Form (Never show 'New PIN' form when locked!) */}
+      {isVaultLocked && (
+        <div className="p-5 rounded-3xl border border-amber-500/30 bg-amber-500/5 space-y-4 animate-fade-in">
+          <div className="space-y-1">
+            <h4 className="font-bold text-xs sm:text-sm text-foreground flex items-center gap-2">
+              <Lock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              <span>Unlock Vault to View or Change Security Settings</span>
+            </h4>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Your sensitive records are locked. To prevent accidentally overwriting inaccessible
+              encryption keys, please authenticate below before changing or viewing security
+              configurations.
+            </p>
+          </div>
+
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              setUnlocking(true);
+              setUnlockErr("");
+              try {
+                await unlock(unlockInput, activeMethod);
+                setUnlockInput("");
+                setMsg({ key: "Vault unlocked successfully.", tone: "ok" });
+              } catch {
+                setUnlockErr(t("set.pinWrong") || "Incorrect unlock secret. Please try again.");
+              } finally {
+                setUnlocking(false);
+              }
+            }}
+            className="space-y-3"
+          >
+            {activeMethod === "pattern" ? (
+              <div className="space-y-2">
+                <p className="text-xs font-semibold text-foreground">
+                  Draw your 3x3 pattern to unlock:
+                </p>
+                <div className="flex justify-center bg-card rounded-2xl border border-border p-2">
+                  <PatternLockCanvas
+                    onComplete={(nodes) => {
+                      setUnlockInput(patternToSecret(nodes));
+                    }}
+                    t={t}
+                  />
+                </div>
+              </div>
+            ) : (
+              <PinInput
+                id="unlock-vault-curr"
+                label={t("set.pinCurrent") || "Enter Current Secret"}
+                value={unlockInput}
+                onChange={setUnlockInput}
+                isPassphrase={activeMethod === "passphrase"}
+              />
+            )}
+
+            {unlockErr && (
+              <p role="alert" className="text-xs font-semibold text-destructive">
+                {unlockErr}
+              </p>
+            )}
+
+            <Btn
+              type="submit"
+              disabled={unlocking || !unlockInput}
+              className="text-xs font-bold w-full sm:w-auto"
+            >
+              {unlocking ? t("set.working") : "Unlock Vault"}
+            </Btn>
+          </form>
+        </div>
+      )}
 
       {/* Device Capability Notice */}
       <div className="p-3 rounded-2xl bg-muted/40 border border-border/60 text-xs flex items-center justify-between gap-3">
@@ -392,304 +537,330 @@ function AppLockSection() {
         </span>
       </div>
 
-      {/* Mode Action Buttons */}
-      {!mode && (
-        <div className="flex flex-wrap gap-2 pt-1">
-          {!enabled ? (
-            <Btn
-              size="sm"
-              className="rounded-xl font-bold text-xs"
-              onClick={() => {
-                setMode("setup");
-                setSelectedMethod("pin");
-              }}
-            >
-              {t("set.pinEnable")}
-            </Btn>
-          ) : (
-            <>
-              <Btn
-                size="sm"
-                variant="outline"
-                className="rounded-xl font-bold text-xs"
-                onClick={() => {
-                  setMode("change");
-                  setSelectedMethod(activeMethod);
-                }}
-              >
-                {t("set.pinChange")}
-              </Btn>
-              <Btn
-                size="sm"
-                variant="outline"
-                className="rounded-xl font-bold text-xs text-destructive hover:text-destructive"
-                onClick={() => setMode("disable")}
-              >
-                {t("set.pinDisable")}
-              </Btn>
-            </>
-          )}
-        </div>
-      )}
-
-      {/* Form: Setup / Change Mode */}
-      {(mode === "setup" || mode === "change") && (
-        <form
-          onSubmit={handleSetupOrChange}
-          className="space-y-4 rounded-3xl border border-border/70 bg-muted/30 p-5 animate-fade-in"
-        >
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-foreground block">Choose Unlock Method:</label>
-            <div className="flex flex-wrap gap-1.5">
-              {[
-                { id: "pin", label: t("set.secretTypePin") },
-                { id: "passphrase", label: t("set.secretTypePassphrase") },
-                { id: "pattern", label: "3x3 Pattern" },
-                ...(deviceSupported ? [{ id: "device", label: "Device Biometrics" }] : []),
-              ].map((m) => (
-                <button
-                  key={m.id}
-                  type="button"
+      {/* Controls only available when Vault is Unlocked */}
+      {!isVaultLocked && (
+        <>
+          {/* Mode Action Buttons */}
+          {!mode && (
+            <div className="flex flex-wrap gap-2 pt-1">
+              {!enabled ? (
+                <Btn
+                  size="sm"
+                  className="rounded-xl font-bold text-xs"
                   onClick={() => {
-                    setSelectedMethod(m.id);
-                    setPinA("");
-                    setPinB("");
-                    setPinC("");
-                    setPatternNodes([]);
-                    setPatternConfirmNodes([]);
-                    setPatternStep("draw");
+                    setMode("setup");
+                    setSelectedMethod("pin");
                   }}
-                  className={cx(
-                    "px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
-                    selectedMethod === m.id
-                      ? "bg-primary text-primary-foreground shadow-2xs"
-                      : "bg-card border border-border text-muted-foreground hover:text-foreground",
-                  )}
                 >
-                  {m.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* PIN Inputs */}
-          {selectedMethod === "pin" && (
-            <div className="space-y-3">
-              <PinInput
-                id="pin-new"
-                label={t("set.pinNew")}
-                value={mode === "change" ? pinB : pinA}
-                onChange={mode === "change" ? setPinB : setPinA}
-                isPassphrase={false}
-              />
-              <PinInput
-                id="pin-confirm"
-                label={t("set.pinConfirm")}
-                value={mode === "change" ? pinC : pinB}
-                onChange={mode === "change" ? setPinC : setPinB}
-                isPassphrase={false}
-              />
-            </div>
-          )}
-
-          {/* Passphrase Inputs */}
-          {selectedMethod === "passphrase" && (
-            <div className="space-y-3">
-              <PinInput
-                id="pass-new"
-                label="New Passphrase (min 6 characters)"
-                value={mode === "change" ? pinB : pinA}
-                onChange={mode === "change" ? setPinB : setPinA}
-                isPassphrase={true}
-              />
-              <PinInput
-                id="pass-confirm"
-                label="Repeat Passphrase"
-                value={mode === "change" ? pinC : pinB}
-                onChange={mode === "change" ? setPinC : setPinB}
-                isPassphrase={true}
-              />
-            </div>
-          )}
-
-          {/* Pattern Canvas */}
-          {selectedMethod === "pattern" && (
-            <div className="space-y-3">
-              <p className="text-xs font-bold text-foreground">
-                {patternStep === "draw"
-                  ? "Draw your 3x3 pattern (connect 4+ points):"
-                  : "Draw pattern again to confirm:"}
-              </p>
-              <div className="flex justify-center bg-card rounded-2xl border border-border p-2">
-                <PatternLockCanvas
-                  onComplete={(nodes) => {
-                    if (patternStep === "draw") {
-                      setPatternNodes(nodes);
-                      setPatternStep("confirm");
-                    } else {
-                      setPatternConfirmNodes(nodes);
-                    }
-                  }}
-                  t={t}
-                />
-              </div>
-              {patternStep === "confirm" && (
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-muted-foreground">Pattern recorded. Confirm above.</span>
-                  <button
-                    type="button"
+                  {t("set.pinEnable")}
+                </Btn>
+              ) : (
+                <>
+                  <Btn
+                    size="sm"
+                    variant="outline"
+                    className="rounded-xl font-bold text-xs"
                     onClick={() => {
-                      setPatternNodes([]);
-                      setPatternConfirmNodes([]);
-                      setPatternStep("draw");
+                      setMode("change");
+                      setSelectedMethod(activeMethod);
                     }}
-                    className="text-primary font-bold hover:underline"
                   >
-                    Redraw original
-                  </button>
-                </div>
+                    {t("set.pinChange")}
+                  </Btn>
+                  <Btn
+                    size="sm"
+                    variant="outline"
+                    className="rounded-xl font-bold text-xs text-destructive hover:text-destructive"
+                    onClick={() => setMode("disable")}
+                  >
+                    {t("set.pinDisable")}
+                  </Btn>
+                </>
               )}
             </div>
           )}
 
-          {/* Device Biometrics Explanation */}
-          {selectedMethod === "device" && (
-            <div className="p-3.5 rounded-2xl bg-card border border-border space-y-1 text-xs">
-              <span className="font-bold text-foreground flex items-center gap-1.5">
-                <Fingerprint className="h-4 w-4 text-primary" />
-                {t("lock.unlockWithDevice")}
-              </span>
-              <p className="text-muted-foreground leading-relaxed">
-                Saheli will bind an on-device platform credential using your fingerprint, face, or
-                lock-screen PIN to wrap your health data encryption key.
+          {/* Form: Setup / Change Mode */}
+          {(mode === "setup" || mode === "change") && (
+            <form
+              onSubmit={handleSetupOrChange}
+              className="space-y-4 rounded-3xl border border-border/70 bg-muted/30 p-5 animate-fade-in"
+            >
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-foreground block">
+                  Choose Unlock Method:
+                </label>
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    { id: "pin", label: t("set.secretTypePin") },
+                    { id: "passphrase", label: t("set.secretTypePassphrase") },
+                    { id: "pattern", label: "3x3 Pattern" },
+                    ...(deviceSupported ? [{ id: "device", label: "Device Biometrics" }] : []),
+                  ].map((m) => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedMethod(m.id);
+                        setPinA("");
+                        setPinB("");
+                        setPinC("");
+                        setPatternNodes([]);
+                        setPatternConfirmNodes([]);
+                        setPatternStep("draw");
+                      }}
+                      className={cx(
+                        "px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
+                        selectedMethod === m.id
+                          ? "bg-primary text-primary-foreground shadow-2xs"
+                          : "bg-card border border-border text-muted-foreground hover:text-foreground",
+                      )}
+                    >
+                      {m.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* PIN Inputs */}
+              {selectedMethod === "pin" && (
+                <div className="space-y-3">
+                  <PinInput
+                    id="pin-new"
+                    label={t("set.pinNew")}
+                    value={mode === "change" ? pinB : pinA}
+                    onChange={mode === "change" ? setPinB : setPinA}
+                    isPassphrase={false}
+                  />
+                  <PinInput
+                    id="pin-confirm"
+                    label={t("set.pinConfirm")}
+                    value={mode === "change" ? pinC : pinB}
+                    onChange={mode === "change" ? setPinC : setPinB}
+                    isPassphrase={false}
+                  />
+                </div>
+              )}
+
+              {/* Passphrase Inputs */}
+              {selectedMethod === "passphrase" && (
+                <div className="space-y-3">
+                  <PinInput
+                    id="pass-new"
+                    label="New Passphrase (min 6 characters)"
+                    value={mode === "change" ? pinB : pinA}
+                    onChange={mode === "change" ? setPinB : setPinA}
+                    isPassphrase={true}
+                  />
+                  <PinInput
+                    id="pass-confirm"
+                    label="Repeat Passphrase"
+                    value={mode === "change" ? pinC : pinB}
+                    onChange={mode === "change" ? setPinC : setPinB}
+                    isPassphrase={true}
+                  />
+                </div>
+              )}
+
+              {/* Pattern Canvas */}
+              {selectedMethod === "pattern" && (
+                <div className="space-y-3">
+                  <p className="text-xs font-bold text-foreground">
+                    {patternStep === "draw"
+                      ? "Draw your 3x3 pattern (connect 4+ points):"
+                      : "Draw pattern again to confirm:"}
+                  </p>
+                  <div className="flex justify-center bg-card rounded-2xl border border-border p-2">
+                    <PatternLockCanvas
+                      onComplete={(nodes) => {
+                        if (patternStep === "draw") {
+                          setPatternNodes(nodes);
+                          setPatternStep("confirm");
+                        } else {
+                          setPatternConfirmNodes(nodes);
+                        }
+                      }}
+                      t={t}
+                    />
+                  </div>
+                  {patternStep === "confirm" && (
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-muted-foreground">
+                        Pattern recorded. Confirm above.
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPatternNodes([]);
+                          setPatternConfirmNodes([]);
+                          setPatternStep("draw");
+                        }}
+                        className="text-primary font-bold hover:underline"
+                      >
+                        Redraw original
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Device Biometrics Explanation */}
+              {selectedMethod === "device" && (
+                <div className="p-3.5 rounded-2xl bg-card border border-border space-y-1 text-xs">
+                  <span className="font-bold text-foreground flex items-center gap-1.5">
+                    <Fingerprint className="h-4 w-4 text-primary" />
+                    {t("lock.unlockWithDevice")}
+                  </span>
+                  <p className="text-muted-foreground leading-relaxed">
+                    Saheli will bind an on-device platform credential using your fingerprint, face,
+                    or lock-screen PIN to wrap your health data encryption key.
+                  </p>
+                </div>
+              )}
+
+              {/* Safeguard Warning */}
+              {mode === "setup" && (
+                <label className="flex items-start gap-2 text-xs text-muted-foreground cursor-pointer pt-1">
+                  <input
+                    type="checkbox"
+                    checked={warnChecked}
+                    onChange={(e) => setWarnChecked(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 rounded border-border text-primary"
+                  />
+                  <span>{t("set.pinWarn")}</span>
+                </label>
+              )}
+
+              <div className="flex gap-2 pt-2">
+                <Btn
+                  type="submit"
+                  disabled={busy || (mode === "setup" && !warnChecked)}
+                  className="text-xs font-bold"
+                >
+                  {busy ? t("set.working") : t("common.save")}
+                </Btn>
+                <Btn
+                  type="button"
+                  variant="outline"
+                  onClick={resetForm}
+                  className="text-xs font-bold"
+                >
+                  {t("common.cancel")}
+                </Btn>
+              </div>
+            </form>
+          )}
+
+          {/* Form: Disable Lock Mode */}
+          {mode === "disable" && (
+            <form
+              onSubmit={handleDisableLock}
+              className="space-y-4 rounded-3xl border border-destructive/30 bg-destructive/5 p-5 animate-fade-in"
+            >
+              <div className="space-y-1">
+                <h4 className="text-xs font-bold text-destructive">{t("set.pinDisable")}</h4>
+                <p className="text-xs text-muted-foreground">
+                  Enter your current unlock secret to turn off encryption locking.
+                </p>
+              </div>
+
+              {activeMethod === "pattern" ? (
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold text-foreground">
+                    Draw your current pattern:
+                  </p>
+                  <div className="flex justify-center bg-card rounded-2xl border border-border p-2">
+                    <PatternLockCanvas onComplete={(nodes) => setPatternNodes(nodes)} t={t} />
+                  </div>
+                </div>
+              ) : (
+                <PinInput
+                  id="pin-curr"
+                  label={t("set.pinCurrent")}
+                  value={pinA}
+                  onChange={setPinA}
+                  isPassphrase={activeMethod === "passphrase"}
+                />
+              )}
+
+              <div className="flex gap-2 pt-2">
+                <Btn
+                  type="submit"
+                  variant="destructive"
+                  disabled={busy}
+                  className="text-xs font-bold"
+                >
+                  {busy ? t("set.working") : t("set.pinDisable")}
+                </Btn>
+                <Btn
+                  type="button"
+                  variant="outline"
+                  onClick={resetForm}
+                  className="text-xs font-bold"
+                >
+                  {t("common.cancel")}
+                </Btn>
+              </div>
+            </form>
+          )}
+
+          {msg && <Status msg={msg.key && (t(msg.key) || msg.key)} tone={msg.tone} />}
+
+          {/* Emergency Recovery Key Management */}
+          <div className="pt-4 border-t border-border/50 space-y-3">
+            <div>
+              <h4 className="font-bold text-xs sm:text-sm text-foreground flex items-center gap-1.5">
+                <KeyRound className="h-4 w-4 text-primary" />
+                <span>{t("set.recoveryKeyTitle")}</span>
+              </h4>
+              <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                {t("set.recoveryKeyDesc")}
               </p>
             </div>
-          )}
 
-          {/* Safeguard Warning */}
-          {mode === "setup" && (
-            <label className="flex items-start gap-2 text-xs text-muted-foreground cursor-pointer pt-1">
-              <input
-                type="checkbox"
-                checked={warnChecked}
-                onChange={(e) => setWarnChecked(e.target.checked)}
-                className="mt-0.5 h-4 w-4 rounded border-border text-primary"
-              />
-              <span>{t("set.pinWarn")}</span>
-            </label>
-          )}
-
-          <div className="flex gap-2 pt-2">
-            <Btn
-              type="submit"
-              disabled={busy || (mode === "setup" && !warnChecked)}
-              className="text-xs font-bold"
-            >
-              {busy ? t("set.working") : t("common.save")}
-            </Btn>
-            <Btn type="button" variant="outline" onClick={resetForm} className="text-xs font-bold">
-              {t("common.cancel")}
-            </Btn>
-          </div>
-        </form>
-      )}
-
-      {/* Form: Disable Lock Mode */}
-      {mode === "disable" && (
-        <form
-          onSubmit={handleDisableLock}
-          className="space-y-4 rounded-3xl border border-destructive/30 bg-destructive/5 p-5 animate-fade-in"
-        >
-          <div className="space-y-1">
-            <h4 className="text-xs font-bold text-destructive">{t("set.pinDisable")}</h4>
-            <p className="text-xs text-muted-foreground">
-              Enter your current unlock secret to turn off encryption locking.
-            </p>
-          </div>
-
-          {activeMethod === "pattern" ? (
-            <div className="space-y-2">
-              <p className="text-xs font-semibold text-foreground">Draw your current pattern:</p>
-              <div className="flex justify-center bg-card rounded-2xl border border-border p-2">
-                <PatternLockCanvas onComplete={(nodes) => setPatternNodes(nodes)} t={t} />
+            {recoveryCode ? (
+              <div className="p-3.5 rounded-2xl bg-muted/40 border border-border flex flex-wrap items-center justify-between gap-3 animate-fade-in">
+                <span className="font-mono text-xs sm:text-sm font-bold tracking-wider text-foreground">
+                  {recoveryCode}
+                </span>
+                <div className="flex items-center gap-2">
+                  <Btn
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={handleCopyRecovery}
+                    className="text-xs font-bold gap-1"
+                  >
+                    <Copy className="h-3 w-3" />
+                    <span>{copiedRecovery ? "✓" : t("set.export")}</span>
+                  </Btn>
+                  <Btn
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setRecoveryCode("")}
+                    className="text-xs"
+                  >
+                    Hide
+                  </Btn>
+                </div>
               </div>
-            </div>
-          ) : (
-            <PinInput
-              id="pin-curr"
-              label={t("set.pinCurrent")}
-              value={pinA}
-              onChange={setPinA}
-              isPassphrase={activeMethod === "passphrase"}
-            />
-          )}
-
-          <div className="flex gap-2 pt-2">
-            <Btn type="submit" variant="destructive" disabled={busy} className="text-xs font-bold">
-              {busy ? t("set.working") : t("set.pinDisable")}
-            </Btn>
-            <Btn type="button" variant="outline" onClick={resetForm} className="text-xs font-bold">
-              {t("common.cancel")}
-            </Btn>
-          </div>
-        </form>
-      )}
-
-      {msg && <Status msg={msg.key && (t(msg.key) || msg.key)} tone={msg.tone} />}
-
-      {/* Emergency Recovery Key Management */}
-      <div className="pt-4 border-t border-border/50 space-y-3">
-        <div>
-          <h4 className="font-bold text-xs sm:text-sm text-foreground flex items-center gap-1.5">
-            <KeyRound className="h-4 w-4 text-primary" />
-            <span>{t("set.recoveryKeyTitle")}</span>
-          </h4>
-          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-            {t("set.recoveryKeyDesc")}
-          </p>
-        </div>
-
-        {recoveryCode ? (
-          <div className="p-3.5 rounded-2xl bg-muted/40 border border-border flex flex-wrap items-center justify-between gap-3 animate-fade-in">
-            <span className="font-mono text-xs sm:text-sm font-bold tracking-wider text-foreground">
-              {recoveryCode}
-            </span>
-            <div className="flex items-center gap-2">
+            ) : (
               <Btn
                 type="button"
                 size="sm"
                 variant="outline"
-                onClick={handleCopyRecovery}
-                className="text-xs font-bold gap-1"
+                onClick={handleRevealRecoveryKey}
+                disabled={busy}
+                className="text-xs font-bold gap-1.5"
               >
-                <Copy className="h-3 w-3" />
-                <span>{copiedRecovery ? "✓" : t("set.export")}</span>
+                <KeyRound className="h-3.5 w-3.5" />
+                <span>{t("set.showRecoveryKey")}</span>
               </Btn>
-              <Btn
-                type="button"
-                size="sm"
-                variant="ghost"
-                onClick={() => setRecoveryCode("")}
-                className="text-xs"
-              >
-                Hide
-              </Btn>
-            </div>
+            )}
           </div>
-        ) : (
-          <Btn
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={handleRevealRecoveryKey}
-            disabled={busy}
-            className="text-xs font-bold gap-1.5"
-          >
-            <KeyRound className="h-3.5 w-3.5" />
-            <span>{t("set.showRecoveryKey")}</span>
-          </Btn>
-        )}
-      </div>
+        </>
+      )}
 
       {/* Auto-Lock Inactivity Timeout & Background Blur Lock */}
       <div className="pt-4 border-t border-border/50 space-y-4">
@@ -1006,6 +1177,8 @@ export default function Settings() {
   const [importState, setImportState] = useState(null);
   const [importErr, setImportErr] = useState(null);
   const [chimeSettings, setChimeSettings] = useState(() => loadChimeSettings());
+  const [isPlayingChime, setIsPlayingChime] = useState(false);
+  const [chimeNotice, setChimeNotice] = useState("");
   const [showAddCondition, setShowAddCondition] = useState(false);
   const [conditionFilter, setConditionFilter] = useState("");
 
@@ -1322,19 +1495,64 @@ export default function Settings() {
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() =>
-                  playSaheliChime({
+                onClick={async () => {
+                  if (isPlayingChime) {
+                    stopSaheliChime();
+                    setIsPlayingChime(false);
+                    return;
+                  }
+                  if (chimeSettings.volume <= 0) {
+                    setChimeNotice(
+                      "Volume is currently at 0%. Increase volume below to hear the preview.",
+                    );
+                    setTimeout(() => setChimeNotice(""), 3500);
+                    return;
+                  }
+                  setChimeNotice("");
+                  setIsPlayingChime(true);
+                  const played = await playSaheliChime({
                     volume: chimeSettings.volume,
                     reducedSensory: chimeSettings.reducedSensory,
                     discreetMode: prefs.discreet,
-                  })
-                }
+                    preview: true,
+                  });
+                  if (!played) {
+                    setIsPlayingChime(false);
+                    setChimeNotice(
+                      "Audio preview could not play. Please check device volume or sound permissions.",
+                    );
+                    setTimeout(() => setChimeNotice(""), 3500);
+                    return;
+                  }
+                  const durMs = chimeSettings.reducedSensory ? 1800 : 1400;
+                  setTimeout(() => {
+                    setIsPlayingChime(false);
+                  }, durMs);
+                }}
                 className="flex items-center gap-1.5 rounded-xl text-xs font-bold"
               >
-                <Play className="h-3.5 w-3.5 text-primary" />
-                <span>{t("chime.preview")}</span>
+                {isPlayingChime ? (
+                  <>
+                    <Square className="h-3.5 w-3.5 text-primary fill-primary" />
+                    <span>{t("common.stop") || "Stop"}</span>
+                  </>
+                ) : (
+                  <>
+                    <Play className="h-3.5 w-3.5 text-primary" />
+                    <span>{t("chime.preview")}</span>
+                  </>
+                )}
               </Btn>
             </div>
+
+            {chimeNotice && (
+              <div
+                role="status"
+                className="p-3 rounded-2xl bg-amber-500/10 text-amber-700 dark:text-amber-400 text-xs font-medium animate-fade-in border border-amber-500/30 leading-relaxed"
+              >
+                {chimeNotice}
+              </div>
+            )}
 
             <p className="text-xs text-muted-foreground leading-relaxed">
               {t("chime.description")}

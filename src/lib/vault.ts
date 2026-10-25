@@ -18,7 +18,7 @@
  */
 
 import { CONFIG } from "../config.js";
-import { idbGet, idbWrite } from "./storage.js";
+import { idbGet, idbWrite, idbDel } from "./storage.js";
 
 const enc = new TextEncoder();
 const dec = new TextDecoder();
@@ -69,6 +69,28 @@ export async function generateVaultDEK(): Promise<CryptoKey> {
   return crypto.subtle.generateKey(
     { name: "AES-GCM", length: 256 },
     true, // extractable for initial wrapping
+    ["encrypt", "decrypt"],
+  );
+}
+
+/**
+ * Exports raw DEK bytes as Base64 for local device-bound storage when lock is disabled
+ */
+export async function exportRawDEK(dek: CryptoKey): Promise<string> {
+  const raw = await crypto.subtle.exportKey("raw", dek);
+  return b64(new Uint8Array(raw));
+}
+
+/**
+ * Imports raw DEK bytes from Base64 for local device-bound decryption
+ */
+export async function importRawDEK(rawB64: string): Promise<CryptoKey> {
+  const bytes = unb64(rawB64);
+  return crypto.subtle.importKey(
+    "raw",
+    bytes as unknown as BufferSource,
+    { name: "AES-GCM", length: 256 },
+    true,
     ["encrypt", "decrypt"],
   );
 }
@@ -366,7 +388,12 @@ export async function initializeVault(
 
   if (typeof indexedDB !== "undefined") {
     try {
-      await idbWrite([["vault_meta", vaultMeta]]);
+      const writes: [string, any][] = [["vault_meta", vaultMeta]];
+      if (lockMethod === "none") {
+        const rawB64 = await exportRawDEK(vaultDEK);
+        writes.push(["vault_device_dek", rawB64]);
+      }
+      await idbWrite(writes);
     } catch {}
   }
 
@@ -382,12 +409,20 @@ export async function initializeVault(
  * Unlocks the vault using a provided secret (PIN, passphrase, pattern, or recovery code)
  */
 export async function unlockVault(
-  secret: string,
+  secret: string = "",
   method: LockMethod | "recovery" = "pin",
 ): Promise<{ vaultDEK: CryptoKey; vaultMeta: VaultMetadata }> {
   const vaultMeta = (await idbGet("vault_meta")) as VaultMetadata | undefined;
   if (!vaultMeta || vaultMeta.version !== 2) {
     throw new Error("vault-not-configured");
+  }
+
+  if (method === "none" || vaultMeta.activeLockMethod === "none") {
+    const rawB64 = (await idbGet("vault_device_dek")) as string | undefined;
+    if (rawB64) {
+      const vaultDEK = await importRawDEK(rawB64);
+      return { vaultDEK, vaultMeta };
+    }
   }
 
   if (method === "device") {
@@ -454,7 +489,16 @@ export async function updateVaultLockMethod(
 
   if (typeof indexedDB !== "undefined") {
     try {
-      await idbWrite([["vault_meta", updatedMeta]]);
+      if (newMethod === "none") {
+        const rawB64 = await exportRawDEK(vaultDEK);
+        await idbWrite([
+          ["vault_meta", updatedMeta],
+          ["vault_device_dek", rawB64],
+        ]);
+      } else {
+        await idbWrite([["vault_meta", updatedMeta]]);
+        await idbDel("vault_device_dek");
+      }
     } catch {}
   }
   return updatedMeta;
@@ -493,7 +537,16 @@ export async function updateVaultRecoveryKey(
 
   if (typeof indexedDB !== "undefined") {
     try {
-      await idbWrite([["vault_meta", updatedMeta]]);
+      if (newMethod === "none") {
+        const rawB64 = await exportRawDEK(vaultDEK);
+        await idbWrite([
+          ["vault_meta", updatedMeta],
+          ["vault_device_dek", rawB64],
+        ]);
+      } else {
+        await idbWrite([["vault_meta", updatedMeta]]);
+        await idbDel("vault_device_dek");
+      }
     } catch {}
   }
 

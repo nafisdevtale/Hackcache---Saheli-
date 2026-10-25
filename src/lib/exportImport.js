@@ -263,6 +263,10 @@ const ALLOWED_SETTINGS_KEYS = [
   "pregnancyOptIn",
   "trackingPaused",
   "discreetMode",
+  "role",
+  "dob",
+  "adultConsent",
+  "lang",
 ];
 const ALLOWED_PREGNANCY_KEYS = ["active", "lmp"];
 const ALLOWED_REMINDERS_KEYS = [
@@ -429,14 +433,15 @@ export function exportCSV(record) {
  * Robust CSV parser supporting quotes, multiline values, and formula sanitization.
  */
 export function parseCSVText(csvText) {
+  const text = (csvText || "").replace(/^\uFEFF/, "");
   const rows = [];
   let currentRow = [];
   let currentField = "";
   let inQuotes = false;
 
-  for (let i = 0; i < csvText.length; i++) {
-    const char = csvText[i];
-    const nextChar = csvText[i + 1];
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    const nextChar = text[i + 1];
 
     if (inQuotes) {
       if (char === '"' && nextChar === '"') {
@@ -786,18 +791,33 @@ export function generateDoctorSummaryPDF(record, analysis, options = {}) {
 </html>`;
 }
 
+export { generateClinicalSummaryPDF } from "./pdfGenerator.ts";
+
 /**
  * Extracts and validates embedded Saheli payload from an exported PDF/HTML file
  */
 export function parsePDFImport(content) {
-  if (!content || typeof content !== "string") {
+  let text = "";
+  if (typeof content === "string") {
+    text = content;
+  } else if (
+    content instanceof ArrayBuffer ||
+    ArrayBuffer.isView(content) ||
+    (content && typeof content === "object" && "byteLength" in content)
+  ) {
+    try {
+      text = new TextDecoder("utf-8").decode(content);
+    } catch {
+      return { ok: false, error: "imp.unsupportedPdfNoPayload" };
+    }
+  } else {
     return { ok: false, error: "imp.unsupportedPdfNoPayload" };
   }
 
   // Look for the versioned embedded payload
   const match =
-    content.match(/<!--\s*SAHELI_RECORD_PAYLOAD_V1:([A-Za-z0-9+/=]+)\s*-->/) ||
-    content.match(/SAHELI_RECORD_PAYLOAD_V1:([A-Za-z0-9+/=]+)/);
+    text.match(/<!--\s*SAHELI_RECORD_PAYLOAD_V1:([A-Za-z0-9+/=]+)\s*-->/) ||
+    text.match(/SAHELI_RECORD_PAYLOAD_V1:([A-Za-z0-9+/=]+)/);
   if (!match || !match[1]) {
     return {
       ok: false,
