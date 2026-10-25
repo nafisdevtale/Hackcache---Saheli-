@@ -1,37 +1,31 @@
 # Local environment variables
 
-## Set up your own keys
+## Create your private local file
 
 1. In your local repository root, copy `.env.local.example` to `.env.local`.
-2. Open `.env.local` in your editor and paste your own API keys between the `=` signs.
-3. Restart the development server after changing environment variables.
-
-Example:
+2. Open `.env.local` in your editor and paste your own credentials after the appropriate `=`.
+3. Restart the development server after changing values.
 
 ```bash
 cp .env.local.example .env.local
+code .env.local
 ```
 
-Then edit the local `.env.local` file:
+The tracked `.env.local.example` contains blank placeholders only. **Do not create or commit a real `.env.local` file on GitHub.** Create it on your own device; the repository's `.gitignore` ignores `.env` and `.env.*`.
 
-```dotenv
-SERPAPI_API_KEY=your_actual_key_here
-```
+## Variables in the template
 
-Do not paste actual keys into this documentation, source files, client-side code, screenshots, issues, or commits.
+- `GEMINI_API_KEY` or `AI_API_KEY`: optional server-side Gemini/AI provider credential.
+- `SERPAPI_API_KEY`: intended for FLASH menstrual self-care product search. Get a key at https://serpapi.com/manage-api-key.
+- `TMDB_API_TOKEN` or `TMDB_API_KEY`, and `WATCHMODE_API_KEY`: optional movie/streaming metadata integrations for INSTINCT.
+- `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`: optional server-side community/database integration. Treat the service-role key as highly sensitive. Only set `SUPABASE_ANON_KEY` if the implementation specifically requires it.
+- `MODERATOR_SECRET` and `SAHELI_MAINTAINER_KEY`: server-only moderation/administration secrets. Generate strong unique values if the corresponding routes are used.
+- `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, `CRON_SECRET`: optional push and scheduled-task configuration.
 
-## Product search (FLASH)
+Core local features such as cycle tracking, app lock, and file imports do not require third-party API keys. Partner Connect remote sync is not configured by these variables.
 
-Create a SerpApi account and retrieve the key from https://serpapi.com/manage-api-key. Set `SERPAPI_API_KEY` in your local `.env.local`.
+## Important implementation note
 
-The key must only be used by server-side code. Never prefix it with `VITE_`, since Vite exposes `VITE_*` variables to browser code.
+A variable in this template does not prove the associated integration is implemented or enabled. In particular, FLASH needs server-side code that reads `process.env.SERPAPI_API_KEY`, calls SerpApi, filters results to menstrual self-care products, and handles errors and rate limits before it can use live shopping listings. Confirm each integration's server handler before adding credentials.
 
-**Important:** this template provides a safe place to store the key locally. It does not by itself implement or enable a SerpApi-backed product recommendation endpoint; the backend must read `process.env.SERPAPI_API_KEY` and call SerpApi before FLASH can use live listings.
-
-## Other optional services
-
-Only fill in credentials for integrations you actually use. Blank values should leave optional services disabled. Do not place production secrets in GitHub repository files. Configure deployed environment variables in the hosting provider's environment/secrets settings instead.
-
-## Git safety
-
-The repository's `.gitignore` ignores `.env` and `.env.*`, while explicitly allowing `.env.example`. Keep the real `.env.local` file untracked. If a real key was ever committed or shared publicly, revoke/rotate it at the provider.
+Never prefix secrets with `VITE_`, because Vite exposes `VITE_*` variables to browser code. Never put real credentials in source files, docs, screenshots, issues, or commits. If a real key was ever committed or shared publicly, revoke or rotate it with the provider.
