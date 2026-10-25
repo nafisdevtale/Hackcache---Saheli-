@@ -242,6 +242,16 @@ const ALLOWED_ROOT_KEYS = [
   "reminders",
   "healthConditions",
   "ovulationObservations",
+  "meta",
+  "chimeSettings",
+  "companion",
+  "exportVersion",
+  "exportedAt",
+  "timestamp",
+  "id",
+  "serialId",
+  "app",
+  "format",
 ];
 const ALLOWED_HEALTH_CONDITIONS_KEYS = [
   "conditions",
@@ -266,7 +276,19 @@ const ALLOWED_SETTINGS_KEYS = [
   "role",
   "dob",
   "adultConsent",
+  "adultTransitionPostponed",
+  "birthYear",
+  "latinNumerals",
+  "nativeNumerals",
+  "useLatinNumerals",
   "lang",
+  "theme",
+  "partnerId",
+  "syncId",
+  "activeConditions",
+  "enablePersonalisation",
+  "lastBackup",
+  "security",
 ];
 const ALLOWED_PREGNANCY_KEYS = ["active", "lmp"];
 const ALLOWED_REMINDERS_KEYS = [
@@ -430,10 +452,33 @@ export function exportCSV(record) {
 }
 
 /**
- * Robust CSV parser supporting quotes, multiline values, and formula sanitization.
+ * Robust CSV parser supporting quotes, multiline values, delimiter auto-detection, and formula sanitization.
  */
-export function parseCSVText(csvText) {
+export function parseCSVText(csvText, delimiter = null) {
   const text = (csvText || "").replace(/^\uFEFF/, "");
+  if (!text.trim()) return [];
+
+  let delim = delimiter;
+  if (!delim) {
+    const firstLine = text.split(/\r\n|\r|\n/)[0] || "";
+    let commas = 0,
+      semicolons = 0,
+      tabs = 0;
+    let inQ = false;
+    for (let i = 0; i < firstLine.length; i++) {
+      const c = firstLine[i];
+      if (c === '"') inQ = !inQ;
+      else if (!inQ) {
+        if (c === ",") commas++;
+        else if (c === ";") semicolons++;
+        else if (c === "\t") tabs++;
+      }
+    }
+    if (semicolons > commas && semicolons > tabs) delim = ";";
+    else if (tabs > commas && tabs > semicolons) delim = "\t";
+    else delim = ",";
+  }
+
   const rows = [];
   let currentRow = [];
   let currentField = "";
@@ -455,7 +500,7 @@ export function parseCSVText(csvText) {
     } else {
       if (char === '"') {
         inQuotes = true;
-      } else if (char === ",") {
+      } else if (char === delim) {
         currentRow.push(currentField);
         currentField = "";
       } else if (char === "\r") {
@@ -480,22 +525,57 @@ export function parseCSVText(csvText) {
 }
 
 /**
- * Parse date from ISO YYYY-MM-DD or DD/MM/YYYY or MM/DD/YYYY
+ * Parse date from ISO YYYY-MM-DD or DD/MM/YYYY or MM/DD/YYYY or timestamp
  */
 function normalizeCsvDate(rawDate) {
   if (!rawDate) return null;
-  const trimmed = rawDate.trim().replace(/^['"]|['"]$/g, "");
-  // YYYY-MM-DD
-  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
-    return isValidDate(trimmed) ? trimmed : null;
-  }
-  // DD/MM/YYYY or DD-MM-YYYY
-  const dmyMatch = trimmed.match(/^(\d{1,2})[/\-](\d{1,2})[/\-](\d{4})$/);
-  if (dmyMatch) {
-    const [, d, m, y] = dmyMatch;
+  const trimmed = String(rawDate)
+    .trim()
+    .replace(/^['"]|['"]$/g, "")
+    .trim();
+  if (!trimmed) return null;
+
+  // ISO: YYYY-MM-DD or YYYY/MM/DD or YYYY.MM.DD (with optional timestamp)
+  const isoPrefixMatch = trimmed.match(
+    /^(\d{4})[/\-.](0?[1-9]|1[0-2])[/\-.](0?[1-9]|[12]\d|3[01])(\s|T|$)/,
+  );
+  if (isoPrefixMatch) {
+    const [, y, m, d] = isoPrefixMatch;
     const iso = `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
     return isValidDate(iso) ? iso : null;
   }
+
+  // DD/MM/YYYY or MM/DD/YYYY
+  const partsMatch = trimmed.match(/^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{4})(\s|T|$)/);
+  if (partsMatch) {
+    const [, p1, p2, y] = partsMatch;
+    const n1 = parseInt(p1, 10);
+    const n2 = parseInt(p2, 10);
+    if (n1 > 12 && n2 <= 12) {
+      const iso = `${y}-${String(n2).padStart(2, "0")}-${String(n1).padStart(2, "0")}`;
+      return isValidDate(iso) ? iso : null;
+    }
+    if (n2 > 12 && n1 <= 12) {
+      const iso = `${y}-${String(n1).padStart(2, "0")}-${String(n2).padStart(2, "0")}`;
+      return isValidDate(iso) ? iso : null;
+    }
+    const isoDmy = `${y}-${String(n2).padStart(2, "0")}-${String(n1).padStart(2, "0")}`;
+    if (isValidDate(isoDmy)) return isoDmy;
+    const isoMdy = `${y}-${String(n1).padStart(2, "0")}-${String(n2).padStart(2, "0")}`;
+    if (isValidDate(isoMdy)) return isoMdy;
+  }
+
+  // Timestamp or Date.parse fallback
+  const parsedTime = Date.parse(trimmed);
+  if (!isNaN(parsedTime)) {
+    const d = new Date(parsedTime);
+    const y = d.getUTCFullYear();
+    if (y >= 2000 && y <= 2100) {
+      const iso = d.toISOString().slice(0, 10);
+      if (isValidDate(iso)) return iso;
+    }
+  }
+
   return null;
 }
 
@@ -524,16 +604,49 @@ export function parseCSVImport(csvText) {
     return { ok: false, error: "imp.csvNoData" };
   }
 
-  const rawHeaders = rows[0].map((h) => sanitizeCsvValue(h).toLowerCase());
+  const rawHeaders = rows[0].map((h) =>
+    sanitizeCsvValue(h)
+      .toLowerCase()
+      .trim()
+      .replace(/^['"]|['"]$/g, ""),
+  );
   const headerMap = {};
   rawHeaders.forEach((h, idx) => {
     headerMap[h] = idx;
   });
 
-  const dateIdx = headerMap["date"];
+  const findCol = (...names) => {
+    for (const n of names) {
+      if (headerMap[n] !== undefined) return headerMap[n];
+    }
+    return undefined;
+  };
+
+  const dateIdx = findCol("date", "day", "timestamp", "start date", "log date", "entry date");
   if (dateIdx === undefined) {
     return { ok: false, error: "imp.csvMissingDateHeader" };
   }
+
+  const periodIdx = findCol("period", "bleeding", "menstruation", "menses", "on period");
+  const flowIdx = findCol("flow", "flow level", "intensity", "blood flow");
+  const padHourlyIdx = findCol("padhourly", "pad hourly", "hourly pad");
+  const bigClotsIdx = findCol("bigclots", "big clots", "clots");
+  const painIdx = findCol("pain", "cramps", "pain level", "severity");
+  const painStoppedIdx = findCol(
+    "painstoppedactivities",
+    "pain stopped activities",
+    "stopped activities",
+  );
+  const painkillerIdx = findCol("painkillerhelped", "painkiller helped", "meds helped");
+  const symptomsIdx = findCol("symptoms", "symptom", "tags");
+  const moodIdx = findCol("mood", "feeling");
+  const energyIdx = findCol("energy", "energy level");
+  const sleepIdx = findCol("sleep", "sleep hours", "hours of sleep");
+  const medicinesIdx = findCol("medicines", "medicine", "meds", "medication");
+  const noteIdx = findCol("note", "notes", "memo", "comment", "comments", "journal");
+  const ovTestIdx = findCol("ovulationtest", "ovulation test", "lh test", "ovulation");
+  const bbtIdx = findCol("bbt", "basal body temperature", "temperature", "temp");
+  const fluidIdx = findCol("cervicalfluid", "cervical fluid", "cervical mucus", "fluid");
 
   const rec = emptyRecord();
   const errors = [];
@@ -554,78 +667,120 @@ export function parseCSVImport(csvText) {
     const day = blankDay(normalizedDate);
 
     // period
-    if (headerMap["period"] !== undefined) {
-      const v = sanitizeCsvValue(row[headerMap["period"]]).toLowerCase();
-      day.period = v === "true" || v === "1" || v === "yes";
+    if (periodIdx !== undefined && row[periodIdx] != null) {
+      const v = sanitizeCsvValue(row[periodIdx]).toLowerCase().trim();
+      day.period = v === "true" || v === "1" || v === "yes" || v === "y";
     }
 
     // flow
-    if (headerMap["flow"] !== undefined) {
-      const f = sanitizeCsvValue(row[headerMap["flow"]]).toLowerCase();
-      if (["spotting", "light", "medium", "heavy"].includes(f)) {
+    if (flowIdx !== undefined && row[flowIdx] != null) {
+      let f = sanitizeCsvValue(row[flowIdx]).toLowerCase().trim();
+      if (f === "low") f = "light";
+      else if (f === "moderate" || f === "normal") f = "medium";
+      else if (f === "high" || f === "severe") f = "heavy";
+      if (FLOWS.includes(f)) {
         day.flow = f;
       }
     }
 
+    // If flow is recorded but period was not explicitly provided, default period = true
+    if (day.flow && day.period === false && periodIdx === undefined) {
+      day.period = true;
+    }
+
+    // padHourly
+    if (padHourlyIdx !== undefined && row[padHourlyIdx] != null) {
+      const v = sanitizeCsvValue(row[padHourlyIdx]).toLowerCase().trim();
+      if (v === "true" || v === "1" || v === "yes") day.padHourly = true;
+      else if (v === "false" || v === "0" || v === "no") day.padHourly = false;
+    }
+
+    // bigClots
+    if (bigClotsIdx !== undefined && row[bigClotsIdx] != null) {
+      const v = sanitizeCsvValue(row[bigClotsIdx]).toLowerCase().trim();
+      if (v === "true" || v === "1" || v === "yes") day.bigClots = true;
+      else if (v === "false" || v === "0" || v === "no") day.bigClots = false;
+    }
+
     // pain
-    if (headerMap["pain"] !== undefined) {
-      const p = parseInt(sanitizeCsvValue(row[headerMap["pain"]]), 10);
-      if (!isNaN(p) && p >= 0 && p <= 5) {
+    if (painIdx !== undefined && row[painIdx] != null) {
+      const p = parseInt(sanitizeCsvValue(row[painIdx]), 10);
+      if (!isNaN(p) && p >= 0 && p <= 10) {
         day.pain = p;
       }
     }
 
+    // painStoppedActivities
+    if (painStoppedIdx !== undefined && row[painStoppedIdx] != null) {
+      const v = sanitizeCsvValue(row[painStoppedIdx]).toLowerCase().trim();
+      day.painStoppedActivities = v === "true" || v === "1" || v === "yes";
+    }
+
+    // painkillerHelped
+    if (painkillerIdx !== undefined && row[painkillerIdx] != null) {
+      const v = sanitizeCsvValue(row[painkillerIdx]).toLowerCase().trim();
+      if (["yes", "no", "na"].includes(v)) {
+        day.painkillerHelped = v;
+      }
+    }
+
     // symptoms
-    if (headerMap["symptoms"] !== undefined) {
-      const symStr = sanitizeCsvValue(row[headerMap["symptoms"]]);
+    if (symptomsIdx !== undefined && row[symptomsIdx] != null) {
+      const symStr = sanitizeCsvValue(row[symptomsIdx]);
       if (symStr) {
         day.symptoms = symStr
           .split(/[;,]/)
-          .map((s) => s.trim())
-          .filter((s) => SYMPTOM_IDS.includes(s));
+          .map((s) => s.trim().toLowerCase())
+          .filter((s) => SYMPTOM_IDS.includes(s) || s.startsWith("c_") || s.startsWith("custom_"));
       }
     }
 
     // mood
-    if (headerMap["mood"] !== undefined) {
-      const m = sanitizeCsvValue(row[headerMap["mood"]]).toLowerCase();
+    if (moodIdx !== undefined && row[moodIdx] != null) {
+      const m = sanitizeCsvValue(row[moodIdx]).toLowerCase().trim();
       if (MOODS.includes(m)) day.mood = m;
     }
 
     // energy
-    if (headerMap["energy"] !== undefined) {
-      const e = sanitizeCsvValue(row[headerMap["energy"]]).toLowerCase();
+    if (energyIdx !== undefined && row[energyIdx] != null) {
+      const e = sanitizeCsvValue(row[energyIdx]).toLowerCase().trim();
       if (ENERGY.includes(e)) day.energy = e;
     }
 
-    // note & medicines
-    if (headerMap["note"] !== undefined) {
-      day.note = sanitizeCsvValue(row[headerMap["note"]]).substring(0, 2000);
+    // sleep
+    if (sleepIdx !== undefined && row[sleepIdx] != null) {
+      const s = parseFloat(sanitizeCsvValue(row[sleepIdx]));
+      if (!isNaN(s) && s >= 0 && s <= 24) day.sleep = s;
     }
-    if (headerMap["medicines"] !== undefined) {
-      day.medicines = sanitizeCsvValue(row[headerMap["medicines"]]).substring(0, 300);
+
+    // note & medicines
+    if (noteIdx !== undefined && row[noteIdx] != null) {
+      day.note = sanitizeCsvValue(row[noteIdx]).substring(0, 2000);
+    }
+    if (medicinesIdx !== undefined && row[medicinesIdx] != null) {
+      day.medicines = sanitizeCsvValue(row[medicinesIdx]).substring(0, 300);
     }
 
     // Ovulation Observations in CSV
     let hasObs = false;
     const obs = defaultOvulationObservation(normalizedDate);
-    if (headerMap["ovulationtest"] !== undefined) {
-      const ot = sanitizeCsvValue(row[headerMap["ovulationtest"]]).toLowerCase();
+    if (ovTestIdx !== undefined && row[ovTestIdx] != null) {
+      const ot = sanitizeCsvValue(row[ovTestIdx]).toLowerCase().trim();
       if (["positive", "negative", "faint", "none"].includes(ot)) {
         obs.testResult = ot;
         hasObs = true;
       }
     }
-    if (headerMap["bbt"] !== undefined) {
-      const bbtVal = parseFloat(sanitizeCsvValue(row[headerMap["bbt"]]));
+    if (bbtIdx !== undefined && row[bbtIdx] != null) {
+      const bbtVal = parseFloat(sanitizeCsvValue(row[bbtIdx]));
       if (!isNaN(bbtVal) && bbtVal >= 30 && bbtVal <= 110) {
         obs.bbt = bbtVal;
         obs.bbtUnit = bbtVal > 50 ? "F" : "C";
         hasObs = true;
       }
     }
-    if (headerMap["cervicalfluid"] !== undefined) {
-      const cf = sanitizeCsvValue(row[headerMap["cervicalfluid"]]).toLowerCase();
+    if (fluidIdx !== undefined && row[fluidIdx] != null) {
+      const cf = sanitizeCsvValue(row[fluidIdx]).toLowerCase().trim();
       if (["dry", "sticky", "creamy", "eggwhite", "watery", "none"].includes(cf)) {
         obs.cervicalFluid = cf;
         hasObs = true;
@@ -806,7 +961,10 @@ export function parsePDFImport(content) {
     (content && typeof content === "object" && "byteLength" in content)
   ) {
     try {
-      text = new TextDecoder("utf-8").decode(content);
+      text = new TextDecoder("latin1").decode(content);
+      if (!text.includes("SAHELI_RECORD_PAYLOAD_V1")) {
+        text = new TextDecoder("utf-8").decode(content);
+      }
     } catch {
       return { ok: false, error: "imp.unsupportedPdfNoPayload" };
     }
@@ -831,8 +989,13 @@ export function parsePDFImport(content) {
     let rawJson = "";
     if (typeof Buffer !== "undefined") {
       rawJson = Buffer.from(match[1], "base64").toString("utf-8");
-    } else if (typeof atob !== "undefined") {
-      rawJson = decodeURIComponent(escape(atob(match[1])));
+    } else {
+      const binaryString = atob(match[1]);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      rawJson = new TextDecoder("utf-8").decode(bytes);
     }
     return parseImport(rawJson);
   } catch {
@@ -848,10 +1011,14 @@ export function parseImport(text) {
   } catch {
     return { ok: false, error: "imp.notJson" };
   }
-  if (!obj || obj.app !== "saheli" || obj.format !== 1 || !obj.record)
+  if (!obj || typeof obj !== "object") {
     return { ok: false, error: "imp.wrongFormat" };
+  }
+  if (obj.app && obj.app !== "saheli") {
+    return { ok: false, error: "imp.wrongFormat" };
+  }
+  const raw = obj.record && typeof obj.record === "object" ? obj.record : obj;
   const object = (v) => !!v && typeof v === "object" && !Array.isArray(v);
-  const raw = obj.record;
   if (
     !object(raw) ||
     !hasOnlyRootKeys(raw) ||
@@ -876,7 +1043,7 @@ export function parseImport(text) {
     (raw.ovulationObservations && !object(raw.ovulationObservations))
   )
     return { ok: false, error: "imp.wrongFormat" };
-  const rec = normalizeRecord(obj.record);
+  const rec = normalizeRecord(raw);
   const s = rec.settings,
     p = rec.pregnancy,
     r = rec.reminders;
@@ -898,6 +1065,12 @@ export function parseImport(text) {
       r.custom.on,
     ].some((v) => !bool(v)) ||
     (s.discreetMode !== undefined && !bool(s.discreetMode)) ||
+    (s.role !== undefined && !["owner", "partner"].includes(s.role)) ||
+    (s.dob !== undefined && s.dob !== null && typeof s.dob !== "string") ||
+    (s.adultTransitionPostponed !== undefined && !bool(s.adultTransitionPostponed)) ||
+    (s.latinNumerals !== undefined && !bool(s.latinNumerals)) ||
+    (s.nativeNumerals !== undefined && !bool(s.nativeNumerals)) ||
+    (s.adultConsent !== undefined && s.adultConsent !== null && !object(s.adultConsent)) ||
     (s.symptomCategories &&
       (!Array.isArray(s.symptomCategories) ||
         s.symptomCategories.some((c) => typeof c !== "string"))) ||
@@ -1030,7 +1203,8 @@ export function mergeRecords(existing, incoming, strategy) {
 }
 
 export function importPreview(existing, incoming) {
-  const inc = Object.keys(incoming.days);
-  const conflicts = inc.filter((d) => existing.days[d]);
+  const inc = Object.keys(incoming?.days || {});
+  const exDays = existing?.days || {};
+  const conflicts = inc.filter((d) => exDays[d]);
   return { total: inc.length, conflicts: conflicts.length, fresh: inc.length - conflicts.length };
 }

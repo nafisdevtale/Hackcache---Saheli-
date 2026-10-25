@@ -1312,29 +1312,40 @@ export default function Settings() {
         detectedFormat = "Clinical PDF Summary";
         const buffer = await file.arrayBuffer();
         parseResult = parsePDFImport(buffer);
-      } else if (fileName.endsWith(".csv") || file.type === "text/csv") {
+      } else if (
+        fileName.endsWith(".csv") ||
+        file.type === "text/csv" ||
+        file.type === "application/vnd.ms-excel"
+      ) {
         detectedFormat = "CSV Spreadsheet";
         const text = await file.text();
         parseResult = parseCSVImport(text);
+      } else if (fileName.endsWith(".json") || file.type === "application/json") {
+        detectedFormat = "JSON Backup";
+        const text = await file.text();
+        parseResult = parseImport(text);
       } else {
         // Auto-detect format by signature / content
         const text = await file.text();
-        if (text.startsWith("%PDF-") || text.includes("SAHELI_RECORD_PAYLOAD_V1")) {
-          detectedFormat = "Clinical PDF Summary";
-          parseResult = parsePDFImport(text);
-        } else if (
-          text.startsWith("Date,") ||
-          text.startsWith("date,") ||
-          text.startsWith("\uFEFFDate,") ||
-          text.startsWith("\uFEFFdate,") ||
-          text.includes("\nDate,") ||
-          text.includes("\ndate,")
+        const trimmed = text.trim();
+        if (
+          trimmed.startsWith("%PDF-") ||
+          trimmed.includes("SAHELI_RECORD_PAYLOAD_V1") ||
+          text.includes("SAHELI_RECORD_PAYLOAD_V1")
         ) {
-          detectedFormat = "CSV Spreadsheet";
-          parseResult = parseCSVImport(text);
-        } else {
+          detectedFormat = "Clinical PDF Summary";
+          const buffer = await file.arrayBuffer();
+          parseResult = parsePDFImport(buffer);
+        } else if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
           detectedFormat = "JSON Backup";
           parseResult = parseImport(text);
+        } else {
+          detectedFormat = "CSV Spreadsheet";
+          parseResult = parseCSVImport(text);
+          if (!parseResult.ok && !trimmed.includes(",") && !trimmed.includes(";")) {
+            parseResult = parseImport(text);
+            if (parseResult.ok) detectedFormat = "JSON Backup";
+          }
         }
       }
 
@@ -1352,7 +1363,7 @@ export default function Settings() {
           incomingDays: preview.total,
           conflicts: preview.conflicts,
           fresh: preview.fresh,
-          invalid: parseResult.skippedRows || 0,
+          invalid: parseResult.errors?.length || 0,
         },
       });
     } catch (err) {
@@ -2115,7 +2126,7 @@ export default function Settings() {
               <span>{t("set.chooseFile")}</span>
               <input
                 type="file"
-                accept=".json,.csv,.pdf,text/csv,application/json,application/pdf"
+                accept=".json,.csv,.pdf,.txt,application/json,text/csv,text/plain,application/pdf,application/vnd.ms-excel,application/octet-stream,text/*"
                 onChange={handleFile}
                 className="sr-only"
               />

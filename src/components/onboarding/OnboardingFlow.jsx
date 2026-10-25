@@ -221,19 +221,43 @@ export function OnboardingFlow() {
     setErrorMsg("");
     setBusy(true);
     try {
-      const text = await file.text();
-      let parsed;
       const lowerName = file.name.toLowerCase();
-      if (lowerName.endsWith(".csv") || file.type === "text/csv") {
-        parsed = parseCSVImport(text);
-      } else if (
+      let parsed;
+      if (
         lowerName.endsWith(".pdf") ||
         lowerName.endsWith(".html") ||
         file.type === "application/pdf"
       ) {
-        parsed = parsePDFImport(text);
-      } else {
+        const buffer = await file.arrayBuffer();
+        parsed = parsePDFImport(buffer);
+      } else if (
+        lowerName.endsWith(".csv") ||
+        file.type === "text/csv" ||
+        file.type === "application/vnd.ms-excel"
+      ) {
+        const text = await file.text();
+        parsed = parseCSVImport(text);
+      } else if (lowerName.endsWith(".json") || file.type === "application/json") {
+        const text = await file.text();
         parsed = parseImport(text);
+      } else {
+        const text = await file.text();
+        const trimmed = text.trim();
+        if (
+          trimmed.startsWith("%PDF-") ||
+          trimmed.includes("SAHELI_RECORD_PAYLOAD_V1") ||
+          text.includes("SAHELI_RECORD_PAYLOAD_V1")
+        ) {
+          const buffer = await file.arrayBuffer();
+          parsed = parsePDFImport(buffer);
+        } else if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+          parsed = parseImport(text);
+        } else {
+          parsed = parseCSVImport(text);
+          if (!parsed.ok && !trimmed.includes(",") && !trimmed.includes(";")) {
+            parsed = parseImport(text);
+          }
+        }
       }
 
       if (!parsed || !parsed.ok) {
@@ -251,6 +275,8 @@ export function OnboardingFlow() {
     } catch {
       setErrorMsg(t("imp.wrongFormat") || "Invalid backup file format.");
       setBusy(false);
+    } finally {
+      if (e.target) e.target.value = "";
     }
   };
 
@@ -400,7 +426,7 @@ export function OnboardingFlow() {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".json,.csv,.pdf,.html,text/csv,application/json,application/pdf"
+                accept=".json,.csv,.pdf,.html,.txt,text/csv,text/plain,application/json,application/pdf,application/vnd.ms-excel,application/octet-stream,text/*"
                 className="hidden"
                 onChange={handleBackupUpload}
               />
