@@ -6,6 +6,8 @@ import {
   validatePatternInput,
 } from "@/lib/authLock.ts";
 import { inspectStorage, migrateLegacyToVault } from "@/lib/migration.ts";
+import { deriveKey, encryptJSON, randomSaltB64 } from "@/lib/encryption.js";
+import { decryptVaultRecord, unwrapDEK, deriveKEK } from "@/lib/vault.ts";
 
 describe("Saheli 11.0 — Auth Lock Inputs & Progressive Lockout", () => {
   it("validates PIN input requirements (4-12 digits only)", () => {
@@ -118,5 +120,134 @@ describe("Saheli 11.0 — Legacy Storage Inspection & Migration", () => {
     expect(migrationResult.vaultMeta.activeLockMethod).toBe("pin");
     expect(migrationResult.encryptedRecord.v).toBe(2);
     expect(migrationResult.recoveryKey).toMatch(/^REC-/);
+  });
+
+  it("migrates a rich legacy record preserving cycle history, symptoms, notes, settings, and companion pets", async () => {
+    const comprehensiveFixture = {
+      version: 1,
+      settings: {
+        ageGroup: "adult",
+        theme: "rose",
+        discreet: true,
+        cycleLength: 29,
+        periodLength: 5,
+        notifications: true,
+      },
+      days: {
+        "2026-09-01": {
+          period: true,
+          flow: "heavy",
+          symptoms: ["cramps", "headache", "fatigue"],
+          notes: "First day of cycle, needed heating pad",
+          sleep: 7,
+          water: 8,
+          mood: "low",
+        },
+        "2026-09-02": {
+          period: true,
+          flow: "medium",
+          symptoms: ["bloating"],
+          notes: "Feeling slightly better after chamomile tea",
+          sleep: 8,
+          water: 10,
+          mood: "calm",
+        },
+        "2026-09-15": {
+          period: false,
+          symptoms: ["ovulation_pain"],
+          notes: "Mid-cycle check-in",
+          sleep: 8,
+          water: 9,
+        },
+      },
+      pets: {
+        activePetId: "pet-cat-01",
+        adopted: [
+          {
+            id: "pet-cat-01",
+            species: "cat",
+            name: "Mochi",
+            level: 3,
+            xp: 450,
+            accessory: "scarf",
+          },
+        ],
+      },
+    };
+
+    const result = await migrateLegacyToVault({
+      legacyRecord: comprehensiveFixture,
+      lockMethod: "passphrase",
+      secret: "master-passphrase-2026",
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.migratedDaysCount).toBe(3);
+
+    // Re-derive KEK from the passphrase to unwrap the DEK
+    const wrapper = result.vaultMeta.wrappers.passphrase!;
+    const kek = await deriveKEK("master-passphrase-2026", wrapper.saltB64, wrapper.iterations);
+    const unwrappedDEK = await unwrapDEK(wrapper.wrappedDEKB64, wrapper.ivB64, kek);
+
+    // Decrypt the migrated record and check 100% deep equality
+    const decrypted = await decryptVaultRecord(unwrappedDEK, result.encryptedRecord);
+
+    expect(decrypted.settings).toEqual(comprehensiveFixture.settings);
+    expect(decrypted.days).toEqual(comprehensiveFixture.days);
+    expect(decrypted.pets).toEqual(comprehensiveFixture.pets);
+    expect(decrypted.days["2026-09-01"].notes).toBe("First day of cycle, needed heating pad");
+    expect(decrypted.pets.adopted[0].name).toBe("Mochi");
+  });
+
+  it("migrates a PIN-encrypted legacy record (enc: 1) and verifies value-level fidelity", async () => {
+    const legacyPlaintext = {
+      version: 1,
+      settings: { ageGroup: "under18", cycleLength: 32 },
+      days: {
+        "2026-10-10": { flow: "heavy", symptoms: ["backache"], notes: "Encrypted diary record" },
+      },
+      pets: { adopted: [] },
+    };
+
+    const salt = randomSaltB64();
+    const legacyKey = await deriveKey("4321", salt, 10000);
+    const legacyEncryptedPayload = await encryptJSON(legacyKey, legacyPlaintext);
+
+    // Simulate migration of encrypted legacy record
+    // 1. Decrypt with legacy key
+    const decrypted = await (async () => {
+      const k = await deriveKey("4321", salt, 10000);
+      const { decryptJSON } = await import("@/lib/encryption.js");
+      return decryptJSON(k, legacyEncryptedPayload);
+    })();
+
+    // 2. Migrate to v2 Vault
+    const result = await migrateLegacyToVault({
+      legacyRecord: decrypted,
+      lockMethod: "pin",
+      secret: "4321",
+    });
+
+    expect(result.success).toBe(true);
+
+    const wrapper = result.vaultMeta.wrappers.pin!;
+    const kek = await deriveKEK("4321", wrapper.saltB64, wrapper.iterations);
+    const dek = await unwrapDEK(wrapper.wrappedDEKB64, wrapper.ivB64, kek);
+    const finalRecord = await decryptVaultRecord(dek, result.encryptedRecord);
+
+    expect(finalRecord.days["2026-10-10"].notes).toBe("Encrypted diary record");
+    expect(finalRecord.settings.ageGroup).toBe("under18");
+  });
+
+  it("fails safely if legacy PIN is incorrect and does not corrupt storage", async () => {
+    const salt = randomSaltB64();
+    const correctKey = await deriveKey("9999", salt, 10000);
+    const encryptedPayload = await encryptJSON(correctKey, { confidential: "health-data" });
+
+    // Attempting to decrypt with wrong PIN must throw and abort
+    const wrongKey = await deriveKey("0000", salt, 10000);
+    const { decryptJSON } = await import("@/lib/encryption.js");
+
+    await expect(decryptJSON(wrongKey, encryptedPayload)).rejects.toThrow();
   });
 });

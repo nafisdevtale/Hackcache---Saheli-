@@ -82,14 +82,33 @@ export interface EncryptedPartnerEnvelope {
   permissionsDigest: string;
 }
 
+async function normalizePublicKeyString(key: CryptoKey | JsonWebKey): Promise<string> {
+  if (key instanceof CryptoKey || (key as any)?.algorithm || (key as any)?.type === "public") {
+    try {
+      const raw = await crypto.subtle.exportKey("raw", key as CryptoKey);
+      return b64(raw);
+    } catch {
+      // Fallback if raw export not permitted
+      const jwk = await crypto.subtle.exportKey("jwk", key as CryptoKey);
+      return `x:${jwk.x || ""}|y:${jwk.y || ""}|crv:${jwk.crv || ""}`;
+    }
+  }
+  const jwk = key as JsonWebKey;
+  return `x:${jwk.x || ""}|y:${jwk.y || ""}|crv:${jwk.crv || ""}`;
+}
+
 /**
- * Computes a 6-digit Short Authentication String (SAS) from two public keys
+ * Computes a 6-digit Short Authentication String (SAS) from two public keys.
+ * Accepts either CryptoKey or JsonWebKey, normalizing uncompressed coordinates
+ * and using canonical lexical sorting to guarantee commutativity: f(A, B) === f(B, A).
  */
 export async function computeVerificationCode(
-  pubKeyJwk1: JsonWebKey,
-  pubKeyJwk2: JsonWebKey,
+  pubKey1: CryptoKey | JsonWebKey,
+  pubKey2: CryptoKey | JsonWebKey,
 ): Promise<string> {
-  const combined = JSON.stringify(pubKeyJwk1) + JSON.stringify(pubKeyJwk2);
+  const s1 = await normalizePublicKeyString(pubKey1);
+  const s2 = await normalizePublicKeyString(pubKey2);
+  const combined = [s1, s2].sort().join("::");
   const hash = await crypto.subtle.digest("SHA-256", enc.encode(combined));
   const bytes = new Uint8Array(hash);
   const num = ((bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3]) >>> 0;
@@ -308,13 +327,13 @@ export async function decryptPartnerSnapshot(
 }
 
 /**
- * Generates an alphanumeric pairing invitation code
+ * Generates an alphanumeric pairing invitation code using uniform Crockford Base32
  */
 export function generateInvitationCode(): string {
-  const chars = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
+  const chars = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
   const bytes = new Uint8Array(8);
   crypto.getRandomValues(bytes);
   let code = "";
-  for (let i = 0; i < 8; i++) code += chars[bytes[i] % chars.length];
+  for (let i = 0; i < 8; i++) code += chars[bytes[i] & 31];
   return `SAHELI-PAIR-${code.slice(0, 4)}-${code.slice(4, 8)}`;
 }

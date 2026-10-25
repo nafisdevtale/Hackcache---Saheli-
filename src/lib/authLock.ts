@@ -109,7 +109,9 @@ export async function isDeviceAuthenticatorAvailable(): Promise<boolean> {
 }
 
 /**
- * Registers a WebAuthn platform credential and wraps the Vault DEK
+ * Registers a WebAuthn platform credential and wraps the Vault DEK.
+ * Attempts WebAuthn PRF (Pseudo-Random Function) extension for hardware-bound
+ * key unwrapping where supported, with platform user-verification fallback.
  */
 export async function registerDeviceAuthenticator(
   vaultDEK: CryptoKey,
@@ -121,6 +123,8 @@ export async function registerDeviceAuthenticator(
 
   const challenge = crypto.getRandomValues(new Uint8Array(32));
   const userId = crypto.getRandomValues(new Uint8Array(16));
+  const saltBytes = crypto.getRandomValues(new Uint8Array(32));
+  const saltB64 = b64(saltBytes);
 
   const credential = (await navigator.credentials.create({
     publicKey: {
@@ -136,6 +140,9 @@ export async function registerDeviceAuthenticator(
         authenticatorAttachment: "platform",
         userVerification: "required",
       },
+      extensions: {
+        prf: {},
+      },
       timeout: 60000,
     },
   })) as PublicKeyCredential;
@@ -143,10 +150,22 @@ export async function registerDeviceAuthenticator(
   if (!credential) throw new Error("credential-creation-failed");
 
   const rawCredId = b64(credential.rawId);
+  const extResults = credential.getClientExtensionResults?.();
+  const prfSupported = Boolean(extResults?.prf?.enabled);
 
-  // Derive device KEK from credential rawId + local secret salt
-  const saltB64 = b64(crypto.getRandomValues(new Uint8Array(16)));
-  const kek = await deriveKEK(rawCredId, saltB64, 10000);
+  let kek: CryptoKey;
+  if (prfSupported && (extResults as any)?.prf?.results?.first) {
+    // Hardware-bound PRF key derivation
+    const prfSecret = (extResults as any).prf.results.first as ArrayBuffer;
+    kek = await crypto.subtle.importKey("raw", prfSecret, { name: "AES-GCM", length: 256 }, false, [
+      "encrypt",
+      "decrypt",
+    ]);
+  } else {
+    // Platform credential user-verification KEK derivation
+    kek = await deriveKEK(rawCredId, saltB64, 10000);
+  }
+
   const { ivB64, wrappedB64 } = await wrapDEK(vaultDEK, kek);
 
   const wrapper = {
@@ -156,6 +175,7 @@ export async function registerDeviceAuthenticator(
     iterations: 10000,
     ivB64,
     wrappedDEKB64: wrappedB64,
+    prfSupported,
   };
 
   return { credentialId: rawCredId, wrapper };
@@ -165,15 +185,16 @@ export async function registerDeviceAuthenticator(
  * Authenticates using WebAuthn platform authenticator and unwraps the Vault DEK
  */
 export async function unlockWithDeviceAuthenticator(vaultMeta: VaultMetadata): Promise<CryptoKey> {
-  const wrapper = vaultMeta.wrappers.device;
+  const wrapper = vaultMeta.wrappers.device as any;
   if (!wrapper || !vaultMeta.deviceCredentialId) {
     throw new Error("device-auth-not-configured");
   }
 
   const challenge = crypto.getRandomValues(new Uint8Array(32));
   const credIdBytes = unb64(vaultMeta.deviceCredentialId);
+  const saltBytes = unb64(wrapper.saltB64);
 
-  const assertion = (await navigator.credentials.get({
+  const getOptions: CredentialRequestOptions = {
     publicKey: {
       challenge,
       allowCredentials: [
@@ -184,14 +205,36 @@ export async function unlockWithDeviceAuthenticator(vaultMeta: VaultMetadata): P
         },
       ],
       userVerification: "required",
+      extensions: wrapper.prfSupported
+        ? {
+            prf: {
+              eval: {
+                first: saltBytes as unknown as BufferSource,
+              },
+            },
+          }
+        : undefined,
       timeout: 60000,
     },
-  })) as PublicKeyCredential;
+  };
+
+  const assertion = (await navigator.credentials.get(getOptions)) as PublicKeyCredential;
 
   if (!assertion) throw new Error("biometric-verification-cancelled");
 
-  const rawCredId = b64(assertion.rawId);
-  const kek = await deriveKEK(rawCredId, wrapper.saltB64, wrapper.iterations);
+  const extResults = assertion.getClientExtensionResults?.();
+  let kek: CryptoKey;
+
+  if (wrapper.prfSupported && (extResults as any)?.prf?.results?.first) {
+    const prfSecret = (extResults as any).prf.results.first as ArrayBuffer;
+    kek = await crypto.subtle.importKey("raw", prfSecret, { name: "AES-GCM", length: 256 }, false, [
+      "encrypt",
+      "decrypt",
+    ]);
+  } else {
+    const rawCredId = b64(assertion.rawId);
+    kek = await deriveKEK(rawCredId, wrapper.saltB64, wrapper.iterations || 10000);
+  }
 
   return unwrapDEK(wrapper.wrappedDEKB64, wrapper.ivB64, kek);
 }

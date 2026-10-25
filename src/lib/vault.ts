@@ -10,7 +10,7 @@
  *    - Derived from user unlock secrets (PIN, Passphrase, Pattern, Recovery Key).
  *    - Wraps/unwraps the Vault DEK using AES-GCM with unique salts and nonces.
  * 3. Recovery Key:
- *    - High-entropy random code (128-bit) formatted as REC-XXXX-XXXX-XXXX-XXXX.
+ *    - High-entropy random code (80-bit uniform entropy: 16 Base32 symbols) formatted as REC-XXXX-XXXX-XXXX-XXXX.
  *    - Independently wraps the Vault DEK to provide account-free recovery.
  * 4. In-Memory Security:
  *    - Unwrapped DEK resides only in memory while the vault is unlocked.
@@ -189,17 +189,23 @@ export async function unwrapRecoveryKey(recoveryKey: string, wrapper: any): Prom
   return unwrapDEK(ciphertext, iv, kek);
 }
 
+// Crockford Base32 alphabet (32 symbols, 5 bits per symbol, no visual ambiguity)
+const CROCKFORD_ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
+
 /**
- * Generates an unpredictable 128-bit high-entropy recovery code:
- * Format: REC-XXXX-XXXX-XXXX-XXXX
+ * Generates an unpredictable 80-bit uniform-entropy recovery code:
+ * Format: REC-XXXX-XXXX-XXXX-XXXX (16 Crockford Base32 characters, 5 bits each)
+ * Total entropy: 16 symbols * 5 bits = 80 bits (2^80 ~= 1.2e24 combinations).
+ * (Note: True 128-bit Base32 requires 26 symbols; 16 symbols provides 80 bits,
+ * perfectly optimized for high offline search-space while remaining human-transcribable).
  */
 export function generateRecoveryKey(): string {
   const bytes = new Uint8Array(16);
   crypto.getRandomValues(bytes);
-  const chars = "23456789ABCDEFGHJKMNPQRSTUVWXYZ"; // Crockford-safe
   let code = "";
   for (let i = 0; i < 16; i++) {
-    code += chars[bytes[i] % chars.length];
+    // 256 is evenly divisible by 32 (256 / 32 = 8), giving strictly zero modulo bias
+    code += CROCKFORD_ALPHABET[bytes[i] & 31];
   }
   return `REC-${code.slice(0, 4)}-${code.slice(4, 8)}-${code.slice(8, 12)}-${code.slice(12, 16)}`;
 }

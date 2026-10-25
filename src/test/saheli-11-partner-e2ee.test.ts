@@ -206,3 +206,114 @@ describe("Saheli 11.0 — Relay API & Revocation Lifecycle", () => {
     expect(afterRevokeRes.status).toBe(404);
   });
 });
+
+describe("Saheli 11.1 — Negative Tests & Third Unauthorized Device Defense", () => {
+  it("guarantees commutative SAS calculation regardless of argument order", async () => {
+    const devA = await generateDeviceKeys();
+    const devB = await generateDeviceKeys();
+
+    const sasAB = await computeVerificationCode(
+      devA.exchangeKey.publicKey,
+      devB.exchangeKey.publicKey,
+    );
+    const sasBA = await computeVerificationCode(
+      devB.exchangeKey.publicKey,
+      devA.exchangeKey.publicKey,
+    );
+
+    expect(sasAB).toBe(sasBA);
+  });
+
+  it("blocks a third unauthorized device from decrypting the owner's encrypted snapshot", async () => {
+    const ownerKeys = await generateDeviceKeys();
+    const authorizedPartnerKeys = await generateDeviceKeys();
+    const attackerKeys = await generateDeviceKeys(); // Device C
+
+    // Owner and authorized partner derive legitimate SSK
+    const legitimateOwnerSSK = await deriveSnapshotSharingKey(
+      ownerKeys.exchangeKey.privateKey,
+      authorizedPartnerKeys.exchangeKey.publicKey,
+    );
+    const legitimatePartnerSSK = await deriveSnapshotSharingKey(
+      authorizedPartnerKeys.exchangeKey.privateKey,
+      ownerKeys.exchangeKey.publicKey,
+    );
+
+    // Attacker derives SSK against owner public key
+    const attackerSSK = await deriveSnapshotSharingKey(
+      attackerKeys.exchangeKey.privateKey,
+      ownerKeys.exchangeKey.publicKey,
+    );
+
+    // Owner encrypts confidential snapshot
+    const testPayload = { secretMedicalData: "Confidential cycle observation" };
+    const encryptedEnvelope = await encryptPartnerSnapshot(legitimateOwnerSSK, testPayload);
+
+    // Authorized partner can successfully decrypt
+    const authorizedDecrypted = await decryptPartnerSnapshot(
+      legitimatePartnerSSK,
+      encryptedEnvelope,
+    );
+    expect(authorizedDecrypted).toEqual(testPayload);
+
+    // Unauthorized third device attempting to decrypt MUST fail (AES-GCM authentication tag failure)
+    await expect(decryptPartnerSnapshot(attackerSSK, encryptedEnvelope)).rejects.toThrow();
+  });
+
+  it("detects MITM public-key substitution via SAS code divergence", async () => {
+    const ownerKeys = await generateDeviceKeys();
+    const legitimatePartnerKeys = await generateDeviceKeys();
+    const mitmAttackerKeys = await generateDeviceKeys();
+
+    // Owner sees legitimate partner's key
+    const ownerExpectedSAS = await computeVerificationCode(
+      ownerKeys.exchangeKey.publicKey,
+      legitimatePartnerKeys.exchangeKey.publicKey,
+    );
+
+    // If MITM substitutes attacker's key to partner
+    const partnerTamperedSAS = await computeVerificationCode(
+      mitmAttackerKeys.exchangeKey.publicKey,
+      legitimatePartnerKeys.exchangeKey.publicKey,
+    );
+
+    // SAS codes differ, alerting users out-of-band to reject the pairing
+    expect(ownerExpectedSAS).not.toBe(partnerTamperedSAS);
+  });
+
+  it("rejects unauthorized third device pairing with invalid or non-existent code", async () => {
+    const res = await handlePartnerPair(
+      new Request("https://saheli.local/api/partner/pair", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          invitationCode: "SAHELI-PAIR-FAKE-CODE",
+          partnerInstallationId: "inst-attacker-3",
+          partnerPublicKey: { kty: "EC", crv: "P-256", x: "x3", y: "y3" },
+        }),
+      }),
+    );
+    expect(res.status).toBe(404);
+    const data = await res.json();
+    expect(data.error).toBe("invalid-or-expired-invitation");
+  });
+
+  it("rejects tampered ciphertext envelopes with authentication failure", async () => {
+    const ownerKeys = await generateDeviceKeys();
+    const partnerKeys = await generateDeviceKeys();
+    const ssk = await deriveSnapshotSharingKey(
+      ownerKeys.exchangeKey.privateKey,
+      partnerKeys.exchangeKey.publicKey,
+    );
+
+    const testPayload = { valid: true };
+    const envelope = await encryptPartnerSnapshot(ssk, testPayload);
+
+    // Tamper with ciphertext by flipping characters in Base64
+    const tamperedCt =
+      envelope.ct.slice(0, -4) + (envelope.ct.slice(-4) === "AAAA" ? "BBBB" : "AAAA");
+    const tamperedEnvelope = { ...envelope, ct: tamperedCt };
+
+    await expect(decryptPartnerSnapshot(ssk, tamperedEnvelope)).rejects.toThrow();
+  });
+});
