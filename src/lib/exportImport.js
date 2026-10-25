@@ -795,7 +795,9 @@ export function parsePDFImport(content) {
   }
 
   // Look for the versioned embedded payload
-  const match = content.match(/<!--\s*SAHELI_RECORD_PAYLOAD_V1:([A-Za-z0-9+/=]+)\s*-->/);
+  const match =
+    content.match(/<!--\s*SAHELI_RECORD_PAYLOAD_V1:([A-Za-z0-9+/=]+)\s*-->/) ||
+    content.match(/SAHELI_RECORD_PAYLOAD_V1:([A-Za-z0-9+/=]+)/);
   if (!match || !match[1]) {
     return {
       ok: false,

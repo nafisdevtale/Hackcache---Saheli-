@@ -128,8 +128,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  const prefs = typeof window !== "undefined" ? loadPrefs() : { textSize: "md", lang: "en" };
+  const isUrdu = prefs?.lang === "ur";
+
   return (
-    <html lang="en">
+    <html
+      lang={prefs?.lang || "en"}
+      dir={isUrdu ? "rtl" : "ltr"}
+      data-text={prefs?.textSize || "md"}
+    >
       <head>
         <HeadContent />
       </head>

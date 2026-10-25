@@ -444,6 +444,8 @@ export default {
   "common.skipToContent": "मुख्य जानकारी पर जाएँ",
   "common.sources": "स्रोत",
   "common.stop": "रोकें",
+  "common.pause": "रोकें",
+  "common.play": "चलाएं",
   "common.ttsUnsupported": "इस ब्राउज़र में सुनने की सुविधा नहीं है।",
   "common.uncertainty": "अनिश्चितता",
   "common.yes": "हाँ",
@@ -914,6 +916,10 @@ export default {
   "ins.loggedTimes": "{n} दिन ({pct}%) दर्ज हुआ",
   "ins.medianCycle": "मध्यम चक्र",
   "ins.medianPeriod": "मध्यम पीरियड",
+  "ins.typicalCycle": "सामान्य चक्र अवधि",
+  "ins.typicalPeriod": "सामान्य पीरियड अवधि",
+  "ins.typicalCycleExplainer":
+    "जब आपके पूरे चक्रों को सबसे छोटे से सबसे लंबे क्रम में रखा जाए, तो बीच की चक्र अवधि।",
   "ins.moodEnergy": "मनोदशा और ऊर्जा का विवरण",
   "ins.nextWindow": "अगले पीरियड का अनुमान (समय दायरा)",
   "ins.nextWindowDesc": "अनुमानित दायरा: {start} से {end} ({days} दिन लंबा)",
@@ -979,6 +985,11 @@ export default {
   "learn.readTime": "{m} मिनट का पाठ",
   "learn.searchPlaceholder": "स्वास्थ्य गाइड खोजें...",
   "learn.title": "सीखें",
+  "learn.progressTitle": "सीखने की प्रगति",
+  "learn.continueReading": "पढ़ना जारी रखें",
+  "learn.markIncomplete": "अपूर्ण चिह्नित करें",
+  "learn.markComplete": "पूर्ण चिह्नित करें",
+  "learn.listenOrRead": "नीचे सुनें या पढ़ें",
   "lock.enterPassphrase": "पासफ़्रेज़ दर्ज करें",
   "lock.forgot":
     "पिन भूल गईं? पिन के बिना सुरक्षित जानकारी वापस नहीं मिल सकती। आप ब्राउज़र में इस साइट का डेटा साफ़ कर सकती हैं।",
@@ -2299,6 +2310,10 @@ export default {
   "onb.dobTitle": "जन्म तिथि",
   "onb.dobSubtitle":
     "इसका उपयोग केवल आपकी आयु के अनुसार स्वास्थ्य मार्गदर्शन, भविष्यवाणियों और समुदाय सुविधाओं को ढालने के लिए होता है। यह कभी फोन से बाहर नहीं जाता।",
+  "onb.missingDobTitle": "व्यक्तिगत देखभाल के लिए अपनी जन्म तिथि जोड़ें",
+  "onb.missingDobDesc":
+    "सहेली आपकी सटीक आयु वर्ग के अनुसार स्वास्थ्य सीमाएं, चक्र भविष्यवाणियां और शिक्षा अनुकूलित करती है। आपका डेटा सुरक्षित और एन्क्रिप्टेड रहता है।",
+  "onb.addDob": "जन्म तिथि जोड़ें",
   "onb.dobDay": "दिन",
   "onb.dobMonth": "महीना",
   "onb.dobYear": "वर्ष",

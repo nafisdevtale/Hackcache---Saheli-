@@ -1,5 +1,16 @@
-import { useState, useMemo } from "react";
-import { Search, BookOpen, Sparkles, Filter, X, ArrowRight } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import {
+  Search,
+  BookOpen,
+  Sparkles,
+  Filter,
+  X,
+  ArrowRight,
+  CheckCircle2,
+  Circle,
+  PlayCircle,
+  Clock,
+} from "lucide-react";
 import { useApp } from "@/App.jsx";
 import { Sources, ListenButton, inputCls, cx } from "@/components/common/ui.jsx";
 import {
@@ -36,14 +47,67 @@ export default function Learn() {
   const [selectedCat, setSelectedCat] = useState("all");
   const [search, setSearch] = useState("");
 
+  const [completed, setCompleted] = useState(() => {
+    try {
+      if (typeof localStorage !== "undefined") {
+        const raw = localStorage.getItem("saheli_completed_lessons");
+        return raw ? JSON.parse(raw) : [];
+      }
+    } catch {}
+    return [];
+  });
+
+  const [lastRead, setLastRead] = useState(() => {
+    try {
+      if (typeof localStorage !== "undefined") {
+        return localStorage.getItem("saheli_last_read_lesson") || null;
+      }
+    } catch {}
+    return null;
+  });
+
+  const toggleComplete = (id, e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    setCompleted((prev) => {
+      const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
+      try {
+        if (typeof localStorage !== "undefined") {
+          localStorage.setItem("saheli_completed_lessons", JSON.stringify(next));
+        }
+      } catch {}
+      return next;
+    });
+  };
+
+  const markOpened = (id) => {
+    setLastRead(id);
+    try {
+      if (typeof localStorage !== "undefined") {
+        localStorage.setItem("saheli_last_read_lesson", id);
+      }
+    } catch {}
+  };
+
+  const catCounts = useMemo(() => {
+    const counts = { all: LESSONS.length };
+    LESSONS.forEach((l) => {
+      const cat = CATEGORY_MAP[l.id] || "guidance";
+      counts[cat] = (counts[cat] || 0) + 1;
+    });
+    return counts;
+  }, []);
+
   const categories = [
-    { id: "all", label: t("learn.catAll") },
-    { id: "biology", label: t("learn.catBiology") },
-    { id: "symptoms", label: t("learn.catSymptoms") },
-    { id: "conditions", label: t("learn.catConditions") },
-    { id: "hygiene", label: t("learn.catHygiene") },
-    { id: "lifeStages", label: t("learn.catLifeStages") },
-    { id: "guidance", label: t("learn.catGuidance") },
+    { id: "all", label: `${t("learn.catAll")} (${catCounts.all || 0})` },
+    { id: "biology", label: `${t("learn.catBiology")} (${catCounts.biology || 0})` },
+    { id: "symptoms", label: `${t("learn.catSymptoms")} (${catCounts.symptoms || 0})` },
+    { id: "conditions", label: `${t("learn.catConditions")} (${catCounts.conditions || 0})` },
+    { id: "hygiene", label: `${t("learn.catHygiene")} (${catCounts.hygiene || 0})` },
+    { id: "lifeStages", label: `${t("learn.catLifeStages")} (${catCounts.lifeStages || 0})` },
+    { id: "guidance", label: `${t("learn.catGuidance")} (${catCounts.guidance || 0})` },
   ];
 
   const filtered = useMemo(() => {
@@ -61,12 +125,51 @@ export default function Learn() {
     });
   }, [selectedCat, search, L]);
 
+  const lastReadLessonObj = useMemo(() => {
+    return lastRead ? LESSONS.find((l) => l.id === lastRead) : null;
+  }, [lastRead]);
+
   // Featured article (First lesson: Cycle biology)
   const featured = LESSONS[0];
 
   return (
     <div className="space-y-6 pb-12 max-w-5xl mx-auto animate-fade-in">
       <NovaPageHeader tag={t("learn.title")} title={t("learn.title")} subtitle={t("learn.intro")} />
+
+      {/* Progress & Continue Reading Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-3xl bg-muted/40 border border-border/70">
+        <div className="space-y-1.5 flex-1 max-w-md">
+          <div className="flex items-center justify-between text-xs font-bold text-foreground">
+            <span className="flex items-center gap-1.5">
+              <CheckCircle2 className="h-4 w-4 text-primary" />
+              <span>{t("learn.progressTitle") || "Learning Progress"}</span>
+            </span>
+            <span className="text-muted-foreground font-semibold">
+              {completed.length} / {LESSONS.length} (
+              {Math.round((completed.length / LESSONS.length) * 100)}%)
+            </span>
+          </div>
+          <div className="w-full h-2 rounded-full bg-border/60 overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-primary to-rose transition-all duration-300 rounded-full"
+              style={{ width: `${Math.round((completed.length / LESSONS.length) * 100)}%` }}
+            />
+          </div>
+        </div>
+
+        {lastReadLessonObj && !completed.includes(lastReadLessonObj.id) && (
+          <a
+            href={`#${lastReadLessonObj.id}`}
+            onClick={() => markOpened(lastReadLessonObj.id)}
+            className="inline-flex items-center gap-2 text-xs font-bold text-primary hover:underline bg-primary/10 px-3 py-1.5 rounded-xl border border-primary/20 shrink-0"
+          >
+            <PlayCircle className="h-4 w-4" />
+            <span>
+              {t("learn.continueReading") || "Continue reading"}: {L(lastReadLessonObj.title)}
+            </span>
+          </a>
+        )}
+      </div>
 
       {/* Featured Editorial Hero Banner */}
       {!search && selectedCat === "all" && featured && (
@@ -153,28 +256,66 @@ export default function Learn() {
             const wordCount = textToRead.split(/\s+/).length;
             const readTime = Math.max(1, Math.ceil(wordCount / 140));
 
+            const isCompleted = completed.includes(l.id);
+
             return (
               <div
                 key={l.id}
                 id={l.id}
-                className="scroll-mt-20 overflow-hidden rounded-3xl border border-border/70 bg-card shadow-xs transition-all hover:border-primary/40 hover:shadow-soft"
+                className={`scroll-mt-20 overflow-hidden rounded-3xl border transition-all hover:border-primary/40 hover:shadow-soft ${
+                  isCompleted
+                    ? "border-primary/30 bg-primary/[0.02]"
+                    : "border-border/70 bg-card shadow-xs"
+                }`}
               >
-                <details className="group">
+                <details
+                  className="group"
+                  onToggle={(e) => {
+                    if (e.currentTarget.open) markOpened(l.id);
+                  }}
+                >
                   <summary className="flex min-h-[68px] cursor-pointer items-center justify-between gap-3 p-4 text-sm sm:text-base font-bold text-foreground">
-                    <div className="flex items-center gap-3.5">
+                    <div className="flex items-center gap-3.5 flex-1 min-w-0">
                       <EducationTopicArt category={cat} className="h-12 w-12 shrink-0" />
-                      <div>
-                        <span className="group-hover:text-primary transition-colors">
+                      <div className="min-w-0 flex-1">
+                        <span className="group-hover:text-primary transition-colors block truncate">
                           {L(l.title)}
                         </span>
-                        <p className="text-xs font-normal text-muted-foreground mt-0.5">
+                        <p className="text-xs font-normal text-muted-foreground mt-0.5 line-clamp-1">
+                          {L(l.paras[0])}
+                        </p>
+                        <p className="text-[11px] font-normal text-muted-foreground/80 mt-1">
                           {t("learn.readTime", { m: readTime })}
                         </p>
                       </div>
                     </div>
+
+                    <button
+                      type="button"
+                      onClick={(e) => toggleComplete(l.id, e)}
+                      aria-label={
+                        isCompleted
+                          ? t("learn.markIncomplete") || "Mark incomplete"
+                          : t("learn.markComplete") || "Mark complete"
+                      }
+                      className={`shrink-0 p-2 rounded-xl transition-all cursor-pointer ${
+                        isCompleted
+                          ? "text-primary bg-primary/10 hover:bg-primary/20"
+                          : "text-muted-foreground/50 hover:text-foreground hover:bg-muted"
+                      }`}
+                    >
+                      {isCompleted ? (
+                        <CheckCircle2 className="h-5 w-5" />
+                      ) : (
+                        <Circle className="h-5 w-5" />
+                      )}
+                    </button>
                   </summary>
                   <div className="space-y-3 border-t border-border/50 px-5 py-5 text-xs sm:text-sm leading-relaxed bg-muted/20">
-                    <div className="flex justify-end">
+                    <div className="flex items-center justify-between gap-2 border-b border-border/40 pb-3">
+                      <span className="text-xs font-bold text-muted-foreground">
+                        {t("learn.listenOrRead") || "Listen or read below"}
+                      </span>
                       <ListenButton text={textToRead} />
                     </div>
                     {l.paras.map((p, i) => (

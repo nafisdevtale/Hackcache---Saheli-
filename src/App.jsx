@@ -29,6 +29,7 @@ import {
 } from "./lib/vault.ts";
 import { registerDeviceAuthenticator } from "./lib/authLock.ts";
 import { syncOwnerSnapshot, flushPartnerOutbox, loadPartnerState } from "./lib/partnerClient.ts";
+import { speechController } from "./lib/audioController.ts";
 import {
   deriveKey,
   encryptJSON,
@@ -269,6 +270,7 @@ export function AppProvider({ children }) {
 
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   useEffect(() => {
+    speechController.stop();
     const isRtl = prefs.lang === "ur";
     document.documentElement.dir = isRtl ? "rtl" : "ltr";
     document.documentElement.lang = prefs.lang || "en";
@@ -547,14 +549,21 @@ export function AppProvider({ children }) {
     },
     async unlock(secret, method = null) {
       const vm = vaultMeta || (await idbGet("vault_meta"));
+      const currentMeta = meta || (await idbGet("meta")) || { mode: "real" };
       if (vm) {
         const determinedMethod = method || vm.activeLockMethod || "pin";
-        const dek = await unlockVault(secret, determinedMethod);
+        const res = await unlockVault(secret, determinedMethod);
+        const dek = res?.vaultDEK || res;
         dekRef.current = dek;
         keyRef.current = dek;
-        const payload = await idbGet(storeKey(meta));
+        if (res?.vaultMeta) {
+          setVaultMeta(res.vaultMeta);
+        }
+        const payload = await idbGet(storeKey(currentMeta));
         let r;
-        if (payload?.v === 2) {
+        if (!payload) {
+          r = emptyRecord();
+        } else if (payload?.v === 2) {
           r = await decryptVaultRecord(dek, payload);
         } else if (isEncrypted(payload)) {
           try {
@@ -566,20 +575,22 @@ export function AppProvider({ children }) {
           r = payload;
         }
         const normalized = normalizeRecord(r);
+        setMeta(currentMeta);
         setRecord(normalized);
-        stateRef.current = { meta, record: normalized };
+        stateRef.current = { meta: currentMeta, record: normalized };
         setStatus("ready");
         return;
       }
 
       // Legacy PIN fallback
-      const key = await deriveKey(secret, meta.pin.salt, meta.pin.iterations);
-      const payload = await idbGet(storeKey(meta));
+      const key = await deriveKey(secret, currentMeta.pin.salt, currentMeta.pin.iterations);
+      const payload = await idbGet(storeKey(currentMeta));
       const r = await decryptJSON(key, payload); // throws on wrong PIN / corrupt data
       keyRef.current = key;
       const normalized = normalizeRecord(r);
+      setMeta(currentMeta);
       setRecord(normalized);
-      stateRef.current = { meta, record: normalized };
+      stateRef.current = { meta: currentMeta, record: normalized };
       setStatus("ready");
     },
     lock() {

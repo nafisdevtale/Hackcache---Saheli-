@@ -390,6 +390,12 @@ export async function unlockVault(
     throw new Error("vault-not-configured");
   }
 
+  if (method === "device") {
+    const { unlockWithDeviceAuthenticator } = await import("./authLock.ts");
+    const vaultDEK = await unlockWithDeviceAuthenticator(vaultMeta);
+    return { vaultDEK, vaultMeta };
+  }
+
   const targetWrapper =
     method === "recovery"
       ? vaultMeta.wrappers.recovery

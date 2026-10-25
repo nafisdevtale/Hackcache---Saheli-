@@ -97,6 +97,24 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+/* =====================================================================
+   GLOBAL ACCESSIBILITY & TEXT SIZE SCALING (Saheli 11.5)
+   Applies to dashboard, navigation, buttons, insights, learn, community,
+   AI, settings, onboarding, partner, and lock screens proportionally.
+   ===================================================================== */
+html[data-text="sm"] {
+  font-size: 14px;
+}
+
+html,
+html[data-text="md"] {
+  font-size: 16px;
+}
+
+html[data-text="lg"] {
+  font-size: 18px;
+}
+
 :root {
   --radius: 1.25rem;
 

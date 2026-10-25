@@ -28,7 +28,7 @@ import { isValidPin, isValidSecret } from "@/lib/encryption.js";
 import { isValidDate, todayStr } from "@/lib/localDate.js";
 import { calculateAge, isValidDob, isLeapYear } from "@/lib/agePolicy.ts";
 import { LANGUAGES } from "@/i18n/languages.js";
-import { parseImport } from "@/lib/exportImport.js";
+import { parseImport, parseCSVImport, parsePDFImport } from "@/lib/exportImport.js";
 import {
   WelcomeArt,
   PrivacyArt,
@@ -222,8 +222,32 @@ export function OnboardingFlow() {
     setBusy(true);
     try {
       const text = await file.text();
-      const parsed = parseImport(text);
-      await restoreFromBackup(parsed.rec);
+      let parsed;
+      const lowerName = file.name.toLowerCase();
+      if (lowerName.endsWith(".csv") || file.type === "text/csv") {
+        parsed = parseCSVImport(text);
+      } else if (
+        lowerName.endsWith(".pdf") ||
+        lowerName.endsWith(".html") ||
+        file.type === "application/pdf"
+      ) {
+        parsed = parsePDFImport(text);
+      } else {
+        parsed = parseImport(text);
+      }
+
+      if (!parsed || !parsed.ok) {
+        setErrorMsg(
+          t(parsed?.error) ||
+            parsed?.explanation ||
+            t("imp.wrongFormat") ||
+            "Invalid backup file format.",
+        );
+        setBusy(false);
+        return;
+      }
+
+      await restoreFromBackup(parsed.record || parsed.rec);
     } catch {
       setErrorMsg(t("imp.wrongFormat") || "Invalid backup file format.");
       setBusy(false);
@@ -376,7 +400,7 @@ export function OnboardingFlow() {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".json"
+                accept=".json,.csv,.pdf,.html,text/csv,application/json,application/pdf"
                 className="hidden"
                 onChange={handleBackupUpload}
               />

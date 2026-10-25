@@ -24,7 +24,10 @@ let failCount = 0;
 
 export function UnifiedLockScreen() {
   const { t, unlock, prefs, vaultMeta, identity } = useApp();
-  const activeMethod = vaultMeta?.activeLockMethod || "pin";
+  const activeMethod =
+    vaultMeta?.activeLockMethod && vaultMeta.activeLockMethod !== "none"
+      ? vaultMeta.activeLockMethod
+      : "pin";
 
   const [inputVal, setInputVal] = useState("");
   const [showPassword, setShowPassword] = useState(false);

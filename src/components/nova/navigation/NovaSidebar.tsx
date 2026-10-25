@@ -22,6 +22,7 @@ import {
   Shield,
   WifiOff,
   Volume2,
+  Square,
 } from "lucide-react";
 // @ts-expect-error plain JS component
 import { SaheliLogo } from "@/components/brand/SaheliLogo.jsx";
@@ -38,6 +39,7 @@ export interface NovaSidebarProps {
   isOnline: boolean;
   onQuickLog: () => void;
   onReadAloud?: () => void;
+  isSpeaking?: boolean;
   userRole?: "owner" | "partner";
 }
 
@@ -48,6 +50,7 @@ export const NovaSidebar: React.FC<NovaSidebarProps> = ({
   isOnline,
   onQuickLog,
   onReadAloud,
+  isSpeaking = false,
   userRole = "owner",
 }) => {
   const isPartner = userRole === "partner";
@@ -210,11 +213,15 @@ export const NovaSidebar: React.FC<NovaSidebarProps> = ({
           {prefs.readAloud && onReadAloud && (
             <button
               type="button"
-              aria-label={t("common.readPage")}
+              aria-label={isSpeaking ? t("common.stop") : t("common.readPage")}
               onClick={onReadAloud}
-              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
+              className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border transition-colors cursor-pointer ${
+                isSpeaking
+                  ? "bg-primary/20 text-primary border-primary/40"
+                  : "border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground"
+              }`}
             >
-              <Volume2 className="h-4 w-4" />
+              {isSpeaking ? <Square className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
             </button>
           )}
         </div>

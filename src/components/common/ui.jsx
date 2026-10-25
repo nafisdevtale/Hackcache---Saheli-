@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { ExternalLink, Volume2, Square } from "lucide-react";
+import { ExternalLink, Volume2, Square, Pause, Play } from "lucide-react";
 import { useApp } from "@/App.jsx";
 import { SOURCES } from "@/content/sources.js";
 import { loc } from "@/lib/localDate.js";
+import { speechController, useSpeechController } from "@/lib/audioController.ts";
 
 export const cx = (...a) => a.filter(Boolean).join(" ");
 
@@ -141,42 +142,64 @@ export function Sources({ ids }) {
 }
 
 export function speak(text, lang, done = () => {}) {
-  if (typeof window === "undefined" || !("speechSynthesis" in window)) return false;
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = loc(lang);
-  u.onend = done;
-  u.onerror = done;
-  window.speechSynthesis.speak(u);
-  return true;
+  return speechController.speak(text, lang, { onEnd: done, onError: done });
+}
+
+export function stopSpeaking() {
+  speechController.stop();
 }
 
 export function ListenButton({ text }) {
   const { t, lang } = useApp();
   const [msg, setMsg] = useState("");
-  const [on, setOn] = useState(false);
+  const { isSpeaking, isPaused, toggle, pause, resume, stop } = useSpeechController(text);
+
   return (
-    <div>
+    <div className="inline-flex items-center gap-1.5">
       <Btn
-        variant="outline"
+        variant={isSpeaking ? "secondary" : "outline"}
         className="min-h-10 text-xs py-1.5 px-3.5 rounded-xl gap-1.5"
         onClick={() => {
-          if (on) {
-            window.speechSynthesis?.cancel();
-            setOn(false);
-            return;
+          setMsg("");
+          const ok = toggle(text, lang, {
+            onError: () => setMsg("common.ttsUnsupported"),
+          });
+          if (!ok && !isSpeaking) {
+            setMsg("common.ttsUnsupported");
           }
-          if (!speak(text, lang, () => setOn(false))) setMsg("common.ttsUnsupported");
-          else setOn(true);
         }}
+        aria-label={isSpeaking ? t("common.stop") : t("common.listen")}
       >
-        {on ? (
-          <Square aria-hidden className="h-3.5 w-3.5" />
+        {isSpeaking ? (
+          <Square aria-hidden className="h-3.5 w-3.5 text-primary" />
         ) : (
           <Volume2 aria-hidden className="h-3.5 w-3.5 text-primary" />
         )}{" "}
-        <span>{on ? t("common.stop") : t("common.listen")}</span>
+        <span>{isSpeaking ? t("common.stop") : t("common.listen")}</span>
       </Btn>
+
+      {isSpeaking && (
+        <button
+          type="button"
+          onClick={() => pause()}
+          aria-label={t("common.pause") || "Pause"}
+          className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted"
+        >
+          <Pause className="h-3.5 w-3.5" />
+        </button>
+      )}
+
+      {isPaused && (
+        <button
+          type="button"
+          onClick={() => resume()}
+          aria-label={t("common.play") || "Resume"}
+          className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-primary/40 bg-primary/10 text-primary hover:bg-primary/20"
+        >
+          <Play className="h-3.5 w-3.5" />
+        </button>
+      )}
+
       {msg && (
         <p role="status" className="mt-1 text-xs text-muted-foreground">
           {t(msg)}

@@ -1,6 +1,6 @@
 import React, { type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { Eye, EyeOff, Volume2 } from "lucide-react";
+import { Eye, EyeOff, Volume2, Square } from "lucide-react";
 // @ts-expect-error plain JS component
 import { SaheliLogo } from "@/components/brand/SaheliLogo.jsx";
 import { LANGUAGES } from "@/i18n/languages.js";
@@ -20,6 +20,7 @@ export interface NovaShellProps {
   isOnline: boolean;
   onQuickLog: () => void;
   onReadAloud?: () => void;
+  isSpeaking?: boolean;
   banners?: ReactNode;
   systemAlerts?: ReactNode;
   userRole?: "owner" | "partner";
@@ -33,6 +34,7 @@ export const NovaShell: React.FC<NovaShellProps> = ({
   isOnline,
   onQuickLog,
   onReadAloud,
+  isSpeaking = false,
   banners,
   systemAlerts,
   userRole = "owner",
@@ -57,6 +59,7 @@ export const NovaShell: React.FC<NovaShellProps> = ({
         isOnline={isOnline}
         onQuickLog={onQuickLog}
         onReadAloud={onReadAloud}
+        isSpeaking={isSpeaking}
         userRole={userRole}
       />
 
@@ -104,11 +107,15 @@ export const NovaShell: React.FC<NovaShellProps> = ({
             {prefs.readAloud && onReadAloud && (
               <button
                 type="button"
-                aria-label={t("common.readPage")}
+                aria-label={isSpeaking ? t("common.stop") : t("common.readPage")}
                 onClick={onReadAloud}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted cursor-pointer"
+                className={`inline-flex h-8 w-8 items-center justify-center rounded-xl transition-colors cursor-pointer ${
+                  isSpeaking
+                    ? "bg-primary/20 text-primary border border-primary/40"
+                    : "text-muted-foreground hover:bg-muted"
+                }`}
               >
-                <Volume2 className="h-4 w-4" />
+                {isSpeaking ? <Square className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
               </button>
             )}
           </div>

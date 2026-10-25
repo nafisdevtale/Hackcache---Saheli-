@@ -39,6 +39,8 @@ import { RhythmMotif } from "@/components/brand/SaheliArt.jsx";
 import { NovaShell } from "@/components/nova";
 import { UnifiedLockScreen } from "@/components/security/UnifiedLockScreen.jsx";
 import { AdultTransitionCard } from "@/components/onboarding/AdultTransitionCard.jsx";
+import { MissingDobCard } from "@/components/onboarding/MissingDobCard.jsx";
+import { useSpeechController } from "@/lib/audioController.ts";
 
 let failCount = 0;
 
@@ -336,6 +338,7 @@ export function Shell({ children }) {
 
   const [speechFailed, setSpeechFailed] = useState(false);
   const [quickLogOpen, setQuickLogOpen] = useState(false);
+  const { isSpeaking, toggle: toggleSpeech } = useSpeechController();
 
   if (status === "loading")
     return (
@@ -370,12 +373,16 @@ export function Shell({ children }) {
         isOnline={isOnline}
         userRole={app.userRole}
         onQuickLog={() => setQuickLogOpen(true)}
-        onReadAloud={() =>
-          setSpeechFailed(!speak(document.getElementById("main")?.innerText || "", prefs.lang))
-        }
+        onReadAloud={() => {
+          const mainEl = document.getElementById("main");
+          const text = mainEl?.innerText || "";
+          toggleSpeech(text, prefs.lang);
+        }}
+        isSpeaking={isSpeaking}
         systemAlerts={
           <>
             <AdultTransitionCard />
+            <MissingDobCard />
             {!isOnline && (
               <div
                 role="status"

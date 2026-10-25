@@ -66,7 +66,12 @@ export default function Insights() {
               value={cycleScope}
               onChange={(val) => setCycleScope(val)}
               options={[
-                { value: "recent", label: t("ins.filterRecent", { n: CONFIG.historyWindow }) },
+                {
+                  value: "recent",
+                  label: t("ins.filterRecent", {
+                    n: Math.min(CONFIG.historyWindow, insights.totalCyclesCount),
+                  }),
+                },
                 { value: "all", label: t("ins.filterAll", { n: insights.totalCyclesCount }) },
               ]}
             />
@@ -104,7 +109,7 @@ export default function Insights() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="rounded-2xl border border-border/60 bg-card/80 p-4">
                   <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    {t("ins.medianCycle")}
+                    {t("ins.typicalCycle") || t("ins.medianCycle")}
                   </p>
                   <p className="font-display text-3xl font-extrabold text-foreground mt-1">
                     {insights.medianCycle ? t("common.days", { n: insights.medianCycle }) : "—"}
@@ -116,11 +121,14 @@ export default function Insights() {
                       max: fmtInteger ? fmtInteger(insights.maxCycle) : insights.maxCycle,
                     })}
                   </p>
+                  <p className="text-[10px] text-muted-foreground/80 mt-1.5 leading-snug">
+                    {t("ins.typicalCycleExplainer")}
+                  </p>
                 </div>
 
                 <div className="rounded-2xl border border-border/60 bg-card/80 p-4">
                   <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    {t("ins.medianPeriod")}
+                    {t("ins.typicalPeriod") || t("ins.medianPeriod")}
                   </p>
                   <p className="font-display text-3xl font-extrabold text-period mt-1">
                     {insights.medianPeriod ? t("common.days", { n: insights.medianPeriod }) : "—"}
@@ -137,10 +145,10 @@ export default function Insights() {
 
               <div className="border-t border-border/60 pt-3">
                 <p className="text-xs text-muted-foreground">
-                  {t("ins.basedOnCycles", { n: insights.recentCycles.length })}
+                  {t("ins.basedOnCycles", { n: insights.activeCycles.length })}
                 </p>
                 <p className="mt-1 text-sm font-semibold text-foreground">
-                  {insights.recentCycles.length < CONFIG.minCyclesForPrediction
+                  {insights.activeCycles.length < CONFIG.minCyclesForPrediction
                     ? t("reg.insufficient")
                     : insights.isIrregular
                       ? insights.irregularReason === "range"
@@ -202,7 +210,7 @@ export default function Insights() {
                   <p className="font-semibold text-foreground">
                     {t("ins.insufficientForEstimate", {
                       min: CONFIG.minCyclesForPrediction,
-                      count: insights.recentCycles.length,
+                      count: insights.activeCycles.length,
                     })}
                   </p>
                   <p className="text-xs text-muted-foreground">{t("ins.insufficientSubtitle")}</p>
@@ -215,7 +223,7 @@ export default function Insights() {
               <div className="flex items-center justify-between pb-2">
                 <h2 className="text-base font-bold text-foreground">{t("ins.history")}</h2>
                 <span className="text-xs text-muted-foreground">
-                  {t("ins.basedOnCycles", { n: insights.cycles.length })}
+                  {t("ins.basedOnCycles", { n: insights.activeCycles.length })}
                 </span>
               </div>
 
@@ -274,7 +282,7 @@ export default function Insights() {
               <h2 className="text-base font-bold text-foreground">{t("ins.cycleChart")}</h2>
               <p className="text-xs text-muted-foreground">
                 {t("ins.chartSummaryCycle", {
-                  count: insights.recentCycles.length,
+                  count: insights.activeCycles.length,
                   min: limits.minLen,
                   max: limits.maxLen,
                 })}
@@ -284,11 +292,11 @@ export default function Insights() {
                   title={t("ins.cycleChart")}
                   refLines={[{ value: limits.minLen }, { value: limits.maxLen }]}
                   summary={t("ins.chartSummaryCycle", {
-                    count: insights.recentCycles.length,
+                    count: insights.activeCycles.length,
                     min: limits.minLen,
                     max: limits.maxLen,
                   })}
-                  data={insights.recentCycles.map((c) => ({
+                  data={insights.activeCycles.map((c) => ({
                     label: fmt(c.start, { month: "short", day: "numeric" }),
                     value: c.length,
                     highlight: c.length > limits.maxLen || c.length < limits.minLen,
@@ -301,7 +309,7 @@ export default function Insights() {
               <h2 className="text-base font-bold text-foreground">{t("ins.periodChart")}</h2>
               <p className="text-xs text-muted-foreground">
                 {t("ins.chartSummaryPeriod", {
-                  count: insights.recentPeriods.length,
+                  count: insights.activePeriods.length,
                   min: insights.minPeriod || 1,
                   max: insights.maxPeriod || 7,
                 })}
@@ -311,11 +319,11 @@ export default function Insights() {
                   title={t("ins.periodChart")}
                   refLines={[{ value: CONFIG.longPeriodDays }]}
                   summary={t("ins.chartSummaryPeriod", {
-                    count: insights.recentPeriods.length,
+                    count: insights.activePeriods.length,
                     min: insights.minPeriod || 1,
                     max: insights.maxPeriod || 7,
                   })}
-                  data={insights.recentPeriods.map((p) => ({
+                  data={insights.activePeriods.map((p) => ({
                     label: fmt(p.start, { month: "short", day: "numeric" }),
                     value: p.length,
                     highlight: p.length > CONFIG.longPeriodDays,
