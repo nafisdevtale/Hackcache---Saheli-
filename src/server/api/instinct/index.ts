@@ -32,6 +32,26 @@ export async function handleInstinctRequest(req: Request): Promise<Response> {
   }
 
   try {
+    // 0. Status: GET /api/instinct/status
+    if (path === "/api/instinct/status" && method === "GET") {
+      const tmdbKey = process.env.TMDB_API_TOKEN?.trim() || process.env.TMDB_API_KEY?.trim();
+      const watchmodeKey = process.env.WATCHMODE_API_KEY?.trim();
+      const configured = Boolean(tmdbKey || watchmodeKey);
+      return new Response(
+        JSON.stringify({
+          ok: true,
+          available: configured,
+          tmdbConfigured: Boolean(tmdbKey),
+          watchmodeConfigured: Boolean(watchmodeKey),
+          region: "IN",
+          message: configured
+            ? "Live entertainment discovery active."
+            : "Entertainment APIs unconfigured. Verified local library active.",
+        }),
+        { status: 200, headers },
+      );
+    }
+
     // 1. Search: GET /api/instinct/search?q=...&type=...
     if (path === "/api/instinct/search" && method === "GET") {
       const q = url.searchParams.get("q") || "";
@@ -73,7 +93,8 @@ export async function handleInstinctRequest(req: Request): Promise<Response> {
               posterUrl: res.poster_path
                 ? `https://image.tmdb.org/t/p/w500${res.poster_path}`
                 : null,
-              streamingServices: ["netflix", "prime"],
+              streamingServices: [],
+              streamingNotice: "Check details for live regional availability",
               sourceAttribution: "TMDB Live Search",
             }));
             externalResults = externalResults.concat(normalizedTmdb);
@@ -82,7 +103,7 @@ export async function handleInstinctRequest(req: Request): Promise<Response> {
       }
 
       const merged = [...localMatches, ...externalResults];
-      return new Response(JSON.stringify({ results: merged }), {
+      return new Response(JSON.stringify({ ok: true, count: merged.length, results: merged }), {
         status: 200,
         headers,
       });

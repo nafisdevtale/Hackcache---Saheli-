@@ -149,16 +149,22 @@ async function supabaseFetch(
     method?: string;
     body?: unknown;
     headers?: Record<string, string>;
+    privileged?: boolean;
   } = {},
 ): Promise<Response> {
   const supabaseUrl = process.env.SUPABASE_URL!.trim().replace(/\/+$/, "");
-  const serviceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.SUPABASE_ANON_KEY)!.trim();
+  const serviceKey = options.privileged
+    ? process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
+    : (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY)?.trim();
+
+  if (options.privileged && !serviceKey) {
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY is required for privileged operations");
+  }
 
   const url = `${supabaseUrl}/rest/v1/${tablePath}`;
   const headers: Record<string, string> = {
-    apikey: serviceKey,
-    Authorization: `Bearer ${serviceKey}`,
+    apikey: serviceKey || "",
+    Authorization: `Bearer ${serviceKey || ""}`,
     "Content-Type": "application/json",
     Prefer: "return=representation",
     ...(options.headers || {}),
@@ -618,14 +624,16 @@ export async function handleCommunityRequest(req: Request): Promise<Response> {
         await supabaseFetch(`${table}?id=eq.${encodeURIComponent(target_id)}`, {
           method: "PATCH",
           body: { status: action },
+          privileged: true,
         });
 
         return new Response(JSON.stringify({ ok: true, status: action }), {
           status: 200,
           headers: { "Content-Type": "application/json" },
         });
-      } catch {
-        return new Response(JSON.stringify({ ok: false, error: "Database error" }), {
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Database error";
+        return new Response(JSON.stringify({ ok: false, error: msg }), {
           status: 502,
         });
       }

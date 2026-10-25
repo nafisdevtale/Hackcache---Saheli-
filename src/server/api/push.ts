@@ -13,6 +13,8 @@
  *    and automatic cleanup of 404/410 expired subscriptions.
  */
 
+import fs from "node:fs";
+import path from "node:path";
 import webpush from "web-push";
 
 export interface PushSubscriptionRecord {
@@ -26,11 +28,96 @@ export interface PushSubscriptionRecord {
   created_at: string;
 }
 
-// In-memory or database-backed subscription store
-let subscriptions: PushSubscriptionRecord[] = [];
+const STORAGE_DIR = path.resolve(process.cwd(), ".data");
+const PUSH_STORAGE_FILE = path.join(STORAGE_DIR, "push_subscriptions.json");
 
-export function resetPushSubscriptions(): void {
+function ensureStorageDir() {
+  try {
+    if (!fs.existsSync(STORAGE_DIR)) {
+      fs.mkdirSync(STORAGE_DIR, { recursive: true });
+    }
+  } catch {}
+}
+
+function loadPersistedPushSubscriptions(): PushSubscriptionRecord[] {
+  try {
+    if (fs.existsSync(PUSH_STORAGE_FILE)) {
+      const data = fs.readFileSync(PUSH_STORAGE_FILE, "utf-8");
+      const parsed = JSON.parse(data);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch {}
+  return [];
+}
+
+function persistPushSubscriptions(subs: PushSubscriptionRecord[]) {
+  try {
+    ensureStorageDir();
+    fs.writeFileSync(PUSH_STORAGE_FILE, JSON.stringify(subs, null, 2), "utf-8");
+  } catch {}
+}
+
+async function syncSubscriptionToSupabaseIfConfigured(
+  sub: PushSubscriptionRecord,
+  action: "upsert" | "delete",
+) {
+  const supabaseUrl = process.env.SUPABASE_URL?.trim().replace(/\/+$/, "");
+  const serviceKey = (
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.SUPABASE_ANON_KEY ||
+    process.env.SUPABASE_KEY
+  )?.trim();
+  if (!supabaseUrl || !serviceKey) return;
+  try {
+    if (action === "upsert") {
+      await fetch(`${supabaseUrl}/rest/v1/push_subscriptions`, {
+        method: "POST",
+        headers: {
+          apikey: serviceKey,
+          Authorization: `Bearer ${serviceKey}`,
+          "Content-Type": "application/json",
+          Prefer: "resolution=merge-duplicates",
+        },
+        body: JSON.stringify({
+          endpoint: sub.endpoint,
+          p256dh: sub.keys.p256dh,
+          auth: sub.keys.auth,
+          discreet: sub.discreet,
+          created_at: sub.created_at,
+        }),
+      });
+    } else {
+      await fetch(
+        `${supabaseUrl}/rest/v1/push_subscriptions?endpoint=eq.${encodeURIComponent(sub.endpoint)}`,
+        {
+          method: "DELETE",
+          headers: {
+            apikey: serviceKey,
+            Authorization: `Bearer ${serviceKey}`,
+          },
+        },
+      );
+    }
+  } catch {}
+}
+
+// In-memory or database-backed subscription store initialized from disk
+let subscriptions: PushSubscriptionRecord[] = loadPersistedPushSubscriptions();
+
+export function resetPushSubscriptions(clearDisk = false): void {
   subscriptions = [];
+  if (clearDisk) {
+    try {
+      if (fs.existsSync(PUSH_STORAGE_FILE)) {
+        fs.unlinkSync(PUSH_STORAGE_FILE);
+      }
+    } catch {}
+  }
+}
+
+export function reloadPushSubscriptionsFromDisk(): PushSubscriptionRecord[] {
+  subscriptions = loadPersistedPushSubscriptions();
+  return [...subscriptions];
 }
 
 export function getPushSubscriptions(): PushSubscriptionRecord[] {
@@ -152,13 +239,16 @@ export async function handlePushRequest(req: Request): Promise<Response> {
 
     // Upsert subscription
     subscriptions = subscriptions.filter((s) => s.endpoint !== subscription.endpoint);
-    subscriptions.push({
+    const newRecord: PushSubscriptionRecord = {
       endpoint: subscription.endpoint,
       keys: { p256dh, auth },
       discreet: Boolean(discreet),
       reminderTimes: Array.isArray(reminderTimes) ? reminderTimes : ["09:00"],
       created_at: new Date().toISOString(),
-    });
+    };
+    subscriptions.push(newRecord);
+    persistPushSubscriptions(subscriptions);
+    syncSubscriptionToSupabaseIfConfigured(newRecord, "upsert").catch(() => {});
 
     return new Response(
       JSON.stringify({
@@ -186,7 +276,12 @@ export async function handlePushRequest(req: Request): Promise<Response> {
     }
 
     const prevCount = subscriptions.length;
+    const removedItem = subscriptions.find((s) => s.endpoint === endpoint);
     subscriptions = subscriptions.filter((s) => s.endpoint !== endpoint);
+    persistPushSubscriptions(subscriptions);
+    if (removedItem) {
+      syncSubscriptionToSupabaseIfConfigured(removedItem, "delete").catch(() => {});
+    }
 
     return new Response(
       JSON.stringify({
@@ -263,8 +358,8 @@ export async function handlePushRequest(req: Request): Promise<Response> {
     }
   }
 
-  // 5. POST /api/push/cron-trigger (Scheduled reminder delivery endpoint)
-  if (path === "/api/push/cron-trigger" && method === "POST") {
+  // 5. POST /api/push/cron-trigger or /api/push/cron (Scheduled reminder delivery endpoint)
+  if ((path === "/api/push/cron-trigger" || path === "/api/push/cron") && method === "POST") {
     const cronSecret = process.env.CRON_SECRET?.trim();
     const authHeader = req.headers.get("authorization");
 
@@ -299,6 +394,7 @@ export async function handlePushRequest(req: Request): Promise<Response> {
 
     if (expiredEndpoints.length > 0) {
       subscriptions = subscriptions.filter((s) => !expiredEndpoints.includes(s.endpoint));
+      persistPushSubscriptions(subscriptions);
     }
 
     return new Response(

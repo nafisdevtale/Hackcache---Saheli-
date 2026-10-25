@@ -5,6 +5,7 @@ import { handleFeedbackRequest } from "./feedback";
 import { handleInstinctRequest } from "./instinct";
 import { handleDivaRouteRequest } from "./diva";
 import { handlePartnerRequest } from "./partner";
+import { handleFlashRequest } from "./flash";
 
 export async function routeApiRequest(req: Request): Promise<Response | null> {
   const url = new URL(req.url);
@@ -22,6 +23,10 @@ export async function routeApiRequest(req: Request): Promise<Response | null> {
     return handleDivaRouteRequest(req);
   }
 
+  if (path.startsWith("/api/flash")) {
+    return handleFlashRequest(req);
+  }
+
   if (path.startsWith("/api/instinct")) {
     return handleInstinctRequest(req);
   }
@@ -30,11 +35,11 @@ export async function routeApiRequest(req: Request): Promise<Response | null> {
     return handleFeedbackRequest(req);
   }
 
-  if (path.startsWith("/api/community/")) {
+  if (path === "/api/community" || path.startsWith("/api/community/")) {
     return handleCommunityRequest(req);
   }
 
-  if (path.startsWith("/api/push/")) {
+  if (path === "/api/push" || path.startsWith("/api/push/")) {
     return handlePushRequest(req);
   }
 

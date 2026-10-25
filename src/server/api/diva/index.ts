@@ -9,6 +9,7 @@
  */
 
 import { AGENT_IDS } from "../../../lib/divaRegistry.js";
+import { classifyDeterministic } from "../../../lib/divaRouter.js";
 
 const GEMINI_SYSTEM_ROUTER_PROMPT = `You are DIVA, the central routing orchestrator for Saheli.
 You must classify the user's intent to one of three specialist agents:
@@ -27,16 +28,56 @@ Respond ONLY with valid JSON in this exact shape:
   "reason": "short explanation"
 }`;
 
+const divaRateLimitMap = new Map<string, number[]>();
+
+function checkDivaRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const timestamps = (divaRateLimitMap.get(ip) || []).filter((t) => now - t < 60000);
+  if (timestamps.length >= 25) return false;
+  timestamps.push(now);
+  divaRateLimitMap.set(ip, timestamps);
+  return true;
+}
+
 export async function handleDivaRouteRequest(req: Request): Promise<Response> {
+  const url = new URL(req.url);
+  const path = url.pathname;
+  const method = req.method.toUpperCase();
+
   const headers = {
     "Content-Type": "application/json",
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
   };
 
-  if (req.method.toUpperCase() === "OPTIONS") {
+  if (method === "OPTIONS") {
     return new Response(null, { status: 204, headers });
+  }
+
+  // 1. GET /api/diva/status
+  if (path === "/api/diva/status" && method === "GET") {
+    const geminiKey = process.env.GEMINI_API_KEY || process.env.AI_API_KEY;
+    const model = process.env.AI_MODEL || "gemini-2.5-flash";
+    return new Response(
+      JSON.stringify({
+        ok: true,
+        available: Boolean(geminiKey),
+        provider: "gemini",
+        model,
+        offlineFallback: "active",
+      }),
+      { status: 200, headers },
+    );
+  }
+
+  // Rate limiting
+  const clientIp = req.headers.get("x-forwarded-for") || "local";
+  if (!checkDivaRateLimit(clientIp)) {
+    return new Response(
+      JSON.stringify({ ok: false, error: "Rate limit exceeded. Please wait a moment." }),
+      { status: 429, headers },
+    );
   }
 
   try {
@@ -61,16 +102,16 @@ export async function handleDivaRouteRequest(req: Request): Promise<Response> {
       );
     }
 
-    const geminiKey =
-      process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+    const geminiKey = process.env.GEMINI_API_KEY || process.env.AI_API_KEY;
+    const model = process.env.AI_MODEL || "gemini-2.5-flash";
 
     if (geminiKey) {
       try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`;
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`;
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 4000);
 
-        const res = await fetch(url, {
+        const res = await fetch(geminiUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -105,26 +146,32 @@ export async function handleDivaRouteRequest(req: Request): Promise<Response> {
             const validAgents = (parsed.agents || []).filter((a: string) => AGENT_IDS.includes(a));
             return new Response(
               JSON.stringify({
+                ok: true,
                 target: parsed.target || "clarification",
                 agents: validAgents.slice(0, 2),
                 confidence: typeof parsed.confidence === "number" ? parsed.confidence : 0.85,
                 reason: parsed.reason || "Gemini route classification",
+                source: "gemini_model",
               }),
               { status: 200, headers },
             );
           }
         }
       } catch {
-        // Fall through to clarification
+        // Fall through to offline classification
       }
     }
 
+    // Offline / fallback router
+    const offlineResult = classifyDeterministic(query);
     return new Response(
       JSON.stringify({
-        target: "clarification",
-        agents: [],
-        confidence: 0.5,
-        reason: "Offline / Fallback to clarification",
+        ok: true,
+        target: offlineResult.target || "clarification",
+        agents: offlineResult.agents || [],
+        confidence: offlineResult.confidence || 0.7,
+        reason: offlineResult.reason || "Offline deterministic router fallback",
+        source: "deterministic_fallback",
       }),
       { status: 200, headers },
     );

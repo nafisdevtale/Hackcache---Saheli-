@@ -404,5 +404,43 @@ export class MarketService {
   }
 }
 
+/**
+ * SerpApi Market Data Provider Adapter
+ */
+export class SerpApiMarketProvider {
+  constructor() {
+    this.name = "SerpApiMarketProvider";
+  }
+
+  async searchProducts(query = "", filters = {}) {
+    try {
+      const params = new URLSearchParams();
+      if (query) params.set("q", query);
+      if (filters.category && filters.category !== "all") params.set("category", filters.category);
+      const res = await fetch(`/api/flash/search?${params.toString()}`);
+      if (!res.ok) return [];
+      const data = await res.json();
+      return Array.isArray(data.products) ? data.products : [];
+    } catch {
+      return [];
+    }
+  }
+
+  async getProduct() {
+    return null;
+  }
+
+  async getCurrentPrice() {
+    return null;
+  }
+
+  async getAvailability() {
+    return null;
+  }
+}
+
 // Global default market service instance
-export const defaultMarketService = new MarketService();
+export const defaultMarketService = new MarketService(
+  new SerpApiMarketProvider(),
+  new LocalCatalogueMarketProvider(),
+);

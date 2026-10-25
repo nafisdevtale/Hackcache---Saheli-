@@ -90,6 +90,16 @@ function persistReports(store: Map<string, FeedbackReport>): boolean {
   }
 }
 
+function getMaintainerSecret(): string | null {
+  if (process.env.SAHELI_MAINTAINER_KEY?.trim()) {
+    return process.env.SAHELI_MAINTAINER_KEY.trim();
+  }
+  if (process.env.NODE_ENV === "production") {
+    return null; // Strictly no hardcoded fallback in production
+  }
+  return "saheli-dev-maintainer-key-2026";
+}
+
 async function persistToSupabaseIfConfigured(report: FeedbackReport): Promise<boolean> {
   const supabaseUrl = process.env.SUPABASE_URL?.trim().replace(/\/+$/, "");
   const serviceKey = (
@@ -99,6 +109,22 @@ async function persistToSupabaseIfConfigured(report: FeedbackReport): Promise<bo
   )?.trim();
   if (!supabaseUrl || !serviceKey) return false;
   try {
+    const dbPayload = {
+      id: report.id,
+      category: report.category,
+      title: report.title,
+      description: report.description,
+      steps_to_reproduce: report.stepsToReproduce || null,
+      expected_behaviour: report.expectedBehaviour || null,
+      actual_behaviour: report.actualBehaviour || null,
+      severity: report.severity || "medium",
+      app_version: report.appVersion || null,
+      browser_info: report.browserInfo || null,
+      contact: report.contact || null,
+      has_screenshot: Boolean(report.hasScreenshot),
+      status: report.status || "received",
+      created_at: report.createdAt,
+    };
     const res = await fetch(`${supabaseUrl}/rest/v1/feedback_reports`, {
       method: "POST",
       headers: {
@@ -107,7 +133,7 @@ async function persistToSupabaseIfConfigured(report: FeedbackReport): Promise<bo
         "Content-Type": "application/json",
         Prefer: "return=minimal",
       },
-      body: JSON.stringify(report),
+      body: JSON.stringify(dbPayload),
     });
     return res.ok;
   } catch {
@@ -185,17 +211,73 @@ export async function handleFeedbackRequest(req: Request): Promise<Response> {
   const path = url.pathname;
   const clientIp = req.headers.get("x-forwarded-for") || "local";
 
-  // GET /api/feedback/status?id=... (Public status query by reporter)
+  // GET /api/feedback/status?id=... (Public status query by reporter or service status check)
   if (req.method === "GET" && path === "/api/feedback/status") {
     const id = url.searchParams.get("id");
     if (!id) {
-      return new Response(JSON.stringify({ ok: false, error: "Missing report ID" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      const configured = Boolean(process.env.SAHELI_MAINTAINER_KEY?.trim());
+      const hasSupabase = Boolean(process.env.SUPABASE_URL?.trim());
+      return new Response(
+        JSON.stringify({
+          ok: true,
+          status: "operational",
+          storage: hasSupabase ? "supabase_and_disk" : "disk_and_memory",
+          maintainerConfigured: configured,
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
     }
 
-    const report = reportsStore.get(id);
+    let report = reportsStore.get(id);
+    if (!report && process.env.SUPABASE_URL) {
+      try {
+        const supabaseUrl = process.env.SUPABASE_URL.trim().replace(/\/+$/, "");
+        const serviceKey = (
+          process.env.SUPABASE_SERVICE_ROLE_KEY ||
+          process.env.SUPABASE_ANON_KEY ||
+          process.env.SUPABASE_KEY
+        )?.trim();
+        if (serviceKey) {
+          const res = await fetch(
+            `${supabaseUrl}/rest/v1/feedback_reports?id=eq.${encodeURIComponent(id)}`,
+            {
+              headers: {
+                apikey: serviceKey,
+                Authorization: `Bearer ${serviceKey}`,
+              },
+            },
+          );
+          if (res.ok) {
+            const rows = (await res.json()) as Array<Record<string, unknown>>;
+            if (rows && rows[0]) {
+              const row = rows[0];
+              report = {
+                id: String(row.id),
+                category: String(row.category),
+                title: String(row.title),
+                description: String(row.description),
+                stepsToReproduce: row.steps_to_reproduce
+                  ? String(row.steps_to_reproduce)
+                  : undefined,
+                expectedBehaviour: row.expected_behaviour
+                  ? String(row.expected_behaviour)
+                  : undefined,
+                actualBehaviour: row.actual_behaviour ? String(row.actual_behaviour) : undefined,
+                severity: (row.severity as any) || "medium",
+                appVersion: row.app_version ? String(row.app_version) : undefined,
+                browserInfo: row.browser_info ? String(row.browser_info) : undefined,
+                contact: row.contact ? String(row.contact) : undefined,
+                hasScreenshot: Boolean(row.has_screenshot),
+                createdAt: String(row.created_at || new Date().toISOString()),
+                status: (row.status as any) || "received",
+              };
+              reportsStore.set(report.id, report);
+            }
+          }
+        }
+      } catch {}
+    }
+
     if (!report) {
       return new Response(JSON.stringify({ ok: false, error: "Report not found" }), {
         status: 404,
@@ -216,12 +298,23 @@ export async function handleFeedbackRequest(req: Request): Promise<Response> {
 
   // GET /api/feedback/reports (Maintainer endpoint, requires secret key)
   if (req.method === "GET" && path === "/api/feedback/reports") {
+    const serverKey = getMaintainerSecret();
+    if (!serverKey) {
+      return new Response(
+        JSON.stringify({
+          ok: false,
+          error: "SAHELI_MAINTAINER_KEY is not configured on this server.",
+        }),
+        { status: 500, headers: { "Content-Type": "application/json" } },
+      );
+    }
+
     const key =
       req.headers.get("x-maintainer-key") ||
       req.headers.get("x-feedback-secret") ||
       (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
 
-    if (!key || key !== MAINTAINER_SECRET) {
+    if (!key || key !== serverKey) {
       return new Response(
         JSON.stringify({ ok: false, error: "Unauthorized. Valid maintainer key required." }),
         { status: 401, headers: { "Content-Type": "application/json" } },

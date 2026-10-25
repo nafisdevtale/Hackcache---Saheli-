@@ -10,7 +10,7 @@ const cache = new Map<string, { data: Array<Record<string, unknown>>; expiry: nu
 const CACHE_TTL_MS = 1000 * 60 * 60; // 1 hour
 
 function getApiKey(): string | null {
-  return process.env.WATCHMODE_API_KEY || process.env.VITE_WATCHMODE_API_KEY || null;
+  return process.env.WATCHMODE_API_KEY?.trim() || null;
 }
 
 export async function fetchWatchmodeSources(

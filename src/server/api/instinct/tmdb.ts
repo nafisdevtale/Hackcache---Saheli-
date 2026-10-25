@@ -14,9 +14,7 @@ const cache = new Map<
 const CACHE_TTL_MS = 1000 * 60 * 30; // 30 minutes
 
 function getApiKey(): string | null {
-  return (
-    process.env.TMDB_API_KEY || process.env.TMDB_API_TOKEN || process.env.VITE_TMDB_API_KEY || null
-  );
+  return process.env.TMDB_API_TOKEN?.trim() || process.env.TMDB_API_KEY?.trim() || null;
 }
 
 export async function fetchTmdbDetails(
