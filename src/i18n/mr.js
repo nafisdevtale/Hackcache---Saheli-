@@ -1551,7 +1551,7 @@ export default {
   "set.fertility": "सेटिंग्ज पर्याय निवडा.",
   "set.fertilityDesc": "सेटिंग्ज पर्याय निवडा.",
   "set.health": "सेटिंग्ज पर्याय निवडा.",
-  "set.import": "सेटिंग्ज पर्याय निवडा.",
+  "set.import": "सहेली डेटा आयात करा",
   "set.importDemoBlock": "सेटिंग्ज पर्याय निवडा.",
   "set.importDone": "सेटिंग्ज पर्याय निवडा.",
   "set.importMerge": "सेटिंग्ज पर्याय निवडा.",
@@ -1824,7 +1824,7 @@ export default {
   "phase.lutealSubtitle": "ल्यूटियल टप्पा ट्रॅकिंग आणि प्रोजेस्टेरॉन पद्धती",
   "selfcare.exploreAll": "सर्व एक्सप्लोर करा",
   "set.ageHelp": "किशोरींच्या सुरक्षिततेचे नियम लागू करण्यासाठी फक्त या फोनवर वापरले जाते.",
-  "set.chooseFile": "JSON बॅकअप फाईल निवडा",
+  "set.chooseFile": "फाईल निवडा (.json, .csv, .pdf)",
   "set.customPh": "उदा., कंबरदुखी, पोट फुगणे...",
   "set.customSymptoms": "सानुकूल लक्षणे",
   "set.demoActiveDesc":
@@ -1832,7 +1832,8 @@ export default {
   "set.export": "नोंदी निर्यात करा",
   "set.exportDesc":
     "एनक्रिप्टेड JSON बॅकअप, CSV स्प्रेडशीट किंवा डॉक्टरांच्या भेटीचा सारांश PDF जतन करा.",
-  "set.importDesc": "सहेली JSON फाईलवरून आधीच्या नोंदी पूर्ववत करा.",
+  "set.importDesc":
+    "सहेली JSON बॅकअप, CSV स्प्रेडशीट किंवा क्लिनिकल PDF सारांशावरून डायरी नोंदी पूर्ववत करा.",
   "set.pregnancyDesc": "गरोदरपणात सायकल अंदाज आणि टप्प्यांचे अंदाज थांबवा.",
   "set.pregnancyMode": "गरोदरपण मोड",
   "set.previewConflicts": "विसंगती आढळल्या",
@@ -2292,4 +2293,20 @@ export default {
   "set.dobUpdatePrompt": "जन्मतारीख अपडेट करा",
   "set.dobMissingPrompt":
     "वय-अनुकूल मार्गदर्शन आणि वैशिष्ट्ये अनलॉक करण्यासाठी कृपया तुमची जन्मतारीख जोडा.",
+  "set.previewFresh": "नवीन नोंदी",
+  "set.previewInvalid": "अवैध नोंदी",
+  "set.chooseStrategy": "आयात पद्धत निवडा:",
+  "set.demoImportSwitchNotice":
+    "डेटा आयात केल्यास डेमो नोंदी बदलून तुमची खाजगी सुरक्षित प्रोफाइल सुरू होईल.",
+  "vault.storageTitle": "एनक्रिप्टेड स्टोरेज",
+  "vault.storageStatus": "तुमच्या जतन केलेल्या नोंदी या डिव्हाइसवर एनक्रिप्ट केलेल्या आहेत.",
+  "vault.storageDesc":
+    "सर्व संवेदनशील आरोग्य नोंदी या डिव्हाइसवर AES-256-GCM द्वारे सुरक्षित आहेत। पिन नसला तरीही हे तुमच्या नोंदींचे रक्षण करते.",
+  "vault.appLockTitle": "ॲप लॉक",
+  "vault.appLockStatus": "सहेली अनलॉक करण्याचा मार्ग निवडा.",
+  "vault.accessTitle": "एनक्रिप्टेड डेटा ॲक्सेस",
+  "vault.accessUnlocked": "तुमच्या खाजगी नोंदी अनलॉक आहेत",
+  "vault.accessLocked": "सुरक्षा सेटिंग्ज बदलण्यासाठी तुमच्या खाजगी नोंदी अनलॉक करा.",
+  "vault.accessExplanation":
+    "एनक्रिप्टेड व्हॉल्ट हे तुमच्या खाजगी नोंदींसाठी सहेलीचे सुरक्षित स्थानिक स्टोरेज आहे. हे वेगळे खाते नाही आणि ऑनलाइन लॉगिनची आवश्यकता नाही.",
 };

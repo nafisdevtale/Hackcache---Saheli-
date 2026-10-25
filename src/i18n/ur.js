@@ -1574,7 +1574,7 @@ export default {
   "set.fertility": "ترتیبات: محفوظ کریں",
   "set.fertilityDesc": "ترتیبات: محفوظ کریں",
   "set.health": "ترتیبات: محفوظ کریں",
-  "set.import": "ترتیبات: محفوظ کریں",
+  "set.import": "سہیلی ڈیٹا امپورٹ کریں",
   "set.importDemoBlock": "ترتیبات: محفوظ کریں",
   "set.importDone": "ترتیبات: محفوظ کریں",
   "set.importMerge": "ترتیبات: محفوظ کریں",
@@ -1839,14 +1839,15 @@ export default {
   "phase.lutealSubtitle": "لیوٹیل فیز ٹریکنگ اور پروجیسٹرون پیٹرن",
   "selfcare.exploreAll": "سب دیکھیں",
   "set.ageHelp": "نوعمر حفاظتی تحفظات لاگو کرنے کے لیے صرف اس فون پر استعمال ہوتا ہے۔",
-  "set.chooseFile": "JSON بیک اپ فائل منتخب کریں",
+  "set.chooseFile": "فائل منتخب کریں (.json, .csv, .pdf)",
   "set.customPh": "مثلاً، کمر درد، پیٹ کا پھولنا...",
   "set.customSymptoms": "اپنی مرضی کے علامات",
   "set.demoActiveDesc":
     "آپ اس وقت ڈیمو موڈ میں سہیلی کو دیکھ رہے ہیں۔ آپ کے اصل ریکارڈز محفوظ ہیں۔",
   "set.export": "ریکارڈز ایکسپورٹ کریں",
   "set.exportDesc": "ایک انکرپٹڈ JSON بیک اپ، CSV اسپریڈشیٹ، یا ڈاکٹر سمری PDF محفوظ کریں۔",
-  "set.importDesc": "سہیلی JSON فائل سے پہلے ایکسپورٹ کیے گئے ریکارڈز کو بحال کریں۔",
+  "set.importDesc":
+    "سہیلی JSON بیک اپ، CSV اسپریڈشیٹ یا کلینیکل PDF خلاصے سے ڈائری ریکارڈز بحال کریں۔",
   "set.pregnancyDesc": "حمل کے دوران چکر کی پیشین گوئیاں اور مرحلے کے اندازے روک دیں۔",
   "set.pregnancyMode": "حمل موڈ",
   "set.previewConflicts": "تضادات پائے گئے",
@@ -2304,4 +2305,20 @@ export default {
   "set.dobUpdatePrompt": "تاریخ پیدائش اپ ڈیٹ کریں",
   "set.dobMissingPrompt":
     "عمر کے مطابق رہنمائی کو فعال کرنے کے لیے براہ کرم اپنی تاریخ پیدائش شامل کریں۔",
+  "set.previewFresh": "نئی اندراجات",
+  "set.previewInvalid": "ناقص اندراجات",
+  "set.chooseStrategy": "امپورٹ کا طریقہ منتخب کریں:",
+  "set.demoImportSwitchNotice":
+    "امپورٹ کرنے سے ڈیمو ریکارڈز بدل جائیں گے اور آپ کا ذاتی محفوظ پروفائل شروع ہو جائے گا۔",
+  "vault.storageTitle": "انکرپٹڈ اسٹوریج",
+  "vault.storageStatus": "آپ کے محفوظ کردہ ریکارڈز اس ڈیوائس پر انکرپٹڈ ہیں۔",
+  "vault.storageDesc":
+    "تمام حساس صحت لاگز اور ڈائری ریکارڈز اس ڈیوائس پر AES-256-GCM کے ذریعے محفوظ ہیں۔ یہ بغیر پن کے بھی آپ کے ریکارڈز کی حفاظت کرتا ہے۔",
+  "vault.appLockTitle": "ایپ لاک",
+  "vault.appLockStatus": "منتخب کریں کہ سہیلی کو کیسے انلاک کیا جائے۔",
+  "vault.accessTitle": "انکرپٹڈ ڈیٹا تک رسائی",
+  "vault.accessUnlocked": "آپ کے ذاتی ریکارڈز انلاک ہیں",
+  "vault.accessLocked": "سیکیورٹی سیٹنگز تبدیل کرنے کے لیے اپنے ذاتی ریکارڈز انلاک کریں۔",
+  "vault.accessExplanation":
+    "انکرپٹڈ والٹ آپ کے ذاتی ریکارڈز کے لیے سہیلی کا محفوظ مقامی اسٹوریج ہے۔ یہ کوئی الگ اکاؤنٹ نہیں ہے اور آن لائن لاگ ان کی ضرورت نہیں ہے۔",
 };

@@ -1574,7 +1574,7 @@ export default {
   "set.fertility": "સેટિંગ્સ: સાચવો",
   "set.fertilityDesc": "સેટિંગ્સ: સાચવો",
   "set.health": "સેટિંગ્સ: સાચવો",
-  "set.import": "સેટિંગ્સ: સાચવો",
+  "set.import": "સહેલી ડેટા આયાત કરો",
   "set.importDemoBlock": "સેટિંગ્સ: સાચવો",
   "set.importDone": "સેટિંગ્સ: સાચવો",
   "set.importMerge": "સેટિંગ્સ: સાચવો",
@@ -1839,14 +1839,15 @@ export default {
   "phase.lutealSubtitle": "લ્યુટિયલ તબક્કો ટ્રેકિંગ અને પ્રોજેસ્ટેરોન પેટર્ન",
   "selfcare.exploreAll": "બધું જુઓ",
   "set.ageHelp": "કિશોર સુરક્ષા નિયમો લાગુ કરવા માટે માત્ર આ ફોન પર વપરાય છે.",
-  "set.chooseFile": "JSON બેકઅપ ફાઇલ પસંદ કરો",
+  "set.chooseFile": "ફાઇલ પસંદ કરો (.json, .csv, .pdf)",
   "set.customPh": "દા.ત., પીઠનો દુખાવો, પેટ ફૂલવું...",
   "set.customSymptoms": "કસ્ટમ લક્ષણો",
   "set.demoActiveDesc":
     "તમે હાલમાં ડેમો મોડમાં સહેલી જોઈ રહ્યા છો. તમારા વાસ્તવિક રેકોર્ડ અલગ સુરક્ષિત છે.",
   "set.export": "રેકોર્ડ નિકાસ કરો",
   "set.exportDesc": "એનક્રિપ્ટેડ JSON બેકઅપ, CSV અથવા તબીબી સારાંશ PDF સાચવો.",
-  "set.importDesc": "સહેલી JSON ફાઇલમાંથી અગાઉના રેકોર્ડ પુનઃસ્થાપિત કરો.",
+  "set.importDesc":
+    "સહેલી JSON બેકઅપ, CSV સ્પ્રેડશીટ અથવા ક્લિનિકલ PDF સારાંશમાંથી ડાયરી રેકોર્ડ પુનઃસ્થાપિત કરો.",
   "set.pregnancyDesc": "ગર્ભાવસ્થા દરમિયાન અનુમાનો થોભાવો.",
   "set.pregnancyMode": "ગર્ભાવસ્થા મોડ",
   "set.previewConflicts": "વિસંગતતાઓ મળી",
@@ -2306,4 +2307,20 @@ export default {
   "set.dobUpdatePrompt": "જન્મ તારીખ અપડેટ કરો",
   "set.dobMissingPrompt":
     "ઉંમર અનુસાર યોગ્ય સુવિધાઓ અનલૉક કરવા માટે કૃપા કરીને તમારી જન્મ તારીખ ઉમેરો.",
+  "set.previewFresh": "નવી એન્ટ્રીઓ",
+  "set.previewInvalid": "અમાન્ય એન્ટ્રીઓ",
+  "set.chooseStrategy": "આયાત કરવાની પદ્ધતિ પસંદ કરો:",
+  "set.demoImportSwitchNotice":
+    "આયાત કરવાથી ડેમો રેકોર્ડ બદલાઈ જશે અને તમારી અંગત પ્રોફાઇલ શરૂ થશે.",
+  "vault.storageTitle": "એન્ક્રિપ્ટેડ સ્ટોરેજ",
+  "vault.storageStatus": "તમારા સાચવેલા રેકોર્ડ્સ આ ઉપકરણ પર એન્ક્રિપ્ટ કરેલા છે.",
+  "vault.storageDesc":
+    "તમામ સંવેદનશીલ આરોગ્ય રેકોર્ડ્સ આ ઉપકરણ પર AES-256-GCM દ્વારા સુરક્ષિત છે. પિન ન હોય તો પણ તે સુરક્ષિત રહે છે.",
+  "vault.appLockTitle": "એપ લૉક",
+  "vault.appLockStatus": "સહેલીને કેવી રીતે અનલૉક કરવું તે પસંદ કરો.",
+  "vault.accessTitle": "એન્ક્રિપ્ટેડ ડેટા ઍક્સેસ",
+  "vault.accessUnlocked": "તમારા અંગત રેકોર્ડ અનલૉક છે",
+  "vault.accessLocked": "સુરક્ષા સેટિંગ્સ બદલવા માટે તમારા અંગત રેકોર્ડ્સને અનલૉક કરો.",
+  "vault.accessExplanation":
+    "એન્ક્રિપ્ટેડ વૉલ્ટ એ તમારા અંગત રેકોર્ડ્સ માટે સહેલીનું સુરક્ષિત સ્થાનિક સ્ટોરેજ છે. આ કોઈ અલગ ખાતું નથી અને ઑનલાઇન લૉગિન જરૂરી નથી.",
 };

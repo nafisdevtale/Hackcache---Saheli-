@@ -1572,7 +1572,7 @@ export default {
   "set.fertility": "ਸੈਟਿੰਗਾਂ: ਸੰਭਾਲੋ",
   "set.fertilityDesc": "ਸੈਟਿੰਗਾਂ: ਸੰਭਾਲੋ",
   "set.health": "ਸੈਟਿੰਗਾਂ: ਸੰਭਾਲੋ",
-  "set.import": "ਸੈਟਿੰਗਾਂ: ਸੰਭਾਲੋ",
+  "set.import": "ਸਹੇਲੀ ਡਾਟਾ ਇੰਪੋਰਟ ਕਰੋ",
   "set.importDemoBlock": "ਸੈਟਿੰਗਾਂ: ਸੰਭਾਲੋ",
   "set.importDone": "ਸੈਟਿੰਗਾਂ: ਸੰਭਾਲੋ",
   "set.importMerge": "ਸੈਟਿੰਗਾਂ: ਸੰਭਾਲੋ",
@@ -1838,14 +1838,15 @@ export default {
   "phase.lutealSubtitle": "ਲਿਊਟੀਅਲ ਪੜਾਅ ਟਰੈਕਿੰਗ ਅਤੇ ਪ੍ਰੋਜੈਸਟ੍ਰੋਨ ਪੈਟਰਨ",
   "selfcare.exploreAll": "ਸਭ ਦੇਖੋ",
   "set.ageHelp": "ਕਿਸ਼ੋਰ ਸੁਰੱਖਿਆ ਨਿਯਮਾਂ ਨੂੰ ਲਾਗੂ ਕਰਨ ਲਈ ਸਿਰਫ਼ ਇਸ ਫ਼ੋਨ 'ਤੇ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ।",
-  "set.chooseFile": "JSON ਬੈਕਅੱਪ ਫ਼ਾਈਲ ਚੁਣੋ",
+  "set.chooseFile": "ਫ਼ਾਈਲ ਚੁਣੋ (.json, .csv, .pdf)",
   "set.customPh": "ਉਦਾਹਰਣ ਵਜੋਂ, ਪਿੱਠ ਦਰਦ, ਪੇਟ ਫੁੱਲਣਾ...",
   "set.customSymptoms": "ਕਸਟਮ ਲੱਛਣ",
   "set.demoActiveDesc":
     "ਤੁਸੀਂ ਇਸ ਵੇਲੇ ਡੈਮੋ ਮੋਡ ਵਿੱਚ ਸਹੇਲੀ ਵੇਖ ਰਹੇ ਹੋ। ਤੁਹਾਡੇ ਅਸਲ ਰਿਕਾਰਡ ਵੱਖਰੇ ਤੌਰ 'ਤੇ ਸੁਰੱਖਿਅਤ ਹਨ।",
   "set.export": "ਰਿਕਾਰਡ ਨਿਰਯਾਤ ਕਰੋ",
   "set.exportDesc": "ਇਨਕ੍ਰਿਪਟਡ JSON ਬੈਕਅੱਪ, CSV ਸਪ੍ਰੈਡਸ਼ੀਟ ਜਾਂ ਡਾਕਟਰ ਸੰਖੇਪ PDF ਸੰਭਾਲੋ।",
-  "set.importDesc": "ਸਹੇਲੀ JSON ਫ਼ਾਈਲ ਤੋਂ ਪਹਿਲਾਂ ਨਿਰਯਾਤ ਕੀਤੇ ਰਿਕਾਰਡਾਂ ਨੂੰ ਬਹਾਲ ਕਰੋ।",
+  "set.importDesc":
+    "ਸਹੇਲੀ JSON ਬੈਕਅੱਪ, CSV ਸਪ੍ਰੈੱਡਸ਼ੀਟ ਜਾਂ ਕਲੀਨਿਕਲ PDF ਸਾਰਾਂਸ਼ ਤੋਂ ਡਾਇਰੀ ਰਿਕਾਰਡ ਬਹਾਲ ਕਰੋ।",
   "set.pregnancyDesc": "ਗਰਭ ਅਵਸਥਾ ਦੌਰਾਨ ਅੰਦਾਜ਼ਿਆਂ ਨੂੰ ਰੋਕੋ।",
   "set.pregnancyMode": "ਗਰਭ ਅਵਸਥਾ ਮੋਡ",
   "set.previewConflicts": "ਟਕਰਾਅ ਮਿਲੇ",
@@ -2304,4 +2305,20 @@ export default {
   "set.dobUpdatePrompt": "ਜਨਮ ਮਿਤੀ ਅੱਪਡੇਟ ਕਰੋ",
   "set.dobMissingPrompt":
     "ਉਮਰ-ਮੁਤਾਬਕ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਅਨਲੌਕ ਕਰਨ ਲਈ ਕਿਰਪਾ ਕਰਕੇ ਆਪਣੀ ਜਨਮ ਮਿਤੀ ਸ਼ਾਮਲ ਕਰੋ।",
+  "set.previewFresh": "ਨਵੀਆਂ ਐਂਟਰੀਆਂ",
+  "set.previewInvalid": "ਅਵੈਧ ਐਂਟਰੀਆਂ",
+  "set.chooseStrategy": "ਇੰਪੋਰਟ ਕਰਨ ਦਾ ਤਰੀਕਾ ਚੁਣੋ:",
+  "set.demoImportSwitchNotice":
+    "ਇੰਪੋਰਟ ਕਰਨ ਨਾਲ ਡੈਮੋ ਰਿਕਾਰਡ ਹਟ ਜਾਣਗੇ ਅਤੇ ਤੁਹਾਡੀ ਨਿੱਜੀ ਪ੍ਰੋਫ਼ਾਈਲ ਸ਼ੁਰੂ ਹੋ ਜਾਵੇਗੀ।",
+  "vault.storageTitle": "ਇਨਕ੍ਰਿਪਟਡ ਸਟੋਰੇਜ",
+  "vault.storageStatus": "ਤੁਹਾਡੇ ਰਿਕਾਰਡ ਇਸ ਡਿਵਾਈਸ 'ਤੇ ਇਨਕ੍ਰਿਪਟ ਕੀਤੇ ਗਏ ਹਨ।",
+  "vault.storageDesc":
+    "ਸਾਰੇ ਸੰਵੇਦਨਸ਼ੀਲ ਸਿਹਤ ਰਿਕਾਰਡ ਇਸ ਡਿਵਾਈਸ 'ਤੇ AES-256-GCM ਦੁਆਰਾ ਸੁਰੱਖਿਅਤ ਹਨ। ਪਿੰਨ ਤੋਂ ਬਿਨਾਂ ਵੀ ਇਹ ਸੁਰੱਖਿਅਤ ਹਨ।",
+  "vault.appLockTitle": "ਐਪ ਲਾਕ",
+  "vault.appLockStatus": "ਚੁਣੋ ਕਿ ਸਹੇਲੀ ਨੂੰ ਕਿਵੇਂ ਅਨਲੌਕ ਕਰਨਾ ਹੈ।",
+  "vault.accessTitle": "ਇਨਕ੍ਰਿਪਟਡ ਡਾਟਾ ਪਹੁੰਚ",
+  "vault.accessUnlocked": "ਤੁਹਾਡੇ ਨਿੱਜੀ ਰਿਕਾਰਡ ਅਨਲੌਕ ਹਨ",
+  "vault.accessLocked": "ਸੁਰੱਖਿਆ ਸੈਟਿੰਗਾਂ ਬਦਲਣ ਲਈ ਆਪਣੇ ਨਿੱਜੀ ਰਿਕਾਰਡ ਅਨਲੌਕ ਕਰੋ।",
+  "vault.accessExplanation":
+    "ਇਨਕ੍ਰਿਪਟਡ ਵਾਲਟ ਤੁਹਾਡੇ ਨਿੱਜੀ ਰਿਕਾਰਡਾਂ ਲਈ ਸਹੇਲੀ ਦਾ ਸੁਰੱਖਿਅਤ ਸਥਾਨਕ ਸਟੋਰੇਜ ਹੈ। ਇਹ ਕੋਈ ਵੱਖਰਾ ਖਾਤਾ ਨਹੀਂ ਹੈ ਅਤੇ ਔਨਲਾਈਨ ਲੌਗਇਨ ਦੀ ਲੋੜ ਨਹੀਂ ਹੈ।",
 };

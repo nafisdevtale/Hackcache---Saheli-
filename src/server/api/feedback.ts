@@ -78,13 +78,40 @@ function loadPersistedReports(): Map<string, FeedbackReport> {
   return store;
 }
 
-function persistReports(store: Map<string, FeedbackReport>) {
+function persistReports(store: Map<string, FeedbackReport>): boolean {
   try {
     ensureStorageDir();
     const list = Array.from(store.values());
     fs.writeFileSync(STORAGE_FILE, JSON.stringify(list, null, 2), "utf-8");
+    return true;
   } catch {
     // Disk write fallback failure ignored in read-only sandbox
+    return false;
+  }
+}
+
+async function persistToSupabaseIfConfigured(report: FeedbackReport): Promise<boolean> {
+  const supabaseUrl = process.env.SUPABASE_URL?.trim().replace(/\/+$/, "");
+  const serviceKey = (
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.SUPABASE_ANON_KEY ||
+    process.env.SUPABASE_KEY
+  )?.trim();
+  if (!supabaseUrl || !serviceKey) return false;
+  try {
+    const res = await fetch(`${supabaseUrl}/rest/v1/feedback_reports`, {
+      method: "POST",
+      headers: {
+        apikey: serviceKey,
+        Authorization: `Bearer ${serviceKey}`,
+        "Content-Type": "application/json",
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify(report),
+    });
+    return res.ok;
+  } catch {
+    return false;
   }
 }
 
@@ -191,6 +218,7 @@ export async function handleFeedbackRequest(req: Request): Promise<Response> {
   if (req.method === "GET" && path === "/api/feedback/reports") {
     const key =
       req.headers.get("x-maintainer-key") ||
+      req.headers.get("x-feedback-secret") ||
       (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
 
     if (!key || key !== MAINTAINER_SECRET) {
@@ -339,7 +367,21 @@ export async function handleFeedbackRequest(req: Request): Promise<Response> {
     };
 
     reportsStore.set(reportId, report);
-    persistReports(reportsStore);
+    const persistedToDisk = persistReports(reportsStore);
+    const persistedToSupabase = await persistToSupabaseIfConfigured(report);
+
+    // If disk write failed and Supabase is not available or failed in production
+    if (!persistedToDisk && !persistedToSupabase && process.env.NODE_ENV === "production") {
+      reportsStore.delete(reportId);
+      return new Response(
+        JSON.stringify({
+          ok: false,
+          error:
+            "Durable storage currently unavailable. Your feedback draft has been preserved locally for offline export.",
+        }),
+        { status: 503, headers: { "Content-Type": "application/json" } },
+      );
+    }
 
     return new Response(
       JSON.stringify({

@@ -1697,7 +1697,7 @@ export default {
   "set.fertility": "Show ovulation estimates",
   "set.fertilityDesc": "Hidden by default for under 18.",
   "set.health": "Health settings",
-  "set.import": "Import a JSON backup",
+  "set.import": "Import Saheli Data",
   "set.importDemoBlock": "Leave demo mode first to import your records.",
   "set.importDone": "Import complete.",
   "set.importMerge": "Add new entries only (keep mine)",
@@ -1986,14 +1986,15 @@ export default {
   "phase.lutealSubtitle": "Luteal phase tracking & progesterone patterns",
   "selfcare.exploreAll": "Explore All",
   "set.ageHelp": "Used only on this device to apply adolescent safety protections.",
-  "set.chooseFile": "Select JSON Backup File",
+  "set.chooseFile": "Choose File (.json, .csv, .pdf)",
   "set.customPh": "e.g., Lower back ache, bloating...",
   "set.customSymptoms": "Custom Symptoms",
   "set.demoActiveDesc":
     "You are currently exploring Saheli in demo mode. Your real records are safely stored separately.",
   "set.export": "Export Records",
   "set.exportDesc": "Save an encrypted JSON backup, CSV spreadsheet, or medical visit summary PDF.",
-  "set.importDesc": "Restore previously exported diary records from a Saheli JSON file.",
+  "set.importDesc":
+    "Restore diary records from a Saheli JSON backup, CSV spreadsheet, or clinical PDF summary.",
   "set.pregnancyDesc": "Pause cycle predictions and phase estimates while pregnant.",
   "set.pregnancyMode": "Pregnancy Mode",
   "set.previewConflicts": "conflicts detected",
@@ -2456,4 +2457,20 @@ export default {
   "set.dobUpdatePrompt": "Update Date of Birth",
   "set.dobMissingPrompt":
     "Please add your date of birth to unlock age-appropriate guidance and features.",
+  "set.previewFresh": "New Entries",
+  "set.previewInvalid": "Invalid Entries",
+  "set.chooseStrategy": "Select Import Strategy:",
+  "set.demoImportSwitchNotice":
+    "Importing will replace demo records and switch to your private encrypted profile.",
+  "vault.storageTitle": "Encrypted Storage",
+  "vault.storageStatus": "Your saved records are encrypted on this device.",
+  "vault.storageDesc":
+    "All sensitive health logs and diary entries are sealed using authenticated AES-256-GCM encryption on this device. This encryption protects your records even without a PIN.",
+  "vault.appLockTitle": "App Lock",
+  "vault.appLockStatus": "Choose how to unlock Saheli.",
+  "vault.accessTitle": "Encrypted Data Access",
+  "vault.accessUnlocked": "Your private records are unlocked",
+  "vault.accessLocked": "Unlock your private records to change security settings.",
+  "vault.accessExplanation":
+    "The encrypted vault is Saheli's protected local storage for your personal records. It is not a separate account and does not require an online login.",
 };

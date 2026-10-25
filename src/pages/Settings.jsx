@@ -364,58 +364,70 @@ function AppLockSection() {
   return (
     <div className="space-y-5">
       {/* 3-Point Security & Vault Status Indicators */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-3xl bg-muted/30 border border-border/70 text-xs">
-        <div className="space-y-1">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
-            Storage Encryption
-          </span>
-          <div className="flex items-center gap-1.5 font-bold text-emerald-600 dark:text-emerald-400">
-            <ShieldCheck className="h-4 w-4 shrink-0" />
-            <span>Active (AES-256-GCM)</span>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 p-4 sm:p-5 rounded-3xl bg-muted/30 border border-border/70 text-xs">
+        {/* A. Encrypted Storage */}
+        <div className="space-y-1.5 flex flex-col justify-between">
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+              {t("vault.storageTitle")}
+            </span>
+            <div className="flex items-center gap-1.5 font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+              <ShieldCheck className="h-4 w-4 shrink-0" />
+              <span>AES-256-GCM Active</span>
+            </div>
+            <p className="font-bold text-foreground text-xs mt-1">{t("vault.storageStatus")}</p>
           </div>
           <p className="text-[11px] text-muted-foreground leading-relaxed">
-            All period logs and diary notes are cryptographically sealed locally.
+            {t("vault.storageDesc")}
           </p>
         </div>
 
-        <div className="space-y-1">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
-            App Lock
-          </span>
-          <div className="flex items-center gap-1.5 font-bold text-foreground">
-            <Lock className="h-4 w-4 text-primary shrink-0" />
-            <span>
-              {enabled ? `Enabled (${getMethodLabel(activeMethod)})` : "Disabled (No PIN)"}
+        {/* B. App Lock */}
+        <div className="space-y-1.5 flex flex-col justify-between border-t md:border-t-0 md:border-s border-border/50 pt-3 md:pt-0 md:ps-3.5">
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+              {t("vault.appLockTitle")}
             </span>
+            <div className="flex items-center gap-1.5 font-bold text-foreground mt-0.5">
+              <Lock className="h-4 w-4 text-primary shrink-0" />
+              <span>
+                {enabled ? `${getMethodLabel(activeMethod)} Active` : "No additional app lock"}
+              </span>
+            </div>
+            <p className="font-bold text-foreground text-xs mt-1">{t("vault.appLockStatus")}</p>
           </div>
           <p className="text-[11px] text-muted-foreground leading-relaxed">
             {enabled
-              ? "Unlocking required before viewing or changing protected settings."
-              : "App launches directly without requiring a PIN or password."}
+              ? "Unlocking is required before viewing or changing protected health settings."
+              : "App launches directly for fast access on your private device."}
           </p>
         </div>
 
-        <div className="space-y-1">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
-            Vault Session
-          </span>
-          <div className="flex items-center gap-1.5 font-bold">
-            {isVaultLocked ? (
-              <span className="text-amber-600 dark:text-amber-400 flex items-center gap-1">
-                <AlertCircle className="h-4 w-4 shrink-0" />
-                Locked (Auth Required)
-              </span>
-            ) : (
-              <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                <Check className="h-4 w-4 shrink-0" />
-                Unlocked & Ready
-              </span>
-            )}
+        {/* C. Encrypted Data Access */}
+        <div className="space-y-1.5 flex flex-col justify-between border-t md:border-t-0 md:border-s border-border/50 pt-3 md:pt-0 md:ps-3.5">
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+              {t("vault.accessTitle")}
+            </span>
+            <div className="flex items-center gap-1.5 font-bold mt-0.5">
+              {isVaultLocked ? (
+                <span className="text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  Locked (Auth Required)
+                </span>
+              ) : (
+                <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                  <Check className="h-4 w-4 shrink-0" />
+                  Unlocked & Ready
+                </span>
+              )}
+            </div>
+            <p className="font-bold text-foreground text-xs mt-1">
+              {isVaultLocked ? t("vault.accessLocked") : t("vault.accessUnlocked")}
+            </p>
           </div>
           <p className="text-[11px] text-muted-foreground leading-relaxed">
-            {isVaultLocked
-              ? "Authenticate below to view recovery keys or modify security settings."
-              : "Active encryption keys are loaded in memory for this session."}
+            {t("vault.accessExplanation")}
           </p>
         </div>
       </div>
@@ -452,12 +464,10 @@ function AppLockSection() {
           <div className="space-y-1">
             <h4 className="font-bold text-xs sm:text-sm text-foreground flex items-center gap-2">
               <Lock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-              <span>Unlock Vault to View or Change Security Settings</span>
+              <span>{t("vault.accessLocked")}</span>
             </h4>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Your sensitive records are locked. To prevent accidentally overwriting inaccessible
-              encryption keys, please authenticate below before changing or viewing security
-              configurations.
+              {t("vault.accessExplanation")}
             </p>
           </div>
 
@@ -1294,30 +1304,70 @@ export default function Settings() {
     if (!file) return;
     setImportErr(null);
     try {
-      const text = await file.text();
-      let parseResult;
       const fileName = file.name.toLowerCase();
-      if (fileName.endsWith(".csv") || file.type === "text/csv") {
+      let parseResult;
+      let detectedFormat = "JSON Backup";
+
+      if (fileName.endsWith(".pdf") || file.type === "application/pdf") {
+        detectedFormat = "Clinical PDF Summary";
+        const buffer = await file.arrayBuffer();
+        parseResult = parsePDFImport(buffer);
+      } else if (fileName.endsWith(".csv") || file.type === "text/csv") {
+        detectedFormat = "CSV Spreadsheet";
+        const text = await file.text();
         parseResult = parseCSVImport(text);
-      } else if (fileName.endsWith(".pdf") || fileName.endsWith(".html")) {
-        parseResult = parsePDFImport(text);
       } else {
-        parseResult = parseImport(text);
+        // Auto-detect format by signature / content
+        const text = await file.text();
+        if (text.startsWith("%PDF-") || text.includes("SAHELI_RECORD_PAYLOAD_V1")) {
+          detectedFormat = "Clinical PDF Summary";
+          parseResult = parsePDFImport(text);
+        } else if (
+          text.startsWith("Date,") ||
+          text.startsWith("date,") ||
+          text.startsWith("\uFEFFDate,") ||
+          text.startsWith("\uFEFFdate,") ||
+          text.includes("\nDate,") ||
+          text.includes("\ndate,")
+        ) {
+          detectedFormat = "CSV Spreadsheet";
+          parseResult = parseCSVImport(text);
+        } else {
+          detectedFormat = "JSON Backup";
+          parseResult = parseImport(text);
+        }
       }
 
       if (!parseResult.ok) {
         throw new Error(parseResult.error || "set.importCorrupt");
       }
       const preview = importPreview(record, parseResult.record);
-      setImportState({ parsed: parseResult.record, preview });
+      setImportState({
+        fileName: file.name,
+        fileSize: file.size,
+        format: detectedFormat,
+        parsed: parseResult.record,
+        preview: {
+          total: preview.total,
+          incomingDays: preview.total,
+          conflicts: preview.conflicts,
+          fresh: preview.fresh,
+          invalid: parseResult.skippedRows || 0,
+        },
+      });
     } catch (err) {
       setImportErr(err.message || "set.importCorrupt");
+    } finally {
+      if (e.target) e.target.value = "";
     }
   };
 
   const applyImport = async (strategy) => {
     if (!importState) return;
     try {
+      if (isDemo && exitDemo) {
+        await exitDemo();
+      }
       await importRecord(importState.parsed, strategy);
       setImportState(null);
     } catch (err) {
@@ -2040,10 +2090,24 @@ export default function Settings() {
           </div>
 
           {/* Import Records */}
-          <div className="nova-card-elevated p-5 sm:p-6 space-y-3">
+          <div className="nova-card-elevated p-5 sm:p-6 space-y-4">
             <div>
               <h2 className="font-bold text-sm sm:text-base text-foreground">{t("set.import")}</h2>
               <p className="text-xs text-muted-foreground mt-0.5">{t("set.importDesc")}</p>
+            </div>
+
+            {/* Supported formats indicators */}
+            <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+              <span className="font-semibold text-foreground">Supported formats:</span>
+              <span className="inline-flex items-center gap-1 rounded-lg bg-muted/60 px-2 py-0.5 font-bold border border-border/60">
+                JSON Backup (.json)
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-lg bg-muted/60 px-2 py-0.5 font-bold border border-border/60">
+                CSV Spreadsheet (.csv)
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-lg bg-muted/60 px-2 py-0.5 font-bold border border-border/60">
+                Clinical Summary PDF (.pdf)
+              </span>
             </div>
 
             <label className="flex min-h-[48px] cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-muted/30 px-4 text-xs font-bold text-primary hover:bg-muted transition-all">
@@ -2051,7 +2115,7 @@ export default function Settings() {
               <span>{t("set.chooseFile")}</span>
               <input
                 type="file"
-                accept=".json,.csv,.pdf,.html,text/csv,text/html,application/json"
+                accept=".json,.csv,.pdf,text/csv,application/json,application/pdf"
                 onChange={handleFile}
                 className="sr-only"
               />
@@ -2060,35 +2124,106 @@ export default function Settings() {
             {importErr && (
               <p
                 role="alert"
-                className="rounded-xl bg-destructive/10 p-2 text-xs font-semibold text-destructive"
+                className="rounded-xl bg-destructive/10 p-2.5 text-xs font-semibold text-destructive flex items-center gap-2"
               >
-                {t(importErr)}
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                <span>{t(importErr) || importErr}</span>
               </p>
             )}
 
             {importState && (
-              <div className="space-y-3 rounded-2xl border border-border/70 bg-muted/40 p-4 text-xs animate-fade-in">
-                <p className="font-bold text-foreground">{t("set.importPreview")}</p>
-                <div className="grid grid-cols-2 gap-2 text-muted-foreground">
-                  <div>
-                    <span>{t("set.previewDays")}: </span>
-                    <strong className="text-foreground">{importState.preview.incomingDays}</strong>
+              <div className="space-y-4 rounded-3xl border border-primary/30 bg-primary/5 p-4 sm:p-5 text-xs animate-fade-in shadow-xs">
+                <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-border/50">
+                  <div className="space-y-0.5">
+                    <p className="font-bold text-sm text-foreground">{t("set.importPreview")}</p>
+                    <p className="text-muted-foreground truncate max-w-xs">
+                      {importState.fileName}
+                    </p>
                   </div>
-                  <div>
-                    <span>{t("set.previewConflicts")}: </span>
-                    <strong className="text-foreground">{importState.preview.conflicts}</strong>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-bold text-primary border border-primary/20">
+                    <FileText className="h-3 w-3" />
+                    {importState.format}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  <div className="rounded-2xl bg-card/80 border border-border/70 p-3 text-center">
+                    <span className="text-[10px] uppercase font-bold text-muted-foreground block">
+                      {t("set.previewDays")}
+                    </span>
+                    <strong className="text-base text-foreground font-black">
+                      {importState.preview.total}
+                    </strong>
+                  </div>
+                  <div className="rounded-2xl bg-card/80 border border-border/70 p-3 text-center">
+                    <span className="text-[10px] uppercase font-bold text-muted-foreground block">
+                      {t("set.previewFresh")}
+                    </span>
+                    <strong className="text-base text-emerald-600 dark:text-emerald-400 font-black">
+                      {importState.preview.fresh}
+                    </strong>
+                  </div>
+                  <div className="rounded-2xl bg-card/80 border border-border/70 p-3 text-center">
+                    <span className="text-[10px] uppercase font-bold text-muted-foreground block">
+                      {t("set.previewConflicts")}
+                    </span>
+                    <strong className="text-base text-amber-600 dark:text-amber-400 font-black">
+                      {importState.preview.conflicts}
+                    </strong>
+                  </div>
+                  <div className="rounded-2xl bg-card/80 border border-border/70 p-3 text-center">
+                    <span className="text-[10px] uppercase font-bold text-muted-foreground block">
+                      {t("set.previewInvalid")}
+                    </span>
+                    <strong className="text-base text-muted-foreground font-black">
+                      {importState.preview.invalid || 0}
+                    </strong>
                   </div>
                 </div>
-                <div className="flex flex-wrap gap-2 pt-2 border-t border-border/50">
-                  <Btn size="sm" onClick={() => applyImport("merge")}>
-                    {t("set.importMerge")}
-                  </Btn>
-                  <Btn size="sm" variant="outline" onClick={() => applyImport("replace")}>
-                    {t("set.importReplace")}
-                  </Btn>
-                  <Btn size="sm" variant="ghost" onClick={() => setImportState(null)}>
-                    {t("common.cancel")}
-                  </Btn>
+
+                {isDemo && (
+                  <div className="rounded-2xl bg-amber-500/10 border border-amber-500/20 p-3 space-y-1">
+                    <span className="font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+                      <AlertCircle className="h-4 w-4" />
+                      {t("set.demoActive")}
+                    </span>
+                    <p className="text-muted-foreground text-[11px] leading-relaxed">
+                      {t("set.demoImportSwitchNotice")}
+                    </p>
+                  </div>
+                )}
+
+                <div className="space-y-1.5 pt-1">
+                  <span className="text-[11px] font-bold text-foreground block">
+                    {t("set.chooseStrategy")}
+                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    <Btn
+                      size="sm"
+                      className="rounded-xl font-bold text-xs"
+                      onClick={() => applyImport("merge")}
+                    >
+                      <Check className="h-3.5 w-3.5 me-1" />
+                      {t("set.importMerge")}
+                    </Btn>
+                    <Btn
+                      size="sm"
+                      variant="outline"
+                      className="rounded-xl font-bold text-xs"
+                      onClick={() => applyImport("replace")}
+                    >
+                      <RefreshCw className="h-3.5 w-3.5 me-1" />
+                      {t("set.importReplace")}
+                    </Btn>
+                    <Btn
+                      size="sm"
+                      variant="ghost"
+                      className="rounded-xl text-xs"
+                      onClick={() => setImportState(null)}
+                    >
+                      {t("common.cancel")}
+                    </Btn>
+                  </div>
                 </div>
               </div>
             )}
