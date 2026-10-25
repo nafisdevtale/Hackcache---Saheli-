@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Palette,
   Shield,
@@ -27,9 +27,19 @@ import {
   Users,
   KeyRound,
   Copy,
+  Fingerprint,
+  RotateCcw,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useApp } from "@/App.jsx";
+import {
+  isDeviceAuthenticatorAvailable,
+  validatePinInput,
+  validatePassphraseInput,
+  validatePatternInput,
+} from "@/lib/authLock.ts";
+import { patternToSecret } from "@/lib/vault.ts";
+import { PatternLockCanvas } from "@/components/security/PatternLockCanvas.jsx";
 import {
   Btn,
   Card,
@@ -171,80 +181,227 @@ function ExportBlock() {
   );
 }
 
-function PinSection() {
-  const { t, meta, enablePin, disablePin, changePin, lock } = useApp();
-  const [mode, setMode] = useState(null);
-  const [secretType, setSecretType] = useState("pin"); // "pin" | "passphrase"
-  const [a, setA] = useState("");
-  const [b, setB] = useState("");
-  const [c, setC] = useState("");
-  const [ok, setOk] = useState(false);
-  const [msg, setMsg] = useState(null);
+function AppLockSection() {
+  const {
+    t,
+    meta,
+    vaultMeta,
+    setupVaultLock,
+    changeVaultLock,
+    disableVaultLock,
+    regenerateRecoveryKey,
+    lock,
+    prefs,
+    setPrefs,
+  } = useApp();
+
+  const activeMethod = vaultMeta?.activeLockMethod || (meta?.pin?.enabled ? "pin" : "none");
+  const enabled = activeMethod !== "none";
+
+  const [mode, setMode] = useState(null); // null | "setup" | "change" | "disable"
+  const [selectedMethod, setSelectedMethod] = useState("pin"); // "pin" | "passphrase" | "pattern" | "device"
+  const [pinA, setPinA] = useState("");
+  const [pinB, setPinB] = useState("");
+  const [pinC, setPinC] = useState("");
+  const [patternNodes, setPatternNodes] = useState([]);
+  const [patternConfirmNodes, setPatternConfirmNodes] = useState([]);
+  const [patternStep, setPatternStep] = useState("draw"); // "draw" | "confirm"
+  const [recoveryCode, setRecoveryCode] = useState("");
+  const [copiedRecovery, setCopiedRecovery] = useState(false);
+  const [deviceSupported, setDeviceSupported] = useState(false);
   const [busy, setBusy] = useState(false);
-  const enabled = !!meta.pin?.enabled;
-  const reset = () => {
-    setA("");
-    setB("");
-    setC("");
+  const [msg, setMsg] = useState(null);
+  const [warnChecked, setWarnChecked] = useState(false);
+
+  useEffect(() => {
+    isDeviceAuthenticatorAvailable().then(setDeviceSupported);
+  }, []);
+
+  const resetForm = () => {
     setMode(null);
-    setOk(false);
+    setPinA("");
+    setPinB("");
+    setPinC("");
+    setPatternNodes([]);
+    setPatternConfirmNodes([]);
+    setPatternStep("draw");
+    setWarnChecked(false);
     setMsg(null);
   };
 
-  async function submit(e) {
-    e.preventDefault();
+  const handleRevealRecoveryKey = async () => {
     setBusy(true);
     setMsg(null);
     try {
-      if (mode === "enable") {
-        const isValid = secretType === "passphrase" ? isValidPassphrase(a) : isValidPin(a);
-        if (!isValid)
-          throw new Error(secretType === "passphrase" ? "set.passphraseInvalid" : "set.pinInvalid");
-        if (a !== b) throw new Error("set.pinMismatch");
-        await enablePin(a);
-        reset();
-      } else if (mode === "disable") {
-        if (!isValidSecret(a)) throw new Error("set.pinInvalid");
-        await disablePin(a);
-        reset();
+      if (regenerateRecoveryKey) {
+        const code = await regenerateRecoveryKey();
+        setRecoveryCode(code);
+      }
+    } catch (e) {
+      setMsg({ key: e.message || "set.failed", tone: "err" });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleCopyRecovery = () => {
+    if (!recoveryCode) return;
+    navigator.clipboard?.writeText(recoveryCode).then(() => {
+      setCopiedRecovery(true);
+      setTimeout(() => setCopiedRecovery(false), 2000);
+    });
+  };
+
+  const handleSetupOrChange = async (e) => {
+    if (e) e.preventDefault();
+    setBusy(true);
+    setMsg(null);
+
+    try {
+      let secretToUse = "";
+      if (selectedMethod === "pin") {
+        const check = validatePinInput(mode === "change" ? pinB : pinA);
+        if (!check.valid) throw new Error(check.error || "set.pinInvalid");
+        if ((mode === "change" ? pinB : pinA) !== (mode === "change" ? pinC : pinB)) {
+          throw new Error("set.pinMismatch");
+        }
+        secretToUse = mode === "change" ? pinB : pinA;
+      } else if (selectedMethod === "passphrase") {
+        const check = validatePassphraseInput(mode === "change" ? pinB : pinA);
+        if (!check.valid) throw new Error(check.error || "set.passphraseInvalid");
+        if ((mode === "change" ? pinB : pinA) !== (mode === "change" ? pinC : pinB)) {
+          throw new Error("set.pinMismatch");
+        }
+        secretToUse = mode === "change" ? pinB : pinA;
+      } else if (selectedMethod === "pattern") {
+        if (patternNodes.length < 4) throw new Error("Pattern must connect at least 4 dots");
+        if (patternStep === "draw") {
+          setPatternStep("confirm");
+          setBusy(false);
+          return;
+        }
+        if (patternNodes.join("-") !== patternConfirmNodes.join("-")) {
+          setPatternConfirmNodes([]);
+          setPatternStep("draw");
+          throw new Error("set.pinMismatch");
+        }
+        secretToUse = patternToSecret(patternNodes);
+      } else if (selectedMethod === "device") {
+        if (!deviceSupported) throw new Error("lock.deviceFailed");
+      }
+
+      if (mode === "setup") {
+        const res = await setupVaultLock(selectedMethod, secretToUse);
+        if (res?.recoveryKey) {
+          setRecoveryCode(res.recoveryKey);
+        }
+        resetForm();
+        setMsg({ key: "set.pinEnabled", tone: "ok" });
       } else if (mode === "change") {
-        if (!isValidSecret(a)) throw new Error("set.pinInvalid");
-        const isValid = secretType === "passphrase" ? isValidPassphrase(b) : isValidPin(b);
-        if (!isValid)
-          throw new Error(secretType === "passphrase" ? "set.passphraseInvalid" : "set.pinInvalid");
-        if (b !== c) throw new Error("set.pinMismatch");
-        await changePin(a, b);
-        reset();
+        await changeVaultLock(selectedMethod, secretToUse);
+        resetForm();
+        setMsg({ key: "set.pinChanged", tone: "ok" });
       }
     } catch (err) {
       setMsg({ key: err.message || "set.failed", tone: "err" });
+    } finally {
+      setBusy(false);
     }
-    setBusy(false);
-  }
+  };
 
-  const isPass = secretType === "passphrase";
+  const handleDisableLock = async (e) => {
+    if (e) e.preventDefault();
+    setBusy(true);
+    setMsg(null);
+    try {
+      let secretToUse = pinA;
+      if (activeMethod === "pattern") {
+        if (patternNodes.length < 4) throw new Error("Pattern must connect at least 4 dots");
+        secretToUse = patternToSecret(patternNodes);
+      }
+      await disableVaultLock(secretToUse, activeMethod);
+      resetForm();
+      setMsg({ key: "set.pinDisabled", tone: "ok" });
+    } catch (err) {
+      setMsg({ key: err.message || "set.pinWrong", tone: "err" });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const getMethodLabel = (m) => {
+    switch (m) {
+      case "pin":
+        return t("set.secretTypePin");
+      case "passphrase":
+        return t("set.secretTypePassphrase");
+      case "pattern":
+        return "3x3 Pattern";
+      case "device":
+        return "Device Biometrics / Passkey";
+      default:
+        return t("common.off");
+    }
+  };
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
+    <div className="space-y-5">
+      {/* Header with Active Method Badge and Lock Now Action */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h3 className="font-bold text-sm text-foreground">{t("set.pin")}</h3>
-          <p className="text-xs text-muted-foreground">
-            {enabled ? t("set.pinOn") : t("set.pinOff")}
+          <h3 className="font-bold text-sm sm:text-base text-foreground flex items-center gap-2">
+            <Lock className="h-4 w-4 text-primary" />
+            <span>{t("set.lockMethod")}</span>
+          </h3>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {enabled ? `${t("set.pinOn")} (${getMethodLabel(activeMethod)})` : t("set.pinOff")}
           </p>
         </div>
+
         {enabled && (
-          <Btn size="sm" variant="outline" className="rounded-xl text-xs font-bold" onClick={lock}>
-            <Lock className="h-3 w-3 me-1" />
-            {t("set.lockNow")}
+          <Btn
+            type="button"
+            size="sm"
+            variant="outline"
+            className="rounded-xl text-xs font-bold gap-1.5 cursor-pointer"
+            onClick={lock}
+          >
+            <Lock className="h-3.5 w-3.5 text-primary" />
+            <span>{t("set.lockNow")}</span>
           </Btn>
         )}
       </div>
 
+      {/* Device Capability Notice */}
+      <div className="p-3 rounded-2xl bg-muted/40 border border-border/60 text-xs flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 text-foreground font-semibold">
+          <Fingerprint className="h-4 w-4 text-primary shrink-0" />
+          <span>Device Platform Biometrics:</span>
+        </div>
+        <span
+          className={cx(
+            "text-[11px] font-bold px-2.5 py-0.5 rounded-full",
+            deviceSupported
+              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+              : "bg-muted text-muted-foreground",
+          )}
+        >
+          {deviceSupported ? "Supported on this device" : "Unavailable on this device"}
+        </span>
+      </div>
+
+      {/* Mode Action Buttons */}
       {!mode && (
         <div className="flex flex-wrap gap-2 pt-1">
           {!enabled ? (
-            <Btn size="sm" className="rounded-xl" onClick={() => setMode("enable")}>
+            <Btn
+              size="sm"
+              className="rounded-xl font-bold text-xs"
+              onClick={() => {
+                setMode("setup");
+                setSelectedMethod("pin");
+              }}
+            >
               {t("set.pinEnable")}
             </Btn>
           ) : (
@@ -252,15 +409,18 @@ function PinSection() {
               <Btn
                 size="sm"
                 variant="outline"
-                className="rounded-xl"
-                onClick={() => setMode("change")}
+                className="rounded-xl font-bold text-xs"
+                onClick={() => {
+                  setMode("change");
+                  setSelectedMethod(activeMethod);
+                }}
               >
                 {t("set.pinChange")}
               </Btn>
               <Btn
                 size="sm"
                 variant="outline"
-                className="rounded-xl"
+                className="rounded-xl font-bold text-xs text-destructive hover:text-destructive"
                 onClick={() => setMode("disable")}
               >
                 {t("set.pinDisable")}
@@ -270,147 +430,292 @@ function PinSection() {
         </div>
       )}
 
-      {mode && (
+      {/* Form: Setup / Change Mode */}
+      {(mode === "setup" || mode === "change") && (
         <form
-          onSubmit={submit}
-          className="space-y-3 rounded-2xl border border-border/70 bg-muted/30 p-4 animate-fade-in"
+          onSubmit={handleSetupOrChange}
+          className="space-y-4 rounded-3xl border border-border/70 bg-muted/30 p-5 animate-fade-in"
         >
-          {(mode === "enable" || mode === "change") && (
-            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-card border border-border/60 w-fit text-xs">
-              <button
-                type="button"
-                onClick={() => {
-                  setSecretType("pin");
-                  setA("");
-                  setB("");
-                  setC("");
-                }}
-                className={cx(
-                  "px-3 py-1 font-bold rounded-lg transition-all",
-                  secretType === "pin"
-                    ? "bg-primary text-primary-foreground shadow-2xs"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {t("set.secretTypePin")}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setSecretType("passphrase");
-                  setA("");
-                  setB("");
-                  setC("");
-                }}
-                className={cx(
-                  "px-3 py-1 font-bold rounded-lg transition-all",
-                  secretType === "passphrase"
-                    ? "bg-primary text-primary-foreground shadow-2xs"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {t("set.secretTypePassphrase")}
-              </button>
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-foreground block">Choose Unlock Method:</label>
+            <div className="flex flex-wrap gap-1.5">
+              {[
+                { id: "pin", label: t("set.secretTypePin") },
+                { id: "passphrase", label: t("set.secretTypePassphrase") },
+                { id: "pattern", label: "3x3 Pattern" },
+                ...(deviceSupported ? [{ id: "device", label: "Device Biometrics" }] : []),
+              ].map((m) => (
+                <button
+                  key={m.id}
+                  type="button"
+                  onClick={() => {
+                    setSelectedMethod(m.id);
+                    setPinA("");
+                    setPinB("");
+                    setPinC("");
+                    setPatternNodes([]);
+                    setPatternConfirmNodes([]);
+                    setPatternStep("draw");
+                  }}
+                  className={cx(
+                    "px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
+                    selectedMethod === m.id
+                      ? "bg-primary text-primary-foreground shadow-2xs"
+                      : "bg-card border border-border text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* PIN Inputs */}
+          {selectedMethod === "pin" && (
+            <div className="space-y-3">
+              <PinInput
+                id="pin-new"
+                label={t("set.pinNew")}
+                value={mode === "change" ? pinB : pinA}
+                onChange={mode === "change" ? setPinB : setPinA}
+                isPassphrase={false}
+              />
+              <PinInput
+                id="pin-confirm"
+                label={t("set.pinConfirm")}
+                value={mode === "change" ? pinC : pinB}
+                onChange={mode === "change" ? setPinC : setPinB}
+                isPassphrase={false}
+              />
             </div>
           )}
 
-          {mode === "enable" && (
-            <>
+          {/* Passphrase Inputs */}
+          {selectedMethod === "passphrase" && (
+            <div className="space-y-3">
               <PinInput
-                id="new"
-                label={isPass ? t("set.passphraseNew") : t("set.pinNew")}
-                value={a}
-                onChange={setA}
-                isPassphrase={isPass}
-              />
-              <PinInput
-                id="confirm"
-                label={isPass ? t("set.passphraseConfirm") : t("set.pinConfirm")}
-                value={b}
-                onChange={setB}
-                isPassphrase={isPass}
-              />
-              <label className="flex items-start gap-2 text-xs text-muted-foreground cursor-pointer pt-1">
-                <input
-                  type="checkbox"
-                  checked={ok}
-                  onChange={(e) => setOk(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 rounded border-border text-primary"
-                />
-                <span>{t("set.pinWarn")}</span>
-              </label>
-            </>
-          )}
-          {mode === "disable" && (
-            <PinInput
-              id="curr"
-              label={t("set.pinCurrent")}
-              value={a}
-              onChange={setA}
-              isPassphrase={true}
-            />
-          )}
-          {mode === "change" && (
-            <>
-              <PinInput
-                id="curr"
-                label={t("set.pinCurrent")}
-                value={a}
-                onChange={setA}
+                id="pass-new"
+                label="New Passphrase (min 6 characters)"
+                value={mode === "change" ? pinB : pinA}
+                onChange={mode === "change" ? setPinB : setPinA}
                 isPassphrase={true}
               />
               <PinInput
-                id="new"
-                label={isPass ? t("set.passphraseNew") : t("set.pinNew")}
-                value={b}
-                onChange={setB}
-                isPassphrase={isPass}
+                id="pass-confirm"
+                label="Repeat Passphrase"
+                value={mode === "change" ? pinC : pinB}
+                onChange={mode === "change" ? setPinC : setPinB}
+                isPassphrase={true}
               />
-              <PinInput
-                id="confirm"
-                label={isPass ? t("set.passphraseConfirm") : t("set.pinConfirm")}
-                value={c}
-                onChange={setC}
-                isPassphrase={isPass}
-              />
-            </>
+            </div>
           )}
+
+          {/* Pattern Canvas */}
+          {selectedMethod === "pattern" && (
+            <div className="space-y-3">
+              <p className="text-xs font-bold text-foreground">
+                {patternStep === "draw"
+                  ? "Draw your 3x3 pattern (connect 4+ points):"
+                  : "Draw pattern again to confirm:"}
+              </p>
+              <div className="flex justify-center bg-card rounded-2xl border border-border p-2">
+                <PatternLockCanvas
+                  onComplete={(nodes) => {
+                    if (patternStep === "draw") {
+                      setPatternNodes(nodes);
+                      setPatternStep("confirm");
+                    } else {
+                      setPatternConfirmNodes(nodes);
+                    }
+                  }}
+                  t={t}
+                />
+              </div>
+              {patternStep === "confirm" && (
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-muted-foreground">Pattern recorded. Confirm above.</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPatternNodes([]);
+                      setPatternConfirmNodes([]);
+                      setPatternStep("draw");
+                    }}
+                    className="text-primary font-bold hover:underline"
+                  >
+                    Redraw original
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Device Biometrics Explanation */}
+          {selectedMethod === "device" && (
+            <div className="p-3.5 rounded-2xl bg-card border border-border space-y-1 text-xs">
+              <span className="font-bold text-foreground flex items-center gap-1.5">
+                <Fingerprint className="h-4 w-4 text-primary" />
+                {t("lock.unlockWithDevice")}
+              </span>
+              <p className="text-muted-foreground leading-relaxed">
+                Saheli will bind an on-device platform credential using your fingerprint, face, or
+                lock-screen PIN to wrap your health data encryption key.
+              </p>
+            </div>
+          )}
+
+          {/* Safeguard Warning */}
+          {mode === "setup" && (
+            <label className="flex items-start gap-2 text-xs text-muted-foreground cursor-pointer pt-1">
+              <input
+                type="checkbox"
+                checked={warnChecked}
+                onChange={(e) => setWarnChecked(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-border text-primary"
+              />
+              <span>{t("set.pinWarn")}</span>
+            </label>
+          )}
+
           <div className="flex gap-2 pt-2">
-            <Btn type="submit" disabled={busy || (mode === "enable" && !ok)}>
+            <Btn
+              type="submit"
+              disabled={busy || (mode === "setup" && !warnChecked)}
+              className="text-xs font-bold"
+            >
               {busy ? t("set.working") : t("common.save")}
             </Btn>
-            <Btn type="button" variant="outline" onClick={reset}>
+            <Btn type="button" variant="outline" onClick={resetForm} className="text-xs font-bold">
               {t("common.cancel")}
             </Btn>
           </div>
-          <Status msg={msg?.key && t(msg.key)} tone={msg?.tone} />
         </form>
       )}
 
-      {enabled && (
-        <div className="pt-3 border-t border-border/50 space-y-3">
-          <div>
-            <label
-              htmlFor="autolock-select"
-              className="block text-xs font-bold text-foreground mb-1"
-            >
-              {t("set.autoLockTimeout")}
-            </label>
-            <select
-              id="autolock-select"
-              value={prefs.autoLockMinutes ?? 10}
-              onChange={(e) => setPrefs({ autoLockMinutes: Number(e.target.value) })}
-              className="h-9 w-full sm:w-64 rounded-xl border border-border bg-card px-3 text-xs font-semibold text-foreground cursor-pointer"
-            >
-              <option value="1">1 min</option>
-              <option value="5">5 min</option>
-              <option value="10">10 min</option>
-              <option value="30">30 min</option>
-              <option value="0">{t("common.off")}</option>
-            </select>
+      {/* Form: Disable Lock Mode */}
+      {mode === "disable" && (
+        <form
+          onSubmit={handleDisableLock}
+          className="space-y-4 rounded-3xl border border-destructive/30 bg-destructive/5 p-5 animate-fade-in"
+        >
+          <div className="space-y-1">
+            <h4 className="text-xs font-bold text-destructive">{t("set.pinDisable")}</h4>
+            <p className="text-xs text-muted-foreground">
+              Enter your current unlock secret to turn off encryption locking.
+            </p>
           </div>
-        </div>
+
+          {activeMethod === "pattern" ? (
+            <div className="space-y-2">
+              <p className="text-xs font-semibold text-foreground">Draw your current pattern:</p>
+              <div className="flex justify-center bg-card rounded-2xl border border-border p-2">
+                <PatternLockCanvas onComplete={(nodes) => setPatternNodes(nodes)} t={t} />
+              </div>
+            </div>
+          ) : (
+            <PinInput
+              id="pin-curr"
+              label={t("set.pinCurrent")}
+              value={pinA}
+              onChange={setPinA}
+              isPassphrase={activeMethod === "passphrase"}
+            />
+          )}
+
+          <div className="flex gap-2 pt-2">
+            <Btn type="submit" variant="destructive" disabled={busy} className="text-xs font-bold">
+              {busy ? t("set.working") : t("set.pinDisable")}
+            </Btn>
+            <Btn type="button" variant="outline" onClick={resetForm} className="text-xs font-bold">
+              {t("common.cancel")}
+            </Btn>
+          </div>
+        </form>
       )}
+
+      {msg && <Status msg={msg.key && (t(msg.key) || msg.key)} tone={msg.tone} />}
+
+      {/* Emergency Recovery Key Management */}
+      <div className="pt-4 border-t border-border/50 space-y-3">
+        <div>
+          <h4 className="font-bold text-xs sm:text-sm text-foreground flex items-center gap-1.5">
+            <KeyRound className="h-4 w-4 text-primary" />
+            <span>{t("set.recoveryKeyTitle")}</span>
+          </h4>
+          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+            {t("set.recoveryKeyDesc")}
+          </p>
+        </div>
+
+        {recoveryCode ? (
+          <div className="p-3.5 rounded-2xl bg-muted/40 border border-border flex flex-wrap items-center justify-between gap-3 animate-fade-in">
+            <span className="font-mono text-xs sm:text-sm font-bold tracking-wider text-foreground">
+              {recoveryCode}
+            </span>
+            <div className="flex items-center gap-2">
+              <Btn
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={handleCopyRecovery}
+                className="text-xs font-bold gap-1"
+              >
+                <Copy className="h-3 w-3" />
+                <span>{copiedRecovery ? "✓" : t("set.export")}</span>
+              </Btn>
+              <Btn
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => setRecoveryCode("")}
+                className="text-xs"
+              >
+                Hide
+              </Btn>
+            </div>
+          </div>
+        ) : (
+          <Btn
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={handleRevealRecoveryKey}
+            disabled={busy}
+            className="text-xs font-bold gap-1.5"
+          >
+            <KeyRound className="h-3.5 w-3.5" />
+            <span>{t("set.showRecoveryKey")}</span>
+          </Btn>
+        )}
+      </div>
+
+      {/* Auto-Lock Inactivity Timeout & Background Blur Lock */}
+      <div className="pt-4 border-t border-border/50 space-y-4">
+        <div>
+          <label htmlFor="autolock-select" className="block text-xs font-bold text-foreground mb-1">
+            {t("set.autoLockTimeout")}
+          </label>
+          <select
+            id="autolock-select"
+            value={prefs.autoLockMinutes ?? 10}
+            onChange={(e) => setPrefs({ autoLockMinutes: Number(e.target.value) })}
+            className="h-9 w-full sm:w-64 rounded-xl border border-border bg-card px-3 text-xs font-semibold text-foreground cursor-pointer"
+          >
+            <option value="1">1 min</option>
+            <option value="5">5 min</option>
+            <option value="10">10 min</option>
+            <option value="30">30 min</option>
+            <option value="0">{t("common.off")}</option>
+          </select>
+        </div>
+
+        <Toggle
+          label="Lock on Background"
+          desc="Lock immediately when you switch away or minimize the app"
+          checked={Boolean(prefs.autoLockOnBackground)}
+          onChange={(v) => setPrefs({ autoLockOnBackground: v })}
+        />
+      </div>
     </div>
   );
 }
@@ -1274,7 +1579,7 @@ export default function Settings() {
 
           {/* PIN / Vault Lock Management */}
           <div className="nova-card-elevated p-5 sm:p-6 space-y-4">
-            <PinSection />
+            <AppLockSection />
           </div>
 
           {/* Saheli Partner Connect */}

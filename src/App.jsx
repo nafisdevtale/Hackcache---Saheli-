@@ -25,7 +25,9 @@ import {
   encryptVaultRecord,
   decryptVaultRecord,
   updateVaultLockMethod,
+  updateVaultRecoveryKey,
 } from "./lib/vault.ts";
+import { registerDeviceAuthenticator } from "./lib/authLock.ts";
 import { syncOwnerSnapshot, flushPartnerOutbox, loadPartnerState } from "./lib/partnerClient.ts";
 import {
   deriveKey,
@@ -487,10 +489,31 @@ export function AppProvider({ children }) {
     },
     async setupVaultLock(method, secret) {
       const currentRecord = stateRef.current.record || record || emptyRecord();
-      const { vaultMeta: newVm, dek, recoveryKey } = await initializeVault(method, secret);
+      const res = await initializeVault({
+        lockMethod: method === "device" ? "none" : method,
+        secret,
+      });
+      const newVm = res.vaultMeta;
+      const dek = res.vaultDEK;
+      const recoveryKey = res.recoveryKey;
       dekRef.current = dek;
       keyRef.current = dek;
-      setVaultMeta(newVm);
+      let finalVm = newVm;
+      if (method === "device") {
+        const { identity: idRecord } = await getOrCreateIdentity();
+        const { credentialId, wrapper } = await registerDeviceAuthenticator(dek, idRecord.serialId);
+        finalVm = {
+          ...newVm,
+          activeLockMethod: "device",
+          deviceCredentialId: credentialId,
+          wrappers: {
+            ...newVm.wrappers,
+            device: wrapper,
+          },
+        };
+        await idbWrite([["vault_meta", finalVm]]);
+      }
+      setVaultMeta(finalVm);
       const encrypted = await encryptVaultRecord(dek, currentRecord);
       const nextMeta = {
         ...meta,
@@ -502,7 +525,7 @@ export function AppProvider({ children }) {
       ]);
       setMeta(nextMeta);
       stateRef.current = { meta: nextMeta, record: currentRecord };
-      return { recoveryKey, vaultMeta: newVm };
+      return { recoveryKey, vaultMeta: finalVm };
     },
     async disableVaultLock(secret, method = null) {
       const vm = vaultMeta || (await idbGet("vault_meta"));
@@ -527,9 +550,46 @@ export function AppProvider({ children }) {
     },
     async changeVaultLock(newMethod, newSecret) {
       if (!dekRef.current) throw new Error("Vault is locked");
-      const updatedMeta = await updateVaultLockMethod(dekRef.current, newMethod, newSecret);
+      let updatedMeta;
+      if (newMethod === "device") {
+        const { identity: idRecord } = await getOrCreateIdentity();
+        const { credentialId, wrapper } = await registerDeviceAuthenticator(
+          dekRef.current,
+          idRecord.serialId,
+        );
+        const vm = vaultMeta || (await idbGet("vault_meta"));
+        updatedMeta = {
+          ...vm,
+          activeLockMethod: "device",
+          deviceCredentialId: credentialId,
+          wrappers: {
+            ...vm.wrappers,
+            device: wrapper,
+          },
+        };
+        await idbWrite([["vault_meta", updatedMeta]]);
+      } else {
+        updatedMeta = await updateVaultLockMethod(dekRef.current, newMethod, newSecret);
+      }
       setVaultMeta(updatedMeta);
+      const nextMeta = {
+        ...meta,
+        pin: {
+          enabled: newMethod !== "none",
+          method: newMethod,
+          cipher: "AES-GCM-256",
+          kdf: "PBKDF2-SHA256",
+        },
+      };
+      await idbWrite([["meta", nextMeta]]);
+      setMeta(nextMeta);
       return updatedMeta;
+    },
+    async regenerateRecoveryKey() {
+      if (!dekRef.current) throw new Error("Vault is locked");
+      const { vaultMeta: newVm, recoveryKey } = await updateVaultRecoveryKey(dekRef.current);
+      setVaultMeta(newVm);
+      return recoveryKey;
     },
     async enablePin(pin) {
       const salt = randomSaltB64();

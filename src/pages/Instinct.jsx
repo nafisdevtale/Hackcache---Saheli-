@@ -136,10 +136,10 @@ export default function Instinct() {
 
   // Check Onboarding
   useEffect(() => {
-    if (!profile.onboardingCompleted) {
+    if (!profile?.onboardingCompleted) {
       setShowOnboarding(true);
     }
-  }, [profile.onboardingCompleted]);
+  }, [profile?.onboardingCompleted]);
 
   // Audio Player handling
   const togglePlayAudio = (track) => {
@@ -315,7 +315,9 @@ export default function Instinct() {
               id: "library",
               label: "My Library",
               icon: Bookmark,
-              badge: library.watchlist.length + Object.keys(library.currentlyWatching).length,
+              badge:
+                (library?.watchlist?.length || 0) +
+                Object.keys(library?.currentlyWatching || {}).length,
             },
             { id: "ask", label: "Ask INSTINCT", icon: MessageCircle },
           ].map((tab) => {
@@ -430,11 +432,11 @@ export default function Instinct() {
               /* Personalized Dashboard Carousels */
               <div className="space-y-10">
                 {/* 1. Continue Watching (If any) */}
-                {dashboard.continueWatching.length > 0 && (
+                {dashboard?.continueWatching?.length > 0 && (
                   <DashboardRow
                     title={t("instinct.continueWatching")}
                     subtitle={t("instinct.continueWatchingSub")}
-                    items={dashboard.continueWatching.map((cw) => cw.item)}
+                    items={(dashboard.continueWatching || []).map((cw) => cw?.item).filter(Boolean)}
                     profile={profile}
                     library={library}
                     onSelect={handleOpenDetail}
@@ -447,7 +449,7 @@ export default function Instinct() {
                 <DashboardRow
                   title={t("instinct.recommendedForYou")}
                   subtitle={t("instinct.recommendedForYouSub")}
-                  items={dashboard.recommendedForYou}
+                  items={dashboard?.recommendedForYou || []}
                   profile={profile}
                   library={library}
                   onSelect={handleOpenDetail}
@@ -456,11 +458,11 @@ export default function Instinct() {
                 />
 
                 {/* 3. Because You Liked */}
-                {dashboard.becauseYouLiked.items.length > 0 && (
+                {dashboard?.becauseYouLiked?.items?.length > 0 && (
                   <DashboardRow
-                    title={`${t("instinct.becauseYouLiked")} "${dashboard.becauseYouLiked.title}"`}
+                    title={`${t("instinct.becauseYouLiked")} "${dashboard?.becauseYouLiked?.title || ""}"`}
                     subtitle={t("instinct.becauseYouLikedSub")}
-                    items={dashboard.becauseYouLiked.items}
+                    items={dashboard.becauseYouLiked.items || []}
                     profile={profile}
                     library={library}
                     onSelect={handleOpenDetail}
@@ -473,7 +475,7 @@ export default function Instinct() {
                 <DashboardRow
                   title={t("instinct.hiddenGems")}
                   subtitle={t("instinct.hiddenGemsSub")}
-                  items={dashboard.hiddenGems}
+                  items={dashboard?.hiddenGems || []}
                   profile={profile}
                   library={library}
                   onSelect={handleOpenDetail}
@@ -485,7 +487,7 @@ export default function Instinct() {
                 <DashboardRow
                   title={t("instinct.trendingNow")}
                   subtitle={t("instinct.trendingNowSub")}
-                  items={dashboard.trendingNow}
+                  items={dashboard?.trendingNow || []}
                   profile={profile}
                   library={library}
                   onSelect={handleOpenDetail}
@@ -497,7 +499,7 @@ export default function Instinct() {
                 <DashboardRow
                   title={t("instinct.somethingDifferent")}
                   subtitle={t("instinct.somethingDifferentSub")}
-                  items={dashboard.somethingDifferent}
+                  items={dashboard?.somethingDifferent || []}
                   profile={profile}
                   library={library}
                   onSelect={handleOpenDetail}
@@ -509,7 +511,7 @@ export default function Instinct() {
                 <DashboardRow
                   title={t("instinct.exploreKdramas")}
                   subtitle={t("instinct.exploreKdramasSub")}
-                  items={dashboard.exploreKdramas}
+                  items={dashboard?.exploreKdramas || []}
                   profile={profile}
                   library={library}
                   onSelect={handleOpenDetail}
@@ -521,7 +523,7 @@ export default function Instinct() {
                 <DashboardRow
                   title={t("instinct.musicForYou")}
                   subtitle={t("instinct.musicForYouSub")}
-                  items={dashboard.musicForYou}
+                  items={dashboard?.musicForYou || []}
                   profile={profile}
                   library={library}
                   onSelect={handleOpenDetail}
@@ -550,8 +552,8 @@ export default function Instinct() {
                 <span className="text-xs font-bold text-primary px-2.5 py-1 rounded-full bg-primary/10">
                   {t("instinct.seriesCount", {
                     n: fmtInteger
-                      ? fmtInteger(Object.keys(library.currentlyWatching).length)
-                      : Object.keys(library.currentlyWatching).length,
+                      ? fmtInteger(Object.keys(library?.currentlyWatching || {}).length)
+                      : Object.keys(library?.currentlyWatching || {}).length,
                   })}
                 </span>
               </div>
@@ -559,8 +561,8 @@ export default function Instinct() {
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
               {VERIFIED_ENTERTAINMENT.filter((i) => i.type === "kdrama").map((drama) => {
-                const progress = library.currentlyWatching[drama.id];
-                const isCompleted = library.completed.includes(drama.id);
+                const progress = library?.currentlyWatching?.[drama.id];
+                const isCompleted = library?.completed?.includes(drama.id);
                 return (
                   <div key={drama.id} className="relative group">
                     <MediaCard
@@ -668,21 +670,21 @@ export default function Instinct() {
                         const updated = toggleLibraryItem("savedMusic", track.id, library);
                         updateLibraryState(updated);
                         showToast(
-                          library.savedMusic.includes(track.id)
+                          library?.savedMusic?.includes(track.id)
                             ? "Removed from My Music"
                             : "Saved to My Music",
                         );
                       }}
                       className={cx(
                         "p-1.5 rounded-xl transition-all",
-                        library.savedMusic.includes(track.id)
+                        library?.savedMusic?.includes(track.id)
                           ? "bg-rose-500/10 text-rose-500"
                           : "text-muted-foreground hover:bg-muted",
                       )}
                     >
                       <Heart
                         className="h-4 w-4"
-                        fill={library.savedMusic.includes(track.id) ? "currentColor" : "none"}
+                        fill={library?.savedMusic?.includes(track.id) ? "currentColor" : "none"}
                       />
                     </button>
                   </div>
@@ -1341,22 +1343,22 @@ function MediaDetailModal({
  * Episode Progress Tracker Modal
  */
 function EpisodeTrackerModal({ drama, library, onClose, onUpdateLibrary }) {
-  const currentProgress = library.currentlyWatching[drama.id] || {
+  const currentProgress = library?.currentlyWatching?.[drama.id] || {
     season: 1,
     episode: 1,
   };
   const [season, setSeason] = useState(currentProgress.season || 1);
   const [episode, setEpisode] = useState(currentProgress.episode || 1);
-  const [isCompleted, setIsCompleted] = useState(library.completed.includes(drama.id));
+  const [isCompleted, setIsCompleted] = useState(Boolean(library?.completed?.includes(drama.id)));
 
   const totalEpisodes = drama.episodes || 16;
   const totalSeasons = drama.seasons || 1;
 
   const handleSave = () => {
     let updated = updateWatchProgress(drama.id, season, episode, library);
-    if (isCompleted && !library.completed.includes(drama.id)) {
+    if (isCompleted && !library?.completed?.includes(drama.id)) {
       updated = toggleLibraryItem("completed", drama.id, updated);
-    } else if (!isCompleted && library.completed.includes(drama.id)) {
+    } else if (!isCompleted && library?.completed?.includes(drama.id)) {
       updated = toggleLibraryItem("completed", drama.id, updated);
     }
     onUpdateLibrary(updated);
@@ -1456,17 +1458,17 @@ function LibraryView({ library, profile, onUpdateLibrary, onSelectMedia, onOpenP
   const tabItems = useMemo(() => {
     switch (libraryTab) {
       case "watchlist":
-        return VERIFIED_ENTERTAINMENT.filter((i) => library.watchlist.includes(i.id));
+        return VERIFIED_ENTERTAINMENT.filter((i) => library?.watchlist?.includes(i.id));
       case "watching":
         return VERIFIED_ENTERTAINMENT.filter((i) =>
-          Object.keys(library.currentlyWatching).includes(i.id),
+          Object.keys(library?.currentlyWatching || {}).includes(i.id),
         );
       case "completed":
-        return VERIFIED_ENTERTAINMENT.filter((i) => library.completed.includes(i.id));
+        return VERIFIED_ENTERTAINMENT.filter((i) => library?.completed?.includes(i.id));
       case "favourites":
-        return VERIFIED_ENTERTAINMENT.filter((i) => library.favourites.includes(i.id));
+        return VERIFIED_ENTERTAINMENT.filter((i) => library?.favourites?.includes(i.id));
       case "savedMusic":
-        return VERIFIED_ENTERTAINMENT.filter((i) => library.savedMusic.includes(i.id));
+        return VERIFIED_ENTERTAINMENT.filter((i) => library?.savedMusic?.includes(i.id));
       default:
         return [];
     }
@@ -1478,15 +1480,15 @@ function LibraryView({ library, profile, onUpdateLibrary, onSelectMedia, onOpenP
         {/* Subtabs */}
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
           {[
-            { id: "watchlist", label: "Watchlist", count: library.watchlist.length },
+            { id: "watchlist", label: "Watchlist", count: library?.watchlist?.length || 0 },
             {
               id: "watching",
               label: "Watching",
-              count: Object.keys(library.currentlyWatching).length,
+              count: Object.keys(library?.currentlyWatching || {}).length,
             },
-            { id: "completed", label: "Completed", count: library.completed.length },
-            { id: "favourites", label: "Favourites", count: library.favourites.length },
-            { id: "savedMusic", label: "My Music", count: library.savedMusic.length },
+            { id: "completed", label: "Completed", count: library?.completed?.length || 0 },
+            { id: "favourites", label: "Favourites", count: library?.favourites?.length || 0 },
+            { id: "savedMusic", label: "My Music", count: library?.savedMusic?.length || 0 },
           ].map((tab) => (
             <button
               key={tab.id}

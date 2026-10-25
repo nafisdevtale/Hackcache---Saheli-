@@ -16,6 +16,7 @@ import {
   Settings,
   Users,
   Menu,
+  HeartHandshake,
   Eye,
   EyeOff,
   Shield,
@@ -79,6 +80,7 @@ export const NovaSidebar: React.FC<NovaSidebarProps> = ({
       title: t("set.title") || "Preferences",
       items: [
         { to: "/community", key: "nav.community", icon: Users },
+        { to: "/partner", key: "partner.title", icon: HeartHandshake },
         { to: "/settings", key: "nav.settings", icon: Settings },
         { to: "/more", key: "nav.more", icon: Menu },
       ],

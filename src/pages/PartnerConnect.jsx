@@ -17,6 +17,8 @@ import {
   ArrowRight,
   UserMinus,
   Lock,
+  Download,
+  Upload,
 } from "lucide-react";
 import { useApp } from "@/App.jsx";
 import { Btn, Card, cx } from "@/components/common/ui.jsx";
@@ -244,6 +246,19 @@ export function PartnerConnectPage() {
             </ul>
           </div>
 
+          {/* In-Memory Relay & Air-Gapped Notice */}
+          <div className="rounded-3xl border border-amber-500/30 bg-amber-500/10 p-4 space-y-2 text-xs">
+            <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300 font-bold">
+              <AlertCircle className="h-4 w-4 shrink-0" />
+              <span>In-Memory Ephemeral Relay & Air-Gapped Mode</span>
+            </div>
+            <p className="text-muted-foreground leading-relaxed">
+              Live pairing synchronizes through an in-memory ephemeral relay that operates during
+              active sessions. For durable, 100% air-gapped sharing without relying on any network
+              relay, export and import pre-encrypted <code>.sahelipartner</code> snapshots.
+            </p>
+          </div>
+
           {/* Connection Status Card */}
           {partnerState?.status === "paired" ? (
             <div className="rounded-3xl border border-border/80 bg-card p-6 shadow-sm space-y-5">
@@ -264,7 +279,39 @@ export function PartnerConnectPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Btn
+                    variant="outline"
+                    size="sm"
+                    onClick={async () => {
+                      setBusy(true);
+                      setErrMsg("");
+                      try {
+                        const jsonStr = await exportManualEncryptedSnapshot(
+                          record,
+                          permissions,
+                          analysis,
+                        );
+                        const blob = new Blob([jsonStr], { type: "application/json" });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement("a");
+                        a.href = url;
+                        a.download = `saheli-partner-snapshot-${new Date().toISOString().slice(0, 10)}.sahelipartner`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                        setStatusMsg("Encrypted .sahelipartner snapshot exported.");
+                      } catch (e) {
+                        setErrMsg(e.message || "Failed to export partner snapshot");
+                      } finally {
+                        setBusy(false);
+                      }
+                    }}
+                    disabled={busy}
+                    className="text-xs font-bold"
+                  >
+                    <Download className="h-3.5 w-3.5 mr-1" />
+                    <span>Export .sahelipartner</span>
+                  </Btn>
                   <Btn
                     variant="outline"
                     size="sm"
@@ -618,6 +665,47 @@ export function PartnerConnectPage() {
               )}
             </div>
           )}
+
+          {/* Air-Gapped Snapshot Import (.sahelipartner) */}
+          <div className="rounded-3xl border border-border/80 bg-card p-6 shadow-sm space-y-3">
+            <div className="space-y-1">
+              <h3 className="text-base font-bold text-foreground">
+                Air-Gapped Snapshot Import (.sahelipartner)
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                Import an encrypted <code>.sahelipartner</code> snapshot file directly (e.g. via
+                local file transfer, USB, or AirDrop) without network relays.
+              </p>
+            </div>
+
+            <label className="flex min-h-[48px] cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-muted/30 px-4 text-xs font-bold text-primary hover:bg-muted transition-all">
+              <Upload className="h-4 w-4" />
+              <span>{t("set.chooseFile") || "Choose .sahelipartner file"}</span>
+              <input
+                type="file"
+                accept=".sahelipartner,.json"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  setBusy(true);
+                  setErrMsg("");
+                  setStatusMsg("");
+                  try {
+                    const text = await file.text();
+                    const decrypted = await importManualEncryptedSnapshot(text);
+                    setPartnerSnapshot({ data: decrypted.data, timestamp: decrypted.timestamp });
+                    setStatusMsg("Air-gapped snapshot imported and verified successfully.");
+                    await refreshState();
+                  } catch (err) {
+                    setErrMsg(err.message || "Failed to import air-gapped snapshot.");
+                  } finally {
+                    setBusy(false);
+                  }
+                }}
+                className="sr-only"
+              />
+            </label>
+          </div>
         </div>
       )}
     </div>

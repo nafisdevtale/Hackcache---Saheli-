@@ -242,22 +242,27 @@ export function getDashboardSections(
   catalogue = VERIFIED_ENTERTAINMENT,
   weights = DEFAULT_INSTINCT_WEIGHTS,
 ) {
-  const suitable = filterSuitability(catalogue, profile, library);
-  const ranked = rankMediaCandidates(suitable, profile, library, weights);
+  const safeProfile = profile || {};
+  const safeLibrary = library || {};
+  const suitable = filterSuitability(catalogue, safeProfile, safeLibrary);
+  const ranked = rankMediaCandidates(suitable, safeProfile, safeLibrary, weights);
 
   // 1. Recommended for You (Top items excluding already watched / completed)
-  const completedSet = new Set(library.completed || []);
-  const watchingIds = Object.keys(library.currentlyWatching || {});
+  const completedSet = new Set(safeLibrary.completed || []);
+  const watchingIds = Object.keys(safeLibrary.currentlyWatching || {});
   const watchingSet = new Set(watchingIds);
 
   const recommendedForYou = ranked
-    .filter((r) => !completedSet.has(r.item.id) && !watchingSet.has(r.item.id))
+    .filter((r) => r?.item && !completedSet.has(r.item.id) && !watchingSet.has(r.item.id))
     .slice(0, 10)
     .map((r) => r.item);
 
   // 2. Because You Liked...
-  const likedKeys = Object.keys(library.likes || {}).filter((k) => library.likes[k]);
-  const referenceId = likedKeys[0] || library.favourites?.[0] || completedSet.values().next().value;
+  const likedKeys = Object.keys(safeLibrary.likes || {}).filter((k) => safeLibrary.likes[k]);
+  const referenceId =
+    likedKeys[0] ||
+    safeLibrary.favourites?.[0] ||
+    (completedSet.size > 0 ? completedSet.values().next().value : null);
   let becauseYouLiked = [];
   let referenceTitle = "";
 
@@ -266,7 +271,7 @@ export function getDashboardSections(
     if (refItem) {
       referenceTitle = refItem.title;
       becauseYouLiked = getSimilarTitles(referenceId, suitable, 6).filter(
-        (item) => !completedSet.has(item.id),
+        (item) => item && !completedSet.has(item.id),
       );
     }
   }
@@ -278,7 +283,7 @@ export function getDashboardSections(
     if (item) {
       continueWatching.push({
         item,
-        progress: library.currentlyWatching[id],
+        progress: safeLibrary.currentlyWatching[id],
       });
     }
   }

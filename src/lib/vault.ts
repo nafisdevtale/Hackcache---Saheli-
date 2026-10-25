@@ -288,21 +288,37 @@ export function isVaultEncrypted(obj: unknown): boolean {
 }
 
 /**
- * Initializes a new encrypted vault with a chosen lock method and an automatic recovery key
+ * Initializes a new encrypted vault with a chosen lock method and an automatic recovery key.
+ * Supports both object configuration and positional arguments for maximum compatibility.
  */
-export async function initializeVault({
-  lockMethod = "none",
-  secret = "",
-  recoveryKey = generateRecoveryKey(),
-}: {
-  lockMethod?: LockMethod;
-  secret?: string;
-  recoveryKey?: string;
-}): Promise<{
+export async function initializeVault(
+  optsOrMethod:
+    | {
+        lockMethod?: LockMethod;
+        secret?: string;
+        recoveryKey?: string;
+      }
+    | LockMethod = "none",
+  maybeSecret = "",
+  maybeRecoveryKey?: string,
+): Promise<{
   vaultDEK: CryptoKey;
+  dek: CryptoKey;
   vaultMeta: VaultMetadata;
   recoveryKey: string;
 }> {
+  let lockMethod: LockMethod = "none";
+  let secret = "";
+  let recoveryKey = maybeRecoveryKey || generateRecoveryKey();
+
+  if (typeof optsOrMethod === "object" && optsOrMethod !== null) {
+    lockMethod = optsOrMethod.lockMethod || "none";
+    secret = optsOrMethod.secret || "";
+    if (optsOrMethod.recoveryKey) recoveryKey = optsOrMethod.recoveryKey;
+  } else if (typeof optsOrMethod === "string") {
+    lockMethod = optsOrMethod;
+    secret = maybeSecret || "";
+  }
   const vaultDEK = await generateVaultDEK();
   const vaultId = crypto.randomUUID
     ? crypto.randomUUID()
@@ -356,6 +372,7 @@ export async function initializeVault({
 
   return {
     vaultDEK,
+    dek: vaultDEK,
     vaultMeta,
     recoveryKey,
   };
@@ -435,4 +452,44 @@ export async function updateVaultLockMethod(
     } catch {}
   }
   return updatedMeta;
+}
+
+/**
+ * Generates and stores a new Recovery Key wrapper using the active Vault DEK
+ */
+export async function updateVaultRecoveryKey(
+  vaultDEK: CryptoKey,
+  newRecoveryKey: string = generateRecoveryKey(),
+): Promise<{ vaultMeta: VaultMetadata; recoveryKey: string }> {
+  const vaultMeta = (await idbGet("vault_meta")) as VaultMetadata | undefined;
+  if (!vaultMeta || vaultMeta.version !== 2) {
+    throw new Error("vault-not-configured");
+  }
+
+  const recoverySaltB64 = b64(crypto.getRandomValues(new Uint8Array(16)));
+  const recoveryKEK = await deriveKEK(newRecoveryKey, recoverySaltB64, CONFIG.pbkdf2Iterations);
+  const recoveryWrapped = await wrapDEK(vaultDEK, recoveryKEK);
+
+  const updatedMeta: VaultMetadata = {
+    ...vaultMeta,
+    wrappers: {
+      ...vaultMeta.wrappers,
+      recovery: {
+        method: "recovery",
+        kdf: "PBKDF2-SHA256",
+        saltB64: recoverySaltB64,
+        iterations: CONFIG.pbkdf2Iterations,
+        ivB64: recoveryWrapped.ivB64,
+        wrappedDEKB64: recoveryWrapped.wrappedB64,
+      },
+    },
+  };
+
+  if (typeof indexedDB !== "undefined") {
+    try {
+      await idbWrite([["vault_meta", updatedMeta]]);
+    } catch {}
+  }
+
+  return { vaultMeta: updatedMeta, recoveryKey: newRecoveryKey };
 }

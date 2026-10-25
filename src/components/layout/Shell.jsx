@@ -25,6 +25,7 @@ import {
   Heart,
   Film,
   Bot,
+  HeartHandshake,
 } from "lucide-react";
 import { useApp } from "@/App.jsx";
 import { Btn, Card, speak, cx } from "@/components/common/ui.jsx";
@@ -308,6 +309,7 @@ const NAV_SECTIONS = [
     defaultTitle: "Account",
     items: [
       { to: "/community", key: "nav.community", icon: Users },
+      { to: "/partner", key: "partner.title", icon: HeartHandshake },
       { to: "/settings", key: "nav.settings", icon: Settings },
       { to: "/more", key: "nav.more", icon: Menu },
     ],

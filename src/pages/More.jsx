@@ -17,6 +17,7 @@ import {
   Heart,
   Film,
   Bot,
+  HeartHandshake,
 } from "lucide-react";
 import { useApp } from "@/App.jsx";
 
@@ -103,6 +104,12 @@ export default function More() {
           key: "nav.community",
           icon: Users,
           color: "text-period bg-period/15 border border-period/30",
+        },
+        {
+          to: "/partner",
+          key: "partner.title",
+          icon: HeartHandshake,
+          color: "text-primary bg-primary/10 border border-primary/20",
         },
         {
           to: "/reminders",
