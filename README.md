@@ -53,13 +53,13 @@ flowchart TD
     subgraph Client ["Client Browser Runtime (Local-First)"]
         UI["React 19 + TanStack Router UI"]
         State["App Provider & State Engine"]
-        
+
         subgraph Security ["Client Security & Vault"]
             Crypto["WebCrypto API (AES-256-GCM)"]
             IDB[("IndexedDB (saheli_db)")]
             MemStorage["In-Memory Ephemeral Storage"]
         end
-        
+
         subgraph Engines ["Deterministic Engines"]
             CycleMath["Cycle Math & Statistics Engine"]
             SafetyTriage["Safety & Emergency Triage"]
@@ -114,6 +114,7 @@ Saheli supports exactly three core languages, audited for 100% key parity (2,156
 3. **Marathi (`mr`)**: Regionally adapted Devanagari vocabulary tailored for Maharashtra.
 
 ### Indic Numbering & Native Script Numerals
+
 - By default, non-English languages render numbers in native Devanagari script (e.g., `२८` for `28`, `१२,३४,५६७` for `12,34,567`).
 - Users can toggle between native Indic numerals and standard Latin digits in **Settings → Display Preferences**.
 - Backward-compatible automatic migration: Users previously configured with discontinued regional languages are gracefully migrated to English with an informative in-app notice.
@@ -224,6 +225,7 @@ The Saheli AI Workspace coordinates specialized assistants under unified privacy
 ## 16. Evidence Base & Medical Safeguards
 
 Saheli's clinical algorithms, educational lessons, and symptom thresholds reference established peer-reviewed protocols:
+
 - **National Health Service (NHS)**: Period health & adolescent cycle guidelines.
 - **American College of Obstetricians and Gynecologists (ACOG)**: Menstruation in adolescents and cycle length definitions.
 - **World Health Organization (WHO)**: Reproductive health and anemia intervention recommendations.
@@ -269,6 +271,7 @@ Saheli organizes navigation into five clear categories:
 ## 20. Getting Started, Development & Quality Gates
 
 ### Prerequisites
+
 - [Bun](https://bun.sh/) (preferred) or [Node.js](https://nodejs.org/) v20+.
 
 ### Installation & Local Development
@@ -306,9 +309,11 @@ bun run build
 ## 21. License, Governance & Disclaimers
 
 ### Open Source License
+
 Saheli Cycle Companion is distributed under the permissive **MIT License**.
 
 ### Emergency Helplines (India)
+
 - **National Emergency Number**: `112`
 - **Ambulance Services**: `108`
 - **Tele-MANAS Mental Health Support**: `14416` / `1800-891-4416`
@@ -316,4 +321,5 @@ Saheli Cycle Companion is distributed under the permissive **MIT License**.
 - **Women Helpline**: `1091` / `181`
 
 ---
-*Saheli — Empowering bodily autonomy, local privacy, and clinical understanding across India.*
+
+_Saheli — Empowering bodily autonomy, local privacy, and clinical understanding across India._
