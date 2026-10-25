@@ -372,7 +372,7 @@ export default function Feedback() {
                 <div className="flex items-center gap-4 rounded-2xl border border-border/80 bg-muted/40 p-3">
                   <img
                     src={formData.screenshotBase64}
-                    alt="Screenshot attachment preview"
+                    alt={t("feedback.screenshotAlt")}
                     className="h-16 w-16 rounded-xl object-cover border border-border"
                   />
                   <div className="flex-1 text-xs">

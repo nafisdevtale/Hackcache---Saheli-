@@ -140,7 +140,7 @@ export const MiniGameOverlay: React.FC<MiniGameOverlayProps> = ({
             </span>
             {streak > 1 && (
               <span className="ml-1 bg-white/25 px-1.5 py-0.5 rounded-full text-[10px]">
-                {streak}x
+                {`${streak}×`}
               </span>
             )}
           </div>

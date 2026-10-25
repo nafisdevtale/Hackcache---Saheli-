@@ -278,15 +278,14 @@ export default function Community() {
                 {identity?.alias || "..."}
               </p>
               <p className="text-[11px] text-muted-foreground leading-relaxed">
-                Your device identity is pseudonymous. No email, phone number, or real identity is
-                attached to your messages.
+                {t("comm.identityPseudonymousDesc")}
               </p>
             </div>
 
             {/* Topic Filter List */}
             <div className="nova-card-elevated p-5 space-y-3">
               <h2 className="font-bold text-xs uppercase tracking-wider text-muted-foreground">
-                Discussion Topics
+                {t("comm.discussionTopics")}
               </h2>
               <div className="flex flex-wrap lg:flex-col gap-1.5">
                 {TOPICS.map((top) => {
@@ -377,15 +376,14 @@ export default function Community() {
                     <WifiOff className="mx-auto h-8 w-8 text-muted-foreground" />
                     <div>
                       <p className="text-sm font-bold text-foreground">
-                        Offline or Local Peer Mode
+                        {t("comm.offlineModeTitle")}
                       </p>
                       <p className="text-xs text-muted-foreground mt-1 max-w-md mx-auto">
-                        Saheli works local-first. When online, peer posts will sync automatically.
-                        You can still view your submissions and draft questions anytime.
+                        {t("comm.offlineModeDesc")}
                       </p>
                     </div>
                     <Btn variant="outline" onClick={loadPosts} className="gap-2 text-xs">
-                      <RefreshCw className="h-3.5 w-3.5" /> Try Reconnecting
+                      <RefreshCw className="h-3.5 w-3.5" /> {t("comm.tryReconnecting")}
                     </Btn>
                   </div>
                 ) : posts.length === 0 ? (
@@ -396,7 +394,7 @@ export default function Community() {
                         "No posts in this topic yet. Be the first to start a conversation!"}
                     </p>
                     <Btn onClick={() => setActiveTab("new_post")} className="text-xs">
-                      Start Discussion
+                      {t("comm.startDiscussion")}
                     </Btn>
                   </div>
                 ) : (

@@ -295,7 +295,7 @@ export default function Ask() {
                   <div className="flex items-center gap-2 text-urgent font-bold text-lg">
                     <HeartHandshake className="h-6 w-6" />
                     <NovaHeading level={2} className="text-urgent">
-                      You Are Not Alone
+                      {t("ask.notAlone")}
                     </NovaHeading>
                   </div>
                   <p className="text-foreground leading-relaxed">{t("ask.selfharm")}</p>
@@ -304,7 +304,7 @@ export default function Ask() {
                       href="tel:14416"
                       className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-primary px-5 font-bold text-primary-foreground shadow-sm hover:opacity-95"
                     >
-                      <Phone className="h-4 w-4" /> Tele-MANAS: 14416
+                      <Phone className="h-4 w-4" /> {t("ask.telemanasBtn")}
                     </a>
                     <a
                       href="tel:112"
@@ -324,8 +324,7 @@ export default function Ask() {
                     {t("ask.none")}
                   </NovaHeading>
                   <NovaText variant="muted" size="xs" className="max-w-md mx-auto">
-                    Try searching with simpler terms like "cramps", "heavy bleeding", "cycle
-                    length", or browse the suggested questions on the left.
+                    {t("ask.noneHint")}
                   </NovaText>
                 </NovaCard>
               )}
@@ -334,7 +333,7 @@ export default function Ask() {
                 <NovaCard variant="elevated" className="p-6 space-y-4">
                   <div className="flex items-center justify-between pb-2 border-b border-border/60">
                     <NovaBadge variant="primary" size="sm">
-                      Verified Clinical Answer
+                      {t("ask.verifiedAnswer")}
                     </NovaBadge>
                     {res.hits.length > 0 && (
                       <span className="text-[11px] text-muted-foreground">
@@ -367,21 +366,23 @@ export default function Ask() {
                     <span>{t("ask.howToUseFaq")}</span>
                   </div>
                   <NovaText variant="muted" size="sm" className="leading-relaxed">
-                    Search above or pick any question from the categories. All answers in this
-                    section are curated by healthcare professionals and available completely offline
-                    without needing an internet connection.
+                    {t("ask.howToUseFaqDesc")}
                   </NovaText>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                     <NovaCard variant="subtle" className="p-4 space-y-1">
-                      <p className="font-bold text-xs text-foreground">100% Offline & Private</p>
+                      <p className="font-bold text-xs text-foreground">
+                        {t("ask.offlinePrivateTitle")}
+                      </p>
                       <NovaText variant="muted" size="xs">
-                        No search queries or reading logs are transmitted outside your phone.
+                        {t("ask.offlinePrivateDesc")}
                       </NovaText>
                     </NovaCard>
                     <NovaCard variant="subtle" className="p-4 space-y-1">
-                      <p className="font-bold text-xs text-foreground">Peer-Reviewed Guidance</p>
+                      <p className="font-bold text-xs text-foreground">
+                        {t("ask.peerReviewedTitle")}
+                      </p>
                       <NovaText variant="muted" size="xs">
-                        Sourced from NHS, WHO, FOGSI, and Ministry of Health (MoHFW) standards.
+                        {t("ask.peerReviewedDesc")}
                       </NovaText>
                     </NovaCard>
                   </div>
@@ -519,7 +520,7 @@ export default function Ask() {
                   {JSON.stringify(getCycleContext(), null, 2)}
                 </pre>
                 <p className="text-[10px] text-muted-foreground italic">
-                  Zero personal identifiers, device tokens, or diary notes are shared.
+                  {t("ask.zeroIdentifiers")}
                 </p>
               </div>
             </NovaDialog>
@@ -563,7 +564,7 @@ export default function Ask() {
                     <div className="rounded-2xl border border-warning/40 bg-warning/10 p-4 text-xs text-foreground space-y-1">
                       <p className="font-bold text-warning flex items-center gap-1.5">
                         <ShieldCheck className="h-4 w-4" />
-                        Verified Offline Fallback Active
+                        {t("ask.offlineFallbackActive")}
                       </p>
                       <p className="text-muted-foreground">
                         {aiRes.error ||
@@ -579,7 +580,7 @@ export default function Ask() {
                         {aiRes.fallback ? "Clinical Library Match" : "Eeve AI Guidance"}
                       </NovaBadge>
                       <span className="text-[10px] text-muted-foreground">
-                        Educational Guidance
+                        {t("ask.educationalGuidance")}
                       </span>
                     </div>
 
@@ -610,11 +611,10 @@ export default function Ask() {
                     <Sparkles className="h-6 w-6" />
                   </div>
                   <NovaHeading level={3} className="text-base">
-                    How can Eeve support you today?
+                    {t("ask.eeveWelcomeTitle")}
                   </NovaHeading>
                   <NovaText variant="muted" size="xs" className="max-w-md mx-auto leading-relaxed">
-                    Ask questions about cycle length, premenstrual symptoms, hygiene practices, or
-                    contraception. Eeve provides empathetic, medically-grounded explanations.
+                    {t("ask.eeveWelcomeDesc")}
                   </NovaText>
                 </NovaCard>
               )}

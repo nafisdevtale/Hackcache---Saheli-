@@ -40,7 +40,7 @@ import { PhaseCards } from "@/components/cycle/PhaseCards.jsx";
 import { QUESTIONNAIRE_CONDITIONS } from "@/content/conditions.js";
 
 export default function Insights() {
-  const { t, fmt, fmtRange, analysis: a, record, prefs, today } = useApp();
+  const { t, fmt, fmtRange, fmtInteger, analysis: a, record, prefs, today } = useApp();
   const [cycleScope, setCycleScope] = useState("recent");
   const [inspectProvenance, setInspectProvenance] = useState(null);
 
@@ -110,7 +110,11 @@ export default function Insights() {
                     {insights.medianCycle ? t("common.days", { n: insights.medianCycle }) : "—"}
                   </p>
                   <p className="text-[11px] font-medium text-muted-foreground mt-0.5">
-                    {t("ins.range")}: {insights.minCycle}–{insights.maxCycle} d
+                    {t("ins.range")}:{" "}
+                    {t("ins.daysRange", {
+                      min: fmtInteger ? fmtInteger(insights.minCycle) : insights.minCycle,
+                      max: fmtInteger ? fmtInteger(insights.maxCycle) : insights.maxCycle,
+                    })}
                   </p>
                 </div>
 
@@ -122,7 +126,11 @@ export default function Insights() {
                     {insights.medianPeriod ? t("common.days", { n: insights.medianPeriod }) : "—"}
                   </p>
                   <p className="text-[11px] font-medium text-muted-foreground mt-0.5">
-                    {t("ins.range")}: {insights.minPeriod}–{insights.maxPeriod} d
+                    {t("ins.range")}:{" "}
+                    {t("ins.daysRange", {
+                      min: fmtInteger ? fmtInteger(insights.minPeriod) : insights.minPeriod,
+                      max: fmtInteger ? fmtInteger(insights.maxPeriod) : insights.maxPeriod,
+                    })}
                   </p>
                 </div>
               </div>
@@ -351,12 +359,12 @@ export default function Insights() {
                     <p className="font-bold">{t("ins.supportHeavyTitle")}</p>
                     {insights.padHourlyDays > 0 && (
                       <p>
-                        • {t("log.padHourly")} ({insights.padHourlyDays} d)
+                        • {t("log.padHourly")} ({t("common.days", { n: insights.padHourlyDays })})
                       </p>
                     )}
                     {insights.bigClotsDays > 0 && (
                       <p>
-                        • {t("log.bigClots")} ({insights.bigClotsDays} d)
+                        • {t("log.bigClots")} ({t("common.days", { n: insights.bigClotsDays })})
                       </p>
                     )}
                     {insights.heavyBleedingProvenance && (
@@ -504,7 +512,7 @@ export default function Insights() {
                       {insights.pain.avgPain}/10
                     </p>
                     <p className="text-[10px] text-muted-foreground">
-                      {insights.pain.daysWithPain} days logged
+                      {insights.pain.daysWithPain} {t("ins.daysLoggedCount")}
                     </p>
                   </div>
                   <div className="rounded-xl bg-card border border-border/70 p-2.5">
@@ -599,8 +607,8 @@ export default function Insights() {
               </div>
 
               <p className="text-[10px] text-muted-foreground/80 pt-1">
-                National Emergency: {EMERGENCY.national} | Ambulance: {EMERGENCY.ambulance} | Mental
-                Health (Tele-MANAS): {EMERGENCY.teleManas}
+                {t("ins.nationalEmergency")} {EMERGENCY.national} | {t("ins.ambulance")}{" "}
+                {EMERGENCY.ambulance} | {t("ins.mentalHealth")} {EMERGENCY.teleManas}
               </p>
             </div>
           </div>
@@ -758,7 +766,9 @@ export default function Insights() {
                     }
                     className="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:underline"
                   >
-                    <span>{pattern.count} cycles</span>
+                    <span>
+                      {pattern.count} {t("ins.cyclesCount")}
+                    </span>
                     <Search className="h-3 w-3" />
                   </button>
                 </div>
@@ -784,7 +794,7 @@ export default function Insights() {
                     </span>
                     {obs.cycleDay && (
                       <span className="text-muted-foreground ms-2 text-[11px]">
-                        (Day {obs.cycleDay})
+                        ({t("ins.dayLabel")} {fmtInteger ? fmtInteger(obs.cycleDay) : obs.cycleDay})
                       </span>
                     )}
                     <span className="text-primary font-semibold ms-2 text-[11px]">

@@ -170,7 +170,7 @@ export default function Diva() {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-card border border-border/60 hover:bg-muted text-xs font-semibold text-muted-foreground transition-all shadow-2xs active:scale-95"
             >
               <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-              <span>{t("diva.privacyTitle", "Privacy Firewall")}</span>
+              <span>{t("diva.privacyFirewall", "Privacy Firewall")}</span>
             </button>
 
             {messages.length > 0 && (
@@ -435,7 +435,7 @@ export default function Diva() {
                                     ) : card.type === "emergency_helplines" ? (
                                       <div className="space-y-1">
                                         <p className="font-bold text-destructive">
-                                          Emergency Helplines:
+                                          {t("diva.emergencyHelplines")}
                                         </p>
                                         {card.helplines?.map((hl, hIdx) => (
                                           <p key={hIdx} className="text-[11px]">
@@ -508,7 +508,7 @@ export default function Diva() {
           disabled={isLoading || !inputValue.trim()}
           leftIcon={<Send className="h-3.5 w-3.5" />}
         >
-          Ask
+          {t("diva.askButton")}
         </NovaButton>
       </form>
 
@@ -516,7 +516,7 @@ export default function Diva() {
       <NovaDialog
         open={activePrivacyModal}
         onClose={() => setActivePrivacyModal(false)}
-        title="Diva Privacy Firewall Guarantees"
+        title={t("diva.privacyTitle")}
         footer={
           <NovaButton
             size="sm"
@@ -524,23 +524,19 @@ export default function Diva() {
             onClick={() => setActivePrivacyModal(false)}
             className="w-full justify-center"
           >
-            Understood
+            {t("diva.understood")}
           </NovaButton>
         }
       >
         <div className="text-xs space-y-2 text-muted-foreground leading-relaxed">
           <p>
-            <strong>1. No Unified Surveillance Profile:</strong> Diva coordinates requests in memory
-            during the active session. It never writes a merged tracking history across health,
-            shopping, and entertainment.
+            <strong>{t("diva.privacyPoint1Title")}</strong> {t("diva.privacyPoint1Desc")}
           </p>
           <p>
-            <strong>2. Health Isolation:</strong> FLASH (Essentials) and INSTINCT (Entertainment)
-            can never read your period dates, symptoms, or health logs.
+            <strong>{t("diva.privacyPoint2Title")}</strong> {t("diva.privacyPoint2Desc")}
           </p>
           <p>
-            <strong>3. Discrete Specialist Memories:</strong> Eeve, FLASH, and INSTINCT maintain
-            strictly separate private storage buckets on your device.
+            <strong>{t("diva.privacyPoint3Title")}</strong> {t("diva.privacyPoint3Desc")}
           </p>
         </div>
       </NovaDialog>

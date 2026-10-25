@@ -25,7 +25,7 @@ import { CalendarEmptyArt } from "@/components/brand/SaheliArt.jsx";
 import { PhaseCards } from "@/components/cycle/PhaseCards.jsx";
 
 export default function Calendar() {
-  const { t, today, lang, record, fmt, saveDay } = useApp();
+  const { t, today, lang, record, fmt, fmtNumber, saveDay } = useApp();
   const [ym, setYm] = useState(() => [Number(today.slice(0, 4)), Number(today.slice(5, 7)) - 1]);
   const [sel, setSel] = useState(today);
   const [quickLogOpen, setQuickLogOpen] = useState(false);
@@ -221,7 +221,7 @@ export default function Calendar() {
                 <div className="flex flex-wrap gap-2 text-[11px] text-muted-foreground pt-0.5">
                   {record.ovulationObservations[sel].testResult !== "none" && (
                     <span className="font-semibold text-primary">
-                      LH:{" "}
+                      {t("phase.lhLabel")}:{" "}
                       {t(
                         `phase.lh${record.ovulationObservations[sel].testResult.charAt(0).toUpperCase() + record.ovulationObservations[sel].testResult.slice(1)}`,
                       )}
@@ -229,13 +229,16 @@ export default function Calendar() {
                   )}
                   {record.ovulationObservations[sel].bbt != null && (
                     <span>
-                      BBT: {record.ovulationObservations[sel].bbt} °
-                      {record.ovulationObservations[sel].bbtUnit || "C"}
+                      {t("phase.bbtLabel")}:{" "}
+                      {fmtNumber
+                        ? fmtNumber(record.ovulationObservations[sel].bbt)
+                        : record.ovulationObservations[sel].bbt}{" "}
+                      °{record.ovulationObservations[sel].bbtUnit || "C"}
                     </span>
                   )}
                   {record.ovulationObservations[sel].cervicalFluid !== "none" && (
                     <span>
-                      Fluid:{" "}
+                      {t("phase.fluidLabel")}:{" "}
                       {t(
                         `phase.fluid${record.ovulationObservations[sel].cervicalFluid.charAt(0).toUpperCase() + record.ovulationObservations[sel].cervicalFluid.slice(1)}`,
                       )}

@@ -5,6 +5,7 @@
 This document certifies the complete multilingual audit and overhaul executed under **Saheli 10.5**. Previous iterations had achieved surface-level dictionary synchronization but suffered from subtle leaks: untranslated interface strings, missing keys in secondary screens, hardcoded English numbers and units, fallback to raw dictionary keys, and lack of real-time bidirectional layout management.
 
 Under Saheli 10.5, the multilingual engine was re-architected from the ground up:
+
 - **Zero Raw Key Leakage**: 100% dictionary key parity across all 13 supported Indian languages (1,805 keys each; 23,465 dictionary entries total).
 - **Source Code Verification**: Automated static extraction audited 153 user-facing components; 975 distinct `t("...")` keys verified with **0 missing keys**.
 - **CLDR Locale Formatting**: Unified numeric, integer, percentage, currency, unit, and date formatting powered by `Intl` standards via `src/lib/locale.js`.
@@ -18,21 +19,21 @@ Under Saheli 10.5, the multilingual engine was re-architected from the ground up
 
 All 13 official languages are fully operational and verified by `bun run i18n:check`:
 
-| Code | Language | Script | Native Endonym | Total Keys | Coverage | Non-Latin Ratio | Contamination |
-|:---:|:---|:---|:---|:---:|:---:|:---:|:---:|
-| `en` | English | Latin | English | 1,805 | 100.0% | 0.0% | 0 |
-| `hi` | Hindi | Devanagari | हिन्दी | 1,805 | 100.0% | 100.0% | 0 |
-| `mr` | Marathi | Devanagari | मराठी | 1,805 | 100.0% | 100.0% | 0 |
-| `bn` | Bengali | Bengali | বাংলা | 1,805 | 100.0% | 99.0% | 0 |
-| `as` | Assamese | Bengali/Assamese | অসমীয়া | 1,805 | 100.0% | 99.0% | 0 |
-| `gu` | Gujarati | Gujarati | ગુજરાતી | 1,805 | 100.0% | 100.0% | 0 |
-| `kn` | Kannada | Kannada | ಕನ್ನಡ | 1,805 | 100.0% | 100.0% | 0 |
-| `ml` | Malayalam | Malayalam | മലയാളം | 1,805 | 100.0% | 100.0% | 0 |
-| `or` | Odia | Odia | ଓଡ଼ିଆ | 1,805 | 100.0% | 99.1% | 0 |
-| `pa` | Punjabi | Gurmukhi | ਪੰਜਾਬੀ | 1,805 | 100.0% | 99.0% | 0 |
-| `ta` | Tamil | Tamil | தமிழ் | 1,805 | 100.0% | 100.0% | 0 |
-| `te` | Telugu | Telugu | తెలుగు | 1,805 | 100.0% | 100.0% | 0 |
-| `ur` | Urdu | Perso-Arabic (RTL) | اردو | 1,805 | 100.0% | 100.0% | 0 |
+| Code | Language  | Script             | Native Endonym | Total Keys | Coverage | Non-Latin Ratio | Contamination |
+| :--: | :-------- | :----------------- | :------------- | :--------: | :------: | :-------------: | :-----------: |
+| `en` | English   | Latin              | English        |   1,805    |  100.0%  |      0.0%       |       0       |
+| `hi` | Hindi     | Devanagari         | हिन्दी         |   1,805    |  100.0%  |     100.0%      |       0       |
+| `mr` | Marathi   | Devanagari         | मराठी          |   1,805    |  100.0%  |     100.0%      |       0       |
+| `bn` | Bengali   | Bengali            | বাংলা          |   1,805    |  100.0%  |      99.0%      |       0       |
+| `as` | Assamese  | Bengali/Assamese   | অসমীয়া        |   1,805    |  100.0%  |      99.0%      |       0       |
+| `gu` | Gujarati  | Gujarati           | ગુજરાતી        |   1,805    |  100.0%  |     100.0%      |       0       |
+| `kn` | Kannada   | Kannada            | ಕನ್ನಡ          |   1,805    |  100.0%  |     100.0%      |       0       |
+| `ml` | Malayalam | Malayalam          | മലയാളം         |   1,805    |  100.0%  |     100.0%      |       0       |
+| `or` | Odia      | Odia               | ଓଡ଼ିଆ          |   1,805    |  100.0%  |      99.1%      |       0       |
+| `pa` | Punjabi   | Gurmukhi           | ਪੰਜਾਬੀ         |   1,805    |  100.0%  |      99.0%      |       0       |
+| `ta` | Tamil     | Tamil              | தமிழ்          |   1,805    |  100.0%  |     100.0%      |       0       |
+| `te` | Telugu    | Telugu             | తెలుగు         |   1,805    |  100.0%  |     100.0%      |       0       |
+| `ur` | Urdu      | Perso-Arabic (RTL) | اردو           |   1,805    |  100.0%  |     100.0%      |       0       |
 
 ---
 
@@ -91,6 +92,7 @@ During the audit, every remaining instance of hardcoded English, missing key fal
 ## 5. Verification Tools & CI Integrity
 
 To prevent future regression, the verification suite incorporates:
+
 - `scripts/i18n-check.js`: Verifies 100% key parity across all 13 dictionaries, non-Latin script coverage, variable interpolation tokens (`{n}`), and scans all `src/**/*.jsx` and `src/**/*.tsx` files for uncatalogued `t("...")` keys.
 - `src/test/saheli-10-5-multilingual-engine.test.tsx`: 15 dedicated unit and integration tests verifying formatting, locale tags, RTL toggles, and component behavior.
 - Real-browser CDP test runner: `scripts/verify-all-languages.js` captures real DOM states and full-viewport screenshots across all supported languages.

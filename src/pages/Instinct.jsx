@@ -88,7 +88,7 @@ import {
 } from "@/lib/instinctRecommender.js";
 
 export default function Instinct() {
-  const { t } = useApp();
+  const { t, fmtInteger } = useApp();
 
   // State
   const [profile, setProfile] = useState(() => loadInstinctProfile());
@@ -260,14 +260,14 @@ export default function Instinct() {
               <button
                 onClick={() => setShowOnboarding(true)}
                 className="p-2 rounded-xl bg-muted/60 text-muted-foreground hover:text-foreground"
-                title="Edit Taste Profile"
+                title={t("instinct.editTasteProfile")}
               >
                 <SlidersHorizontal className="h-4 w-4" />
               </button>
               <button
                 onClick={() => setShowPortability(true)}
                 className="p-2 rounded-xl bg-muted/60 text-muted-foreground hover:text-foreground"
-                title="Data Portability"
+                title={t("instinct.dataPortability")}
               >
                 <Download className="h-4 w-4" />
               </button>
@@ -401,12 +401,14 @@ export default function Instinct() {
             {searchQuery ? (
               <div>
                 <h2 className="text-base font-bold mb-4">
-                  Search Results for "{searchQuery}" ({filteredItems.length})
+                  {t("instinct.searchResultsFor", {
+                    query: searchQuery,
+                    count: fmtInteger ? fmtInteger(filteredItems.length) : filteredItems.length,
+                  })}
                 </h2>
                 {filteredItems.length === 0 ? (
                   <div className="text-center py-16 text-muted-foreground text-xs">
-                    No matching titles found in verified catalogue. Try searching another term or
-                    asking INSTINCT!
+                    {t("instinct.noSearchResults")}
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
@@ -430,8 +432,8 @@ export default function Instinct() {
                 {/* 1. Continue Watching (If any) */}
                 {dashboard.continueWatching.length > 0 && (
                   <DashboardRow
-                    title="Continue Watching"
-                    subtitle="Pick up right where you left off"
+                    title={t("instinct.continueWatching")}
+                    subtitle={t("instinct.continueWatchingSub")}
                     items={dashboard.continueWatching.map((cw) => cw.item)}
                     profile={profile}
                     library={library}
@@ -443,8 +445,8 @@ export default function Instinct() {
 
                 {/* 2. Recommended for You */}
                 <DashboardRow
-                  title="Recommended For You"
-                  subtitle="Trained ranking tailored to your taste profile"
+                  title={t("instinct.recommendedForYou")}
+                  subtitle={t("instinct.recommendedForYouSub")}
                   items={dashboard.recommendedForYou}
                   profile={profile}
                   library={library}
@@ -456,8 +458,8 @@ export default function Instinct() {
                 {/* 3. Because You Liked */}
                 {dashboard.becauseYouLiked.items.length > 0 && (
                   <DashboardRow
-                    title={`Because You Enjoyed "${dashboard.becauseYouLiked.title}"`}
-                    subtitle="Similar storytelling, themes, and tone"
+                    title={`${t("instinct.becauseYouLiked")} "${dashboard.becauseYouLiked.title}"`}
+                    subtitle={t("instinct.becauseYouLikedSub")}
                     items={dashboard.becauseYouLiked.items}
                     profile={profile}
                     library={library}
@@ -469,8 +471,8 @@ export default function Instinct() {
 
                 {/* 4. Hidden Gems */}
                 <DashboardRow
-                  title="Hidden Gems"
-                  subtitle="Exceptional audience acclaim, beyond the mainstream algorithm"
+                  title={t("instinct.hiddenGems")}
+                  subtitle={t("instinct.hiddenGemsSub")}
                   items={dashboard.hiddenGems}
                   profile={profile}
                   library={library}
@@ -481,8 +483,8 @@ export default function Instinct() {
 
                 {/* 5. Trending Now */}
                 <DashboardRow
-                  title="Trending Now"
-                  subtitle="Current popular velocity across streaming networks"
+                  title={t("instinct.trendingNow")}
+                  subtitle={t("instinct.trendingNowSub")}
                   items={dashboard.trendingNow}
                   profile={profile}
                   library={library}
@@ -493,8 +495,8 @@ export default function Instinct() {
 
                 {/* 6. Something Different */}
                 <DashboardRow
-                  title="Something Different"
-                  subtitle="Controlled novelty to expand your cultural horizons"
+                  title={t("instinct.somethingDifferent")}
+                  subtitle={t("instinct.somethingDifferentSub")}
                   items={dashboard.somethingDifferent}
                   profile={profile}
                   library={library}
@@ -505,8 +507,8 @@ export default function Instinct() {
 
                 {/* 7. Explore K-Dramas */}
                 <DashboardRow
-                  title="Explore K-Dramas"
-                  subtitle="Top Korean storytelling, romance, and drama"
+                  title={t("instinct.exploreKdramas")}
+                  subtitle={t("instinct.exploreKdramasSub")}
                   items={dashboard.exploreKdramas}
                   profile={profile}
                   library={library}
@@ -517,8 +519,8 @@ export default function Instinct() {
 
                 {/* 8. Music for You */}
                 <DashboardRow
-                  title="Music For Your Vibe"
-                  subtitle="Relaxing sounds, regional folk, and uplifting melodies"
+                  title={t("instinct.musicForYou")}
+                  subtitle={t("instinct.musicForYouSub")}
                   items={dashboard.musicForYou}
                   profile={profile}
                   library={library}
@@ -538,18 +540,19 @@ export default function Instinct() {
           <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-3xl bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-indigo-500/10 border border-pink-500/20">
               <div>
-                <h2 className="text-lg font-bold">K-Drama Universe</h2>
-                <p className="text-xs text-muted-foreground">
-                  Explore top-rated Korean series, track season and episode progress, and find
-                  authentic Korean dramas.
-                </p>
+                <h2 className="text-lg font-bold">{t("instinct.kdramaUniverse")}</h2>
+                <p className="text-xs text-muted-foreground">{t("instinct.kdramaUniverseDesc")}</p>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-semibold text-muted-foreground">
                   {t("instinct.watching")}:
                 </span>
                 <span className="text-xs font-bold text-primary px-2.5 py-1 rounded-full bg-primary/10">
-                  {Object.keys(library.currentlyWatching).length} Series
+                  {t("instinct.seriesCount", {
+                    n: fmtInteger
+                      ? fmtInteger(Object.keys(library.currentlyWatching).length)
+                      : Object.keys(library.currentlyWatching).length,
+                  })}
                 </span>
               </div>
             </div>
@@ -595,11 +598,8 @@ export default function Instinct() {
           <div className="space-y-6">
             <div className="p-5 rounded-3xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-cyan-500/10 border border-emerald-500/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <h2 className="text-lg font-bold">Music Discovery & Soundscapes</h2>
-                <p className="text-xs text-muted-foreground">
-                  Explore relaxing sufi, regional Indian folk, K-pop, classical piano, and indie
-                  melodies with 30s previews.
-                </p>
+                <h2 className="text-lg font-bold">{t("instinct.musicDiscoveryTitle")}</h2>
+                <p className="text-xs text-muted-foreground">{t("instinct.musicDiscoveryDesc")}</p>
               </div>
               {currentPlayingTrack && (
                 <div className="flex items-center gap-3 bg-card px-4 py-2 rounded-2xl border border-border/80 shadow-sm">
@@ -654,11 +654,11 @@ export default function Instinct() {
                     >
                       {currentPlayingTrack?.id === track.id && isPlayingAudio ? (
                         <>
-                          <Pause className="h-3.5 w-3.5" /> Pause Preview
+                          <Pause className="h-3.5 w-3.5" /> {t("instinct.pausePreview")}
                         </>
                       ) : (
                         <>
-                          <Play className="h-3.5 w-3.5" /> Play Preview
+                          <Play className="h-3.5 w-3.5" /> {t("instinct.playPreview")}
                         </>
                       )}
                     </button>
@@ -714,11 +714,7 @@ export default function Instinct() {
               <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
               <div>
                 <p className="font-bold">{t("instinct.assistantTitle")}</p>
-                <p className="text-muted-foreground">
-                  Ask for recommendations by mood, era, streaming platform, or specific tropes.
-                  Instant on-device privacy guaranteed: INSTINCT has zero access to your cycle or
-                  medical diary.
-                </p>
+                <p className="text-muted-foreground">{t("instinct.assistantPrivacyNote")}</p>
               </div>
             </div>
 
@@ -790,7 +786,7 @@ export default function Instinct() {
 
               {isChatLoading && (
                 <div className="flex items-center gap-2 text-xs text-muted-foreground italic">
-                  <RefreshCw className="h-3 w-3 animate-spin" /> INSTINCT is thinking...
+                  <RefreshCw className="h-3 w-3 animate-spin" /> {t("instinct.isThinking")}
                 </div>
               )}
             </div>
@@ -811,7 +807,7 @@ export default function Instinct() {
                 className="flex-1 px-4 py-3 rounded-2xl bg-card border border-border/80 text-xs focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
               />
               <Btn type="submit" size="sm" disabled={!chatInput.trim() || isChatLoading}>
-                Ask
+                {t("instinct.askBtn")}
               </Btn>
             </form>
           </div>
@@ -1061,7 +1057,9 @@ function MediaDetailModal({
                   <span>{item.rating}/10</span>
                   {item.voteCount && (
                     <span className="text-[10px] text-muted-foreground font-normal">
-                      ({item.voteCount.toLocaleString()} votes)
+                      {t("instinct.votesCount", {
+                        n: fmtInteger ? fmtInteger(item.voteCount) : item.voteCount,
+                      })}
                     </span>
                   )}
                 </div>
@@ -1097,8 +1095,11 @@ function MediaDetailModal({
               )}
               {item.episodes && (
                 <p>
-                  <strong>{t("instinct.metaEpisodes")}:</strong> {item.episodes} episodes (
-                  {item.seasons || 1} seasons)
+                  <strong>{t("instinct.metaEpisodes")}:</strong>{" "}
+                  {t("instinct.episodesSeasons", {
+                    episodes: fmtInteger ? fmtInteger(item.episodes) : item.episodes,
+                    seasons: fmtInteger ? fmtInteger(item.seasons || 1) : item.seasons || 1,
+                  })}
                 </p>
               )}
               {item.cast && item.cast.length > 0 && (
@@ -1124,7 +1125,7 @@ function MediaDetailModal({
         {item.synopsis && (
           <div className="space-y-1">
             <h4 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">
-              Synopsis
+              {t("instinct.synopsisTitle")}
             </h4>
             <p className="text-xs text-foreground/90 leading-relaxed">{item.synopsis}</p>
           </div>
@@ -1134,7 +1135,7 @@ function MediaDetailModal({
         {item.streamingServices && item.streamingServices.length > 0 && (
           <div className="space-y-2">
             <h4 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">
-              Where to Watch / Listen in India
+              {t("instinct.whereToWatchTitle")}
             </h4>
             <div className="flex flex-wrap gap-2">
               {item.streamingServices.map((srvId) => {
@@ -1165,7 +1166,7 @@ function MediaDetailModal({
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-600/10 text-red-600 hover:bg-red-600 hover:text-white transition-all text-xs font-bold"
             >
-              <Play className="h-3.5 w-3.5" /> Watch Official Trailer
+              <Play className="h-3.5 w-3.5" /> {t("instinct.watchOfficialTrailer")}
             </a>
           </div>
         )}
@@ -1173,7 +1174,7 @@ function MediaDetailModal({
         {/* Grounded Recommendation Explanation */}
         <div className="p-3.5 rounded-2xl bg-muted/40 border border-border/60 space-y-1.5">
           <h4 className="text-[11px] font-bold text-muted-foreground uppercase flex items-center gap-1.5">
-            <Sparkles className="h-3 w-3 text-primary" /> Why Recommended For You
+            <Sparkles className="h-3 w-3 text-primary" /> {t("instinct.whyRecommendedTitle")}
           </h4>
           <ul className="text-xs space-y-1">
             {explanations.map((exp, i) => (
@@ -1213,7 +1214,7 @@ function MediaDetailModal({
               className="gap-1.5 text-xs text-rose-500"
             >
               <Heart className="h-3.5 w-3.5" fill={isFavourite ? "currentColor" : "none"} />
-              Favourite
+              {t("instinct.favourite")}
             </Btn>
 
             {/* Completed Toggle */}
@@ -1227,7 +1228,7 @@ function MediaDetailModal({
               className="gap-1.5 text-xs"
             >
               <Check className="h-3.5 w-3.5" />
-              {isCompleted ? "Completed" : "Mark Completed"}
+              {isCompleted ? t("instinct.completed") : t("instinct.markCompleted")}
             </Btn>
 
             {/* Feedback: Like / Dislike / Not Interested */}
@@ -1241,7 +1242,7 @@ function MediaDetailModal({
                   "p-2 rounded-xl transition-all",
                   isLiked ? "bg-primary/20 text-primary" : "text-muted-foreground hover:bg-muted",
                 )}
-                title="Like"
+                title={t("instinct.like")}
               >
                 <ThumbsUp className="h-3.5 w-3.5" />
               </button>
@@ -1257,7 +1258,7 @@ function MediaDetailModal({
                     ? "bg-red-500/20 text-red-500"
                     : "text-muted-foreground hover:bg-muted",
                 )}
-                title="Dislike"
+                title={t("instinct.dislike")}
               >
                 <ThumbsDown className="h-3.5 w-3.5" />
               </button>
@@ -1269,7 +1270,7 @@ function MediaDetailModal({
                   onClose();
                 }}
                 className="p-2 rounded-xl text-muted-foreground hover:bg-muted hover:text-red-500 transition-all"
-                title="Not Interested"
+                title={t("instinct.notInterested")}
               >
                 <EyeOff className="h-3.5 w-3.5" />
               </button>
@@ -1307,7 +1308,7 @@ function MediaDetailModal({
         {/* Similar Titles Carousel */}
         {similarItems.length > 0 && (
           <div className="space-y-3 pt-4 border-t border-border/40">
-            <h4 className="text-xs font-bold tracking-tight">More Like This</h4>
+            <h4 className="text-xs font-bold tracking-tight">{t("instinct.moreLikeThis")}</h4>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {similarItems.map((sim) => (
                 <div
@@ -1391,7 +1392,7 @@ function EpisodeTrackerModal({ drama, library, onClose, onUpdateLibrary }) {
               <div className="flex justify-between text-xs font-semibold">
                 <span>{t("instinct.season")}</span>
                 <span className="text-primary font-bold">
-                  {season} of {totalSeasons}
+                  {`${fmtInteger ? fmtInteger(season) : season} / ${fmtInteger ? fmtInteger(totalSeasons) : totalSeasons}`}
                 </span>
               </div>
               <input
@@ -1409,7 +1410,7 @@ function EpisodeTrackerModal({ drama, library, onClose, onUpdateLibrary }) {
             <div className="flex justify-between text-xs font-semibold">
               <span>{t("instinct.episode")}</span>
               <span className="text-primary font-bold">
-                {episode} of {totalEpisodes}
+                {`${fmtInteger ? fmtInteger(episode) : episode} / ${fmtInteger ? fmtInteger(totalEpisodes) : totalEpisodes}`}
               </span>
             </div>
             <input
@@ -1429,16 +1430,16 @@ function EpisodeTrackerModal({ drama, library, onClose, onUpdateLibrary }) {
               onChange={(e) => setIsCompleted(e.target.checked)}
               className="rounded accent-primary"
             />
-            <span className="text-xs font-semibold">Mark Entire Series as Completed</span>
+            <span className="text-xs font-semibold">{t("instinct.markSeriesCompleted")}</span>
           </label>
         </div>
 
         <div className="flex items-center justify-end gap-2 pt-3 border-t border-border/40">
           <Btn variant="outline" size="sm" onClick={onClose}>
-            Cancel
+            {t("common.cancel")}
           </Btn>
           <Btn size="sm" onClick={handleSave}>
-            Save Progress
+            {t("instinct.saveProgress")}
           </Btn>
         </div>
       </div>
@@ -1504,17 +1505,16 @@ function LibraryView({ library, profile, onUpdateLibrary, onSelectMedia, onOpenP
         </div>
 
         <Btn variant="outline" size="sm" onClick={onOpenPortability} className="gap-2 text-xs">
-          <Download className="h-3.5 w-3.5" /> Export / Import Data
+          <Download className="h-3.5 w-3.5" /> {t("instinct.exportImportData")}
         </Btn>
       </div>
 
       {tabItems.length === 0 ? (
         <div className="text-center py-20 rounded-3xl border border-dashed border-border/80 p-8 space-y-2">
           <Bookmark className="h-8 w-8 text-muted-foreground/40 mx-auto" />
-          <h4 className="text-sm font-bold">Your {libraryTab} is empty</h4>
+          <h4 className="text-sm font-bold">{t("instinct.libraryEmpty", { tab: libraryTab })}</h4>
           <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-            Discover movies, series, K-dramas, or music and save them to organize your entertainment
-            journey.
+            {t("instinct.libraryEmptyDesc")}
           </p>
         </div>
       ) : (
@@ -1595,15 +1595,13 @@ function TasteOnboardingModal({ profile, onClose, onSave }) {
 
         <div className="space-y-1">
           <h2 className="text-lg font-bold">{t("instinct.personalizeTaste")}</h2>
-          <p className="text-xs text-muted-foreground">
-            Tune your preferences for movies, series, K-dramas, and music. 100% on-device.
-          </p>
+          <p className="text-xs text-muted-foreground">{t("instinct.tunePreferencesDesc")}</p>
         </div>
 
         {/* 1. Age & Content Suitability */}
         <div className="space-y-2">
           <label className="text-xs font-bold uppercase text-muted-foreground">
-            Content Suitability
+            {t("instinct.contentSuitability")}
           </label>
           <div className="grid grid-cols-3 gap-2">
             {[
@@ -1631,7 +1629,7 @@ function TasteOnboardingModal({ profile, onClose, onSave }) {
         {/* 2. Streaming Subscriptions */}
         <div className="space-y-2">
           <label className="text-xs font-bold uppercase text-muted-foreground">
-            Your Active Streaming Services
+            {t("instinct.activeStreaming")}
           </label>
           <div className="flex flex-wrap gap-2">
             {STREAMING_PLATFORMS.map((srv) => {
@@ -1659,7 +1657,7 @@ function TasteOnboardingModal({ profile, onClose, onSave }) {
         {/* 3. Preferred Languages */}
         <div className="space-y-2">
           <label className="text-xs font-bold uppercase text-muted-foreground">
-            Languages You Enjoy
+            {t("instinct.languagesYouEnjoy")}
           </label>
           <div className="flex flex-wrap gap-2">
             {[
@@ -1696,7 +1694,7 @@ function TasteOnboardingModal({ profile, onClose, onSave }) {
         {/* 4. Genres */}
         <div className="space-y-2">
           <label className="text-xs font-bold uppercase text-muted-foreground">
-            Favorite Genres & Themes
+            {t("instinct.favoriteGenresThemes")}
           </label>
           <div className="flex flex-wrap gap-1.5">
             {[
@@ -1739,10 +1737,10 @@ function TasteOnboardingModal({ profile, onClose, onSave }) {
 
         <div className="flex justify-end gap-2 pt-4 border-t border-border/40">
           <Btn variant="outline" size="sm" onClick={onClose}>
-            Cancel
+            {t("common.cancel")}
           </Btn>
           <Btn size="sm" onClick={handleFinish}>
-            Save Preferences
+            {t("instinct.savePreferences")}
           </Btn>
         </div>
       </div>
@@ -1810,9 +1808,7 @@ function DataPortabilityModal({ library, onClose, onImport }) {
 
         <div>
           <h2 className="text-lg font-bold">{t("instinct.dataPortability")}</h2>
-          <p className="text-xs text-muted-foreground">
-            Export your watchlist, favorites, and music to keep, or restore them anytime.
-          </p>
+          <p className="text-xs text-muted-foreground">{t("instinct.dataPortabilityDesc")}</p>
         </div>
 
         {/* Export Options */}
@@ -1822,10 +1818,10 @@ function DataPortabilityModal({ library, onClose, onImport }) {
           </h4>
           <div className="flex gap-2">
             <Btn size="sm" variant="outline" onClick={handleDownloadJson} className="gap-2 text-xs">
-              <Download className="h-3.5 w-3.5" /> Download JSON
+              <Download className="h-3.5 w-3.5" /> {t("instinct.downloadJson")}
             </Btn>
             <Btn size="sm" variant="outline" onClick={handleDownloadCsv} className="gap-2 text-xs">
-              <Download className="h-3.5 w-3.5" /> Download CSV
+              <Download className="h-3.5 w-3.5" /> {t("instinct.downloadCsv")}
             </Btn>
           </div>
         </div>
@@ -1834,7 +1830,7 @@ function DataPortabilityModal({ library, onClose, onImport }) {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h4 className="text-xs font-bold uppercase text-muted-foreground">
-              Import Into Library
+              {t("instinct.importIntoLibrary")}
             </h4>
             <div className="flex gap-1 text-[11px]">
               <button
@@ -1880,7 +1876,7 @@ function DataPortabilityModal({ library, onClose, onImport }) {
             disabled={!importText.trim()}
             className="w-full"
           >
-            Apply Import
+            {t("instinct.applyImport")}
           </Btn>
         </div>
       </div>

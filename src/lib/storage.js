@@ -65,7 +65,9 @@ export const DEFAULT_PREFS = {
   theme: "system", // "light" | "dark" | "system"
   readAloud: false,
   discreet: false,
-  nativeNumerals: false,
+  latinNumerals: false, // Default is false: non-English languages automatically use native script numerals
+  useLatinNumerals: false,
+  nativeNumerals: true,
 };
 let memoryStore = {};
 

@@ -49,6 +49,8 @@ import {
   LOCALE_MAP,
   formatNumber as formatNumLocale,
   formatDate as formatDtLocale,
+  getLocaleTag,
+  shouldUseNativeNumerals,
 } from "./locale.js";
 
 export { LOCALE_MAP };
@@ -61,12 +63,14 @@ export function formatDate(s, lang = "en", opts = { day: "numeric", month: "shor
   if (!isValidDate(s)) return "";
   return formatDtLocale(s, lang, opts);
 }
-export function formatRange(a, b, lang = "en") {
-  if (a === b) return formatDate(a, lang);
-  return `${formatDate(a, lang)} – ${formatDate(b, lang)}`;
+export function formatRange(a, b, lang = "en", opts = {}) {
+  if (a === b) return formatDate(a, lang, opts);
+  return `${formatDate(a, lang, opts)} – ${formatDate(b, lang, opts)}`;
 }
-export function monthTitle(y, m0, lang = "en") {
-  return new Intl.DateTimeFormat(loc(lang), {
+export function monthTitle(y, m0, lang = "en", options = {}) {
+  const useNative = shouldUseNativeNumerals(lang, options);
+  const tag = getLocaleTag(lang, useNative);
+  return new Intl.DateTimeFormat(tag, {
     month: "long",
     year: "numeric",
     timeZone: "UTC",

@@ -81,7 +81,7 @@ const ICON_MAP = {
 };
 
 export default function SelfCare() {
-  const { t, L, record, today, safety, prefs } = useApp();
+  const { t, L, record, today, safety, prefs, fmtInteger } = useApp();
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeModalProg, setActiveModalProg] = useState(null);
   const [activeBreathingModal, setActiveBreathingModal] = useState(false);
@@ -278,7 +278,7 @@ export default function SelfCare() {
                 </NovaButton>
               )}
               <NovaText variant="muted" size="xs" className="italic">
-                Optional comfort practice • Free & non-mandatory
+                {t("selfcare.optionalComfortNotice")}
               </NovaText>
             </div>
           </NovaCard>
@@ -370,7 +370,12 @@ export default function SelfCare() {
                     {/* Header tags: Category & Favorite */}
                     <div className="flex items-center justify-between">
                       <NovaBadge variant="neutral" size="sm">
-                        {t(`selfcare.cat.${prog.category}`)} • {prog.suggestedDuration}m
+                        {t(`selfcare.cat.${prog.category}`)} •{" "}
+                        {t("selfcare.durationMinutes", {
+                          n: fmtInteger
+                            ? fmtInteger(prog.suggestedDuration)
+                            : prog.suggestedDuration,
+                        })}
                       </NovaBadge>
                       <button
                         type="button"
@@ -577,7 +582,7 @@ export default function SelfCare() {
                       : "bg-card text-foreground border border-border/60 hover:bg-muted",
                   )}
                 >
-                  {mins}m
+                  {t("selfcare.durationMinutes", { n: fmtInteger ? fmtInteger(mins) : mins })}
                 </button>
               ))}
               <button
@@ -709,7 +714,10 @@ export default function SelfCare() {
                               {prog ? t(prog.titleKey) : h.id}
                             </span>
                             <span className="text-[10px] text-muted-foreground">
-                              {new Date(h.completedAt).toLocaleDateString()} • {h.durationMinutes}m
+                              {new Date(h.completedAt).toLocaleDateString()} •{" "}
+                              {t("selfcare.durationMinutes", {
+                                n: fmtInteger ? fmtInteger(h.durationMinutes) : h.durationMinutes,
+                              })}
                             </span>
                           </div>
                           <span className="text-[10px] font-semibold text-secondary-strong bg-secondary/20 px-2 py-0.5 rounded-full flex items-center gap-1">
@@ -731,7 +739,7 @@ export default function SelfCare() {
                   {t("selfcare.mycare.notes")}
                 </NovaHeading>
                 <NovaText variant="muted" size="xs" className="mt-0.5">
-                  Private comfort observations stored strictly on this device.
+                  {t("selfcare.privateNotesDesc")}
                 </NovaText>
               </div>
 
@@ -783,7 +791,11 @@ export default function SelfCare() {
               <div className="space-y-0.5">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
                   {t(`selfcare.cat.${activeModalProg.category}`)} •{" "}
-                  {activeModalProg.suggestedDuration}m
+                  {t("selfcare.durationMinutes", {
+                    n: fmtInteger
+                      ? fmtInteger(activeModalProg.suggestedDuration)
+                      : activeModalProg.suggestedDuration,
+                  })}
                 </span>
                 <h2 id="player-title" className="font-display font-bold text-lg text-foreground">
                   {t(activeModalProg.titleKey)}
@@ -872,12 +884,11 @@ export default function SelfCare() {
                   {t("selfcare.prog.completed")}!
                 </h3>
                 <p className="text-xs text-muted-foreground max-w-sm mx-auto leading-relaxed">
-                  Saved to your personal wellness diary. Remember to rest, hydrate, and take time
-                  for yourself.
+                  {t("selfcare.completedDesc")}
                 </p>
                 <div className="pt-2">
                   <Btn onClick={closeProgrammeModal} className="text-xs font-bold min-h-10 px-6">
-                    Close Routine
+                    {t("selfcare.closeRoutine")}
                   </Btn>
                 </div>
               </div>
@@ -974,7 +985,10 @@ function BreathingGuideModal({ onClose }) {
                   : "scale-90 bg-gradient-to-tr from-muted to-muted/60 border border-border/60",
               )}
             >
-              <span className="font-mono font-extrabold text-2xl text-foreground">{seconds}s</span>
+              <span className="font-mono font-extrabold text-2xl text-foreground">
+                {seconds}
+                {t("selfcare.secUnit")}
+              </span>
             </div>
             <p className="mt-4 font-display font-bold text-base text-foreground animate-fade-in">
               {phase === "inhale" ? t("selfcare.breathing.inhale") : t("selfcare.breathing.exhale")}
@@ -1010,7 +1024,7 @@ function BreathingGuideModal({ onClose }) {
             ) : (
               <VolumeX className="h-3.5 w-3.5" />
             )}
-            Sound Chime
+            {t("selfcare.soundChime")}
           </button>
 
           <button

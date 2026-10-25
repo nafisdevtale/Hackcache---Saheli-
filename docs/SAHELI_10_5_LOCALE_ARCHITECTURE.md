@@ -59,12 +59,14 @@ export const NATIVE_NUMBERING_SYSTEMS = {
 ### 2.3 Numbering Extension Strategy
 
 Modern browser `Intl.NumberFormat` engines for languages like `bn-IN`, `mr-IN`, and `ur-IN` default to native script digits unless explicitly overridden. To provide predictable, user-configurable behavior:
+
 - When `useNativeNumerals: false` (default), the locale tag appends `-u-nu-latn` (e.g. `bn-IN-u-nu-latn`), ensuring standard digits `1, 2, 3...`
 - When `useNativeNumerals: true`, the locale tag appends `-u-nu-${system}` (e.g. `bn-IN-u-nu-beng`), rendering native digits `১, ২, ৩...`
 
 ### 2.4 Cached Formatters
 
 `src/lib/locale.js` provides high-performance cached formatters:
+
 - `formatNumber(value, lang, options)`: Arbitrary precision numbers.
 - `formatInteger(value, lang, options)`: Truncated/rounded integers for cycle days, counts, and streak metrics.
 - `formatPercent(value, lang, options)`: Formatted percentage metrics for cycle regularity and symptom frequency.
@@ -81,6 +83,7 @@ Modern browser `Intl.NumberFormat` engines for languages like `bn-IN`, `mr-IN`, 
 ## 3. Bidirectional (RTL) Layout System
 
 Urdu (`ur`) requires full Right-to-Left (RTL) layout mirroring:
+
 - `isRTL(lang)` returns `true` for `"ur"`.
 - When switching to Urdu, `document.documentElement.dir` is set to `"rtl"`, and `document.documentElement.lang` is set to `"ur"`.
 - CSS layouts use logical properties where possible (`margin-inline-start`, `padding-inline-end`, `inset-inline-start`).

@@ -54,10 +54,12 @@ describe("Saheli 10.5 — Authoritative Multilingual Engine", () => {
       }
     });
 
-    it("formats integers with standard Latin digits by default", () => {
+    it("formats integers with native digits by default for non-English, and Latin digits for English", () => {
       expect(formatInteger(14, "en")).toBe("14");
-      expect(formatInteger(28, "hi")).toBe("28");
+      expect(formatInteger(28, "hi")).toBe("२८");
+      expect(formatInteger(28, "bn")).toBe("২৮");
       expect(formatInteger(1000, "en")).toBe("1,000");
+      expect(formatInteger(28, "hi", { latinNumerals: true })).toBe("28");
     });
 
     it("formats numbers with native Indic digits when nativeNumerals is requested", () => {

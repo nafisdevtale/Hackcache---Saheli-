@@ -11,21 +11,21 @@ To ensure transparent reporting, Saheli distinguishes between **Technical Key Pa
 
 ## 2. 13-Language Verification Status
 
-| Language | Code | Family | Script | Total Keys | Key Parity | Script Fidelity | Quality Tier | Automated Test Status |
-|:---|:---:|:---|:---|:---:|:---:|:---:|:---:|:---:|
-| **English** | `en` | Indo-European | Latin | 1,805 | 100.0% | 100.0% | Tier 1 (Baseline) | PASS |
-| **Hindi** | `hi` | Indo-Aryan | Devanagari | 1,805 | 100.0% | 100.0% | Tier 1 (Primary) | PASS |
-| **Marathi** | `mr` | Indo-Aryan | Devanagari | 1,805 | 100.0% | 100.0% | Tier 1 (Primary) | PASS |
-| **Bengali** | `bn` | Indo-Aryan | Bengali | 1,805 | 100.0% | 99.0% | Tier 1 (Primary) | PASS |
-| **Tamil** | `ta` | Dravidian | Tamil | 1,805 | 100.0% | 100.0% | Tier 1 (Primary) | PASS |
-| **Telugu** | `te` | Dravidian | Telugu | 1,805 | 100.0% | 100.0% | Tier 1 (Primary) | PASS |
-| **Urdu** | `ur` | Indo-Aryan | Arabic/Nastaliq (RTL) | 1,805 | 100.0% | 100.0% | Tier 1 (RTL Primary) | PASS |
-| **Gujarati** | `gu` | Indo-Aryan | Gujarati | 1,805 | 100.0% | 100.0% | Tier 2 (Validated) | PASS |
-| **Kannada** | `kn` | Dravidian | Kannada | 1,805 | 100.0% | 100.0% | Tier 2 (Validated) | PASS |
-| **Malayalam** | `ml` | Dravidian | Malayalam | 1,805 | 100.0% | 100.0% | Tier 2 (Validated) | PASS |
-| **Punjabi** | `pa` | Indo-Aryan | Gurmukhi | 1,805 | 100.0% | 99.0% | Tier 2 (Validated) | PASS |
-| **Odia** | `or` | Indo-Aryan | Odia | 1,805 | 100.0% | 99.1% | Tier 2 (Validated) | PASS |
-| **Assamese** | `as` | Indo-Aryan | Assamese | 1,805 | 100.0% | 99.0% | Tier 2 (Validated) | PASS |
+| Language      | Code | Family        | Script                | Total Keys | Key Parity | Script Fidelity |     Quality Tier     | Automated Test Status |
+| :------------ | :--: | :------------ | :-------------------- | :--------: | :--------: | :-------------: | :------------------: | :-------------------: |
+| **English**   | `en` | Indo-European | Latin                 |   1,805    |   100.0%   |     100.0%      |  Tier 1 (Baseline)   |         PASS          |
+| **Hindi**     | `hi` | Indo-Aryan    | Devanagari            |   1,805    |   100.0%   |     100.0%      |   Tier 1 (Primary)   |         PASS          |
+| **Marathi**   | `mr` | Indo-Aryan    | Devanagari            |   1,805    |   100.0%   |     100.0%      |   Tier 1 (Primary)   |         PASS          |
+| **Bengali**   | `bn` | Indo-Aryan    | Bengali               |   1,805    |   100.0%   |      99.0%      |   Tier 1 (Primary)   |         PASS          |
+| **Tamil**     | `ta` | Dravidian     | Tamil                 |   1,805    |   100.0%   |     100.0%      |   Tier 1 (Primary)   |         PASS          |
+| **Telugu**    | `te` | Dravidian     | Telugu                |   1,805    |   100.0%   |     100.0%      |   Tier 1 (Primary)   |         PASS          |
+| **Urdu**      | `ur` | Indo-Aryan    | Arabic/Nastaliq (RTL) |   1,805    |   100.0%   |     100.0%      | Tier 1 (RTL Primary) |         PASS          |
+| **Gujarati**  | `gu` | Indo-Aryan    | Gujarati              |   1,805    |   100.0%   |     100.0%      |  Tier 2 (Validated)  |         PASS          |
+| **Kannada**   | `kn` | Dravidian     | Kannada               |   1,805    |   100.0%   |     100.0%      |  Tier 2 (Validated)  |         PASS          |
+| **Malayalam** | `ml` | Dravidian     | Malayalam             |   1,805    |   100.0%   |     100.0%      |  Tier 2 (Validated)  |         PASS          |
+| **Punjabi**   | `pa` | Indo-Aryan    | Gurmukhi              |   1,805    |   100.0%   |      99.0%      |  Tier 2 (Validated)  |         PASS          |
+| **Odia**      | `or` | Indo-Aryan    | Odia                  |   1,805    |   100.0%   |      99.1%      |  Tier 2 (Validated)  |         PASS          |
+| **Assamese**  | `as` | Indo-Aryan    | Assamese              |   1,805    |   100.0%   |      99.0%      |  Tier 2 (Validated)  |         PASS          |
 
 ---
 

@@ -48,6 +48,7 @@ import {
   formatRelativeTime,
   formatList,
   isRTL,
+  shouldUseNativeNumerals,
 } from "./lib/locale.js";
 import { translate, pick } from "./i18n/index.js";
 import {
@@ -91,36 +92,46 @@ export function AppProvider({ children }) {
 
   const t = useCallback((k, v) => translate(prefs.lang, k, v), [prefs.lang]);
   const L = useCallback((o) => pick(prefs.lang, o), [prefs.lang]);
-  const fmt = useCallback((d, o) => formatDate(d, prefs.lang, o), [prefs.lang]);
-  const fmtRange = useCallback((a, b) => formatRange(a, b, prefs.lang), [prefs.lang]);
+  const isNativeNum = shouldUseNativeNumerals(prefs.lang, prefs);
+  const fmt = useCallback(
+    (d, o) => formatDate(d, prefs.lang, { useNativeNumerals: isNativeNum, ...o }),
+    [prefs.lang, isNativeNum],
+  );
+  const fmtRange = useCallback(
+    (a, b, o) => formatRange(a, b, prefs.lang, { useNativeNumerals: isNativeNum, ...o }),
+    [prefs.lang, isNativeNum],
+  );
   const fmtNumber = useCallback(
-    (n, o) => formatNumber(n, prefs.lang, { useNativeNumerals: prefs.nativeNumerals, ...o }),
-    [prefs.lang, prefs.nativeNumerals],
+    (n, o) => formatNumber(n, prefs.lang, { useNativeNumerals: isNativeNum, ...o }),
+    [prefs.lang, isNativeNum],
   );
   const fmtInteger = useCallback(
-    (n, o) => formatInteger(n, prefs.lang, { useNativeNumerals: prefs.nativeNumerals, ...o }),
-    [prefs.lang, prefs.nativeNumerals],
+    (n, o) => formatInteger(n, prefs.lang, { useNativeNumerals: isNativeNum, ...o }),
+    [prefs.lang, isNativeNum],
   );
   const fmtPercent = useCallback(
-    (n, o) => formatPercent(n, prefs.lang, { useNativeNumerals: prefs.nativeNumerals, ...o }),
-    [prefs.lang, prefs.nativeNumerals],
+    (n, o) => formatPercent(n, prefs.lang, { useNativeNumerals: isNativeNum, ...o }),
+    [prefs.lang, isNativeNum],
   );
   const fmtCurrency = useCallback(
     (n, cur, o) =>
       formatCurrency(n, cur || "INR", prefs.lang, {
-        useNativeNumerals: prefs.nativeNumerals,
+        useNativeNumerals: isNativeNum,
         ...o,
       }),
-    [prefs.lang, prefs.nativeNumerals],
+    [prefs.lang, isNativeNum],
   );
   const fmtUnit = useCallback(
-    (n, u, o) => formatUnit(n, u, prefs.lang, { useNativeNumerals: prefs.nativeNumerals, ...o }),
-    [prefs.lang, prefs.nativeNumerals],
+    (n, u, o) => formatUnit(n, u, prefs.lang, { useNativeNumerals: isNativeNum, ...o }),
+    [prefs.lang, isNativeNum],
   );
-  const fmtTime = useCallback((v, o) => formatTime(v, prefs.lang, o), [prefs.lang]);
+  const fmtTime = useCallback(
+    (v, o) => formatTime(v, prefs.lang, { useNativeNumerals: isNativeNum, ...o }),
+    [prefs.lang, isNativeNum],
+  );
   const fmtRelative = useCallback(
-    (v, u, o) => formatRelativeTime(v, u, prefs.lang, o),
-    [prefs.lang],
+    (v, u, o) => formatRelativeTime(v, u, prefs.lang, { useNativeNumerals: isNativeNum, ...o }),
+    [prefs.lang, isNativeNum],
   );
   const fmtList = useCallback((items, o) => formatList(items, prefs.lang, o), [prefs.lang]);
 

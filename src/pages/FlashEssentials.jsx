@@ -634,8 +634,8 @@ export default function FlashEssentials() {
                                 </div>
                               )}
                               <div className="pt-1 text-[10px] text-muted-foreground italic">
-                                Price verified: {p.priceTimestamp || p.lastPriceCheck} · Merchant:{" "}
-                                {p.merchant || p.retailer}
+                                {t("flash.priceVerified")} {p.priceTimestamp || p.lastPriceCheck} ·{" "}
+                                {t("flash.merchant")} {p.merchant || p.retailer}
                               </div>
 
                               {/* Local-only private recommendation feedback */}
@@ -648,7 +648,7 @@ export default function FlashEssentials() {
                                     type="button"
                                     onClick={() => handleFeedback(p.productId || p.id, true)}
                                     className="p-1 rounded-md text-muted-foreground hover:text-emerald-600 hover:bg-emerald-500/10 transition-colors cursor-pointer"
-                                    title="Yes"
+                                    title={t("common.yes")}
                                   >
                                     <ThumbsUp className="h-3.5 w-3.5" />
                                   </button>
@@ -656,7 +656,7 @@ export default function FlashEssentials() {
                                     type="button"
                                     onClick={() => handleFeedback(p.productId || p.id, false)}
                                     className="p-1 rounded-md text-muted-foreground hover:text-rose-600 hover:bg-rose-500/10 transition-colors cursor-pointer"
-                                    title="No"
+                                    title={t("common.no")}
                                   >
                                     <ThumbsDown className="h-3.5 w-3.5" />
                                   </button>
@@ -931,8 +931,8 @@ export default function FlashEssentials() {
                   {t("flash.merchantTitle")}
                 </span>
                 <p className="text-muted-foreground bg-muted/30 p-2.5 rounded-xl">
-                  {selectedProductDetails.merchant || selectedProductDetails.retailer} · Last
-                  verified:{" "}
+                  {selectedProductDetails.merchant || selectedProductDetails.retailer} ·{" "}
+                  {t("flash.lastVerified")}{" "}
                   {selectedProductDetails.priceTimestamp || selectedProductDetails.lastPriceCheck}
                 </p>
               </div>

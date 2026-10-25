@@ -169,8 +169,8 @@ export function translate(lang, key, vars) {
   if (vars && typeof s === "string") {
     for (const k of Object.keys(vars)) {
       const rawVal = vars[k];
-      const formatted = typeof rawVal === "number" ? formatNumber(rawVal, lang) : String(rawVal);
-      s = s.split(`{${k}}`).join(formatted);
+      const valStr = rawVal !== undefined && rawVal !== null ? String(rawVal) : "";
+      s = s.split(`{${k}}`).join(valStr);
     }
   }
   return s;

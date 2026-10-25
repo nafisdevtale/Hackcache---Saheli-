@@ -93,13 +93,36 @@ const relativeTimeFormatCache = new Map();
 const listFormatCache = new Map();
 
 /**
- * Returns BCP 47 locale tag, optionally appending the native numbering system
+ * Resolves whether native script digits should be used for a given language and preference set.
+ * Rule (Saheli 10.6):
+ * - English always uses Latin numerals ("latn").
+ * - Non-English languages default to their native decimal digit system ("deva", "beng", "gujr", etc.).
+ * - If user explicitly set latinNumerals: true or useLatinNumerals: true or nativeNumerals: false, Latin numerals are used.
  */
-export function getLocaleTag(lang = "en", useNativeNumerals = false) {
+export function shouldUseNativeNumerals(lang = "en", optionsOrPrefs = {}) {
+  if (lang === "en") return false;
+  if (optionsOrPrefs.latinNumerals === true || optionsOrPrefs.useLatinNumerals === true)
+    return false;
+  if (optionsOrPrefs.nativeNumerals === false || optionsOrPrefs.useNativeNumerals === false)
+    return false;
+  if (optionsOrPrefs.nativeNumerals === true || optionsOrPrefs.useNativeNumerals === true)
+    return true;
+  return true;
+}
+
+/**
+ * Returns BCP 47 locale tag, appending the native numbering system by default when useNativeNumerals is true
+ */
+export function getLocaleTag(lang = "en", useNativeNumerals = undefined) {
   const baseTag = LOCALE_MAP[lang] || "en-IN";
-  if (!useNativeNumerals) return baseTag;
-  const nu = NATIVE_NUMBERING_SYSTEMS[lang];
-  return nu && nu !== "latn" ? `${baseTag}-u-nu-${nu}` : baseTag;
+  if (useNativeNumerals === false) {
+    return `${baseTag}-u-nu-latn`;
+  }
+  if (useNativeNumerals === true) {
+    const nu = NATIVE_NUMBERING_SYSTEMS[lang];
+    return nu && nu !== "latn" ? `${baseTag}-u-nu-${nu}` : baseTag;
+  }
+  return baseTag;
 }
 
 /**
@@ -124,8 +147,8 @@ export function formatNumber(value, lang = "en", options = {}) {
   const num = typeof value === "number" ? value : Number(value);
   if (isNaN(num)) return String(value);
 
-  const useNative = Boolean(options.useNativeNumerals ?? options.nativeNumerals);
-  const tag = useNative ? getLocaleTag(lang, true) : `${getLocaleTag(lang, false)}-u-nu-latn`;
+  const useNative = shouldUseNativeNumerals(lang, options);
+  const tag = getLocaleTag(lang, useNative);
   const cacheKey = `${tag}_${JSON.stringify(options)}`;
 
   let formatter = numberFormatCache.get(cacheKey);
@@ -261,7 +284,8 @@ export function formatDate(value, lang = "en", options = { day: "numeric", month
   }
   if (!date || isNaN(date.getTime())) return String(value);
 
-  const tag = getLocaleTag(lang);
+  const useNative = shouldUseNativeNumerals(lang, options);
+  const tag = getLocaleTag(lang, useNative);
   const cacheKey = `${tag}_${JSON.stringify(options)}`;
   let formatter = dateTimeFormatCache.get(cacheKey);
   if (!formatter) {
@@ -292,7 +316,8 @@ export function formatTime(value, lang = "en", options = { hour: "numeric", minu
   }
   if (!date || isNaN(date.getTime())) return String(value);
 
-  const tag = getLocaleTag(lang);
+  const useNative = shouldUseNativeNumerals(lang, options);
+  const tag = getLocaleTag(lang, useNative);
   const cacheKey = `${tag}_time_${JSON.stringify(options)}`;
   let formatter = dateTimeFormatCache.get(cacheKey);
   if (!formatter) {
@@ -318,7 +343,8 @@ export function formatRelativeTime(
   const num = typeof value === "number" ? value : Number(value);
   if (isNaN(num)) return "";
 
-  const tag = getLocaleTag(lang);
+  const useNative = shouldUseNativeNumerals(lang, options);
+  const tag = getLocaleTag(lang, useNative);
   const cacheKey = `${tag}_${unit}_${JSON.stringify(options)}`;
   let formatter = relativeTimeFormatCache.get(cacheKey);
   if (!formatter) {
@@ -337,7 +363,8 @@ export function formatRelativeTime(
  */
 export function formatList(items, lang = "en", options = { style: "long", type: "conjunction" }) {
   if (!Array.isArray(items) || items.length === 0) return "";
-  const tag = getLocaleTag(lang);
+  const useNative = shouldUseNativeNumerals(lang, options);
+  const tag = getLocaleTag(lang, useNative);
   const cacheKey = `${tag}_list_${JSON.stringify(options)}`;
   let formatter = listFormatCache.get(cacheKey);
   if (!formatter) {

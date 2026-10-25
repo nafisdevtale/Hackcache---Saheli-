@@ -1,10 +1,23 @@
 // Lightweight accessible SVG bar chart. Values are also printed as text.
+import { useApp } from "@/App.jsx";
+import { translate } from "@/i18n/index.js";
+
 export function BarChart({ data = [], title, refLines = [], summary = "" }) {
+  let t;
+  try {
+    const app = useApp();
+    t = app?.t || ((k) => translate("en", k));
+  } catch {
+    t = (k) => translate("en", k);
+  }
   if (!data || data.length === 0) {
     return (
       <figure className="py-4 text-center text-sm text-muted-foreground">
         <p>{title}</p>
-        <figcaption className="sr-only">{title}: No data recorded yet.</figcaption>
+        <figcaption className="sr-only">
+          {title ? `${title}: ` : ""}
+          {t("common.noDataRecorded")}
+        </figcaption>
       </figure>
     );
   }

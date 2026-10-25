@@ -624,30 +624,40 @@ export default function Settings() {
               })}
             </div>
 
-            {/* Native Indic Numerals Toggle */}
-            <div className="pt-3 border-t border-border/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <div className="space-y-0.5">
-                <span className="text-xs font-bold text-foreground">
-                  {t("settings.nativeNumerals") || "Native Script Numerals"}
-                </span>
-                <p className="text-[11px] text-muted-foreground leading-relaxed">
-                  {t("settings.nativeNumeralsDesc") ||
-                    "Display numbers in your regional Indic script instead of standard Latin digits"}
-                </p>
-                <p className="text-xs font-semibold text-primary pt-1">
-                  {t("settings.nativeNumeralsPreview", {
-                    n: fmtInteger ? fmtInteger(14) : 14,
-                    total: fmtInteger ? fmtInteger(28) : 28,
-                  }) ||
-                    `Preview: Day ${fmtInteger ? fmtInteger(14) : 14} of ${fmtInteger ? fmtInteger(28) : 28}`}
-                </p>
+            {/* Optional Latin Numerals Compatibility Toggle */}
+            {prefs.lang !== "en" && (
+              <div className="pt-3 border-t border-border/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="space-y-0.5">
+                  <span className="text-xs font-bold text-foreground">
+                    {t("settings.latinNumerals") || "Standard Latin Digits (0-9)"}
+                  </span>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    {t("settings.latinNumeralsDesc") ||
+                      "Display numbers using standard Latin digits instead of your language's native script"}
+                  </p>
+                  <p className="text-xs font-semibold text-primary pt-1">
+                    {t("settings.nativeNumeralsPreview", {
+                      n: fmtInteger ? fmtInteger(14) : 14,
+                      total: fmtInteger ? fmtInteger(28) : 28,
+                    }) ||
+                      `Preview: Day ${fmtInteger ? fmtInteger(14) : 14} of ${fmtInteger ? fmtInteger(28) : 28}`}
+                  </p>
+                </div>
+                <Toggle
+                  checked={Boolean(
+                    prefs.latinNumerals || prefs.useLatinNumerals || prefs.nativeNumerals === false,
+                  )}
+                  onChange={(checked) =>
+                    setPrefs({
+                      latinNumerals: checked,
+                      useLatinNumerals: checked,
+                      nativeNumerals: !checked,
+                    })
+                  }
+                  id="latin-numerals-toggle"
+                />
               </div>
-              <Toggle
-                checked={Boolean(prefs.nativeNumerals)}
-                onChange={(checked) => setPrefs({ nativeNumerals: checked })}
-                id="native-numerals-toggle"
-              />
-            </div>
+            )}
           </div>
 
           {/* Theme, Text Size & Accessibility */}
@@ -1058,11 +1068,9 @@ export default function Settings() {
             {/* Quick Log Favorites Selection */}
             <div className="space-y-2 pt-2 border-t border-border/50">
               <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                ★ {t("today.upcomingReminders")} (Quick Log)
+                ★ {t("today.upcomingReminders")} ({t("settings.quickLogTitle")})
               </span>
-              <p className="text-[11px] text-muted-foreground">
-                Select your favorite symptoms for instant 1-tap logging.
-              </p>
+              <p className="text-[11px] text-muted-foreground">{t("settings.quickLogDesc")}</p>
               <div className="flex flex-wrap gap-1.5">
                 {SYMPTOMS.filter((s) => !s.safety).map((s) => {
                   const isFav = (record.settings?.quickLogFavorites || []).includes(s.id);
@@ -1138,7 +1146,7 @@ export default function Settings() {
                           type="button"
                           onClick={() => removeCustomSymptom(cs.id)}
                           className="text-muted-foreground hover:text-destructive p-1"
-                          title="Delete"
+                          title={t("common.delete")}
                         >
                           ×
                         </button>

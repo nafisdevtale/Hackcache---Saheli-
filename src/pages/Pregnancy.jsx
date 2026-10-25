@@ -53,7 +53,7 @@ export default function Pregnancy() {
       <div className="space-y-6 max-w-xl mx-auto py-4">
         <div className="border-b border-border/60 pb-3">
           <span className="text-xs font-bold uppercase tracking-wider text-primary">
-            Maternity Care
+            {t("preg.badge")}
           </span>
           <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
             {t("preg.title")}
@@ -142,7 +142,7 @@ export default function Pregnancy() {
       {/* Header */}
       <div className="border-b border-border/60 pb-3">
         <span className="text-xs font-bold uppercase tracking-wider text-primary">
-          Maternity Tracking
+          {t("preg.activeBadge")}
         </span>
         <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
           {t("preg.title")}

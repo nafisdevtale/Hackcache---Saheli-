@@ -478,7 +478,7 @@ export default function LogDay() {
                   max={24}
                   step={0.5}
                   value={form.sleep ?? ""}
-                  placeholder="e.g. 7.5"
+                  placeholder={t("log.sleepPh")}
                   onChange={(e) => set({ sleep: e.target.value === "" ? null : e.target.value })}
                   className={inputCls}
                 />
@@ -500,7 +500,7 @@ export default function LogDay() {
             {/* Optional Ovulation Observations */}
             <div className="rounded-2xl border border-secondary/30 bg-secondary/5 p-4 space-y-3">
               <span className="font-bold text-xs text-foreground uppercase tracking-wider flex items-center gap-1.5">
-                ✨ {t("phase.ovulationCardTitle")} (Optional)
+                ✨ {t("phase.ovulationCardTitle")} ({t("common.optional")})
               </span>
 
               {/* LH Test */}

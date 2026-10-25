@@ -574,7 +574,7 @@ export default function Today() {
                       {t("selfcare.subtitle")}
                     </p>
                     <span className="inline-block rounded-full bg-secondary text-secondary-foreground border border-secondary-strong/20 px-2.5 py-0.5 text-[10px] font-bold">
-                      Soundscapes • Breathing • Relief
+                      {t("today.selfCarePills")}
                     </span>
                   </div>
                 </div>
@@ -590,7 +590,7 @@ export default function Today() {
           {/* ========================================================================= */}
           {/* TIER 4: AI INTELLIGENCE SUITE (Diva Orchestrator + Specialists)           */}
           {/* ========================================================================= */}
-          <section aria-label="AI Intelligence Suite" className="space-y-3">
+          <section aria-label={t("today.ariaAiSuite")} className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <NovaAgentBadge agent="diva" size="sm" showLabel={false} />
@@ -642,7 +642,7 @@ export default function Today() {
                   <NovaAgentBadge agent="eeve" size="sm" showLabel={false} />
                   <div>
                     <h4 className="text-xs font-bold text-foreground group-hover:text-period">
-                      EEVE
+                      {t("agent.eeve.name")}
                     </h4>
                     <p className="text-[11px] text-muted-foreground">{t("nav.ask")}</p>
                   </div>
@@ -658,7 +658,7 @@ export default function Today() {
                   <NovaAgentBadge agent="flash" size="sm" showLabel={false} />
                   <div>
                     <h4 className="text-xs font-bold text-foreground group-hover:text-emerald-700 dark:group-hover:text-emerald-400">
-                      FLASH
+                      {t("agent.flash.name")}
                     </h4>
                     <p className="text-[11px] text-muted-foreground">{t("nav.flash")}</p>
                   </div>
@@ -674,7 +674,7 @@ export default function Today() {
                   <NovaAgentBadge agent="instinct" size="sm" showLabel={false} />
                   <div>
                     <h4 className="text-xs font-bold text-foreground group-hover:text-indigo-700 dark:group-hover:text-indigo-400">
-                      INSTINCT
+                      {t("agent.instinct.name")}
                     </h4>
                     <p className="text-[11px] text-muted-foreground">{t("nav.instinct")}</p>
                   </div>
@@ -687,7 +687,7 @@ export default function Today() {
           {/* ========================================================================= */}
           {/* TIER 5: CYCLE PHASE TRACKER & NOTICES                                      */}
           {/* ========================================================================= */}
-          <section aria-label="Cycle Phase Tracking">
+          <section aria-label={t("today.ariaCycleTracking")}>
             <PhaseCards />
           </section>
 

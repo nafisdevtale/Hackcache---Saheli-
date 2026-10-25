@@ -112,7 +112,7 @@ export default function Discover() {
             <button
               type="button"
               onClick={() => setSearchQuery("")}
-              aria-label="Clear search"
+              aria-label={t("aria.clearSearch")}
               className="absolute end-3.5 top-3 text-muted-foreground hover:text-foreground cursor-pointer"
             >
               <X className="h-4 w-4" />
@@ -126,7 +126,7 @@ export default function Discover() {
           <div className="relative min-w-0 flex-1">
             <div
               role="tablist"
-              aria-label="Article categories"
+              aria-label={t("aria.articleCategories")}
               className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none touch-pan-x"
             >
               {DISCOVER_CATEGORIES.map((cat) => {

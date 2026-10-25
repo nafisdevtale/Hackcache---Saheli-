@@ -13,18 +13,18 @@
 
 ## 2. Fulfillment of Mandatory Criteria
 
-| # | Criterion | Required Behavior | Audit Verification | Status |
-|:---:|:---|:---|:---|:---:|
-| 1 | **Authoritative Locale Engine** | Selected language governs every application label without mixed-language leaks | Scanned 153 components, 0 missing keys, 0 raw key leaks | **PASS** |
-| 2 | **Instant Language Switching** | Language changes update UI immediately without page reload or loss of state | Managed via React Context & `setPrefs`, verified in CDP test runner | **PASS** |
-| 3 | **Locale-Aware Formatting** | Numbers, dates, times, currency, and percentages formatted via standard CLDR APIs | `src/lib/locale.js` provides cached `Intl` formatters with Indic numeral toggle | **PASS** |
-| 4 | **Full RTL Support** | Urdu (`ur`) displays with true right-to-left layout, flipped navigation, and RTL attributes | `<html lang="ur" dir="rtl">` dynamically set; mirrored navigation dock | **PASS** |
-| 5 | **Medical Safety Guardrails** | Deterministic under-18 and irregular cycle safeguards operate identically across all languages | Triage rules and teen notices preserved and localized in all 13 languages | **PASS** |
-| 6 | **Virtual Companion Localisation**| All 15 pet definitions, stage anchors, and care actions localized | `TalkingPetStage` anchors and action bars fully translated in all 13 dictionaries | **PASS** |
-| 7 | **Multi-Agent AI Specialization** | Diva, Eeve, FLASH, and INSTINCT respond in the selected language | Server endpoints receive and enforce `locale` parameter in prompts | **PASS** |
-| 8 | **Local-First Privacy** | Records remain in IndexedDB; no telemetry or unapproved network requests | Zero telemetry, zero external translation calls at runtime | **PASS** |
-| 9 | **Browser Verification Matrix** | Real-browser rendering and visual proof across all 13 languages | 14 screenshots captured in `docs/screenshots/saheli-10-5/` | **PASS** |
-| 10 | **Regression Prevention** | Complete test coverage ensuring zero regressions across all prior milestones | Full suite passing: 571 tests across 49 files (100% pass rate) | **PASS** |
+|  #  | Criterion                          | Required Behavior                                                                              | Audit Verification                                                                |  Status  |
+| :-: | :--------------------------------- | :--------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------- | :------: |
+|  1  | **Authoritative Locale Engine**    | Selected language governs every application label without mixed-language leaks                 | Scanned 153 components, 0 missing keys, 0 raw key leaks                           | **PASS** |
+|  2  | **Instant Language Switching**     | Language changes update UI immediately without page reload or loss of state                    | Managed via React Context & `setPrefs`, verified in CDP test runner               | **PASS** |
+|  3  | **Locale-Aware Formatting**        | Numbers, dates, times, currency, and percentages formatted via standard CLDR APIs              | `src/lib/locale.js` provides cached `Intl` formatters with Indic numeral toggle   | **PASS** |
+|  4  | **Full RTL Support**               | Urdu (`ur`) displays with true right-to-left layout, flipped navigation, and RTL attributes    | `<html lang="ur" dir="rtl">` dynamically set; mirrored navigation dock            | **PASS** |
+|  5  | **Medical Safety Guardrails**      | Deterministic under-18 and irregular cycle safeguards operate identically across all languages | Triage rules and teen notices preserved and localized in all 13 languages         | **PASS** |
+|  6  | **Virtual Companion Localisation** | All 15 pet definitions, stage anchors, and care actions localized                              | `TalkingPetStage` anchors and action bars fully translated in all 13 dictionaries | **PASS** |
+|  7  | **Multi-Agent AI Specialization**  | Diva, Eeve, FLASH, and INSTINCT respond in the selected language                               | Server endpoints receive and enforce `locale` parameter in prompts                | **PASS** |
+|  8  | **Local-First Privacy**            | Records remain in IndexedDB; no telemetry or unapproved network requests                       | Zero telemetry, zero external translation calls at runtime                        | **PASS** |
+|  9  | **Browser Verification Matrix**    | Real-browser rendering and visual proof across all 13 languages                                | 14 screenshots captured in `docs/screenshots/saheli-10-5/`                        | **PASS** |
+| 10  | **Regression Prevention**          | Complete test coverage ensuring zero regressions across all prior milestones                   | Full suite passing: 571 tests across 49 files (100% pass rate)                    | **PASS** |
 
 ---
 
