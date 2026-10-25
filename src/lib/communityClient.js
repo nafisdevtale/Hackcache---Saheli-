@@ -136,6 +136,7 @@ export async function deleteAllCommunityData() {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       author_hash: identity.hash,
+      author_secret: identity.secret,
     }),
   });
 

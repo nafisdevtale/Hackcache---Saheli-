@@ -90,24 +90,46 @@ function persistReports(store: Map<string, FeedbackReport>): boolean {
   }
 }
 
-function getMaintainerSecret(): string | null {
-  if (process.env.SAHELI_MAINTAINER_KEY?.trim()) {
-    return process.env.SAHELI_MAINTAINER_KEY.trim();
+function cleanEnvValue(val?: string): string {
+  if (!val) return "";
+  let trimmed = val.trim();
+  if (
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+  ) {
+    trimmed = trimmed.slice(1, -1).trim();
   }
-  if (process.env.NODE_ENV === "production") {
-    return null; // Strictly no hardcoded fallback in production
-  }
-  return "saheli-dev-maintainer-key-2026";
+  return trimmed;
 }
 
-async function persistToSupabaseIfConfigured(report: FeedbackReport): Promise<boolean> {
-  const supabaseUrl = process.env.SUPABASE_URL?.trim().replace(/\/+$/, "");
-  const serviceKey = (
+export function isFeedbackDatabaseConfigured(): boolean {
+  const url = cleanEnvValue(process.env.SUPABASE_URL);
+  const key = cleanEnvValue(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY);
+  return Boolean(url && key);
+}
+
+function getMaintainerSecret(): string | null {
+  if (process.env.SAHELI_MAINTAINER_KEY?.trim()) {
+    return cleanEnvValue(process.env.SAHELI_MAINTAINER_KEY);
+  }
+  // In test environment, allow mock test suite key if unset
+  if (process.env.NODE_ENV === "test") {
+    return "saheli-dev-maintainer-key-2026";
+  }
+  // Strictly no hardcoded administrative fallback credentials in any live environment
+  return null;
+}
+
+async function persistToSupabaseIfConfigured(
+  report: FeedbackReport,
+): Promise<{ success: boolean; error?: string }> {
+  const supabaseUrl = cleanEnvValue(process.env.SUPABASE_URL).replace(/\/+$/, "");
+  const serviceKey = cleanEnvValue(
     process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.SUPABASE_ANON_KEY ||
-    process.env.SUPABASE_KEY
-  )?.trim();
-  if (!supabaseUrl || !serviceKey) return false;
+      process.env.SUPABASE_ANON_KEY ||
+      process.env.SUPABASE_KEY,
+  );
+  if (!supabaseUrl || !serviceKey) return { success: false, error: "Database not configured" };
   try {
     const dbPayload = {
       id: report.id,
@@ -131,13 +153,17 @@ async function persistToSupabaseIfConfigured(report: FeedbackReport): Promise<bo
         apikey: serviceKey,
         Authorization: `Bearer ${serviceKey}`,
         "Content-Type": "application/json",
-        Prefer: "return=minimal",
+        Prefer: "return=representation",
       },
       body: JSON.stringify(dbPayload),
     });
-    return res.ok;
-  } catch {
-    return false;
+    if (res.ok) {
+      return { success: true };
+    }
+    const errText = await res.text();
+    return { success: false, error: errText };
+  } catch (err: unknown) {
+    return { success: false, error: err instanceof Error ? err.message : "Database fetch failed" };
   }
 }
 
@@ -229,50 +255,46 @@ export async function handleFeedbackRequest(req: Request): Promise<Response> {
     }
 
     let report = reportsStore.get(id);
-    if (!report && process.env.SUPABASE_URL) {
+    const supabaseUrl = cleanEnvValue(process.env.SUPABASE_URL).replace(/\/+$/, "");
+    const serviceKey = cleanEnvValue(
+      process.env.SUPABASE_SERVICE_ROLE_KEY ||
+        process.env.SUPABASE_ANON_KEY ||
+        process.env.SUPABASE_KEY,
+    );
+    if (!report && supabaseUrl && serviceKey) {
       try {
-        const supabaseUrl = process.env.SUPABASE_URL.trim().replace(/\/+$/, "");
-        const serviceKey = (
-          process.env.SUPABASE_SERVICE_ROLE_KEY ||
-          process.env.SUPABASE_ANON_KEY ||
-          process.env.SUPABASE_KEY
-        )?.trim();
-        if (serviceKey) {
-          const res = await fetch(
-            `${supabaseUrl}/rest/v1/feedback_reports?id=eq.${encodeURIComponent(id)}`,
-            {
-              headers: {
-                apikey: serviceKey,
-                Authorization: `Bearer ${serviceKey}`,
-              },
+        const res = await fetch(
+          `${supabaseUrl}/rest/v1/feedback_reports?id=eq.${encodeURIComponent(id)}`,
+          {
+            headers: {
+              apikey: serviceKey,
+              Authorization: `Bearer ${serviceKey}`,
             },
-          );
-          if (res.ok) {
-            const rows = (await res.json()) as Array<Record<string, unknown>>;
-            if (rows && rows[0]) {
-              const row = rows[0];
-              report = {
-                id: String(row.id),
-                category: String(row.category),
-                title: String(row.title),
-                description: String(row.description),
-                stepsToReproduce: row.steps_to_reproduce
-                  ? String(row.steps_to_reproduce)
-                  : undefined,
-                expectedBehaviour: row.expected_behaviour
-                  ? String(row.expected_behaviour)
-                  : undefined,
-                actualBehaviour: row.actual_behaviour ? String(row.actual_behaviour) : undefined,
-                severity: (row.severity as any) || "medium",
-                appVersion: row.app_version ? String(row.app_version) : undefined,
-                browserInfo: row.browser_info ? String(row.browser_info) : undefined,
-                contact: row.contact ? String(row.contact) : undefined,
-                hasScreenshot: Boolean(row.has_screenshot),
-                createdAt: String(row.created_at || new Date().toISOString()),
-                status: (row.status as any) || "received",
-              };
-              reportsStore.set(report.id, report);
-            }
+          },
+        );
+        if (res.ok) {
+          const rows = (await res.json()) as Array<Record<string, unknown>>;
+          if (rows && rows[0]) {
+            const row = rows[0];
+            report = {
+              id: String(row.id),
+              category: String(row.category),
+              title: String(row.title),
+              description: String(row.description),
+              stepsToReproduce: row.steps_to_reproduce ? String(row.steps_to_reproduce) : undefined,
+              expectedBehaviour: row.expected_behaviour
+                ? String(row.expected_behaviour)
+                : undefined,
+              actualBehaviour: row.actual_behaviour ? String(row.actual_behaviour) : undefined,
+              severity: (row.severity as any) || "medium",
+              appVersion: row.app_version ? String(row.app_version) : undefined,
+              browserInfo: row.browser_info ? String(row.browser_info) : undefined,
+              contact: row.contact ? String(row.contact) : undefined,
+              hasScreenshot: Boolean(row.has_screenshot),
+              createdAt: String(row.created_at || new Date().toISOString()),
+              status: (row.status as any) || "received",
+            };
+            reportsStore.set(report.id, report);
           }
         }
       } catch {}
@@ -319,6 +341,46 @@ export async function handleFeedbackRequest(req: Request): Promise<Response> {
         JSON.stringify({ ok: false, error: "Unauthorized. Valid maintainer key required." }),
         { status: 401, headers: { "Content-Type": "application/json" } },
       );
+    }
+
+    const supabaseUrl = cleanEnvValue(process.env.SUPABASE_URL).replace(/\/+$/, "");
+    const serviceKey = cleanEnvValue(
+      process.env.SUPABASE_SERVICE_ROLE_KEY ||
+        process.env.SUPABASE_ANON_KEY ||
+        process.env.SUPABASE_KEY,
+    );
+    if (supabaseUrl && serviceKey) {
+      try {
+        const res = await fetch(`${supabaseUrl}/rest/v1/feedback_reports?order=created_at.desc`, {
+          headers: {
+            apikey: serviceKey,
+            Authorization: `Bearer ${serviceKey}`,
+          },
+        });
+        if (res.ok) {
+          const rows = (await res.json()) as Array<Record<string, unknown>>;
+          for (const row of rows) {
+            reportsStore.set(String(row.id), {
+              id: String(row.id),
+              category: String(row.category),
+              title: String(row.title),
+              description: String(row.description),
+              stepsToReproduce: row.steps_to_reproduce ? String(row.steps_to_reproduce) : undefined,
+              expectedBehaviour: row.expected_behaviour
+                ? String(row.expected_behaviour)
+                : undefined,
+              actualBehaviour: row.actual_behaviour ? String(row.actual_behaviour) : undefined,
+              severity: (row.severity as any) || "medium",
+              appVersion: row.app_version ? String(row.app_version) : undefined,
+              browserInfo: row.browser_info ? String(row.browser_info) : undefined,
+              contact: row.contact ? String(row.contact) : undefined,
+              hasScreenshot: Boolean(row.has_screenshot),
+              createdAt: String(row.created_at || new Date().toISOString()),
+              status: (row.status as any) || "received",
+            });
+          }
+        }
+      } catch {}
     }
 
     const allReports = Array.from(reportsStore.values()).sort(
@@ -461,10 +523,26 @@ export async function handleFeedbackRequest(req: Request): Promise<Response> {
 
     reportsStore.set(reportId, report);
     const persistedToDisk = persistReports(reportsStore);
-    const persistedToSupabase = await persistToSupabaseIfConfigured(report);
+    const isDbConfigured = isFeedbackDatabaseConfigured();
+    let persistedToSupabase = false;
 
-    // If disk write failed and Supabase is not available or failed in production
-    if (!persistedToDisk && !persistedToSupabase && process.env.NODE_ENV === "production") {
+    if (isDbConfigured) {
+      const dbResult = await persistToSupabaseIfConfigured(report);
+      persistedToSupabase = dbResult.success;
+      if (!persistedToSupabase) {
+        // Fails closed if database is configured but save failed: do NOT return false success receipt
+        reportsStore.delete(reportId);
+        return new Response(
+          JSON.stringify({
+            ok: false,
+            error:
+              "Durable database storage could not confirm report receipt. Your draft was not discarded; please try again.",
+            details: process.env.NODE_ENV !== "production" ? dbResult.error : undefined,
+          }),
+          { status: 502, headers: { "Content-Type": "application/json" } },
+        );
+      }
+    } else if (!persistedToDisk) {
       reportsStore.delete(reportId);
       return new Response(
         JSON.stringify({
@@ -481,6 +559,7 @@ export async function handleFeedbackRequest(req: Request): Promise<Response> {
         ok: true,
         reportId,
         createdAt,
+        durableStorage: isDbConfigured ? "supabase" : "disk",
         message: "Your report has been successfully transmitted and acknowledged by the server.",
       }),
       { status: 200, headers: { "Content-Type": "application/json" } },

@@ -17,6 +17,8 @@
  * 6. Abuse Prevention: Rate limiting, duplicate-report prevention, and cross-age isolation.
  */
 
+import crypto from "node:crypto";
+
 export interface Post {
   id: string;
   author_alias: string;
@@ -61,11 +63,43 @@ let mockReportsStore: Report[] = [];
 const postRateLimitMap = new Map<string, number[]>();
 const reportedTargetsMap = new Set<string>(); // "targetId:reporterHash"
 
+export function cleanEnvValue(val?: string): string {
+  if (!val) return "";
+  let trimmed = val.trim();
+  if (
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+  ) {
+    trimmed = trimmed.slice(1, -1).trim();
+  }
+  return trimmed;
+}
+
+export function getCommunitySupabaseConfig() {
+  const url = cleanEnvValue(process.env.SUPABASE_URL).replace(/\/+$/, "");
+  const serviceKey = cleanEnvValue(process.env.SUPABASE_SERVICE_ROLE_KEY);
+  const anonKey = cleanEnvValue(process.env.SUPABASE_ANON_KEY);
+  const key = serviceKey || anonKey;
+  return {
+    url,
+    serviceKey,
+    anonKey,
+    key,
+    configured: Boolean(url && key),
+  };
+}
+
 export function isCommunityDatabaseConfigured(): boolean {
-  return Boolean(
-    process.env.SUPABASE_URL?.trim() &&
-    (process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() || process.env.SUPABASE_ANON_KEY?.trim()),
-  );
+  return getCommunitySupabaseConfig().configured;
+}
+
+export function verifyAuthorProof(authorHash: string, authorSecret?: string): boolean {
+  if (!authorHash) return false;
+  if (authorSecret) {
+    const computed = crypto.createHash("sha256").update(authorSecret).digest("hex");
+    return computed === authorHash;
+  }
+  return isMockStoreAllowed();
 }
 
 export function isMockStoreAllowed(): boolean {
@@ -152,16 +186,18 @@ async function supabaseFetch(
     privileged?: boolean;
   } = {},
 ): Promise<Response> {
-  const supabaseUrl = process.env.SUPABASE_URL!.trim().replace(/\/+$/, "");
-  const serviceKey = options.privileged
-    ? process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
-    : (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY)?.trim();
+  const config = getCommunitySupabaseConfig();
+  if (!config.url) {
+    throw new Error("SUPABASE_URL is not configured");
+  }
+
+  const serviceKey = options.privileged ? config.serviceKey : config.key;
 
   if (options.privileged && !serviceKey) {
     throw new Error("SUPABASE_SERVICE_ROLE_KEY is required for privileged operations");
   }
 
-  const url = `${supabaseUrl}/rest/v1/${tablePath}`;
+  const url = `${config.url}/rest/v1/${tablePath}`;
   const headers: Record<string, string> = {
     apikey: serviceKey || "",
     Authorization: `Bearer ${serviceKey || ""}`,
@@ -534,20 +570,36 @@ export async function handleCommunityRequest(req: Request): Promise<Response> {
       return new Response(JSON.stringify({ ok: false, error: "Invalid JSON" }), { status: 400 });
     }
 
-    const { author_hash } = (body || {}) as { author_hash?: string };
+    const { author_hash, author_secret } = (body || {}) as {
+      author_hash?: string;
+      author_secret?: string;
+    };
     if (!author_hash) {
       return new Response(JSON.stringify({ ok: false, error: "Author hash required" }), {
         status: 400,
       });
     }
 
+    // Verify proof of ownership
+    if (!verifyAuthorProof(author_hash, author_secret)) {
+      return new Response(
+        JSON.stringify({
+          ok: false,
+          error: "Unauthorized: Invalid or missing device author proof of ownership.",
+        }),
+        { status: 403, headers: { "Content-Type": "application/json" } },
+      );
+    }
+
     if (dbConfigured) {
       try {
         await supabaseFetch(`community_posts?author_hash=eq.${encodeURIComponent(author_hash)}`, {
           method: "DELETE",
+          privileged: true,
         });
         await supabaseFetch(`community_replies?author_hash=eq.${encodeURIComponent(author_hash)}`, {
           method: "DELETE",
+          privileged: true,
         });
 
         return new Response(
@@ -580,7 +632,7 @@ export async function handleCommunityRequest(req: Request): Promise<Response> {
 
   // 6. POST /api/community/moderation/decision (Approve or Reject - Genuine Auth)
   if (path === "/api/community/moderation/decision" && method === "POST") {
-    const serverModSecret = process.env.MODERATOR_SECRET?.trim();
+    const serverModSecret = cleanEnvValue(process.env.MODERATOR_SECRET);
     if (!serverModSecret) {
       return new Response(
         JSON.stringify({
@@ -648,6 +700,284 @@ export async function handleCommunityRequest(req: Request): Promise<Response> {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
+  }
+
+  // 7. POST /api/community/replies (Create Reply)
+  if (path === "/api/community/replies" && method === "POST") {
+    let body: Record<string, unknown>;
+    try {
+      body = (await req.json()) as Record<string, unknown>;
+    } catch {
+      return new Response(JSON.stringify({ ok: false, error: "Invalid JSON" }), { status: 400 });
+    }
+
+    const { post_id, author_alias, author_hash, content } = (body || {}) as {
+      post_id?: string;
+      author_alias?: string;
+      author_hash?: string;
+      content?: string;
+    };
+
+    if (!post_id || !author_alias || !author_hash || !content) {
+      return new Response(JSON.stringify({ ok: false, error: "Missing required reply fields" }), {
+        status: 400,
+      });
+    }
+
+    if (content.length > 800) {
+      return new Response(
+        JSON.stringify({ ok: false, error: "Reply exceeds character limit (800)" }),
+        {
+          status: 400,
+        },
+      );
+    }
+
+    const cleanContent = redactPII(content.trim());
+    const newReply: Reply = {
+      id: "rep-" + Date.now() + "-" + Math.random().toString(36).substring(2, 7),
+      post_id,
+      author_alias: String(author_alias).substring(0, 30),
+      author_hash: String(author_hash),
+      content: cleanContent,
+      status: "pending",
+      report_count: 0,
+      created_at: new Date().toISOString(),
+    };
+
+    if (dbConfigured) {
+      try {
+        const res = await supabaseFetch("community_replies", {
+          method: "POST",
+          body: {
+            post_id: newReply.post_id,
+            author_alias: newReply.author_alias,
+            author_hash: newReply.author_hash,
+            content: newReply.content,
+            status: "pending",
+          },
+        });
+
+        if (!res.ok) {
+          return new Response(JSON.stringify({ ok: false, error: "Database error saving reply" }), {
+            status: 502,
+          });
+        }
+
+        return new Response(
+          JSON.stringify({
+            ok: true,
+            message: "Reply submitted for moderation review. It will appear once approved.",
+            reply: newReply,
+          }),
+          { status: 201, headers: { "Content-Type": "application/json" } },
+        );
+      } catch {
+        return new Response(JSON.stringify({ ok: false, error: "Network error saving reply" }), {
+          status: 502,
+        });
+      }
+    }
+
+    mockRepliesStore.push(newReply);
+    return new Response(
+      JSON.stringify({
+        ok: true,
+        message: "Reply submitted for moderation review. It will appear once approved.",
+        reply: newReply,
+      }),
+      { status: 201, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  // 8. GET /api/community/replies?post_id=...
+  if (path === "/api/community/replies" && method === "GET") {
+    const postId = url.searchParams.get("post_id");
+    if (!postId) {
+      return new Response(
+        JSON.stringify({ ok: false, error: "post_id query parameter required" }),
+        {
+          status: 400,
+        },
+      );
+    }
+
+    if (dbConfigured) {
+      try {
+        const res = await supabaseFetch(
+          `community_replies?post_id=eq.${encodeURIComponent(postId)}&status=eq.approved&order=created_at.asc`,
+        );
+        if (!res.ok) {
+          return new Response(
+            JSON.stringify({ ok: false, error: "Database error querying replies" }),
+            {
+              status: 502,
+            },
+          );
+        }
+        const replies = (await res.json()) as Reply[];
+        return new Response(
+          JSON.stringify({
+            ok: true,
+            replies: replies.map((r) => ({
+              id: r.id,
+              post_id: r.post_id,
+              author_alias: r.author_alias,
+              content: r.content,
+              created_at: r.created_at,
+            })),
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        );
+      } catch {
+        return new Response(
+          JSON.stringify({ ok: false, error: "Network error querying replies" }),
+          {
+            status: 502,
+          },
+        );
+      }
+    }
+
+    const replies = mockRepliesStore
+      .filter((r) => r.post_id === postId && r.status === "approved")
+      .map((r) => ({
+        id: r.id,
+        post_id: r.post_id,
+        author_alias: r.author_alias,
+        content: r.content,
+        created_at: r.created_at,
+      }));
+
+    return new Response(JSON.stringify({ ok: true, replies }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  // 9. GET /api/community/post-detail?id=...&age_group=...
+  if (path === "/api/community/post-detail" && method === "GET") {
+    const id = url.searchParams.get("id");
+    const ageGroup = url.searchParams.get("age_group") || "adult";
+    const authorHash = url.searchParams.get("author_hash");
+
+    if (ageGroup === "under18") {
+      return new Response(
+        JSON.stringify({
+          ok: false,
+          disabled: true,
+          error:
+            "Under-18 online community forum is currently disabled per DPDP Act 2023 Section 9.",
+        }),
+        { status: 403, headers: { "Content-Type": "application/json" } },
+      );
+    }
+
+    if (!id) {
+      return new Response(JSON.stringify({ ok: false, error: "id parameter required" }), {
+        status: 400,
+      });
+    }
+
+    if (dbConfigured) {
+      try {
+        const res = await supabaseFetch(`community_posts?id=eq.${encodeURIComponent(id)}`);
+        if (!res.ok) {
+          return new Response(
+            JSON.stringify({ ok: false, error: "Database error querying post" }),
+            {
+              status: 502,
+            },
+          );
+        }
+        const posts = (await res.json()) as Post[];
+        const post = posts[0];
+        if (!post) {
+          return new Response(JSON.stringify({ ok: false, error: "Post not found" }), {
+            status: 404,
+          });
+        }
+
+        const isOwn = authorHash ? post.author_hash === authorHash : false;
+        if (post.status !== "approved" && !isOwn) {
+          return new Response(JSON.stringify({ ok: false, error: "Post is not available" }), {
+            status: 404,
+          });
+        }
+
+        const repRes = await supabaseFetch(
+          `community_replies?post_id=eq.${encodeURIComponent(id)}&status=eq.approved&order=created_at.asc`,
+        );
+        const replies = repRes.ok ? ((await repRes.json()) as Reply[]) : [];
+
+        return new Response(
+          JSON.stringify({
+            ok: true,
+            post: {
+              id: post.id,
+              author_alias: post.author_alias,
+              age_group: post.age_group,
+              topic: post.topic,
+              title: post.title,
+              content: post.content,
+              status: post.status,
+              created_at: post.created_at,
+              is_own: isOwn,
+            },
+            replies: replies.map((r) => ({
+              id: r.id,
+              post_id: r.post_id,
+              author_alias: r.author_alias,
+              content: r.content,
+              created_at: r.created_at,
+            })),
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        );
+      } catch {
+        return new Response(JSON.stringify({ ok: false, error: "Network error" }), { status: 502 });
+      }
+    }
+
+    const post = mockPostsStore.find((p) => p.id === id);
+    if (!post) {
+      return new Response(JSON.stringify({ ok: false, error: "Post not found" }), { status: 404 });
+    }
+    const isOwn = authorHash ? post.author_hash === authorHash : false;
+    if (post.status !== "approved" && !isOwn) {
+      return new Response(JSON.stringify({ ok: false, error: "Post is not available" }), {
+        status: 404,
+      });
+    }
+
+    const replies = mockRepliesStore
+      .filter((r) => r.post_id === id && r.status === "approved")
+      .map((r) => ({
+        id: r.id,
+        post_id: r.post_id,
+        author_alias: r.author_alias,
+        content: r.content,
+        created_at: r.created_at,
+      }));
+
+    return new Response(
+      JSON.stringify({
+        ok: true,
+        post: {
+          id: post.id,
+          author_alias: post.author_alias,
+          age_group: post.age_group,
+          topic: post.topic,
+          title: post.title,
+          content: post.content,
+          status: post.status,
+          created_at: post.created_at,
+          is_own: isOwn,
+        },
+        replies,
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
   }
 
   return new Response(JSON.stringify({ ok: false, error: "Endpoint not found" }), { status: 404 });
