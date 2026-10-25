@@ -36,6 +36,7 @@ import { SaheliLogo, AmbientGlow } from "@/components/brand/SaheliLogo.jsx";
 import { QuickLogSheet } from "@/components/logging/QuickLogSheet.jsx";
 import { RhythmMotif } from "@/components/brand/SaheliArt.jsx";
 import { NovaShell } from "@/components/nova";
+import { UnifiedLockScreen } from "@/components/security/UnifiedLockScreen.jsx";
 
 let failCount = 0;
 
@@ -353,7 +354,7 @@ export function Shell({ children }) {
     );
 
   if (status === "onboarding") return <OnboardingFlow />;
-  if (status === "locked") return <LockScreen />;
+  if (status === "locked") return <UnifiedLockScreen />;
 
   return (
     <>

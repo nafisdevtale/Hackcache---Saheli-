@@ -23,6 +23,10 @@ import {
   Stethoscope,
   HeartPulse,
   ChevronRight,
+  ShieldCheck,
+  Users,
+  KeyRound,
+  Copy,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useApp } from "@/App.jsx";
@@ -382,6 +386,106 @@ function PinSection() {
           <Status msg={msg?.key && t(msg.key)} tone={msg?.tone} />
         </form>
       )}
+
+      {enabled && (
+        <div className="pt-3 border-t border-border/50 space-y-3">
+          <div>
+            <label
+              htmlFor="autolock-select"
+              className="block text-xs font-bold text-foreground mb-1"
+            >
+              {t("set.autoLockTimeout")}
+            </label>
+            <select
+              id="autolock-select"
+              value={prefs.autoLockMinutes ?? 10}
+              onChange={(e) => setPrefs({ autoLockMinutes: Number(e.target.value) })}
+              className="h-9 w-full sm:w-64 rounded-xl border border-border bg-card px-3 text-xs font-semibold text-foreground cursor-pointer"
+            >
+              <option value="1">1 min</option>
+              <option value="5">5 min</option>
+              <option value="10">10 min</option>
+              <option value="30">30 min</option>
+              <option value="0">{t("common.off")}</option>
+            </select>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SerialIdentityCard() {
+  const { t, identity } = useApp();
+  const [copied, setCopied] = useState(false);
+
+  const copySerial = () => {
+    if (!identity?.serialId) return;
+    navigator.clipboard?.writeText(identity.serialId).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h3 className="font-bold text-sm sm:text-base text-foreground flex items-center gap-2">
+            <ShieldCheck className="h-4 w-4 text-primary" />
+            <span>{t("set.serialId")}</span>
+          </h3>
+          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+            {t("set.serialIdDesc")}
+          </p>
+        </div>
+      </div>
+
+      <div className="p-3.5 rounded-2xl bg-muted/40 border border-border/70 flex flex-wrap items-center justify-between gap-3">
+        <div className="font-mono text-sm sm:text-base font-extrabold text-foreground tracking-wider">
+          {identity?.serialId || "..."}
+        </div>
+        <Btn
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={copySerial}
+          className="rounded-xl text-xs font-bold gap-1.5"
+        >
+          <Copy className="h-3.5 w-3.5" />
+          <span>{copied ? "✓" : t("set.export")}</span>
+        </Btn>
+      </div>
+    </div>
+  );
+}
+
+function PartnerConnectCard() {
+  const { t } = useApp();
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h3 className="font-bold text-sm sm:text-base text-foreground flex items-center gap-2">
+            <Users className="h-4 w-4 text-primary" />
+            <span>{t("partner.title")}</span>
+          </h3>
+          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+            {t("partner.subtitle")}
+          </p>
+        </div>
+      </div>
+
+      <div className="pt-1 flex justify-end">
+        <Link to="/partner">
+          <Btn size="sm" className="rounded-xl text-xs font-bold gap-1.5">
+            <Users className="h-3.5 w-3.5" />
+            <span>{t("partner.title")}</span>
+            <ChevronRight className="h-3.5 w-3.5" />
+          </Btn>
+        </Link>
+      </div>
     </div>
   );
 }
@@ -1163,9 +1267,19 @@ export default function Settings() {
       {/* TAB 3: PRIVACY & SECURITY */}
       {activeTab === "privacy" && (
         <div className="space-y-6 animate-fade-in">
-          {/* PIN Lock Management */}
+          {/* Saheli Serial Identity */}
+          <div className="nova-card-elevated p-5 sm:p-6 space-y-4">
+            <SerialIdentityCard />
+          </div>
+
+          {/* PIN / Vault Lock Management */}
           <div className="nova-card-elevated p-5 sm:p-6 space-y-4">
             <PinSection />
+          </div>
+
+          {/* Saheli Partner Connect */}
+          <div className="nova-card-elevated p-5 sm:p-6 space-y-4">
+            <PartnerConnectCard />
           </div>
 
           {/* Discreet Mode Configuration */}

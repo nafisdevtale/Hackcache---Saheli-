@@ -49,6 +49,10 @@ export async function idbWrite(puts = [], deletes = []) {
   });
 }
 
+export async function idbDel(key) {
+  return idbWrite([], [key]);
+}
+
 export function idbDeleteDatabase() {
   return new Promise((res, rej) => {
     const r = indexedDB.deleteDatabase(DB);

@@ -4,10 +4,15 @@ import { handlePushRequest } from "./push";
 import { handleFeedbackRequest } from "./feedback";
 import { handleInstinctRequest } from "./instinct";
 import { handleDivaRouteRequest } from "./diva";
+import { handlePartnerRequest } from "./partner";
 
 export async function routeApiRequest(req: Request): Promise<Response | null> {
   const url = new URL(req.url);
   const path = url.pathname;
+
+  if (path.startsWith("/api/partner/")) {
+    return handlePartnerRequest(req);
+  }
 
   if (path === "/api/ask") {
     return handleAskRequest(req);

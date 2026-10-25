@@ -90,6 +90,9 @@ const ALLOWLIST = new Set([
   "INSTINCT",
   "Diva",
   "Loading...",
+  "SAHELI-PAIR-XXXX-XXXX",
+  "REC-XXXX-XXXX-XXXX-XXXX",
+  "SH-XXXX-XXXX-XXXX-XXXX",
 ]);
 
 // Ignored attributes (non-human-facing or technical)
@@ -156,9 +159,15 @@ function isAllowlisted(text) {
   if (!trimmed) return true;
   if (/^[0-9\s.,!?:;/\\_\-+*#@$%^&()\[\]{}|<=>`~"'·•—–×]+$/.test(trimmed)) return true;
   if (ALLOWLIST.has(trimmed)) return true;
-  // If all words are allowlisted
+  // If all words are allowlisted or digits
   const words = trimmed.split(/\s+/);
-  if (words.length > 0 && words.every((w) => ALLOWLIST.has(w.replace(/[.,!?:;()]/g, ""))))
+  if (
+    words.length > 0 &&
+    words.every((w) => {
+      const clean = w.replace(/[.,!?:;()]/g, "");
+      return ALLOWLIST.has(clean) || /^\d+$/.test(clean);
+    })
+  )
     return true;
   return false;
 }
