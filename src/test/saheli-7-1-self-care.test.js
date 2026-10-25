@@ -325,8 +325,8 @@ describe("Saheli 7.1 — Self Care & Wellness Studio", () => {
     });
   });
 
-  describe("Module 5: 13-Language Internationalisation & RTL Support", () => {
-    it("all 13 language dictionaries contain identical key parity for all self care keys", () => {
+  describe("Module 5: Supported Languages Internationalisation", () => {
+    it("all supported language dictionaries contain identical key parity for all self care keys", () => {
       const enKeys = Object.keys(DICTS.en).filter((k) => k.startsWith("selfcare."));
       expect(enKeys.length).toBeGreaterThan(150);
 
@@ -348,14 +348,14 @@ describe("Saheli 7.1 — Self Care & Wellness Studio", () => {
       }
     });
 
-    it("verifies Urdu (RTL) has valid translation and right-to-left language config", () => {
-      const urduLang = LANGUAGES.find((l) => l.code === "ur");
-      expect(urduLang).toBeDefined();
-      expect(urduLang.dir).toBe("rtl");
+    it("verifies Marathi has valid translation and proper language config", () => {
+      const mrLang = LANGUAGES.find((l) => l.code === "mr");
+      expect(mrLang).toBeDefined();
+      expect(mrLang.dir).toBe("ltr");
 
-      const urduDict = DICTS.ur;
-      expect(urduDict["selfcare.title"]).toContain("سیلف کیئر");
-      expect(urduDict["nav.selfCare"]).toBe("سیلف کیئر");
+      const mrDict = DICTS.mr;
+      expect(mrDict["selfcare.title"]).toBeDefined();
+      expect(mrDict["nav.selfCare"]).toBeDefined();
     });
   });
 });

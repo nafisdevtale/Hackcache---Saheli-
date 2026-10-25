@@ -104,48 +104,43 @@ export default function Insights() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Left Column: Key Stats, Next Window & Cycle History */}
           <div className="lg:col-span-6 space-y-4">
-            {/* Section 1: Overview Summary Cards */}
+            {/* Section 1: Cycle Overview */}
             <NovaCard variant="elevated" padding="md" className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="rounded-2xl border border-border/60 bg-card/80 p-4">
-                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    {t("ins.typicalCycle") || t("ins.medianCycle")}
-                  </p>
-                  <p className="font-display text-3xl font-extrabold text-foreground mt-1">
-                    {insights.medianCycle ? t("common.days", { n: insights.medianCycle }) : "—"}
-                  </p>
-                  <p className="text-[11px] font-medium text-muted-foreground mt-0.5">
-                    {t("ins.range")}:{" "}
-                    {t("ins.daysRange", {
-                      min: fmtInteger ? fmtInteger(insights.minCycle) : insights.minCycle,
-                      max: fmtInteger ? fmtInteger(insights.maxCycle) : insights.maxCycle,
-                    })}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground/80 mt-1.5 leading-snug">
-                    {t("ins.typicalCycleExplainer")}
-                  </p>
+              <div className="flex items-center justify-between border-b border-border/60 pb-2">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-primary" aria-hidden />
+                  <h2 className="text-sm font-bold uppercase tracking-wider text-foreground">
+                    1. {t("ins.sectionCycleOverview")}
+                  </h2>
                 </div>
-
-                <div className="rounded-2xl border border-border/60 bg-card/80 p-4">
-                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    {t("ins.typicalPeriod") || t("ins.medianPeriod")}
-                  </p>
-                  <p className="font-display text-3xl font-extrabold text-period mt-1">
-                    {insights.medianPeriod ? t("common.days", { n: insights.medianPeriod }) : "—"}
-                  </p>
-                  <p className="text-[11px] font-medium text-muted-foreground mt-0.5">
-                    {t("ins.range")}:{" "}
-                    {t("ins.daysRange", {
-                      min: fmtInteger ? fmtInteger(insights.minPeriod) : insights.minPeriod,
-                      max: fmtInteger ? fmtInteger(insights.maxPeriod) : insights.maxPeriod,
-                    })}
-                  </p>
-                </div>
+                <span className="text-xs text-muted-foreground font-semibold">
+                  {t("ins.basedOnCycles", { n: insights.activeCycles.length })}
+                </span>
               </div>
 
-              <div className="border-t border-border/60 pt-3">
-                <p className="text-xs text-muted-foreground">
-                  {t("ins.basedOnCycles", { n: insights.activeCycles.length })}
+              <div className="rounded-2xl border border-border/60 bg-card/80 p-4">
+                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  {t("ins.typicalCycle") || t("ins.medianCycle")}
+                </p>
+                <p className="font-display text-3xl font-extrabold text-foreground mt-1">
+                  {insights.medianCycle ? t("common.days", { n: insights.medianCycle }) : "—"}
+                </p>
+                <p className="text-[11px] font-medium text-muted-foreground mt-0.5">
+                  {t("ins.range")}:{" "}
+                  {t("ins.daysRange", {
+                    min: fmtInteger ? fmtInteger(insights.minCycle) : insights.minCycle,
+                    max: fmtInteger ? fmtInteger(insights.maxCycle) : insights.maxCycle,
+                  })}
+                  {spread > 0 && ` • ${spread}d variability`}
+                </p>
+                <p className="text-[10px] text-muted-foreground/80 mt-1.5 leading-snug">
+                  {t("ins.typicalCycleExplainer")}
+                </p>
+              </div>
+
+              <div className="border-t border-border/60 pt-3 space-y-1">
+                <p className="text-[11px] text-muted-foreground/90 font-medium">
+                  {t("ins.cycleFormula")}
                 </p>
                 <p className="mt-1 text-sm font-semibold text-foreground">
                   {insights.activeCycles.length < CONFIG.minCyclesForPrediction
@@ -157,11 +152,43 @@ export default function Insights() {
                       : t("reg.regular", { spread })}
                 </p>
                 {a.currentCycleDay && !insights.isPaused && (
-                  <p className="mt-2 text-xs font-bold text-primary">
+                  <p className="mt-1 text-xs font-bold text-primary">
                     {t("ins.currentCycle", { day: a.currentCycleDay })}
                   </p>
                 )}
               </div>
+            </NovaCard>
+
+            {/* Section 2: Period Overview */}
+            <NovaCard variant="elevated" padding="md" className="space-y-4">
+              <div className="flex items-center justify-between border-b border-border/60 pb-2">
+                <div className="flex items-center gap-2">
+                  <Droplets className="h-4 w-4 text-period" aria-hidden />
+                  <h2 className="text-sm font-bold uppercase tracking-wider text-foreground">
+                    2. {t("ins.sectionPeriodOverview")}
+                  </h2>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-border/60 bg-card/80 p-4">
+                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  {t("ins.typicalPeriod") || t("ins.medianPeriod")}
+                </p>
+                <p className="font-display text-3xl font-extrabold text-period mt-1">
+                  {insights.medianPeriod ? t("common.days", { n: insights.medianPeriod }) : "—"}
+                </p>
+                <p className="text-[11px] font-medium text-muted-foreground mt-0.5">
+                  {t("ins.range")}:{" "}
+                  {t("ins.daysRange", {
+                    min: fmtInteger ? fmtInteger(insights.minPeriod) : insights.minPeriod,
+                    max: fmtInteger ? fmtInteger(insights.maxPeriod) : insights.maxPeriod,
+                  })}
+                </p>
+              </div>
+
+              <p className="text-[11px] text-muted-foreground/90 font-medium">
+                {t("ins.periodFormula")}
+              </p>
             </NovaCard>
 
             {/* Section 2: Future Estimate & Uncertainty Representation */}
@@ -277,9 +304,15 @@ export default function Insights() {
 
           {/* Right Column: Visual Charts, Flow Breakdown & Symptoms */}
           <div className="lg:col-span-6 space-y-4">
-            {/* Section 3: Visual Charts */}
+            {/* Section 4: Patterns Over Time (Visual Charts & Trajectory) */}
             <div className="nova-card-elevated space-y-3">
-              <h2 className="text-base font-bold text-foreground">{t("ins.cycleChart")}</h2>
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-primary" aria-hidden />
+                <h2 className="text-base font-bold text-foreground">
+                  4. {t("ins.sectionPatternsOverTime")}
+                </h2>
+              </div>
+              <h3 className="text-sm font-semibold text-foreground pt-1">{t("ins.cycleChart")}</h3>
               <p className="text-xs text-muted-foreground">
                 {t("ins.chartSummaryCycle", {
                   count: insights.activeCycles.length,
@@ -395,11 +428,13 @@ export default function Insights() {
               </div>
             )}
 
-            {/* Section 6: Symptom Observations & Trends */}
+            {/* Section 3: Symptoms & Well-being */}
             <div className="nova-card-elevated space-y-4">
               <div className="flex items-center gap-2">
                 <Activity className="h-5 w-5 text-primary" aria-hidden />
-                <h2 className="text-base font-bold text-foreground">{t("ins.symptomsTitle")}</h2>
+                <h2 className="text-base font-bold text-foreground">
+                  3. {t("ins.sectionSymptomsWellbeing")}
+                </h2>
               </div>
 
               {/* Recurring Patterns across cycles */}
@@ -550,11 +585,13 @@ export default function Insights() {
               </div>
             </div>
 
-            {/* Section 7: Supportive Health Guidance & Next Steps */}
+            {/* Section 5: When to Seek Professional Guidance */}
             <div className="nova-card-elevated space-y-4">
               <div className="flex items-center gap-2">
                 <Stethoscope className="h-5 w-5 text-primary" aria-hidden />
-                <h2 className="text-base font-bold text-foreground">{t("ins.supportTitle")}</h2>
+                <h2 className="text-base font-bold text-foreground">
+                  5. {t("ins.sectionProfessionalGuidance")}
+                </h2>
               </div>
 
               {insights.supportiveCards.length > 0 ? (

@@ -7,29 +7,17 @@ const DEVANAGARI_LETTERS = /[\u0900-\u0963\u0966-\u097F]/;
 const SCRIPT_RANGES = {
   hi: [0x0900, 0x097f],
   mr: [0x0900, 0x097f],
-  bn: [0x0980, 0x09ff],
-  as: [0x0980, 0x09ff],
-  te: [0x0c00, 0x0c7f],
-  kn: [0x0c80, 0x0cff],
-  ta: [0x0b80, 0x0bff],
-  gu: [0x0a80, 0x0aff],
-  pa: [0x0a00, 0x0a7f],
-  ml: [0x0d00, 0x0d7f],
-  or: [0x0b00, 0x0b7f],
-  ur: [0x0600, 0x06ff],
 };
 
 const enKeys = Object.keys(DICTS.en);
 const totalEn = enKeys.length;
 
-let report = `# Saheli 5.1 — Multilingual System Audit Report\n\n`;
+let report = `# Saheli 11.9 — Multilingual System Audit Report\n\n`;
 report += `Generated: ${new Date().toISOString()}\n\n`;
 report += `### Summary\n\n`;
-report += `- **Total Supported Languages**: ${LANGUAGES.length}\n`;
+report += `- **Supported Languages**: English (\`en\`), Hindi (\`hi\`), Marathi (\`mr\`) (${LANGUAGES.length} total)\n`;
 report += `- **Master Dictionary Keys**: ${totalEn} keys\n`;
-report += `- **Key Parity Across All Languages**: 100.0%\n`;
-report += `- **Verbatim Hindi Contamination in Regional Languages**: 0 keys\n`;
-report += `- **RTL Support**: Urdu (\`ur\`) registered and styled with \`dir="rtl"\` and Nastaliq typography\n\n`;
+report += `- **Key Parity Across Supported Languages**: 100.0%\n\n`;
 
 report += `### Language Matrix\n\n`;
 report += `| Code | Language | Native Name | Script | Direction | Total Keys | Parity % | Contaminated | Status |\n`;

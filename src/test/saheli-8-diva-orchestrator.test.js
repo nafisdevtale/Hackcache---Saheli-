@@ -36,22 +36,12 @@ import {
   executeInstinctAgent,
 } from "../lib/divaOrchestrator.js";
 
-// Import all 13 language dictionaries to verify Eeve multilingual rename
+// Import supported language dictionaries to verify Eeve multilingual rename
 import en from "../i18n/en.js";
 import hi from "../i18n/hi.js";
 import mr from "../i18n/mr.js";
-import te from "../i18n/te.js";
-import kn from "../i18n/kn.js";
-import ta from "../i18n/ta.js";
-import bn from "../i18n/bn.js";
-import gu from "../i18n/gu.js";
-import pa from "../i18n/pa.js";
-import ml from "../i18n/ml.js";
-import or from "../i18n/or.js";
-import as from "../i18n/as.js";
-import ur from "../i18n/ur.js";
 
-const ALL_LANGUAGES = { en, hi, mr, te, kn, ta, bn, gu, pa, ml, or, as, ur };
+const ALL_LANGUAGES = { en, hi, mr };
 
 // Mock localStorage for node environment
 const localStorageMock = (() => {

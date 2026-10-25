@@ -28,48 +28,18 @@ export const LOCALE_MAP = {
   en: "en-IN",
   hi: "hi-IN",
   mr: "mr-IN",
-  bn: "bn-IN",
-  as: "as-IN",
-  gu: "gu-IN",
-  kn: "kn-IN",
-  ml: "ml-IN",
-  or: "or-IN",
-  pa: "pa-IN",
-  ta: "ta-IN",
-  te: "te-IN",
-  ur: "ur-IN",
 };
 
 export const SCRIPT_MAP = {
   en: "Latn",
   hi: "Deva",
   mr: "Deva",
-  bn: "Beng",
-  as: "Beng",
-  gu: "Gujr",
-  kn: "Knda",
-  ml: "Mlym",
-  or: "Orya",
-  pa: "Guru",
-  ta: "Taml",
-  te: "Telu",
-  ur: "Arab",
 };
 
 export const NATIVE_NUMBERING_SYSTEMS = {
   en: "latn",
   hi: "deva",
   mr: "deva",
-  bn: "beng",
-  as: "beng",
-  gu: "gujr",
-  kn: "knda",
-  ml: "mlym",
-  or: "orya",
-  pa: "guru",
-  ta: "tamldec",
-  te: "telu",
-  ur: "arabext",
 };
 
 // Native digit character offsets for parsing

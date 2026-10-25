@@ -70,19 +70,9 @@ describe("Saheli 10.6 — Total Translation Completeness & Native Numeral Enforc
     const nonEnglishLangs = [
       { code: "hi", num: 28, expected: "२८", script: "Devanagari" },
       { code: "mr", num: 28, expected: "२८", script: "Devanagari" },
-      { code: "bn", num: 28, expected: "২৮", script: "Bengali" },
-      { code: "as", num: 28, expected: "২৮", script: "Bengali/Assamese" },
-      { code: "gu", num: 28, expected: "૨૮", script: "Gujarati" },
-      { code: "pa", num: 28, expected: "੨੮", script: "Gurmukhi" },
-      { code: "kn", num: 28, expected: "೨೮", script: "Kannada" },
-      { code: "ml", num: 28, expected: "൨൮", script: "Malayalam" },
-      { code: "or", num: 28, expected: "୨୮", script: "Odia" },
-      { code: "ta", num: 28, expected: "௨௮", script: "Tamil" },
-      { code: "te", num: 28, expected: "౨౮", script: "Telugu" },
-      { code: "ur", num: 28, expected: "۲۸", script: "Eastern Arabic-Indic" },
     ];
 
-    it("enforces shouldUseNativeNumerals true by default for all 12 non-English Indic languages", () => {
+    it("enforces shouldUseNativeNumerals true by default for supported Indic languages", () => {
       expect(shouldUseNativeNumerals("en")).toBe(false);
       for (const { code } of nonEnglishLangs) {
         expect(shouldUseNativeNumerals(code)).toBe(true);
@@ -90,7 +80,7 @@ describe("Saheli 10.6 — Total Translation Completeness & Native Numeral Enforc
       }
     });
 
-    it("formats integers using authentic native digits by default for all 12 Indic languages", () => {
+    it("formats integers using authentic native digits by default for supported Indic languages", () => {
       expect(formatInteger(28, "en")).toBe("28");
       for (const { code, num, expected, script } of nonEnglishLangs) {
         const formatted = formatInteger(num, code);
@@ -127,8 +117,8 @@ describe("Saheli 10.6 — Total Translation Completeness & Native Numeral Enforc
     });
   });
 
-  describe("2. Total Translation Completeness & Zero Leakage Across 13 Languages", () => {
-    it("ensures all 13 languages have exact 100% dictionary key parity (1974 keys)", () => {
+  describe("2. Total Translation Completeness & Zero Leakage Across Supported Languages", () => {
+    it("ensures all supported languages have exact 100% dictionary key parity (1974+ keys)", () => {
       const enKeys = Object.keys(DICTS.en);
       expect(enKeys.length).toBeGreaterThanOrEqual(1974);
 
@@ -163,7 +153,7 @@ describe("Saheli 10.6 — Total Translation Completeness & Native Numeral Enforc
       }
     });
 
-    it("verifies newly added 10.6 keys exist across all 13 languages", () => {
+    it("verifies newly added 10.6 keys exist across all supported languages", () => {
       const sample106Keys = [
         "settings.latinNumerals",
         "settings.latinNumeralsDesc",
@@ -199,8 +189,8 @@ describe("Saheli 10.6 — Total Translation Completeness & Native Numeral Enforc
             <button data-testid="switch-hi" onClick={() => setLang("hi")}>
               Hindi
             </button>
-            <button data-testid="switch-bn" onClick={() => setLang("bn")}>
-              Bengali
+            <button data-testid="switch-mr" onClick={() => setLang("mr")}>
+              Marathi
             </button>
             <button data-testid="open-modal" onClick={() => setModalOpen(true)}>
               {translate(lang, "nav.settings")}
@@ -247,12 +237,12 @@ describe("Saheli 10.6 — Total Translation Completeness & Native Numeral Enforc
       expect(screen.getByTestId("modal").textContent).toContain(DICTS.hi["nav.settings"]);
       expect((input as HTMLInputElement).value).toBe("Severe cramps today");
 
-      // Switch language to Bengali
-      fireEvent.click(screen.getByTestId("switch-bn"));
+      // Switch language to Marathi
+      fireEvent.click(screen.getByTestId("switch-mr"));
 
-      // Verification: Modal still open, input text still preserved, labels localized to Bengali
+      // Verification: Modal still open, input text still preserved, labels localized to Marathi
       expect(screen.getByTestId("modal")).toBeTruthy();
-      expect(screen.getByTestId("modal").textContent).toContain(DICTS.bn["nav.settings"]);
+      expect(screen.getByTestId("modal").textContent).toContain(DICTS.mr["nav.settings"]);
       expect((input as HTMLInputElement).value).toBe("Severe cramps today");
     });
   });
@@ -276,8 +266,8 @@ describe("Saheli 10.6 — Total Translation Completeness & Native Numeral Enforc
       expect(textContent).toContain("२८"); // Day 28 in Devanagari
     });
 
-    it("renders RhythmRing with native numerals in Bengali", () => {
-      mockAppState.lang = "bn";
+    it("renders RhythmRing with native numerals in Marathi", () => {
+      mockAppState.lang = "mr";
       mockAppState.prefs = { latinNumerals: false, useLatinNumerals: false, nativeNumerals: true };
       mockAppState.cycleState = { cycleDay: 14, phase: "ovulatory" };
 
@@ -289,8 +279,8 @@ describe("Saheli 10.6 — Total Translation Completeness & Native Numeral Enforc
       );
 
       const textContent = container.textContent || "";
-      expect(textContent).toContain("১৪"); // Day 14 in Bengali
-      expect(textContent).toContain("২৮"); // Day 28 in Bengali
+      expect(textContent).toContain("१४"); // Day 14 in Devanagari (Marathi)
+      expect(textContent).toContain("२८"); // Day 28 in Devanagari (Marathi)
     });
 
     it("renders RhythmRing with standard Latin numerals when latinNumerals preference is true", () => {

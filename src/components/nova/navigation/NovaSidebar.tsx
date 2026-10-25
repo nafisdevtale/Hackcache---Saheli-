@@ -23,6 +23,7 @@ import {
   WifiOff,
   Volume2,
   Square,
+  HelpCircle,
 } from "lucide-react";
 // @ts-expect-error plain JS component
 import { SaheliLogo } from "@/components/brand/SaheliLogo.jsx";
@@ -57,63 +58,76 @@ export const NovaSidebar: React.FC<NovaSidebarProps> = ({
 
   const ownerPillars = [
     {
-      title: t("today.title") ? `${t("today.title")} & Cycle` : "My Health",
+      title: t("nav.catDaily") || "Daily",
       items: [
         { to: "/", key: "nav.today", icon: Home, exact: true },
         { to: "/calendar", key: "nav.calendar", icon: CalendarDays },
         { to: "/log", key: "nav.log", icon: Droplet },
-        { to: "/insights", key: "nav.insights", icon: BarChart3 },
       ],
     },
     {
-      title: t("nav.selfCare") || "My Space",
+      title: t("nav.catUnderstand") || "Understand",
+      items: [
+        { to: "/insights", key: "nav.insights", icon: BarChart3 },
+        { to: "/learn", key: "nav.learn", icon: BookOpen },
+        { to: "/doctor", key: "nav.doctor", icon: HeartPulse },
+      ],
+    },
+    {
+      title: t("nav.catExplore") || "Explore",
       items: [
         { to: "/selfcare", key: "nav.selfCare", icon: Sparkles },
-        { to: "/companion", key: "nav.companion", icon: Heart },
         { to: "/discover", key: "nav.discover", icon: Compass },
-        { to: "/learn", key: "nav.learn", icon: BookOpen },
+        { to: "/diva", key: "nav.aiWorkspace", icon: Bot },
       ],
     },
     {
-      title: t("nav.ai") || "AI Specialists",
-      items: [
-        { to: "/diva", key: "nav.diva", icon: Bot },
-        { to: "/ask", key: "nav.ask", icon: HeartPulse },
-        { to: "/flash", key: "nav.flash", icon: ShoppingBag },
-        { to: "/instinct", key: "nav.instinct", icon: Film },
-      ],
-    },
-    {
-      title: t("set.title") || "Preferences",
+      title: t("nav.catConnect") || "Connect",
       items: [
         { to: "/community", key: "nav.community", icon: Users },
         { to: "/partner", key: "partner.title", icon: HeartHandshake },
+      ],
+    },
+    {
+      title: t("nav.catManage") || "Manage",
+      items: [
         { to: "/settings", key: "nav.settings", icon: Settings },
-        { to: "/more", key: "nav.more", icon: Menu },
+        { to: "/feedback", key: "nav.feedback", icon: HelpCircle },
       ],
     },
   ];
 
   const partnerPillars = [
     {
-      title: t("partner.title") || "Partner Connect",
+      title: t("nav.catDaily") || "Daily",
       items: [
         { to: "/partner", key: "partner.title", icon: HeartHandshake, exact: true },
-        { to: "/learn", key: "nav.learn", icon: BookOpen },
+        { to: "/discover", key: "nav.discover", icon: Compass },
       ],
     },
     {
-      title: t("nav.ai") || "AI Guidance",
+      title: t("nav.catUnderstand") || "Understand",
       items: [
-        { to: "/diva", key: "nav.diva", icon: Bot },
-        { to: "/ask", key: "nav.ask", icon: HeartPulse },
+        { to: "/learn", key: "nav.learn", icon: BookOpen },
+        { to: "/doctor", key: "nav.doctor", icon: HeartPulse },
       ],
     },
     {
-      title: t("set.title") || "Preferences",
+      title: t("nav.catExplore") || "Explore",
+      items: [
+        { to: "/diva", key: "nav.aiWorkspace", icon: Bot },
+        { to: "/selfcare", key: "nav.selfCare", icon: Sparkles },
+      ],
+    },
+    {
+      title: t("nav.catConnect") || "Connect",
+      items: [{ to: "/community", key: "nav.community", icon: Users }],
+    },
+    {
+      title: t("nav.catManage") || "Manage",
       items: [
         { to: "/settings", key: "nav.settings", icon: Settings },
-        { to: "/more", key: "nav.more", icon: Menu },
+        { to: "/feedback", key: "nav.feedback", icon: HelpCircle },
       ],
     },
   ];

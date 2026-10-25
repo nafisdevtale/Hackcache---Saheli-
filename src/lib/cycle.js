@@ -39,17 +39,25 @@ export function groupPeriods(dates, gap = CONFIG.periodGroupGapDays, days = {}) 
       last.days.push(d);
     } else out.push({ start: d, end: d, days: [d] });
   }
-  return out.map((p) => ({ ...p, length: diffDays(p.start, p.end) + 1 }));
+  return out.map((p) => {
+    const isSpottingOnly = p.days.length === 1 && days[p.start]?.flow === "spotting";
+    return {
+      ...p,
+      length: diffDays(p.start, p.end) + 1,
+      isSpottingOnly: Boolean(isSpottingOnly),
+    };
+  });
 }
 
 export function completeCycles(periods) {
+  const confirmed = Array.isArray(periods) ? periods.filter((p) => !p.isSpottingOnly) : [];
   const c = [];
-  for (let i = 0; i < periods.length - 1; i++) {
+  for (let i = 0; i < confirmed.length - 1; i++) {
     c.push({
-      start: periods[i].start,
-      nextStart: periods[i + 1].start,
-      length: diffDays(periods[i].start, periods[i + 1].start),
-      periodLength: periods[i].length,
+      start: confirmed[i].start,
+      nextStart: confirmed[i + 1].start,
+      length: diffDays(confirmed[i].start, confirmed[i + 1].start),
+      periodLength: confirmed[i].length,
     });
   }
   return c;

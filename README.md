@@ -1,726 +1,319 @@
-# Saheli Cycle Companion (Saheli India)
+# Saheli — Privacy-First Menstrual Health & Cycle Companion
 
-Saheli is a complete, privacy-first menstrual-health companion Progressive Web App (PWA) built specifically for women and adolescents across India. It combines local-first encrypted health logging, bilingual and multi-regional Indian language support (13 languages), a safe pseudonymous peer-support community, a real AI health assistant with deterministic emergency triage, and clinical guidance backed by NHS, WHO, ACOG, FIGO, FOGSI, and MoHFW sources.
+[![Quality Gates](https://img.shields.io/badge/Quality%20Gates-Passing-success)](https://github.com/nafisdevtale/remix-of-saheli-cycle-companion)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Local-First](https://img.shields.io/badge/Privacy-Local--First%20IndexedDB-brightgreen)](https://github.com/nafisdevtale/remix-of-saheli-cycle-companion)
+[![Languages](https://img.shields.io/badge/Languages-en%20%7C%20hi%20%7C%20mr-orange)](https://github.com/nafisdevtale/remix-of-saheli-cycle-companion)
 
-## Core Pillars & India-wide Architecture
-
-1. **Separation of Private Health Records from Optional Online Services**:
-   - Menstrual cycle history, bleeding volume, custom symptoms, and notes stay exclusively on your device in **IndexedDB** with optional client-side **WebCrypto AES-256-GCM** encryption.
-   - Zero remote accounts, zero phone/email registrations, zero third-party tracking cookies or telemetry.
-2. **13 Indian Languages with 100% Key Parity**:
-   - English, Hindi (हिन्दी), Marathi (मराठी), Telugu (తెలుగు), Kannada (ಕನ್ನಡ), Tamil (தமிழ்), Bengali (বাংলা), Gujarati (ગુજરાતી), Punjabi (ਪੰਜਾਬੀ), Malayalam (മലയാളം), Odia (ଓଡ଼ିଆ), Assamese (অসমীয়া), and Urdu (اردو with native RTL layout).
-   - 606 keys across all dictionaries with verified native script core terms. Full language status documented in `TRANSLATION_REPORT.md`.
-3. **Deterministic Safety Engine & Real AI Health Assistant (`/api/ask`)**:
-   - Google Gemini 2.5 Flash / OpenAI-compatible provider integration with strict rate-limiting and privacy-first consent flow.
-   - **Deterministic Emergency Screening**: Bypasses AI to provide immediate emergency helplines for acute hemorrhage (soaking 2+ pads/hour), sudden severe pelvic pain, high fever with foul discharge, or ectopic pregnancy risks (**National Emergency: 112 / Ambulance: 108**).
-   - **Mental Health & Crisis Triage**: Automatic routing for self-harm and suicidal distress in English and Hindi to **Tele-MANAS (14416 / 1800-891-4416)** and **KIRAN (1800-599-0019)**.
-   - **Opt-in Cycle Summary**: Default OFF; when enabled, appends minimal non-PII cycle values.
-   - Graceful offline fallback to Saheli's verified medical library when unconfigured or offline.
-4. **Safe Pseudonymous Community (`/community`, `/api/community/*`)**:
-   - Complete pseudonymity using a client-held device token hash (e.g., "Saheli 4821"). No phone numbers or emails required.
-   - **Automated PII Redaction**: Phone numbers, emails, and external links are automatically stripped before queueing.
-   - **Child Safety (DPDP Act Section 9)**: Online teen community forum is disabled pending parental consent and age assurance framework.
-   - **Pre-Publication Moderation**: Submissions start in a pending moderation queue before public appearance.
-   - **Auto-Flagging & Instant Wiping**: 3 reports automatically flag and hide content. "Delete All My Data" purges all posts and replies tied to the user's device credential immediately.
-   - Database schema and Row-Level Security (RLS) migration in `supabase/migrations/20261023_community_schema.sql`. Fails closed if database credentials are not set.
-5. **Core Health MVP Enhancements**:
-   - Custom symptom tracking with frequency analysis and backward/forward compatible schema import.
-   - Calendar period quick-actions ("Start period here" / "Remove period") with accessible distinct non-color shapes.
-   - Expanded evidence-based lessons: Thyroid conditions, Postpartum return, Perimenopause transition, Preparing for a doctor visit, and Cycle record interpretation.
-6. **Smart Reminders & Discreet Notifications**:
-   - Web Push using standard VAPID authentication and discreet notification payloads. Fails closed when VAPID keys are unconfigured while preserving local in-app reminders.
-7. **DPDP Act 2023 Readiness & Honest Governance**:
-   - Full regulatory readiness review and data minimization disclosures detailed in `COMPLIANCE.md`. Medical and clinical review marked as pending independent accreditation.
+Saheli (सहेली / सखी) is an evidence-informed, local-first menstrual cycle companion and progressive web application engineered specifically for individuals and families across India. Combining client-side cryptographic security, authentic multilingual localization across **English, Hindi (हिन्दी), and Marathi (मराठी)**, an adaptable AI workspace, and deterministic clinical triage, Saheli empowers users with deep bodily literacy while guaranteeing zero third-party surveillance.
 
 ---
 
-## Progressive Web App (PWA) & Offline Capabilities
+## Table of Contents
 
-- **Installable PWA**: Configured with a W3C web app manifest (`/manifest.webmanifest`), standalone display mode, portrait orientation, theme colors (`#a34438`), and complete standard/maskable app icon sets (192px, 512px, SVG vector, and Apple Touch Icon).
-- **Offline-First Application Shell**: A dedicated Service Worker (`/sw.js`) precaches the application shell, icons, manifest, and stylesheets. Once loaded, all core screens (Today, Log, Calendar, Insights, Doctor Guidance, Visit Summary, Learn, Ask, Reminders, Pregnancy, and Settings) remain completely functional without internet access.
-- **Strict Privacy Guarantees**:
-  - Personal health logs, symptoms, cycle calculations, and encryption keys live strictly in client-side **IndexedDB / WebCrypto** and are **never transmitted to any server or cached in the Service Worker Cache API**.
-  - Service worker caching is restricted to same-origin GET requests for the application shell and static assets (`/assets/*`).
-  - Sensitive export queries, credentials, and non-GET requests bypass the cache completely.
-  - Complete data deletion (`Settings > Delete everything`) purges all IndexedDB data, localStorage/sessionStorage keys, and explicitly purges the Service Worker Cache API (`caches.delete`).
-- **Discreet & Accessible Installation**:
-  - Standard mode prompts: "Install app" / "ऐप इंस्टॉल करें".
-  - Discreet mode prompts: "Install Diary" / "डायरी इंस्टॉल करें".
-  - Graceful fallbacks for browsers without programmatic install prompts (including iOS Safari Add-to-Home-Screen instructions).
-- **Safe Update Handling**:
-  - Service worker updates trigger a polite, non-intrusive notification ("A new version is ready") with explicit user approval to refresh, preventing mid-session disruption or unsaved data loss.
-  - Obsolete cache versions are purged automatically upon activation.
-
-## Personalised Cycle Insights & Health Guidance (Saheli 2.1)
-
-- **Local Cycle-History Analysis**: Computes recorded cycle lengths, median duration, personal range, and spread across available cycles. Features cycle-by-cycle comparisons against personal medians.
-- **Cautious Predictions & Uncertainty Representation**: Enforces a strict 3-cycle minimum history before generating estimates; represents future predictions as date intervals/windows; widens windows dynamically for irregular cycles; and explicitly states that estimates are not for contraception.
-- **Bleeding Patterns**: Tracks recorded period durations, flow intensity distributions (spotting, light, medium, heavy), and flags heavy bleeding signs (pad changes every 1–2 hours, clots larger than ₹10 coin, periods > 7 days).
-- **Symptom Patterns & Well-being Trends**: Identifies symptoms recurring across cycles, timing associations (premenstrual, during period, other days), and pain/mood/sleep trends without treating unlogged days as confirmed symptom-free.
-- **Supportive Health Guidance**: Provides contextual links to medical guidance (`/doctor`), relevant lessons (`/learn`), doctor visit summaries (`/visit`), and national helplines (112, 108, Tele-MANAS 14416).
-- **Accessibility & Bilingual Localization**: Fully screen-reader accessible with semantic data tables, SVG chart summaries, high-contrast support, and 100% matched English and Hindi coverage.
-
-## Trust, Safety & Release Hardening (Saheli 2.2)
-
-- **Strict Service Worker Allowlist**: `public/sw.js` restricts caching to an explicit static asset allowlist (`/`, manifest, icons, favicon, robots.txt, and hashed `/assets/*` bundles). Unapproved same-origin GET endpoints and sensitive query parameters (`pin`, `key`, `token`, `auth`, `/export`) are strictly excluded.
-- **WebCrypto Hardening**: Enhanced `decryptJSON` to validate payload structure and handle malformed base64 and tampered ciphertext bytes with descriptive error handling.
-- **Storage Resilience**: Implemented fallback in-memory storage for private browsing and restricted iframe environments where `localStorage` is disabled or inaccessible.
-- **Medical & Governance Auditing**: Automated test suite (`medical-sources.test.js`) verifies all 31 sources across NHS, WHO, ACOG, FIGO, FOGSI, MoHFW, Tele-MANAS, and 112 India, verifying that 100% of medical statements carry verified source attributions.
-- **Route & Workflow Verification**: Comprehensive test coverage across all 12 application routes (`app-routing.test.tsx`) and full pregnancy, doctor summary, and preferences workflows (`user-workflows.test.js`). Total automated test coverage expanded to 117 tests.
-
-## First-Run Experience, Personalisation & Product Polish (Saheli 3.0)
-
-- **Guided First-Run Onboarding Flow**:
-  - Replaces legacy single-screen onboarding with a 4-step mobile-first wizard (`OnboardingFlow.jsx`).
-  - **Language Selection**: Immediate English / हिंदी switcher on the welcome screen with visual feedback.
-  - **Age-Appropriate Setup**: Clear guidance for teenagers (Under 18) explaining normal cycle variation (21–45 days per ACOG) with automatic suppression of fertility predictions for adolescent privacy.
-  - **Transparent Privacy & PIN Lock**: Details local-only IndexedDB architecture and educational nature of estimates. Offers optional 4-digit PIN setup with double-entry confirmation and clear warnings regarding forgotten PIN data recovery.
-  - **Flexible First-Run Entry**: Lets users log their most recent period start date immediately, start with an empty diary, explore educational guides first, or preview simulated demo history.
-  - **Low-Friction Bypass**: Users who want to skip setup can start immediately with safe defaults.
-- **Supportive Daily Dashboard (`Today`)**:
-  - **Empty State**: Reassuring welcome state when no entries exist with direct actions to log today, record past periods on the calendar, read how cycles work, or load demo data.
-  - **Building Profile State**: Encouraging progress card for 1–2 cycles showing how many cycles remain until 3-cycle predictions unlock without treating missing history as abnormal.
-  - **Active State**: Displays current cycle day, phase explanation, and prediction window intervals.
-  - **Contextual Education Shortcuts**: Direct shortcuts to relevant educational lessons (`/learn`), doctor visit summary (`/visit`), and questions (`/ask`).
-- **Privacy for Shared Devices**:
-  - Discreet Mode ("Diary" / "डायरी") with neutral icon and neutral notification copy ("Time to check in" / "देखने का समय").
-  - Dedicated "Shared Device Privacy Guide" in Settings explaining local encryption protections alongside physical device limitations (unlocked screen, browser history, homescreen icon).
-- **Automated Test Coverage**: 129 tests passing across 9 test suites, including dedicated tests in `onboarding-today.test.js`.
+1. [Core Values & Mission](#1-core-values--mission)
+2. [Architecture Overview](#2-architecture-overview)
+3. [Local-First Privacy & Encryption Architecture](#3-local-first-privacy--encryption-architecture)
+4. [Multilingual Framework & Native Numerals](#4-multilingual-framework--native-numerals)
+5. [Menstrual Cycle Engine & Tracking Accuracy](#5-menstrual-cycle-engine--tracking-accuracy)
+6. [Expert Insights & Analytics](#6-expert-insights--analytics)
+7. [Educational Sanctuary & Health Literacy](#7-educational-sanctuary--health-literacy)
+8. [Saheli AI Workspace & Multi-Agent Orchestration](#8-saheli-ai-workspace--multi-agent-orchestration)
+9. [Community & Pseudonymous Peer Support](#9-community--pseudonymous-peer-support)
+10. [Partner Connect & Cryptographic Sharing](#10-partner-connect--cryptographic-sharing)
+11. [Discreet Mode & Physical Safety Controls](#11-discreet-mode--physical-safety-controls)
+12. [App Lock, Recovery & Vault Security](#12-app-lock-recovery--vault-security)
+13. [Data Portability: Import, Export & Backup](#13-data-portability-import-export--backup)
+14. [Audio Controller: Chimes & Speech Synthesis](#14-audio-controller-chimes--speech-synthesis)
+15. [Progressive Web App (PWA) & Offline Reliability](#15-progressive-web-app-pwa--offline-reliability)
+16. [Evidence Base & Medical Safeguards](#16-evidence-base--medical-safeguards)
+17. [Regulatory Compliance & Adolescent Safeguards](#17-regulatory-compliance--adolescent-safeguards)
+18. [Navigation & Information Architecture](#18-navigation--information-architecture)
+19. [Technical Stack & Dependencies](#19-technical-stack--dependencies)
+20. [Getting Started, Development & Quality Gates](#20-getting-started-development--quality-gates)
+21. [License, Governance & Disclaimers](#21-license-governance--disclaimers)
 
 ---
 
-# SAHELI — HACKCACHE STAGE 1: COMPLETE BUILD PROMPT
-
-Build a complete, functional web application for the HackCache hackathon. This is an implementation task, not a request for a plan, wireframe, or static mockup. Build the actual application, with working navigation, local data persistence, calculations, health guidance, bilingual content, privacy controls, and responsive design.
-
-Follow every requirement below. Do not silently omit features, replace functional logic with mock data, or claim something works unless you have implemented and tested it.
-
-## 1. PROJECT IDENTITY
-
-**App name:** Saheli
-
-**Track:** Social Impact
-
-**Target user:** Ananya, a 17-year-old Class 12 student in Lucknow, India. Her periods are irregular, she prefers Hindi, shares a phone with her family, and feels shy about asking someone for menstrual health guidance.
-
-**Primary product focus:** Helping users understand irregular periods and know when to seek medical attention.
-
-**Core product promise:**
-
-Saheli is a free, private, accessible menstrual health companion that helps users track their cycles, understand their health history, learn from reliable medical sources, and recognise when professional guidance may be appropriate.
-
-It must not diagnose medical conditions, promise accurate predictions, or compromise sensitive health information.
-
-## 2. PROBLEM TO SOLVE
-
-Many women and girls struggle to distinguish ordinary menstrual variations from symptoms that may require medical evaluation. They may find PCOS/PCOD confusing, lack reliable health education, be unable to afford tracking apps, or be uncomfortable sharing intimate health information.
-
-Build a calm, mobile-first application that addresses these problems through:
-
-- Private menstrual and symptom tracking.
-- Transparent cycle estimates and historical insights.
-- Understandable guidance on when to see a doctor.
-- Reliable, source-linked menstrual health education.
-- English and Hindi language support.
-- Accessibility for users with limited technical confidence.
-- Meaningful privacy protections for shared devices.
-
-The app must work without creating an account or sending personal cycle information to a backend.
-
-## 3. MANDATORY SAFETY RULES
-
-These requirements must be implemented, not merely displayed as disclaimers.
-
-- Never diagnose PCOS, PCOD, anaemia, pregnancy complications, or another medical condition.
-- Never present a cycle prediction as certain.
-- Never tell a user that a warning sign is harmless without adequate basis.
-- Never recommend medication dosages or unsupported treatments.
-- Every displayed prediction must be labelled as an estimate and shown as a range of dates.
-- Every displayed ovulation estimate and fertile-window estimate must include: "This is an estimate. It can't be used to prevent pregnancy."
-- Do not display ovulation or fertile-window estimates when the cycle is classified as irregular under the configured rule.
-- Use established health guidance from WHO, NHS, ACOG, FOGSI, and India's Ministry of Health and Family Welfare.
-- Every material medical fact must have a named, verifiable source and URL in the local content files. Do not invent references, statistics, or medical claims.
-- If a logged symptom warrants medical attention, explain what was noticed, which dates or entries support it, why it matters, and what action the user can take.
-- Use calm, neutral language and visual styling for health guidance. Reserve a clearly distinguishable urgent treatment for genuine emergency messages.
-- Include an appropriate statement that the application provides educational information and is not a substitute for professional medical evaluation.
-
-### Urgent guidance
-
-When the applicable rules identify an urgent situation, show "Get medical help now" and appropriate instructions to seek urgent care.
-
-Examples include:
-
-- Sudden, severe lower abdominal pain.
-- Very heavy bleeding accompanied by dizziness or fainting.
-- Bleeding or severe pain when pregnancy is possible.
-
-Include India's emergency numbers 112 and 108 as specified in the supplied brief. Do not imply that contacting the application or reading its information is sufficient in an emergency.
-
-### Mental health guidance
-
-If the user records a "very low" mood for at least three consecutive days or asks about self-harm, show an appropriate supportive message and Tele-MANAS, India's mental health helpline: 14416.
-
-Do not use shaming language, minimise distress, or treat the application as a replacement for mental health care.
-
-## 4. MANDATORY PRIVACY ARCHITECTURE
-
-The core application must be local-first.
-
-- No account, sign-up, login service, backend database, or server-side storage of personal cycle records.
-- Store cycle dates, period logs, symptoms, mood entries, medicines, sleep records, notes, and derived personal insights in IndexedDB.
-- Use localStorage only for non-sensitive interface preferences, such as selected language and text size.
-- Do not send personal health records to external services.
-- No analytics, advertising trackers, telemetry, third-party tracking scripts, remotely loaded fonts, images, or external scripts.
-- Bundle all required application assets locally.
-- Official medical references may be opened as external links only after an explicit user action.
-- Do not log health records or personal notes to the browser console.
-- Use synthetic demonstration data only. Keep demo data separate from a user's actual records.
-- The application must continue to work with previously loaded resources when offline where its implementation supports it. Do not promise complete offline functionality until it has been tested.
-
-Serving the initial application from a hosting provider is acceptable. The critical privacy requirement is that the app must not automatically transmit personal health information or load third-party tracking resources.
-
-### Optional four-digit PIN lock
-
-Implement a functional PIN lock using the Web Crypto API.
-
-- Use AES-GCM to encrypt sensitive records before they are written to persistent storage when PIN protection is enabled.
-- Derive the encryption key from the PIN using PBKDF2 and a random salt.
-- Use an appropriate documented work factor and a cryptographically secure random, unique IV for every AES-GCM encryption operation.
-- Never store the PIN itself.
-- Never store the derived encryption key persistently.
-- Keep decrypted sensitive data in memory only while the app is unlocked.
-- On reload, require the PIN before decrypting protected records.
-- Support enabling, disabling, and changing the PIN without losing existing records.
-- Explain clearly that forgetting the PIN means the protected data cannot be recovered.
-- Offer an export before enabling PIN protection.
-- Handle incorrect PINs, corrupted ciphertext, failed writes, and interrupted updates without silently deleting data.
-- Test that protected records are unreadable ciphertext in the browser's storage panel.
-- Do not claim that a four-digit PIN makes the app invulnerable to every attack.
-
-### Discreet mode
-
-When enabled:
-
-- Display the app name "Diary".
-- Use a neutral, non-menstrual icon.
-- Ensure notifications say "Time to check in", never "period".
-- Do not expose menstrual dates, symptoms, pregnancy information, or other sensitive details on notification banners.
-- Apply discreet mode consistently throughout navigation, settings, reminders, and relevant screen titles.
-
-### Export, import, and deletion
-
-- Provide JSON and CSV exports.
-- Exports must contain the appropriate user data and maintain valid dates and record relationships.
-- Warn users before exporting readable health information.
-- Allow previously exported JSON data to be imported back.
-- Validate the import format and content before changing existing records.
-- Avoid silently duplicating records or overwriting the user's data.
-- Provide "Delete everything" with one explicit confirmation.
-- Deletion must clear all application-owned records, preferences, encrypted records, and relevant local application storage.
-- Verify deletion by checking storage and reopening the application.
-
-Do not claim that exported CSV files are encrypted. Explain that the user is responsible for protecting exported files.
-
-## 5. TECHNOLOGY STACK
-
-Use this stack for the initial implementation:
-
-- React.
-- Vite.
-- Tailwind CSS.
-- Plain JavaScript only. Do not use TypeScript.
-- React Router for navigation.
-- React hooks and Context where needed.
-- IndexedDB for persistent personal records.
-- localStorage only for non-sensitive UI preferences.
-- Web Crypto API for encryption.
-- Lightweight SVG charts and locally bundled icons.
-- Native JavaScript date calculations implemented in a reusable module.
-- Lightweight automated tests for critical cycle-calculation and safety-rule logic, using an existing lightweight test setup where possible.
-
-Do not add Supabase, MongoDB, Firebase, a backend API, an external AI service, authentication, analytics, or unnecessary dependencies to this core build.
-
-GitHub should manage source-code version history. Hosting should serve the frontend without receiving personal health records.
-
-Keep the code modular, readable, and suitable for debugging during a 48-hour hackathon.
-
-## 6. REQUIRED PROJECT STRUCTURE
-
-Maintain this structure, adapting only when necessary to the existing project:
-
-src/
-
-- components/
-  - layout/
-  - common/
-  - calendar/
-  - insights/
-- pages/
-  - Today.jsx
-  - LogDay.jsx
-  - Calendar.jsx
-  - Insights.jsx
-  - DoctorGuidance.jsx
-  - Learn.jsx
-  - Ask.jsx
-  - Settings.jsx
-- data/
-  - symptoms.js
-  - redflags.js
-  - demo.js
-- content/
-  - faq.js
-  - lessons.js
-  - conditions.js
-  - firstPeriod.js
-  - pregnancyWeeks.js
-  - sources.js
-- i18n/
-  - en.js
-  - hi.js
-- lib/
-  - cycle.js
-  - storage.js
-  - encryption.js
-  - exportImport.js
-  - safetyRules.js
-  - localDate.js
-- config.js
-- App.jsx
-- main.jsx
-
-All interface strings must be localised through src/i18n/en.js and src/i18n/hi.js. Educational content and FAQs must also have complete English and Hindi versions, not just translated navigation labels.
-
-Put the numerical thresholds used by cycle and medical rules into src/config.js. Keep rules and symptom definitions in data modules rather than embedding them throughout React components.
-
-## 7. FIRST-LAUNCH EXPERIENCE
-
-On the first opening of the app, offer two clear options:
-
-1. "Try with demo data"
-2. "Start fresh"
-
-The demo profile must contain eight months of synthetic period and symptom history, including one long cycle, painful periods, and mood changes.
-
-The demo must trigger at least two appropriate Doctor Guidance cards so the functionality can be demonstrated.
-
-Provide a clear way to reset demo data and start fresh without accidentally mixing demonstration records with genuine user records.
-
-Do not pre-populate personal records for users who select "Start fresh".
-
-## 8. CYCLE CALCULATION ENGINE
-
-Implement all cycle calculations in src/lib/cycle.js. The interface must consume the results of this module instead of calculating predictions independently.
-
-### Date representation
-
-- Store calendar dates as plain local date strings in YYYY-MM-DD format.
-- Do not parse a YYYY-MM-DD string with a conversion that treats it as UTC and shifts the visible date.
-- Use explicit local-calendar date arithmetic for cycle calculations.
-- Test month boundaries, leap years, daylight-saving transitions where applicable, and timezone-related display behaviour.
-
-### Cycle length and history
-
-- Cycle length is the number of calendar days between the first day of one period and the first day of the next.
-- Use the last six complete cycles when available.
-- Never treat an unfinished current cycle as a complete cycle.
-- With fewer than three complete logged cycles, do not generate a prediction. Show: "Log 3 periods and I'll start estimating".
-- Maintain consistent definitions for complete cycles, period duration, and missing logs.
-
-### Next-period estimate
-
-- Calculate the median cycle length from the last six complete cycles, or from the available complete cycles when fewer than six exist.
-- Calculate spread consistently as the maximum cycle length minus the minimum cycle length in the included history.
-- Define the prediction half-width as the greater of two days or the calculated spread.
-- Show the resulting date range and label it "estimate".
-- Document the algorithm and keep it deterministic and testable.
-- Treat these calculation details as an implementation definition, not a medical guarantee.
-
-### Irregular-cycle handling
-
-- Keep the irregularity threshold in src/config.js.
-- Apply the age-dependent rule described in the supplied brief, including its stated FIGO threshold guidance.
-- When recent cycles vary beyond the configured threshold, label the history as irregular.
-- Widen the displayed estimate range in accordance with the documented calculation method.
-- Provide a calm one-line explanation that variation can occur in the first years after periods begin and at other times.
-- Link to "When to see a doctor".
-- Do not suppress relevant medical warnings merely because a cycle is labelled irregular.
-
-### Ovulation and fertile-window estimates
-
-- When the cycle meets the criteria for providing an estimate, calculate ovulation approximately fourteen days before the next expected period.
-- Estimate the fertile window as the five preceding days plus that estimated day.
-- Present dates as ranges where appropriate and always display the disclaimer: "This is an estimate. It can't be used to prevent pregnancy."
-- Do not show ovulation or fertile-window estimates when the cycle is irregular under the configured rule.
-- Explain why the estimate is unavailable.
-- Respect the age-group and pregnancy-mode settings that control whether fertility-related features are displayed.
-
-### Missing period logs
-
-If the gap since the previous period is much longer than the user's established pattern, ask whether a period entry may have been forgotten before interpreting the gap as a long cycle.
-
-Do not silently assume that a missed log means a health event or a medical condition.
-
-## 9. REQUIRED APPLICATION SCREENS
-
-### SCREEN 1 — TODAY
-
-Display:
-
-- Current cycle day where it can be calculated reliably.
-- One plain-language sentence about the current phase.
-- Next-period estimate as a date range where sufficient history exists.
-- A prominent "Log today" action.
-- One personal insight derived from the saved records.
-
-With insufficient history, explain that more periods need to be logged.
-
-Do not present sample values as genuine predictions.
-
-### SCREEN 2 — LOG A DAY
-
-Allow the user to record:
-
-- Period on/off.
-- Flow: spotting, light, medium, heavy.
-- If heavy flow is selected, ask whether a pad needs changing every one to two hours and whether clots are larger than a ₹10 coin.
-- Pain from zero to ten.
-- Whether pain stopped the user from doing normal activities.
-- Symptoms selected from icon buttons, including cramps, headache, acne, bloating, tiredness, mood changes, trouble sleeping, and other configured symptoms.
-- Mood.
-- Energy.
-- Sleep hours.
-- Medicines taken.
-- One optional private text note.
-
-Every selection must have an understandable text label in addition to any icon.
-
-Users must be able to choose which symptoms they track in Settings.
-
-Save actual records locally, allow editing previous dates, validate the input, and confirm that saved records persist after reload.
-
-### SCREEN 3 — CALENDAR
-
-Create a month-view calendar containing:
-
-- Logged period days.
-- Predicted period date ranges.
-- Recorded symptoms.
-- Navigation between months.
-- A way to tap a day to view or edit its records.
-
-Logged and predicted days must look different in both shape or pattern and colour. Never use colour alone to communicate the difference.
-
-### SCREEN 4 — INSIGHTS
-
-Display:
-
-- Cycle history.
-- Cycle-length and period-length bar charts.
-- Average and range of recorded cycle lengths.
-- A clear description of how regular the cycle history appears.
-- Symptom patterns across cycles.
-
-Examples of acceptable, evidence-based patterns:
-
-- "Cramps were logged on days 1–2 of your last 4 periods."
-- "Energy was usually lower in the 5 days before your period in the recorded history."
-
-Show a pattern only after it appears across at least three cycles, and state the number of cycles supporting it.
-
-Never infer a medical diagnosis from recorded symptoms.
-
-Use synthetic demo history to show the feature. Do not display hard-coded insight sentences as though they were calculated from the current user's records.
-
-### SCREEN 5 — WHEN TO SEE A DOCTOR
-
-Implement the rules in src/data/redflags.js and evaluate them against actual saved records.
-
-The specified checks include:
-
-- Periods lasting more than seven days.
-- Needing to change a pad every one to two hours.
-- Clots larger than a ₹10 coin.
-- For adults, cycle lengths shorter than 21 or longer than 35 days for three consecutive cycles.
-- For users under 18, cycle lengths shorter than 21 or longer than 45 days for three consecutive cycles.
-- No period for 90 days when pregnancy is not applicable.
-- Bleeding between periods or after sex.
-- Pain that stops daily life or is not helped by painkillers.
-- Heavy periods accompanied by tiredness, breathlessness, or dizziness, which may warrant assessment for anaemia.
-
-Also provide information about important signs that cannot be established from the app's logs:
-
-- No period by age 15.
-- Periods changing suddenly after years of being regular.
-- Any bleeding after menopause.
-
-Every alert must contain:
-
-- What was noticed.
-- The recorded dates or observations supporting it.
-- Why it matters in plain language.
-- What the user can do next.
-- Appropriate options such as a government health centre, the government's eSanjeevani tele-consultation service, or a gynaecologist.
-- Reliable source references.
-
-Keep numerical medical rules in src/config.js and src/data/redflags.js. Make them maintainable and testable.
-
-Verify medical thresholds against the referenced authoritative guidance. Where age, history, or missing data changes how a rule should be interpreted, do not silently apply an adult-only threshold.
-
-Implement "Prepare for my visit" as a print-ready one-page summary containing cycle history, period duration, symptoms, pain, medicines, and questions to ask the doctor.
-
-The summary must be legible when printed and must not expose demo records in place of real records.
-
-### SCREEN 6 — LEARN
-
-Provide short, readable lessons with simple local illustrations and a "Listen" button using browser-native text-to-speech where supported.
-
-Include:
-
-- Menstrual cycle and its phases.
-- What is common and what may require medical attention.
-- PCOS/PCOD: what it is, how the terms are used in India according to the source material, common signs, the need for medical evaluation, and possible treatment approaches explained generally.
-- Why a period might be late, including stress, weight changes, illness, travel, pregnancy, PCOS, and thyroid problems.
-- Cramps and general evidence-based measures that may help.
-- Pads, cups, and cloth: safe use and hygiene.
-- A "My first period" guide for younger users.
-
-Every health fact must have a reliable source attached to it in the local content files. Do not invent sources or unsupported medical claims.
-
-Include an understandable source link or source attribution at the end of each lesson.
-
-### SCREEN 7 — ASK
-
-Create a local FAQ experience based on at least 30 questions and answers in src/content/faq.js.
-
-- Support English and Hindi.
-- Match the user's question to locally stored FAQs using a transparent keyword-matching method.
-- Show suggested questions.
-- Show a safe, plain-language answer where a relevant FAQ exists.
-- Answers about concerning symptoms must end with appropriate information on when to seek medical attention.
-- When there is no suitable answer, respond: "I don't know that one. A doctor can help."
-- Never diagnose or prescribe.
-- Never send questions, cycle history, or private notes to an external AI service.
-
-This is a local, rule-based FAQ implementation. Do not present it as a real AI chatbot.
-
-### SCREEN 8 — REMINDERS
-
-Provide optional reminders for:
-
-- Next period estimate.
-- Daily check-in.
-- Medicines at times entered by the user.
-- A custom reminder.
-
-All reminders must be off by default.
-
-- Ask notification permission only after the user enables notifications.
-- Use the Notification API where supported.
-- Provide an in-app banner fallback.
-- Handle denied permissions and unsupported browsers gracefully.
-- Do not promise notifications will work when the application is closed unless that behaviour has actually been implemented and tested in the target browser.
-- Respect discreet mode in every reminder.
-
-### SCREEN 9 — PREGNANCY MODE
-
-This mode must be off by default and available only after the user indicates a positive pregnancy test or confirmation from a doctor.
-
-When enabled:
-
-- Estimate gestational week using the first day of the last menstrual period.
-- Estimate the due date as 280 days after that date, clearly labelled as an estimate.
-- Display short weekly information from locally stored sourced content.
-- Provide relevant check-up reminders.
-- Clearly explain urgent warning signs, including bleeding, severe abdominal pain, severe headache or blurred vision, swelling of the face or hands, fever, fluid leaking, and reduced baby movement after 28 weeks.
-- Pause period predictions while pregnancy mode is active.
-- Keep the pregnancy experience separate from ordinary period tracking.
-- If pregnancy mode is turned off, ask neutrally whether the user wants to return to period tracking. Do not assume why they are turning it off.
-- Respect the age group and explicit settings governing pregnancy and fertility-related features.
-
-All pregnancy guidance must be medically sourced and must not be used as a diagnostic tool.
-
-### SCREEN 10 — SETTINGS
-
-Implement:
-
-- Language selection: English or Hindi.
-- Three text-size settings.
-- High contrast.
-- Read aloud.
-- Age group: under 18 or 18 and over.
-- Configurable tracked symptoms.
-- PIN lock.
-- Discreet mode.
-- JSON/CSV export.
-- JSON import.
-- Delete everything.
-
-Age group settings should affect only the relevant guidance, thresholds, and feature visibility. For users under 18, hide fertility and pregnancy features until explicitly enabled in accordance with the specification.
-
-Ensure every setting changes the actual behaviour of the application.
-
-## 10. BILINGUAL SUPPORT
-
-- Keep interface strings in src/i18n/en.js and src/i18n/hi.js.
-- Translate all screens, buttons, labels, form validation, notifications, warnings, health cards, and error states.
-- Translate all FAQ answers and educational content into Hindi.
-- Language switching must update the currently displayed screen without losing records or form data.
-- Use everyday Hindi that a Class 8 student could understand.
-- Medical terminology must include a simple explanation the first time it appears.
-- Do not mix untranslated English text into the Hindi interface unnecessarily.
-- Store language-independent data and use the selected language only for display.
-
-## 11. DESIGN AND ACCESSIBILITY
-
-Build a polished, trustworthy mobile-first application.
-
-- Design first for a 360px-wide screen.
-- Use a warm, calm, supportive visual style.
-- Avoid shaming language, alarmist presentation, and unnecessarily clinical layouts.
-- Make the principal action easy to find on each screen.
-- Body text must be at least 16px.
-- Buttons and major touch targets must be at least 48px tall.
-- Use adequate contrast consistent with WCAG AA.
-- Provide visible keyboard focus.
-- Add accessible labels to form fields and icon buttons.
-- Use semantic headings and landmarks.
-- Do not depend on colour alone to communicate health status or calendar differences.
-- Check all screens at the largest text size and with longer Hindi text.
-- Respect reduced-motion preferences.
-- Use lightweight locally bundled icons and illustrations.
-- Avoid large images, heavy dependencies, unnecessary animations, and decorative features that impair usability.
-
-The result should look polished enough for a competitive social-impact hackathon while remaining realistic, safe, fast, and understandable.
-
-## 12. IMPLEMENTATION ORDER
-
-Build the full application in the existing project. Use the following sequence internally:
-
-1. Set up the application structure, routes, shared components, design system, and English/Hindi text resources.
-2. Implement local date utilities, IndexedDB storage, and the cycle-calculation engine.
-3. Build Today, Log a Day, Calendar, and Insights using actual stored data.
-4. Implement Doctor Guidance using configurable rules and sourced information.
-5. Implement Learn and Ask using local bilingual content.
-6. Implement Settings, PIN encryption, discreet mode, export/import, and deletion.
-7. Implement reminders and pregnancy mode with appropriate safety checks.
-8. Run the final regression, accessibility, and privacy checks.
-
-This order does not permit omitting later screens. Build a complete first version of all ten screens before treating Stage 1 as finished.
-
-Do not add Stage 2 add-ons, an external AI assistant, community functionality, MongoDB, Supabase, or other new backend services during this build.
-
-## 13. REQUIRED TESTS BEFORE DECLARING THE BUILD COMPLETE
-
-Execute the relevant tests and report actual results.
-
-### Application integrity
-
-- Every screen opens and navigates correctly.
-- No critical console errors.
-- No broken imports or build errors.
-- No decorative buttons presented as functional.
-- Form validation and editing work.
-- Saved entries survive a page reload.
-
-### Cycle calculations
-
-- Fewer than three complete cycles produce no prediction.
-- Three or more complete cycles produce a calculated estimate range.
-- The last six complete cycles are used where available.
-- A long cycle is handled consistently.
-- A missing period is not silently interpreted as a medical event.
-- Irregular cycles receive the correct label and widened estimate.
-- Fertility estimates are hidden when required.
-- The fertile-window and ovulation disclaimer appears whenever either estimate is shown.
-- Date calculations work across month boundaries and leap years without shifting logged dates.
-
-### Doctor Guidance
-
-- The demo data triggers at least two appropriate guidance cards.
-- Each card identifies the underlying observations and dates.
-- Adult and under-18 cycle thresholds are applied correctly.
-- Urgent rules are not presented as ordinary informational notices.
-- The print-ready doctor-visit summary works.
-
-### Privacy and storage
-
-- No personal cycle data is sent to a backend or external service.
-- After the application has loaded, the Network panel shows no unexpected third-party requests or tracking resources.
-- Encrypted records are unreadable in the storage panel when PIN protection is enabled.
-- Incorrect PIN attempts do not silently erase data.
-- Enabling, disabling, and changing the PIN preserve the intended records.
-- Export and re-import reproduce the same records.
-- Deletion clears application-owned records and preferences.
-- Demo data is never accidentally merged with real user records.
-
-### Language and accessibility
-
-- Every screen switches between English and Hindi.
-- Longer Hindi content does not break the layout.
-- All screens work at 360px width.
-- Text remains usable at the largest setting.
-- Keyboard navigation and visible focus work.
-- Icons and form controls have accessible names.
-- Logged and predicted calendar days remain distinguishable without colour.
-
-### Reminders and pregnancy mode
-
-- Reminders remain off by default.
-- Denied notification permission produces a graceful fallback.
-- Discreet mode does not reveal sensitive information in reminder text.
-- Pregnancy mode pauses ordinary period predictions.
-- Switching between modes does not corrupt historical records.
-
-## 14. FINAL DELIVERABLE
-
-Build the actual working prototype now.
-
-When you finish, provide a concise implementation report containing:
-
-1. The screens and features implemented.
-2. The files and major modules created.
-3. Which automated and manual tests you actually ran.
-4. Any tests that failed or could not be executed.
-5. Any requirements that remain incomplete.
-6. Any security, medical-content, or browser-compatibility limitations that remain unverified.
-7. Instructions for running, previewing, and publishing the project.
-
-Never claim that the application is fully tested, privacy-secure, medically verified, or complete unless those claims are supported by actual checks.
-
-Prioritise correctness, user safety, privacy, accessibility, and a fully working core experience over feature count.
-
-**Start building the application now. Do not respond with only a plan.**
-
-## Development & Local Setup
-
-Saheli uses [Bun](https://bun.sh) as its fast, all-in-one package manager and JavaScript runtime.
-
-### Prerequisites
-
-- [Bun](https://bun.sh) (v1.1+) installed locally.
-
-### Installation
-
-```bash
-git clone https://github.com/nafisdevtale/remix-of-saheli-cycle-companion.git
-cd remix-of-saheli-cycle-companion
-bun install
+## 1. Core Values & Mission
+
+- **Privacy as a Fundamental Right**: Your menstrual cycle, symptoms, sexual health, and personal notes belong to you alone. Saheli stores records locally on your device with optional AES-GCM encryption. No account creation, email, or phone number is ever required.
+- **Dignity & Accessibility**: Menstrual health education must be respectful, clear, and available in native Indian languages. Saheli supports English, Hindi, and Marathi with 100% key parity and native Indic numerals.
+- **Physical Safety on Shared Phones**: In multi-generational households where phones are frequently shared, Saheli provides Discreet Mode ("Personal Diary"), a fast panic lock, and a PIN/passphrase vault.
+- **Honest Algorithmic Boundaries**: Cycle predictions are displayed as cautious probability intervals rather than deceptive single-day guarantees. Fertility predictions are strictly suppressed for adolescents (under 18) and irregular cycles.
+
+---
+
+## 2. Architecture Overview
+
+Saheli operates on an offline-first, client-authoritative architecture where all health calculations and diary mutations run in the browser runtime.
+
+```mermaid
+flowchart TD
+    subgraph Client ["Client Browser Runtime (Local-First)"]
+        UI["React 19 + TanStack Router UI"]
+        State["App Provider & State Engine"]
+        
+        subgraph Security ["Client Security & Vault"]
+            Crypto["WebCrypto API (AES-256-GCM)"]
+            IDB[("IndexedDB (saheli_db)")]
+            MemStorage["In-Memory Ephemeral Storage"]
+        end
+        
+        subgraph Engines ["Deterministic Engines"]
+            CycleMath["Cycle Math & Statistics Engine"]
+            SafetyTriage["Safety & Emergency Triage"]
+            AudioSynth["Audio & Chime WebAudio Engine"]
+            I18nEngine["Multilingual & Numeral Formatter"]
+        end
+
+        subgraph AI_Workspace ["Saheli AI Workspace"]
+            Diva["DIVA Coordinator"]
+            Eeve["Eeve (Health AI)"]
+            Flash["FLASH (Essentials)"]
+            Instinct["INSTINCT (Media & Mood)"]
+        end
+    end
+
+    subgraph Optional_Backend ["Optional Remote Services (Opt-in)"]
+        GeminiProxy["AI Inference Proxy (/api/ask, /api/diva)"]
+        SupabaseDB[("Supabase RLS Database")]
+        WebPush["VAPID Push Service"]
+    end
+
+    UI --> State
+    State --> Security
+    State --> Engines
+    State --> AI_Workspace
+    Crypto --> IDB
+    SafetyTriage -.->|"Emergency Bypass"| UI
+    AI_Workspace -.->|"Zero-Health Boundary"| GeminiProxy
+    State -.->|"Pseudonymous Posts"| SupabaseDB
+    State -.->|"Discreet Notifications"| WebPush
 ```
 
-### Available Scripts
+---
 
-- `bun run dev`: Start local development server on port 8080 (`http://localhost:8080`).
-- `bun run build`: Create an optimized production build using Vite and Nitro.
-- `bun run preview`: Preview the production build locally.
-- `bun test`: Execute the comprehensive test suite (208 tests across 16 test files).
-- `bun run lint`: Run ESLint to verify code quality and style standards.
-- `bun run format`: Format the codebase using Prettier.
-- `bun run i18n:check`: Verify 100% key parity across all 13 supported Indian languages.
-- `bun run i18n:report`: Generate a detailed multilingual coverage and status report.
+## 3. Local-First Privacy & Encryption Architecture
 
-### Architecture & Security Standards
+- **IndexedDB Storage**: Health diary entries, observations, and configuration preferences live in client-side IndexedDB (`saheli_db`).
+- **WebCrypto AES-256-GCM Vault**:
+  - Keys are derived client-side via PBKDF2 (100,000 iterations, SHA-256) from user PINs or passphrases.
+  - Data at rest is encrypted with standard 12-byte initialization vectors (IV) and 128-bit authentication tags.
+  - If a device is locked, encrypted records cannot be read by any script or inspector without the secret.
+- **Zero Third-Party Trackers**: Zero Google Analytics, zero Meta Pixels, zero advertising SDKs. Network traffic occurs only when explicit user actions request remote services (e.g., Community posts or AI inquiries).
 
-- **Zero-Cloud Health Records**: Menstrual dates, symptoms, moods, and notes are saved exclusively to client-side IndexedDB with optional AES-GCM-256 encryption.
-- **Audited Clinical Sources**: All medical references link to authoritative publications (NHS, WHO, ACOG, FIGO, FOGSI, MoHFW).
-- **Independent & Self-Contained**: No external tracking scripts, third-party fonts, or hosted runtime dependencies.
+---
+
+## 4. Multilingual Framework & Native Numerals
+
+Saheli supports exactly three core languages, audited for 100% key parity (2,156 verified keys each):
+
+1. **English (`en`)**: Baseline international terminology.
+2. **Hindi (`hi`)**: Natural Devanagari script vernacular with authentic medical terminology.
+3. **Marathi (`mr`)**: Regionally adapted Devanagari vocabulary tailored for Maharashtra.
+
+### Indic Numbering & Native Script Numerals
+- By default, non-English languages render numbers in native Devanagari script (e.g., `२८` for `28`, `१२,३४,५६७` for `12,34,567`).
+- Users can toggle between native Indic numerals and standard Latin digits in **Settings → Display Preferences**.
+- Backward-compatible automatic migration: Users previously configured with discontinued regional languages are gracefully migrated to English with an informative in-app notice.
+
+---
+
+## 5. Menstrual Cycle Engine & Tracking Accuracy
+
+The Saheli menstrual tracking engine follows strict clinical rules:
+
+- **Calendar-Day Calculation**: Cycle length is calculated strictly as the calendar-day difference between consecutive confirmed period starts:
+  $$\text{Cycle Length} = \text{Date}(\text{Period Start}_{i+1}) - \text{Date}(\text{Period Start}_i)$$
+- **Bleeding Episode Duration**: Period length is measured as the continuous calendar days of menstrual bleeding, tolerating up to a 1-day unlogged gap within an active episode.
+- **Spotting vs. Confirmed Start**: Isolated single-day spotting mid-cycle is cataloged separately and never resets the cycle start date.
+- **Robust Statistics**: Median cycle lengths and interquartile ranges (IQR) are calculated on validated history windows (last 6 completed cycles).
+- **Leap Year & Timezone Resilience**: Handled strictly via UTC calendar date arithmetic (`YYYY-MM-DD`), preventing daylight-saving or timezone rollover corruption.
+
+---
+
+## 6. Expert Insights & Analytics
+
+Saheli 11.9 structures clinical and statistical feedback into five distinct sections:
+
+1. **Cycle Overview**: Completed cycle counts, median cycle length, range (min–max), and cycle variability.
+2. **Period Overview**: Median bleeding duration, duration range, and bleeding volume distribution (spotting, light, medium, heavy).
+3. **Symptoms & Well-being**: Multi-cycle recurring patterns, phase correlation (follicular, luteal, premenstrual), average pain scores (/10), disruptive pain frequency, and sleep averages.
+4. **Patterns Over Time**: Historical bar charts, Recent 6 vs. All cycles toggle, next predicted window, and complete cycle comparison tables.
+5. **When to Seek Professional Guidance**: Evidence-informed clinical thresholds (cycles $<21$ or $>35$ days, variation $>7$ days, bleeding $>7$ days, heavy soaking $>1-2$ hours).
+
+---
+
+## 7. Educational Sanctuary & Health Literacy
+
+- **Evidence-Based Medical Lessons**: Comprehensive guides on cycle phases, PCOS/PCOD, endometriosis, contraception realities, perimenopause, and thyroid health.
+- **Interactive Symptom Glossary**: Explanations for over 30 physical and emotional symptoms.
+- **Doctor Preparation Guide (`/visit`)**: Formats current cycle history into an exportable, non-identifying consultation summary.
+
+---
+
+## 8. Saheli AI Workspace & Multi-Agent Orchestration
+
+The Saheli AI Workspace coordinates specialized assistants under unified privacy firewalls:
+
+- **DIVA (Central Coordinator)**: Directs user prompts to the appropriate specialist or synthesizes multi-agent responses.
+- **Eeve (Health AI Companion)**: Evidence-based clinical cycle education and triage.
+- **FLASH (Essentials Advisor)**: Recommends curated menstrual products, reusable cups, and comfort essentials.
+- **INSTINCT (Entertainment & Relaxation)**: Suggests feel-good cinema, soothing music, and literature matched to mood.
+- **Customizable Drag-and-Drop Layout**: Specialist cards feature pointer/touch dragging, accessible keyboard Move Up/Down controls, persistent ordering in `localStorage`, and one-click layout resets.
+
+---
+
+## 9. Community & Pseudonymous Peer Support
+
+- **Zero-PII Pseudonymity**: Posts and replies are tied to an ephemeral cryptographic token hash (`Saheli 4821`).
+- **Supabase Row-Level Security (RLS)**: Public tables enforce strict client-side read/write boundaries with pre-publication moderation status.
+- **Automatic Content Filtering**: Client and server filters redact phone numbers, email addresses, and external URLs before storage.
+- **One-Click Instant Purge**: "Delete All My Data" completely purges every post and reply associated with the device hash.
+
+---
+
+## 10. Partner Connect & Cryptographic Sharing
+
+- **Cycle Owner & Partner Roles**: Configurable on first launch or via settings.
+- **Encrypted Synchronization**: Direct asymmetric pairing allowing partners to view cycle phases, supportive tips, and comfort suggestions without exposing intimate notes.
+- **Partner View**: Tailored dashboard displaying cycle phase status, helpful reminders, and mood support guidelines.
+
+---
+
+## 11. Discreet Mode & Physical Safety Controls
+
+- **Discreet Alias**: Toggling Discreet Mode transforms Saheli into a generic "Personal Diary" with neutral themes and subtle floral branding.
+- **Discreet Notifications**: Push notifications display neutral text ("Time for your daily reflection") rather than menstrual reminders.
+- **Panic Exit**: Quick-close actions clear active in-memory session states immediately.
+
+---
+
+## 12. App Lock, Recovery & Vault Security
+
+- **Multi-Factor Vault Options**: Support for 4-to-12 digit PINs or arbitrary alphanumeric passphrases.
+- **Brute-Force Lockout**: Consecutive invalid attempts trigger progressive exponential backoff delays.
+- **Recovery Phrase Verification**: Deterministic recovery keys permit cryptographic vault recovery without central key escrows.
+
+---
+
+## 13. Data Portability: Import, Export & Backup
+
+- **JSON Full-Vault Backup**: Encrypted or plaintext export of full diary records, observations, companion states, and custom settings.
+- **CSV Spreadsheets**: Clean, spreadsheet-friendly exports for review in Excel or sharing with healthcare providers.
+- **Strict Validation on Import**: Imported archives undergo structural sanity checks and schema version migrations before merging into IndexedDB.
+
+---
+
+## 14. Audio Controller: Chimes & Speech Synthesis
+
+- **WebAudio Saheli Chime**: Synthesized calming frequencies (432 Hz / 528 Hz gentle bell chimes) generated via pure Web Audio oscillators without heavy external MP3 downloads.
+- **Read Aloud (TTS)**: Built-in speech synthesis engine supporting natural narration in English, Hindi, and Marathi.
+
+---
+
+## 15. Progressive Web App (PWA) & Offline Reliability
+
+- **Service Worker (`public/sw.js`)**: Static caching strategy that caches only same-origin build assets (`/assets/*`).
+- **Zero Cache on Health Data**: Health records and database interactions are excluded from Service Worker caches.
+- **Installable Desktop & Mobile App**: Compliant W3C web manifest with standalone display support and responsive layout adaptations.
+
+---
+
+## 16. Evidence Base & Medical Safeguards
+
+Saheli's clinical algorithms, educational lessons, and symptom thresholds reference established peer-reviewed protocols:
+- **National Health Service (NHS)**: Period health & adolescent cycle guidelines.
+- **American College of Obstetricians and Gynecologists (ACOG)**: Menstruation in adolescents and cycle length definitions.
+- **World Health Organization (WHO)**: Reproductive health and anemia intervention recommendations.
+- **Federation of Obstetric and Gynaecological Societies of India (FOGSI)**: Clinical guidance adapted for Indian demographic contexts.
+- **Ministry of Health and Family Welfare (MoHFW)**: Rashtriya Kishor Swasthya Karyakram (RKSK) adolescent standards.
+
+---
+
+## 17. Regulatory Compliance & Adolescent Safeguards
+
+- **Digital Personal Data Protection (DPDP) Act 2023 (India)**: Strictly follows data minimization principles. Personal records remain on the data principal's hardware.
+- **Adolescent Safeguards (Under 18)**:
+  - Fertility windows and ovulation estimates are **strictly suppressed**.
+  - Cycle variation tolerance is widened to 21–45 days per clinical guidance.
+  - Educational guidance emphasizes that irregularity in the first 2–3 post-menarche years is normal.
+- **Non-Medical Certification Disclaimer**: Saheli is an educational self-care companion and does not constitute certified medical diagnosis, treatment, or contraceptive device software.
+
+---
+
+## 18. Navigation & Information Architecture
+
+Saheli organizes navigation into five clear categories:
+
+1. **Daily**: Today (`/`), Calendar (`/calendar`), Log (`/log`).
+2. **Understand**: Insights (`/insights`), Learn (`/learn`), Doctor Guidance (`/doctor`).
+3. **Explore**: Self Care (`/selfcare`), Discover (`/discover`), AI Workspace (`/diva`).
+4. **Connect**: Community (`/community`), Partner Connect (`/partner`).
+5. **Manage**: Settings (`/settings`), Help & Feedback (`/feedback`).
+
+---
+
+## 19. Technical Stack & Dependencies
+
+- **Frontend Core**: React 19, TypeScript, Vite 6, Tailwind CSS v4.
+- **Routing**: TanStack Router (file-based routing under `src/routes`).
+- **Icons & Visuals**: Lucide React, Custom SVG motifs.
+- **Data Persistence**: IndexedDB (native `idb` wrappers), WebCrypto API.
+- **Testing**: Vitest, React Testing Library, JSDOM.
+- **Formatting & Linters**: Prettier, ESLint 9.
+
+---
+
+## 20. Getting Started, Development & Quality Gates
+
+### Prerequisites
+- [Bun](https://bun.sh/) (preferred) or [Node.js](https://nodejs.org/) v20+.
+
+### Installation & Local Development
+
+```bash
+# Clone the repository
+git clone https://github.com/nafisdevtale/remix-of-saheli-cycle-companion.git
+cd remix-of-saheli-cycle-companion
+
+# Install dependencies
+bun install
+
+# Start local development server
+bun run dev
+```
+
+### Automated Quality Gates
+
+```bash
+# Run full automated test suite (620+ tests)
+bun run test
+
+# Check i18n key parity across en, hi, mr
+bun run i18n:check
+
+# Run ESLint code checks
+bun run lint
+
+# Build production bundle
+bun run build
+```
+
+---
+
+## 21. License, Governance & Disclaimers
+
+### Open Source License
+Saheli Cycle Companion is distributed under the permissive **MIT License**.
+
+### Emergency Helplines (India)
+- **National Emergency Number**: `112`
+- **Ambulance Services**: `108`
+- **Tele-MANAS Mental Health Support**: `14416` / `1800-891-4416`
+- **KIRAN Mental Health Helpline**: `1800-599-0019`
+- **Women Helpline**: `1091` / `181`
+
+---
+*Saheli — Empowering bodily autonomy, local privacy, and clinical understanding across India.*

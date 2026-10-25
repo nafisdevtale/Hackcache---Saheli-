@@ -93,13 +93,13 @@ describe("SAHELI 10.3 — Discover Layout & Button Overlap Repair", () => {
       expect(screen.getByRole("button", { name: /सहेजे गए लेख/i })).toBeInTheDocument();
     });
 
-    it("renders all category labels and bookmarks button in Urdu RTL without crashing", () => {
-      mockAppState.lang = "ur";
+    it("renders all category labels and bookmarks button in Marathi without crashing", () => {
+      mockAppState.lang = "mr";
       render(<Discover />);
 
-      expect(screen.getByText("علم اور آگاہی")).toBeInTheDocument();
-      expect(screen.getByText(/سہیلی دریافت/i)).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /محفوظ شدہ مضامین/i })).toBeInTheDocument();
+      expect(screen.getByText("सर्व विषय")).toBeInTheDocument();
+      expect(screen.getByText(/सहेली शोध/i)).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /जतन केलेले लेख/i })).toBeInTheDocument();
     });
   });
 

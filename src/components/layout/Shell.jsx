@@ -26,6 +26,8 @@ import {
   Film,
   Bot,
   HeartHandshake,
+  HelpCircle,
+  HeartPulse,
 } from "lucide-react";
 import { useApp } from "@/App.jsx";
 import { Btn, Card, speak, cx } from "@/components/common/ui.jsx";
@@ -274,47 +276,51 @@ function LockScreen() {
 
 const NAV_SECTIONS = [
   {
-    id: "rhythm",
-    titleKey: "nav.rhythmSection",
-    defaultTitle: "Daily Rhythm",
+    id: "daily",
+    titleKey: "nav.catDaily",
+    defaultTitle: "Daily",
     items: [
       { to: "/", key: "nav.today", icon: Home },
       { to: "/calendar", key: "nav.calendar", icon: CalendarDays },
       { to: "/log", key: "nav.log", icon: Droplet },
-      { to: "/insights", key: "nav.insights", icon: BarChart3 },
     ],
   },
   {
-    id: "sanctuary",
-    titleKey: "nav.sanctuarySection",
-    defaultTitle: "Sanctuary",
+    id: "understand",
+    titleKey: "nav.catUnderstand",
+    defaultTitle: "Understand",
+    items: [
+      { to: "/insights", key: "nav.insights", icon: BarChart3 },
+      { to: "/learn", key: "nav.learn", icon: BookOpen },
+      { to: "/doctor", key: "nav.doctor", icon: HeartPulse },
+    ],
+  },
+  {
+    id: "explore",
+    titleKey: "nav.catExplore",
+    defaultTitle: "Explore",
     items: [
       { to: "/selfcare", key: "nav.selfCare", icon: Sparkles },
-      { to: "/companion", key: "nav.companion", icon: Heart },
       { to: "/discover", key: "nav.discover", icon: Compass },
-      { to: "/learn", key: "nav.learn", icon: BookOpen },
+      { to: "/diva", key: "nav.aiWorkspace", icon: Bot, badge: "AI" },
     ],
   },
   {
-    id: "ai",
-    titleKey: "nav.aiSection",
-    defaultTitle: "AI Intelligence",
-    items: [
-      { to: "/diva", key: "nav.diva", icon: Bot, badge: "Hub" },
-      { to: "/ask", key: "nav.ask", icon: MessageCircle },
-      { to: "/flash", key: "nav.flash", icon: ShoppingBag },
-      { to: "/instinct", key: "nav.instinct", icon: Film },
-    ],
-  },
-  {
-    id: "system",
-    titleKey: "nav.systemSection",
-    defaultTitle: "Account",
+    id: "connect",
+    titleKey: "nav.catConnect",
+    defaultTitle: "Connect",
     items: [
       { to: "/community", key: "nav.community", icon: Users },
       { to: "/partner", key: "partner.title", icon: HeartHandshake },
+    ],
+  },
+  {
+    id: "manage",
+    titleKey: "nav.catManage",
+    defaultTitle: "Manage",
+    items: [
       { to: "/settings", key: "nav.settings", icon: Settings },
-      { to: "/more", key: "nav.more", icon: Menu },
+      { to: "/feedback", key: "nav.feedback", icon: HelpCircle },
     ],
   },
 ];

@@ -12,16 +12,6 @@ const rootSrc = path.resolve(__dirname, "../src");
 const SCRIPT_RANGES = {
   hi: [0x0900, 0x097f], // Devanagari
   mr: [0x0900, 0x097f], // Devanagari
-  bn: [0x0980, 0x09ff], // Bengali
-  as: [0x0980, 0x09ff], // Bengali-Assamese
-  te: [0x0c00, 0x0c7f], // Telugu
-  kn: [0x0c80, 0x0cff], // Kannada
-  ta: [0x0b80, 0x0bff], // Tamil
-  gu: [0x0a80, 0x0aff], // Gujarati
-  pa: [0x0a00, 0x0a7f], // Gurmukhi
-  ml: [0x0d00, 0x0d7f], // Malayalam
-  or: [0x0b00, 0x0b7f], // Odia
-  ur: [0x0600, 0x06ff], // Arabic/Urdu
 };
 
 const DEVANAGARI_LETTERS = /[\u0900-\u0963\u0966-\u097F]/;
@@ -37,9 +27,11 @@ const enKeys = Object.keys(DICTS.en).sort();
 const enKeySet = new Set(enKeys);
 
 console.log(`\n======================================================`);
-console.log(` SAHELI 10.1 MULTILINGUAL & SOURCE CODE INTEGRITY AUDIT`);
+console.log(` SAHELI 11.9 MULTILINGUAL & SOURCE CODE INTEGRITY AUDIT`);
 console.log(` Base dictionary (en): ${enKeys.length} keys`);
-console.log(` Total registered languages: ${LANGUAGES.length}`);
+console.log(
+  ` Supported languages: English (en), Hindi (hi), Marathi (mr) (${LANGUAGES.length} total)`,
+);
 console.log(`======================================================\n`);
 
 // -----------------------------------------------------------------------------
@@ -183,7 +175,7 @@ for (const lang of LANGUAGES) {
 console.log(`\n------------------------------------------------------`);
 if (totalErrors === 0) {
   console.log(
-    `🎉 ALL 13 LANGUAGES & SOURCE CODE PASS: 100% key parity, zero leakage, zero contamination!\n`,
+    `🎉 ALL 3 SUPPORTED LANGUAGES (EN, HI, MR) & SOURCE CODE PASS: 100% key parity, zero leakage, zero contamination!\n`,
   );
   process.exit(0);
 } else {

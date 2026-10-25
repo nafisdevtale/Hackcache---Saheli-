@@ -100,10 +100,26 @@ function getStorage(type = "localStorage") {
   };
 }
 
+export const SUPPORTED_LANG_CODES = ["en", "hi", "mr"];
+
 export function loadPrefs() {
   try {
     const store = getStorage("localStorage");
-    return { ...DEFAULT_PREFS, ...JSON.parse(store?.getItem(PREFS_KEY) || "{}") };
+    const raw = JSON.parse(store?.getItem(PREFS_KEY) || "{}");
+    const prefs = { ...DEFAULT_PREFS, ...raw };
+
+    // Saheli 11.9: Safe migration for users with discontinued language preferences
+    if (prefs.lang && !SUPPORTED_LANG_CODES.includes(prefs.lang)) {
+      prefs.langMigration = {
+        previousLang: prefs.lang,
+        migratedTo: "en",
+        migratedAt: new Date().toISOString(),
+      };
+      prefs.lang = "en";
+      savePrefs(prefs);
+    }
+
+    return prefs;
   } catch {
     return { ...DEFAULT_PREFS };
   }

@@ -161,7 +161,7 @@ describe("Saheli 10.0 — Project Nova User Interaction Regression Suite", () =>
     it("allows user to toggle specialist tabs and submit inquiries", async () => {
       render(<Diva />);
 
-      const flashBtn = screen.getByRole("button", { name: /FLASH/i });
+      const flashBtn = screen.getByRole("button", { name: /FLASH \(Essentials\)/i });
       fireEvent.click(flashBtn);
 
       const input = screen.getByPlaceholderText(/Ask about your cycle, finding essentials/i);

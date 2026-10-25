@@ -69,25 +69,19 @@ describe("Saheli 9.0 — Visual, Typography & Layout Regression Suite", () => {
       });
     });
 
-    it("preserves proper Urdu RTL translation and directionality", () => {
-      const urduName = translate("ur", "app.name");
-      const urduTagline = translate("ur", "app.tagline");
-      const urduCompanions = translate("ur", "companion.speciesAvailable", { n: 15 });
+    it("preserves proper Marathi translation and directionality", () => {
+      const mrName = translate("mr", "app.name");
+      const mrTagline = translate("mr", "app.tagline");
+      const mrCompanions = translate("mr", "companion.speciesAvailable", { n: 15 });
 
-      expect(urduName).toBe("سہیلی");
-      expect(urduTagline).toBe("آپ کی نجی ماہواری ساتھی");
-      expect(urduCompanions).toContain("15");
-      expect(urduCompanions).toContain("ساتھی دستیاب ہیں");
+      expect(mrName).toBe("सहेली");
+      expect(mrTagline).toBeDefined();
+      expect(mrCompanions).toContain("15");
+      expect(mrCompanions).toContain("साथीदार उपलब्ध");
     });
 
-    it("interpolates count variables correctly across Hindi, Bengali, Tamil and Marathi", () => {
+    it("interpolates count variables correctly across Hindi and Marathi", () => {
       expect(translate("hi", "companion.speciesAvailable", { n: 15 })).toContain("15 साथी उपलब्ध");
-      expect(translate("bn", "companion.speciesAvailable", { n: 15 })).toContain(
-        "15টি সঙ্গী উপলব্ধ",
-      );
-      expect(translate("ta", "companion.speciesAvailable", { n: 15 })).toContain(
-        "15 தோழர்கள் உள்ளன",
-      );
       expect(translate("mr", "companion.speciesAvailable", { n: 15 })).toContain(
         "15 साथीदार उपलब्ध",
       );

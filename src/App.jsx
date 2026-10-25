@@ -321,8 +321,7 @@ export function AppProvider({ children }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   useEffect(() => {
     speechController.stop();
-    const isRtl = prefs.lang === "ur";
-    document.documentElement.dir = isRtl ? "rtl" : "ltr";
+    document.documentElement.dir = "ltr";
     document.documentElement.lang = prefs.lang || "en";
     const id = setTimeout(() => {
       if (prefs.discreet) document.title = translate(prefs.lang, "app.discreetName");
@@ -331,6 +330,23 @@ export function AppProvider({ children }) {
     }, 0);
     return () => clearTimeout(id);
   }, [prefs.discreet, prefs.lang, pathname]);
+
+  // Nonintrusive language migration notification for existing users
+  useEffect(() => {
+    if (prefs.langMigration) {
+      setBanners((b) => {
+        if (b.some((x) => x.id === "lang-migration-notice")) return b;
+        return [
+          {
+            id: "lang-migration-notice",
+            text: "Saheli now focuses exclusively on English, Hindi, and Marathi. Your language preference has been adjusted to English. All your health records, notes, and encrypted data remain safely preserved.",
+            dismissible: true,
+          },
+          ...b,
+        ];
+      });
+    }
+  }, [prefs.langMigration]);
 
   async function writeRecord(next, nextMeta = meta, extraDeletes = []) {
     let value;
@@ -1106,7 +1122,16 @@ export function AppProvider({ children }) {
     banners: prefs.discreet
       ? bannersView.map((b) => ({ ...b, text: t("rem.msg.checkin") }))
       : bannersView,
-    dismissBanner: (id) => setBanners((b) => b.filter((x) => x.id !== id)),
+    dismissBanner: (id) => {
+      setBanners((b) => {
+        const target = b.find((x) => x.id === id);
+        if (target?.onDismiss) target.onDismiss();
+        return b.filter((x) => x.id !== id);
+      });
+      if (id === "lang-migration-notice") {
+        setPrefs({ langMigration: null });
+      }
+    },
     fire,
     ...api,
   };

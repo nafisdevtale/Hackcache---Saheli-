@@ -61,7 +61,6 @@ describe("SAHELI 8.1 — Companion Dashboard & Global UI Repair", () => {
       expect(translate("en", "pet.badge")).toBe("Your Companion");
       expect(translate("hi", "pet.badge")).toBe("आपका साथी");
       expect(translate("mr", "pet.badge")).toBe("तुमचा साथीदार");
-      expect(translate("ur", "pet.badge")).toBe("آپ کا ساتھی");
 
       expect(translate("en", "pet.adoptTitle")).toBe("Meet Your New Companion");
       expect(translate("en", "pet.adoptSubtitle")).toBe(
@@ -77,27 +76,27 @@ describe("SAHELI 8.1 — Companion Dashboard & Global UI Repair", () => {
       const hiCount = translate("hi", "companion.speciesAvailable", { n: PET_SPECIES.length });
       expect(hiCount).toBe("15 साथी उपलब्ध");
 
-      const urCount = translate("ur", "companion.speciesAvailable", { n: PET_SPECIES.length });
-      expect(urCount).toBe("15 ساتھی دستیاب ہیں");
+      const mrCount = translate("mr", "companion.speciesAvailable", { n: PET_SPECIES.length });
+      expect(mrCount).toBe("15 साथीदार उपलब्ध");
     });
 
-    it("resolves all 15 species names and descriptions across en, hi, and ur", () => {
+    it("resolves all 15 species names and descriptions across en, hi, and mr", () => {
       for (const pet of PET_SPECIES) {
         const enName = translate("en", pet.nameKey);
         const hiName = translate("hi", pet.nameKey);
-        const urName = translate("ur", pet.nameKey);
+        const mrName = translate("mr", pet.nameKey);
 
         expect(enName).not.toMatch(/^pet\.species\./);
         expect(hiName).not.toMatch(/^pet\.species\./);
-        expect(urName).not.toMatch(/^pet\.species\./);
+        expect(mrName).not.toMatch(/^pet\.species\./);
 
         const enDesc = translate("en", pet.descriptionKey);
         const hiDesc = translate("hi", pet.descriptionKey);
-        const urDesc = translate("ur", pet.descriptionKey);
+        const mrDesc = translate("mr", pet.descriptionKey);
 
         expect(enDesc).not.toMatch(/^pet\.species\./);
         expect(hiDesc).not.toMatch(/^pet\.species\./);
-        expect(urDesc).not.toMatch(/^pet\.species\./);
+        expect(mrDesc).not.toMatch(/^pet\.species\./);
         expect(enDesc.length).toBeGreaterThan(10);
       }
     });
@@ -203,15 +202,14 @@ describe("SAHELI 8.1 — Companion Dashboard & Global UI Repair", () => {
       expect(screen.queryByText(/pet\./)).not.toBeInTheDocument();
     });
 
-    it("renders the entire adoption screen in Urdu with zero English leakage on keys", () => {
-      mockAppState.lang = "ur";
-      mockAppState.prefs = { lang: "ur" };
+    it("renders the entire adoption screen in Marathi with zero English leakage on keys", () => {
+      mockAppState.lang = "mr";
+      mockAppState.prefs = { lang: "mr" };
 
       render(<Companion />);
 
-      expect(screen.getByText("آپ کا ساتھی")).toBeInTheDocument();
-      expect(screen.getByText("15 ساتھی دستیاب ہیں")).toBeInTheDocument();
-      expect(screen.getAllByText("پیاری بلی").length).toBeGreaterThanOrEqual(1);
+      expect(screen.getByText("तुमचा साथीदार")).toBeInTheDocument();
+      expect(screen.getByText("15 साथीदार उपलब्ध")).toBeInTheDocument();
       expect(screen.queryByText(/pet\./)).not.toBeInTheDocument();
     });
   });

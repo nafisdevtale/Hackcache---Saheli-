@@ -40,6 +40,7 @@ import {
 } from "@/components/nova";
 import { AGENT_REGISTRY } from "@/lib/divaRegistry.js";
 import { executeDivaRequest } from "@/lib/divaOrchestrator.js";
+import { AiWorkspace } from "@/components/diva/AiWorkspace.jsx";
 
 const SUGGESTED_PROMPTS = [
   {
@@ -211,6 +212,9 @@ export default function Diva() {
           </div>
         </div>
       </NovaCard>
+
+      {/* Draggable Saheli AI Workspace */}
+      <AiWorkspace t={t} onSelectSpecialist={(id) => setSelectedAgent(id)} />
 
       {/* Specialist Selector Bar */}
       <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">

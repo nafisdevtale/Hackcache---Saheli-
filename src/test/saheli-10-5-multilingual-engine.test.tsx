@@ -24,21 +24,11 @@ import { screenSafety } from "../server/api/ai.ts";
 
 describe("Saheli 10.5 — Authoritative Multilingual Engine", () => {
   describe("1. Core Locale Engine (src/lib/locale.js)", () => {
-    it("maps all 13 supported languages to valid BCP 47 locale tags", () => {
+    it("maps all supported languages to valid BCP 47 locale tags", () => {
       const expectedTags: Record<string, string> = {
         en: "en-IN",
         hi: "hi-IN",
         mr: "mr-IN",
-        bn: "bn-IN",
-        as: "as-IN",
-        gu: "gu-IN",
-        kn: "kn-IN",
-        ml: "ml-IN",
-        or: "or-IN",
-        pa: "pa-IN",
-        ta: "ta-IN",
-        te: "te-IN",
-        ur: "ur-IN",
       };
 
       for (const [code, expected] of Object.entries(expectedTags)) {
@@ -46,9 +36,8 @@ describe("Saheli 10.5 — Authoritative Multilingual Engine", () => {
       }
     });
 
-    it("correctly identifies Urdu as RTL and others as LTR", () => {
-      expect(isRTL("ur")).toBe(true);
-      const ltrLangs = ["en", "hi", "mr", "bn", "as", "gu", "kn", "ml", "or", "pa", "ta", "te"];
+    it("verifies supported languages are LTR", () => {
+      const ltrLangs = ["en", "hi", "mr"];
       for (const lang of ltrLangs) {
         expect(isRTL(lang)).toBe(false);
       }
@@ -57,7 +46,7 @@ describe("Saheli 10.5 — Authoritative Multilingual Engine", () => {
     it("formats integers with native digits by default for non-English, and Latin digits for English", () => {
       expect(formatInteger(14, "en")).toBe("14");
       expect(formatInteger(28, "hi")).toBe("२८");
-      expect(formatInteger(28, "bn")).toBe("২৮");
+      expect(formatInteger(28, "mr")).toBe("२८");
       expect(formatInteger(1000, "en")).toBe("1,000");
       expect(formatInteger(28, "hi", { latinNumerals: true })).toBe("28");
     });
@@ -66,41 +55,13 @@ describe("Saheli 10.5 — Authoritative Multilingual Engine", () => {
       const hiDeva = formatInteger(14, "hi", { nativeNumerals: true });
       expect(hiDeva).toBe("१४");
 
-      const bnDigits = formatInteger(14, "bn", { nativeNumerals: true });
-      expect(bnDigits).toBe("১৪");
-
-      const guDigits = formatInteger(14, "gu", { nativeNumerals: true });
-      expect(guDigits).toBe("૧૪");
-
-      const knDigits = formatInteger(14, "kn", { nativeNumerals: true });
-      expect(knDigits).toBe("೧೪");
-
-      const taDigits = formatInteger(14, "ta", { nativeNumerals: true });
-      expect(taDigits).toBe("௧௪");
-
-      const teDigits = formatInteger(14, "te", { nativeNumerals: true });
-      expect(teDigits).toBe("౧౪");
-
-      const mlDigits = formatInteger(14, "ml", { nativeNumerals: true });
-      expect(mlDigits).toBe("൧൪");
-
-      const orDigits = formatInteger(14, "or", { nativeNumerals: true });
-      expect(orDigits).toBe("୧୪");
-
-      const paDigits = formatInteger(14, "pa", { nativeNumerals: true });
-      expect(paDigits).toBe("੧੪");
-
-      const urDigits = formatInteger(14, "ur", { nativeNumerals: true });
-      expect(urDigits).toBe("۱۴");
+      const mrDeva = formatInteger(14, "mr", { nativeNumerals: true });
+      expect(mrDeva).toBe("१४");
     });
 
     it("parses localized native Indic numbers back to standard numbers", () => {
       expect(parseLocalizedNumber("१४", "hi")).toBe(14);
-      expect(parseLocalizedNumber("১৪", "bn")).toBe(14);
-      expect(parseLocalizedNumber("૧૪", "gu")).toBe(14);
-      expect(parseLocalizedNumber("೧೪", "kn")).toBe(14);
-      expect(parseLocalizedNumber("௧௪", "ta")).toBe(14);
-      expect(parseLocalizedNumber("౧౪", "te")).toBe(14);
+      expect(parseLocalizedNumber("१४", "mr")).toBe(14);
       expect(parseLocalizedNumber("1,234.56", "en")).toBe(1234.56);
     });
 
@@ -137,24 +98,10 @@ describe("Saheli 10.5 — Authoritative Multilingual Engine", () => {
   });
 
   describe("2. Translation & Dictionary Parity", () => {
-    it("ensures all 13 languages are registered in LANGUAGES metadata", () => {
-      expect(LANGUAGES.length).toBe(13);
+    it("ensures all supported languages are registered in LANGUAGES metadata", () => {
+      expect(LANGUAGES.length).toBe(3);
       const codes = LANGUAGES.map((l) => l.code);
-      const required = [
-        "en",
-        "hi",
-        "mr",
-        "bn",
-        "as",
-        "gu",
-        "kn",
-        "ml",
-        "or",
-        "pa",
-        "ta",
-        "te",
-        "ur",
-      ];
+      const required = ["en", "hi", "mr"];
       for (const r of required) {
         expect(codes).toContain(r);
       }
