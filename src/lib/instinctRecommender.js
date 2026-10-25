@@ -18,14 +18,17 @@ import {
  */
 export function filterSuitability(items, profile = {}, library = {}) {
   const notInterestedSet = new Set(library?.notInterested || []);
-  const ageFilter = profile?.ageFilter || "all";
+  const isMinor =
+    profile?.isUnder18 ||
+    profile?.ageGroup === "under18" ||
+    profile?.ageFilter === "family_friendly";
 
   return items.filter((item) => {
     // 1. Check user exclusion
     if (notInterestedSet.has(item.id)) return false;
 
     // 2. Age safety
-    if (ageFilter === "family_friendly") {
+    if (isMinor) {
       if (item.ageSuitability && item.ageSuitability !== "family_friendly") {
         return false;
       }

@@ -22,6 +22,7 @@ export interface NovaShellProps {
   onReadAloud?: () => void;
   banners?: ReactNode;
   systemAlerts?: ReactNode;
+  userRole?: "owner" | "partner";
 }
 
 export const NovaShell: React.FC<NovaShellProps> = ({
@@ -34,6 +35,7 @@ export const NovaShell: React.FC<NovaShellProps> = ({
   onReadAloud,
   banners,
   systemAlerts,
+  userRole = "owner",
 }) => {
   return (
     <div
@@ -55,6 +57,7 @@ export const NovaShell: React.FC<NovaShellProps> = ({
         isOnline={isOnline}
         onQuickLog={onQuickLog}
         onReadAloud={onReadAloud}
+        userRole={userRole}
       />
 
       {/* Main Content Viewport */}
@@ -128,7 +131,7 @@ export const NovaShell: React.FC<NovaShellProps> = ({
       </div>
 
       {/* Mobile Floating Bottom Dock (< 768px) */}
-      <NovaMobileDock t={t} onQuickLog={onQuickLog} />
+      <NovaMobileDock t={t} onQuickLog={onQuickLog} userRole={userRole} />
     </div>
   );
 };

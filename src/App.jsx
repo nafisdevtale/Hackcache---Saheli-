@@ -40,6 +40,7 @@ import {
 } from "./lib/encryption.js";
 import { analyze, getAuthoritativeCycleState } from "./lib/cycle.js";
 import { evaluateSafety } from "./lib/safetyRules.js";
+import { getAgePolicy, calculateAge, isValidDob } from "./lib/agePolicy.ts";
 import { buildDemo } from "./data/demo.js";
 import {
   emptyRecord,
@@ -172,6 +173,16 @@ export function AppProvider({ children }) {
         stateRef.current = { meta: m, record: normalized };
         setRecord(normalized);
         setStatus("ready");
+        const activeRole = normalized?.settings?.role || m?.role || "owner";
+        if (
+          activeRole === "partner" &&
+          typeof window !== "undefined" &&
+          (window.location.hash === "" ||
+            window.location.hash === "#/" ||
+            window.location.hash === "#")
+        ) {
+          window.location.hash = "#/partner";
+        }
       } catch {
         setStatus("error");
       }
@@ -363,7 +374,11 @@ export function AppProvider({ children }) {
     },
     async completeOnboarding({
       mode = "real",
+      role = "owner",
+      dob = null,
       ageGroup = "under18",
+      lockMethod = "none",
+      secret = null,
       pin = null,
       firstPeriodDate = null,
       discreet = false,
@@ -381,8 +396,19 @@ export function AppProvider({ children }) {
       }
 
       const r = emptyRecord();
-      r.settings.ageGroup = ageGroup || "under18";
-      if (r.settings.ageGroup === "under18") r.settings.showFertility = false;
+      r.settings.role = role || "owner";
+
+      if (dob && isValidDob(dob, today)) {
+        r.settings.dob = dob;
+        const calc = calculateAge(dob, today);
+        r.settings.ageGroup = calc.isUnder18 ? "under18" : "adult";
+      } else {
+        r.settings.ageGroup = ageGroup || "under18";
+      }
+
+      if (r.settings.ageGroup === "under18") {
+        r.settings.showFertility = false;
+      }
 
       if (healthConditions && typeof healthConditions === "object") {
         r.healthConditions = {
@@ -392,7 +418,7 @@ export function AppProvider({ children }) {
         };
       }
 
-      if (firstPeriodDate && isValidDate(firstPeriodDate)) {
+      if (role === "owner" && firstPeriodDate && isValidDate(firstPeriodDate)) {
         r.days[firstPeriodDate] = {
           ...blankDay(firstPeriodDate),
           period: true,
@@ -403,16 +429,31 @@ export function AppProvider({ children }) {
         };
       }
 
-      if (pin && isValidSecret(pin)) {
-        const salt = randomSaltB64();
-        const iterations = CONFIG.pbkdf2Iterations;
-        const key = await deriveKey(pin, salt, iterations);
+      const effectiveLockMethod =
+        lockMethod !== "none" ? lockMethod : pin && isValidSecret(pin) ? "pin" : "none";
+      const effectiveSecret = secret || pin;
+
+      if (effectiveLockMethod !== "none" && effectiveSecret && isValidSecret(effectiveSecret)) {
+        const { vaultMeta: newVm, vaultDEK: dek } = await initializeVault({
+          lockMethod: effectiveLockMethod,
+          secret: effectiveSecret,
+        });
+        dekRef.current = dek;
+        keyRef.current = dek;
+        setVaultMeta(newVm);
+
         const nextMeta = {
           onboarded: true,
           mode: "real",
-          pin: { enabled: true, salt, iterations, kdf: "PBKDF2-SHA256", cipher: "AES-GCM-256" },
+          role,
+          pin: {
+            enabled: true,
+            method: effectiveLockMethod,
+            cipher: "AES-GCM-256",
+            kdf: "PBKDF2-SHA256",
+          },
         };
-        const ct = await encryptJSON(key, r);
+        const ct = await encryptVaultRecord(dek, r);
         await idbWrite(
           [
             ["meta", nextMeta],
@@ -420,16 +461,78 @@ export function AppProvider({ children }) {
           ],
           ["demo"],
         );
-        keyRef.current = key;
+        keyRef.current = dek;
         setMeta(nextMeta);
         setRecord(r);
         stateRef.current = { meta: nextMeta, record: r };
         setStatus("ready");
       } else {
-        const nextMeta = { onboarded: true, mode: "real", pin: { enabled: false } };
+        const nextMeta = { onboarded: true, mode: "real", role, pin: { enabled: false } };
         await writeRecord(r, nextMeta, ["demo"]);
         setStatus("ready");
       }
+
+      if (role === "partner") {
+        if (typeof window !== "undefined") {
+          window.location.hash = "#/partner";
+        }
+      }
+    },
+    async switchRole(newRole) {
+      if (newRole !== "owner" && newRole !== "partner") return;
+      await mutate(({ record: r, meta: m }) => {
+        const nextSettings = { ...r.settings, role: newRole };
+        const nextRecord = { ...r, settings: nextSettings };
+        const nextMeta = { ...m, role: newRole };
+        return writeRecord(nextRecord, nextMeta);
+      });
+      if (typeof window !== "undefined") {
+        if (newRole === "partner") {
+          window.location.hash = "#/partner";
+        } else {
+          window.location.hash = "#/";
+        }
+      }
+    },
+    async updateDateOfBirth(newDob) {
+      if (!isValidDob(newDob, today)) throw new Error("Invalid date of birth");
+      const calc = calculateAge(newDob, today);
+      await mutate(({ record: r, meta: m }) => {
+        const nextSettings = {
+          ...r.settings,
+          dob: newDob,
+          ageGroup: calc.isUnder18 ? "under18" : "adult",
+          showFertility: calc.isUnder18 ? false : r.settings?.showFertility,
+        };
+        const nextRecord = { ...r, settings: nextSettings };
+        return writeRecord(nextRecord, m);
+      });
+    },
+    async updateAdultConsent() {
+      await mutate(({ record: r, meta: m }) => {
+        const nextSettings = {
+          ...r.settings,
+          ageGroup: "adult",
+          showFertility: true,
+          adultConsent: {
+            version: 1,
+            confirmedAt: new Date().toISOString(),
+          },
+          adultTransitionPostponed: false,
+        };
+        const nextRecord = { ...r, settings: nextSettings };
+        return writeRecord(nextRecord, m);
+      });
+    },
+    async postponeAdultTransition() {
+      await mutate(({ record: r, meta: m }) => {
+        const nextSettings = {
+          ...r.settings,
+          adultTransitionPostponed: true,
+        };
+        const nextRecord = { ...r, settings: nextSettings };
+        return writeRecord(nextRecord, m);
+      });
     },
     async exitDemo() {
       const r = emptyRecord();
@@ -701,9 +804,25 @@ export function AppProvider({ children }) {
     () => (record && analysis ? evaluateSafety({ record, analysis, today }) : null),
     [record, analysis, today],
   );
-  const fertilityVisible = !!settings && settings.showFertility !== false;
+  const agePolicy = useMemo(() => getAgePolicy(record, today), [record, today]);
+  const userRole = record?.settings?.role || meta?.role || "owner";
+
+  const isAdultTransitionEligible = useMemo(() => {
+    if (!record?.settings?.dob) return false;
+    const calc = calculateAge(record.settings.dob, today);
+    return (
+      !calc.isUnder18 && !record.settings.adultConsent && !record.settings.adultTransitionPostponed
+    );
+  }, [record, today]);
+
+  const fertilityVisible =
+    !!settings &&
+    settings.showFertility !== false &&
+    agePolicy.capabilities.canViewFertilityPredictions;
   const pregnancyVisible =
-    !!settings && (settings.ageGroup === "adult" || settings.pregnancyOptIn === true);
+    !!settings &&
+    (settings.ageGroup === "adult" || settings.pregnancyOptIn === true) &&
+    agePolicy.capabilities.canViewFertilityPredictions;
 
   // ---- Reminders (only while the app is open) ----
   const fired = useRef(new Set());
@@ -848,6 +967,9 @@ export function AppProvider({ children }) {
     analysis,
     cycleState,
     safety,
+    agePolicy,
+    userRole,
+    isAdultTransitionEligible,
     fertilityVisible,
     pregnancyVisible,
     identity,

@@ -38,6 +38,7 @@ import { QuickLogSheet } from "@/components/logging/QuickLogSheet.jsx";
 import { RhythmMotif } from "@/components/brand/SaheliArt.jsx";
 import { NovaShell } from "@/components/nova";
 import { UnifiedLockScreen } from "@/components/security/UnifiedLockScreen.jsx";
+import { AdultTransitionCard } from "@/components/onboarding/AdultTransitionCard.jsx";
 
 let failCount = 0;
 
@@ -367,12 +368,14 @@ export function Shell({ children }) {
         prefs={prefs}
         setPrefs={setPrefs}
         isOnline={isOnline}
+        userRole={app.userRole}
         onQuickLog={() => setQuickLogOpen(true)}
         onReadAloud={() =>
           setSpeechFailed(!speak(document.getElementById("main")?.innerText || "", prefs.lang))
         }
         systemAlerts={
           <>
+            <AdultTransitionCard />
             {!isOnline && (
               <div
                 role="status"

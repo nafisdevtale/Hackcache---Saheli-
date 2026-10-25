@@ -17,6 +17,7 @@
 */
 import { CONFIG } from "../config.js";
 import { addDays, diffDays, todayStr } from "./localDate.js";
+import { calculateAge } from "./agePolicy.ts";
 
 export function periodDates(days = {}) {
   return Object.keys(days)
@@ -517,6 +518,7 @@ export function getAuthoritativeCycleState(record, targetDate = todayStr()) {
   const isTrackingPaused = !!settings.trackingPaused;
   const isUnder18 =
     settings.ageGroup === "under18" ||
+    (settings.dob && calculateAge(settings.dob, targetDate).isUnder18) ||
     (settings.birthYear && new Date(targetDate).getFullYear() - Number(settings.birthYear) < 18);
   const effectiveAgeGroup = isUnder18 ? "under18" : settings.ageGroup || "adult";
 

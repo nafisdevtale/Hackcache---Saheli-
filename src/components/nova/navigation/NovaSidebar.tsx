@@ -38,6 +38,7 @@ export interface NovaSidebarProps {
   isOnline: boolean;
   onQuickLog: () => void;
   onReadAloud?: () => void;
+  userRole?: "owner" | "partner";
 }
 
 export const NovaSidebar: React.FC<NovaSidebarProps> = ({
@@ -47,8 +48,11 @@ export const NovaSidebar: React.FC<NovaSidebarProps> = ({
   isOnline,
   onQuickLog,
   onReadAloud,
+  userRole = "owner",
 }) => {
-  const pillars = [
+  const isPartner = userRole === "partner";
+
+  const ownerPillars = [
     {
       title: t("today.title") ? `${t("today.title")} & Cycle` : "My Health",
       items: [
@@ -87,6 +91,32 @@ export const NovaSidebar: React.FC<NovaSidebarProps> = ({
     },
   ];
 
+  const partnerPillars = [
+    {
+      title: t("partner.title") || "Partner Connect",
+      items: [
+        { to: "/partner", key: "partner.title", icon: HeartHandshake, exact: true },
+        { to: "/learn", key: "nav.learn", icon: BookOpen },
+      ],
+    },
+    {
+      title: t("nav.ai") || "AI Guidance",
+      items: [
+        { to: "/diva", key: "nav.diva", icon: Bot },
+        { to: "/ask", key: "nav.ask", icon: HeartPulse },
+      ],
+    },
+    {
+      title: t("set.title") || "Preferences",
+      items: [
+        { to: "/settings", key: "nav.settings", icon: Settings },
+        { to: "/more", key: "nav.more", icon: Menu },
+      ],
+    },
+  ];
+
+  const pillars = isPartner ? partnerPillars : ownerPillars;
+
   return (
     <aside
       aria-label={t("nav.main")}
@@ -95,7 +125,7 @@ export const NovaSidebar: React.FC<NovaSidebarProps> = ({
     >
       {/* Brand Header */}
       <div className="flex items-center justify-between px-5 py-4 border-b border-border/80">
-        <Link to="/" className="flex items-center gap-2.5">
+        <Link to={isPartner ? "/partner" : "/"} className="flex items-center gap-2.5">
           <SaheliLogo discreet={prefs.discreet} size={32} animated />
           <span className="font-display text-lg font-extrabold tracking-tight bg-gradient-to-r from-primary to-period bg-clip-text text-transparent">
             {prefs.discreet ? t("app.discreetName") : t("app.name")}

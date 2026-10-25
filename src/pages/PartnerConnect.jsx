@@ -36,10 +36,10 @@ import {
 import { DEFAULT_PARTNER_PERMISSIONS } from "@/lib/partner.ts";
 
 export function PartnerConnectPage() {
-  const { t, record, analysis, identity, isOnline } = useApp();
+  const { t, record, analysis, identity, isOnline, userRole, agePolicy } = useApp();
 
   const [partnerState, setPartnerState] = useState(null);
-  const [activeTab, setActiveTab] = useState("owner");
+  const [activeTab, setActiveTab] = useState(userRole === "partner" ? "partner" : "owner");
   const [permissions, setPermissions] = useState(DEFAULT_PARTNER_PERMISSIONS);
   const [partnerName, setPartnerName] = useState("");
   const [invitationCode, setInvitationCode] = useState("");
@@ -218,6 +218,19 @@ export function PartnerConnectPage() {
       {/* OWNER EXPERIENCE */}
       {activeTab === "owner" && (
         <div className="space-y-6">
+          {agePolicy?.isUnder18 && (
+            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-xs text-amber-900 dark:text-amber-200 space-y-1">
+              <div className="flex items-center gap-2 font-bold">
+                <Shield className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                <span>{t("onb.dobUnder18Badge") || "Adolescent Safeguarded Mode (< 18)"}</span>
+              </div>
+              <p className="leading-relaxed opacity-90">
+                {t("onb.under18Desc") ||
+                  "Fertility predictions and private notes are strictly safeguarded and excluded from partner sharing."}
+              </p>
+            </div>
+          )}
+
           {/* Privacy & Safeguard Banner */}
           <div className="rounded-3xl border border-primary/20 bg-primary/5 p-5 space-y-3">
             <div className="flex items-center gap-2 text-primary font-bold text-sm">

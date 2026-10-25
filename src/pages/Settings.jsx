@@ -29,6 +29,8 @@ import {
   Copy,
   Fingerprint,
   RotateCcw,
+  HeartHandshake,
+  Flower2,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useApp } from "@/App.jsx";
@@ -716,6 +718,193 @@ function AppLockSection() {
           onChange={(v) => setPrefs({ autoLockOnBackground: v })}
         />
       </div>
+    </div>
+  );
+}
+
+function ExperienceAndAgeSection() {
+  const { t, record, userRole, switchRole, agePolicy, updateDateOfBirth, today } = useApp();
+  const [showSwitchModal, setShowSwitchModal] = useState(false);
+  const [editingDob, setEditingDob] = useState(false);
+  const [dobInput, setDobInput] = useState(record?.settings?.dob || "");
+  const [busy, setBusy] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const targetRole = userRole === "owner" ? "partner" : "owner";
+
+  const handleConfirmSwitch = async () => {
+    setBusy(true);
+    try {
+      await switchRole(targetRole);
+      setShowSwitchModal(false);
+    } catch {
+      setErrorMsg(t("set.failed") || "Failed to switch role.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleSaveDob = async (e) => {
+    e.preventDefault();
+    setErrorMsg("");
+    if (!dobInput) return;
+    setBusy(true);
+    try {
+      await updateDateOfBirth(dobInput);
+      setEditingDob(false);
+    } catch {
+      setErrorMsg(t("onb.dobInvalid") || "Invalid date of birth.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between border-b border-border/60 pb-3">
+        <div className="space-y-0.5">
+          <h2 className="font-bold text-sm sm:text-base text-foreground flex items-center gap-2">
+            <HeartHandshake className="h-4 w-4 text-primary" />
+            <span>{t("set.roleTitle") || "My Saheli Experience"}</span>
+          </h2>
+          <p className="text-xs text-muted-foreground">
+            {t("set.roleDesc", {
+              role:
+                userRole === "owner"
+                  ? t("set.roleOwner") || "Cycle Owner"
+                  : t("set.rolePartner") || "Partner",
+            })}
+          </p>
+        </div>
+
+        <Btn
+          size="sm"
+          variant="outline"
+          onClick={() => setShowSwitchModal(true)}
+          className="rounded-2xl text-xs font-semibold"
+        >
+          {t("set.roleSwitchPrompt", {
+            role:
+              targetRole === "owner"
+                ? t("set.roleOwner") || "Cycle Owner"
+                : t("set.rolePartner") || "Partner",
+          })}
+        </Btn>
+      </div>
+
+      {/* Date of Birth & Age Policy Status */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-semibold text-muted-foreground">
+            {t("set.dobTitle") || "Date of Birth"}:
+          </span>
+          <span className="text-xs font-bold px-2.5 py-1 rounded-xl bg-primary/10 text-primary">
+            {agePolicy.isUnder18
+              ? t("onb.dobUnder18Badge") || "Adolescent Safeguarded Mode (< 18)"
+              : t("onb.dobAdultBadge") || "Full Adult Mode (18+)"}
+          </span>
+        </div>
+
+        {record?.settings?.dob && !editingDob ? (
+          <div className="flex items-center justify-between text-xs rounded-2xl bg-muted/30 p-3">
+            <span className="text-muted-foreground">
+              {agePolicy.age !== null
+                ? t("onb.dobAgeNotice", { age: agePolicy.age })
+                : "Configured"}
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                setDobInput(record.settings.dob);
+                setEditingDob(true);
+              }}
+              className="text-primary font-semibold hover:underline"
+            >
+              {t("set.dobUpdatePrompt") || "Update Date of Birth"}
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={handleSaveDob} className="space-y-2 pt-1">
+            {!record?.settings?.dob && (
+              <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+                {t("set.dobMissingPrompt") ||
+                  "Please add your date of birth to unlock age-appropriate guidance and features."}
+              </p>
+            )}
+            <div className="flex gap-2">
+              <input
+                type="date"
+                max={today}
+                value={dobInput}
+                onChange={(e) => setDobInput(e.target.value)}
+                className={cx(inputCls, "h-11 rounded-2xl text-xs flex-1")}
+              />
+              <Btn
+                type="submit"
+                size="sm"
+                disabled={busy || !dobInput}
+                className="rounded-2xl px-4"
+              >
+                {t("common.save") || "Save"}
+              </Btn>
+              {editingDob && (
+                <Btn
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setEditingDob(false)}
+                  className="rounded-2xl"
+                >
+                  {t("common.cancel") || "Cancel"}
+                </Btn>
+              )}
+            </div>
+            {errorMsg && <p className="text-xs text-destructive">{errorMsg}</p>}
+          </form>
+        )}
+      </div>
+
+      {/* Switch Role Confirmation Modal */}
+      {showSwitchModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+        >
+          <div className="w-full max-w-md rounded-3xl border border-border bg-card p-6 shadow-2xl space-y-4">
+            <h3 className="font-display text-lg font-bold text-foreground">
+              {t("set.roleSwitchConfirmTitle") || "Switch Application Role?"}
+            </h3>
+            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+              {t("set.roleSwitchConfirmDesc") ||
+                "Switching roles will adapt your navigation and interface. Your stored data will be preserved."}
+            </p>
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <Btn
+                variant="outline"
+                size="sm"
+                onClick={() => setShowSwitchModal(false)}
+                className="rounded-2xl"
+              >
+                {t("common.cancel") || "Cancel"}
+              </Btn>
+              <Btn
+                size="sm"
+                onClick={handleConfirmSwitch}
+                disabled={busy}
+                className="rounded-2xl font-bold"
+              >
+                {t("set.roleSwitchPrompt", {
+                  role:
+                    targetRole === "owner"
+                      ? t("set.roleOwner") || "Cycle Owner"
+                      : t("set.rolePartner") || "Partner",
+                })}
+              </Btn>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1572,6 +1761,11 @@ export default function Settings() {
       {/* TAB 3: PRIVACY & SECURITY */}
       {activeTab === "privacy" && (
         <div className="space-y-6 animate-fade-in">
+          {/* Saheli Experience & Age Adaptation */}
+          <div className="nova-card-elevated p-5 sm:p-6 space-y-4">
+            <ExperienceAndAgeSection />
+          </div>
+
           {/* Saheli Serial Identity */}
           <div className="nova-card-elevated p-5 sm:p-6 space-y-4">
             <SerialIdentityCard />

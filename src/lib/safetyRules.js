@@ -1,10 +1,14 @@
 import { CONFIG } from "../config.js";
 import { addDays, diffDays, todayStr } from "./localDate.js";
 import { RED_FLAG_RULES, URGENT_RULES } from "../data/redflags.js";
+import { calculateAge } from "./agePolicy.ts";
 
 export function evaluateSafety({ record, analysis, today = todayStr() }) {
   const days = record.days || {};
-  const ageGroup = record.settings?.ageGroup || "adult";
+  const isUnder18 =
+    record.settings?.ageGroup === "under18" ||
+    (record.settings?.dob && calculateAge(record.settings.dob, today).isUnder18);
+  const ageGroup = isUnder18 ? "under18" : record.settings?.ageGroup || "adult";
   const pregnancyActive = !!record.pregnancy?.active;
   const ctx = { days, analysis, today, ageGroup, pregnancyActive };
 
