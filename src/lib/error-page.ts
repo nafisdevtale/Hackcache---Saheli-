@@ -1,9 +1,19 @@
-export function renderErrorPage(): string {
+import { translate } from "../i18n/index.js";
+
+export function renderErrorPage(lang: string = "en"): string {
+  const dir = lang === "ur" ? "rtl" : "ltr";
+  const title = translate(lang, "error.pageTitle") || "This page didn't load";
+  const desc =
+    translate(lang, "error.pageDesc") ||
+    "Something went wrong on our end. You can try refreshing or head back home.";
+  const tryAgain = translate(lang, "error.tryAgain") || "Try again";
+  const goHome = translate(lang, "error.goHome") || "Go home";
+
   return `<!doctype html>
-<html lang="en">
+<html lang="${lang}" dir="${dir}">
   <head>
     <meta charset="utf-8" />
-    <title>This page didn't load</title>
+    <title>${title}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
       body { font: 15px/1.5 system-ui, -apple-system, sans-serif; background: #fafafa; color: #111; display: grid; place-items: center; min-height: 100vh; margin: 0; padding: 1.5rem; }
@@ -18,11 +28,11 @@ export function renderErrorPage(): string {
   </head>
   <body>
     <div class="card">
-      <h1>This page didn't load</h1>
-      <p>Something went wrong on our end. You can try refreshing or head back home.</p>
+      <h1>${title}</h1>
+      <p>${desc}</p>
       <div class="actions">
-        <button class="primary" onclick="location.reload()">Try again</button>
-        <a class="secondary" href="/">Go home</a>
+        <button class="primary" onclick="location.reload()">${tryAgain}</button>
+        <a class="secondary" href="/">${goHome}</a>
       </div>
     </div>
   </body>

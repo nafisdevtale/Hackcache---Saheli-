@@ -3,16 +3,15 @@ import { useSearch, useNavigate } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, CircleDot, Droplet, Check, Trash2, Save } from "lucide-react";
 import { useApp } from "@/App.jsx";
 import {
-  Btn,
-  Card,
-  Chip,
-  PageTitle,
-  Toggle,
-  Field,
-  inputCls,
-  Status,
-  cx,
-} from "@/components/common/ui.jsx";
+  NovaHeading,
+  NovaText,
+  NovaButton,
+  NovaCard,
+  NovaChip,
+  NovaBadge,
+  NovaPageHeader,
+} from "@/components/nova";
+import { Toggle, Field, inputCls, Status, cx } from "@/components/common/ui.jsx";
 import { SYMPTOMS, FLOWS, MOODS, ENERGY } from "@/data/symptoms.js";
 import { blankDay, validateDay, defaultOvulationObservation } from "@/lib/exportImport.js";
 import { addDays, isValidDate } from "@/lib/localDate.js";
@@ -77,7 +76,9 @@ export default function LogDay() {
   const tracked = [
     ...SYMPTOMS.filter(
       (s) =>
-        s.safety || record.settings.trackedSymptoms.includes(s.id) || form.symptoms.includes(s.id),
+        s.safety ||
+        (record?.settings?.trackedSymptoms || []).includes(s.id) ||
+        (form?.symptoms || []).includes(s.id),
     ),
     ...customSymptoms,
   ];
@@ -161,67 +162,52 @@ export default function LogDay() {
           [false, "common.no"],
           [null, "common.notSure"],
         ].map(([v, k]) => (
-          <Chip key={k} selected={value === v} onClick={() => onChange(v)}>
+          <NovaChip key={k} selected={value === v} onClick={() => onChange(v)}>
             {t(k)}
-          </Chip>
+          </NovaChip>
         ))}
       </div>
     </fieldset>
   );
 
   return (
-    <form onSubmit={onSave} className="space-y-6" noValidate>
+    <form onSubmit={onSave} className="space-y-6 sm:space-y-8 animate-fade-in" noValidate>
       {/* Page Title & Navigation Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/60 pb-3">
-        <div className="flex items-center gap-3">
-          <DailyJournalMotif className="w-10 h-10 shrink-0" />
-          <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-primary">
-              {t("log.title")}
-            </span>
-            <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-              {fmt(date, { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
-            </h1>
+      <NovaPageHeader
+        tag={t("log.title")}
+        title={fmt(date, { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
+        action={
+          <div className="flex items-center gap-2">
+            <NovaButton variant="icon" aria-label={t("log.prev")} onClick={() => go(-1)}>
+              <ChevronLeft aria-hidden className="h-5 w-5" />
+            </NovaButton>
+
+            <input
+              id="date"
+              type="date"
+              max={today}
+              value={date}
+              className="h-10 rounded-2xl border border-border bg-card px-3 text-xs font-semibold text-foreground hover:bg-muted cursor-pointer transition-all"
+              onChange={(e) => {
+                const d = e.target.value;
+                if (isValidDate(d) && d <= today) {
+                  setDate(d);
+                  navigate({ to: "/log", search: { date: d }, replace: true });
+                }
+              }}
+            />
+
+            <NovaButton
+              variant="icon"
+              aria-label={t("log.next")}
+              disabled={date >= today}
+              onClick={() => go(1)}
+            >
+              <ChevronRight aria-hidden className="h-5 w-5" />
+            </NovaButton>
           </div>
-        </div>
-
-        {/* Date Stepper Controls */}
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            aria-label={t("log.prev")}
-            onClick={() => go(-1)}
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-border bg-card hover:bg-muted text-foreground transition-all active:scale-95"
-          >
-            <ChevronLeft aria-hidden className="h-5 w-5" />
-          </button>
-
-          <input
-            id="date"
-            type="date"
-            max={today}
-            value={date}
-            className="h-10 rounded-2xl border border-border bg-card px-3 text-xs font-semibold text-foreground hover:bg-muted cursor-pointer transition-all"
-            onChange={(e) => {
-              const d = e.target.value;
-              if (isValidDate(d) && d <= today) {
-                setDate(d);
-                navigate({ to: "/log", search: { date: d }, replace: true });
-              }
-            }}
-          />
-
-          <button
-            type="button"
-            aria-label={t("log.next")}
-            disabled={date >= today}
-            onClick={() => go(1)}
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-border bg-card hover:bg-muted text-foreground disabled:opacity-40 transition-all active:scale-95"
-          >
-            <ChevronRight aria-hidden className="h-5 w-5" />
-          </button>
-        </div>
-      </div>
+        }
+      />
 
       {exists && (
         <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">
@@ -235,7 +221,7 @@ export default function LogDay() {
         {/* Left Column: Period, Flow & Pain */}
         <div className="lg:col-span-6 space-y-4">
           {/* Period & Flow Selector */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
+          <NovaCard variant="elevated" padding="md" className="space-y-4">
             <Toggle
               label={t("log.period")}
               checked={form.period}
@@ -243,7 +229,7 @@ export default function LogDay() {
             />
 
             {form.period && (
-              <fieldset className="pt-2 border-t border-border/50 animate-fade-in space-y-2">
+              <fieldset className="pt-3 border-t border-border/50 animate-fade-in space-y-2.5">
                 <legend className="font-bold text-xs uppercase tracking-wider text-period">
                   {t("log.flow")}
                 </legend>
@@ -256,9 +242,9 @@ export default function LogDay() {
                         type="button"
                         onClick={() => set({ flow: f })}
                         className={cx(
-                          "flex flex-col items-center justify-center rounded-2xl py-3 px-2 text-xs font-semibold transition-all border",
+                          "flex flex-col items-center justify-center rounded-2xl py-3 px-2 text-xs font-semibold transition-all border active:scale-95 cursor-pointer",
                           isSelected
-                            ? "bg-period text-period-foreground border-period shadow-sm"
+                            ? "bg-period text-primary-foreground border-period shadow-sm font-bold"
                             : "bg-card border-border/70 hover:bg-period/10 text-foreground",
                         )}
                       >
@@ -293,17 +279,15 @@ export default function LogDay() {
                 />
               </div>
             )}
-          </div>
+          </NovaCard>
 
           {/* Pain Slider & Severity */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
+          <NovaCard variant="elevated" padding="md" className="space-y-4">
             <div className="flex items-center justify-between">
               <label htmlFor="pain" className="font-bold text-sm text-foreground">
                 {t("log.pain")}
               </label>
-              <span className="rounded-full bg-primary/10 px-3 py-0.5 text-xs font-bold text-primary">
-                {form.pain}/10
-              </span>
+              <NovaBadge tone={form.pain > 6 ? "urgent" : "primary"}>{form.pain}/10</NovaBadge>
             </div>
 
             <p className="text-xs text-muted-foreground">{t("log.painHelp")}</p>
@@ -332,25 +316,25 @@ export default function LogDay() {
                   </legend>
                   <div className="flex flex-wrap gap-2">
                     {["yes", "no", "na"].map((v) => (
-                      <Chip
+                      <NovaChip
                         key={v}
                         selected={form.painkillerHelped === v}
                         onClick={() => set({ painkillerHelped: v })}
                       >
                         {t(`pk.${v}`)}
-                      </Chip>
+                      </NovaChip>
                     ))}
                   </div>
                 </fieldset>
               </div>
             )}
-          </div>
+          </NovaCard>
         </div>
 
         {/* Right Column: Symptoms, Mood, Energy, Notes & Extras */}
         <div className="lg:col-span-6 space-y-4">
           {/* Symptoms Chips & Intensity */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
+          <NovaCard variant="elevated" padding="md" className="space-y-4">
             <fieldset>
               <legend className="font-bold text-sm text-foreground mb-1">
                 {t("log.symptoms")}
@@ -372,7 +356,7 @@ export default function LogDay() {
                     type="button"
                     onClick={() => setSymCategoryFilter(c.id)}
                     className={cx(
-                      "text-[11px] font-bold px-2.5 py-1 rounded-full transition-colors",
+                      "text-[11px] font-bold px-2.5 py-1 rounded-full transition-colors cursor-pointer",
                       symCategoryFilter === c.id
                         ? "bg-primary text-primary-foreground"
                         : "bg-muted/70 text-muted-foreground hover:bg-muted",
@@ -386,14 +370,14 @@ export default function LogDay() {
               {/* Symptom Selection Chips */}
               <div className="flex flex-wrap gap-1.5">
                 {filteredTracked.map((s) => (
-                  <Chip
+                  <NovaChip
                     key={s.id}
                     icon={s.icon}
                     selected={form.symptoms.includes(s.id)}
                     onClick={() => toggleSym(s.id)}
                   >
                     {s.custom ? s.label : t(`sym.${s.id}`)}
-                  </Chip>
+                  </NovaChip>
                 ))}
               </div>
             </fieldset>
@@ -428,12 +412,12 @@ export default function LogDay() {
                               type="button"
                               onClick={() => setIntensity(id, int.key)}
                               className={cx(
-                                "text-[10px] font-bold px-2 py-0.5 rounded-full transition-all",
+                                "text-[10px] font-bold px-2 py-0.5 rounded-full transition-all active:scale-95 cursor-pointer",
                                 intensity === int.key
                                   ? int.key === "severe"
                                     ? "bg-destructive text-destructive-foreground font-extrabold shadow-xs"
                                     : "bg-primary text-primary-foreground font-extrabold shadow-xs"
-                                  : "bg-background text-muted-foreground hover:bg-muted",
+                                  : "bg-card text-muted-foreground hover:bg-muted",
                               )}
                             >
                               {int.label}
@@ -446,23 +430,23 @@ export default function LogDay() {
                 </div>
               </div>
             )}
-          </div>
+          </NovaCard>
 
           {/* Mood & Energy */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
+          <NovaCard variant="elevated" padding="md" className="space-y-4">
             <fieldset>
               <legend className="font-semibold text-xs text-muted-foreground uppercase tracking-wider mb-2">
                 {t("log.mood")}
               </legend>
               <div className="flex flex-wrap gap-1.5">
                 {MOODS.map((m) => (
-                  <Chip
+                  <NovaChip
                     key={m}
                     selected={form.mood === m}
                     onClick={() => set({ mood: form.mood === m ? null : m })}
                   >
                     {t(`mood.${m}`)}
-                  </Chip>
+                  </NovaChip>
                 ))}
               </div>
             </fieldset>
@@ -473,13 +457,13 @@ export default function LogDay() {
               </legend>
               <div className="flex flex-wrap gap-1.5">
                 {ENERGY.map((m) => (
-                  <Chip
+                  <NovaChip
                     key={m}
                     selected={form.energy === m}
                     onClick={() => set({ energy: form.energy === m ? null : m })}
                   >
                     {t(`energy.${m}`)}
-                  </Chip>
+                  </NovaChip>
                 ))}
               </div>
             </fieldset>
@@ -494,7 +478,7 @@ export default function LogDay() {
                   max={24}
                   step={0.5}
                   value={form.sleep ?? ""}
-                  placeholder="e.g. 7.5"
+                  placeholder={t("log.sleepPh")}
                   onChange={(e) => set({ sleep: e.target.value === "" ? null : e.target.value })}
                   className={inputCls}
                 />
@@ -516,7 +500,7 @@ export default function LogDay() {
             {/* Optional Ovulation Observations */}
             <div className="rounded-2xl border border-secondary/30 bg-secondary/5 p-4 space-y-3">
               <span className="font-bold text-xs text-foreground uppercase tracking-wider flex items-center gap-1.5">
-                ✨ {t("phase.ovulationCardTitle")} (Optional)
+                ✨ {t("phase.ovulationCardTitle")} ({t("common.optional")})
               </span>
 
               {/* LH Test */}
@@ -531,13 +515,13 @@ export default function LogDay() {
                     ["faint", "phase.lhFaint"],
                     ["positive", "phase.lhPositive"],
                   ].map(([id, key]) => (
-                    <Chip
+                    <NovaChip
                       key={id}
                       selected={obsForm.testResult === id}
                       onClick={() => setObsForm((f) => ({ ...f, testResult: id }))}
                     >
                       {t(key)}
-                    </Chip>
+                    </NovaChip>
                   ))}
                 </div>
               </div>
@@ -567,7 +551,7 @@ export default function LogDay() {
                         type="button"
                         onClick={() => setObsForm((f) => ({ ...f, bbtUnit: "C" }))}
                         className={cx(
-                          "px-2.5 py-1 text-xs font-bold transition-colors",
+                          "px-2.5 py-1 text-xs font-bold transition-colors cursor-pointer",
                           obsForm.bbtUnit === "C"
                             ? "bg-card text-foreground"
                             : "text-muted-foreground",
@@ -579,7 +563,7 @@ export default function LogDay() {
                         type="button"
                         onClick={() => setObsForm((f) => ({ ...f, bbtUnit: "F" }))}
                         className={cx(
-                          "px-2.5 py-1 text-xs font-bold transition-colors",
+                          "px-2.5 py-1 text-xs font-bold transition-colors cursor-pointer",
                           obsForm.bbtUnit === "F"
                             ? "bg-card text-foreground"
                             : "text-muted-foreground",
@@ -633,7 +617,7 @@ export default function LogDay() {
                 className={cx(inputCls, "min-h-20")}
               />
             </Field>
-          </div>
+          </NovaCard>
         </div>
       </div>
 
@@ -643,7 +627,7 @@ export default function LogDay() {
           className="rounded-2xl bg-destructive/10 p-4 text-destructive text-xs space-y-1"
         >
           <p className="font-bold">{t("log.fixErrors")}</p>
-          <ul className="ml-5 list-disc">
+          <ul className="ms-5 list-disc">
             {errors.map((e) => (
               <li key={e}>{t(e)}</li>
             ))}
@@ -654,15 +638,16 @@ export default function LogDay() {
       <Status msg={msg?.key && t(msg.key)} tone={msg?.tone} />
 
       {/* Floating Sticky Save Bar */}
-      <div className="sticky bottom-20 md:bottom-6 z-20 flex gap-3 rounded-2xl border border-border/70 bg-card/90 p-3 shadow-xl backdrop-blur-md">
-        <Btn type="submit" className="flex-1 min-h-12 rounded-xl text-base font-bold shadow-md">
-          <Save className="h-4 w-4 mr-1.5" />
+      <div className="sticky bottom-20 md:bottom-6 z-20 flex gap-3 rounded-2xl border border-primary/20 bg-card/95 p-3.5 shadow-xl backdrop-blur-md">
+        <NovaButton type="submit" variant="primary" size="lg" className="flex-1 shadow-md">
+          <Save className="h-4 w-4 me-1.5" />
           <span>{t("log.save")}</span>
-        </Btn>
+        </NovaButton>
         {exists && (
-          <Btn
-            variant="outline"
-            className="min-h-12 rounded-xl border-destructive/40 text-destructive hover:bg-destructive/10"
+          <NovaButton
+            variant="secondary"
+            size="lg"
+            className="border-destructive/40 text-destructive hover:bg-destructive/10"
             onClick={async () => {
               try {
                 await deleteDay(date);
@@ -673,9 +658,9 @@ export default function LogDay() {
               }
             }}
           >
-            <Trash2 className="h-4 w-4 mr-1.5" />
+            <Trash2 className="h-4 w-4 me-1.5" />
             <span>{t("common.delete")}</span>
-          </Btn>
+          </NovaButton>
         )}
       </div>
     </form>

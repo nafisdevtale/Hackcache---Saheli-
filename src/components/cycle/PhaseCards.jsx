@@ -35,6 +35,7 @@ export function PhaseCards({ showAll = true, allowObservationLog = true, classNa
     cycleState: appCycleState,
     saveOvulationObservation,
     deleteOvulationObservation,
+    fmtInteger,
   } = useApp();
 
   const cycleState = appCycleState || (record ? getAuthoritativeCycleState(record, today) : null);
@@ -320,10 +321,17 @@ export function PhaseCards({ showAll = true, allowObservationLog = true, classNa
             <div>
               <div className="flex items-center gap-2">
                 <span className="rounded-full bg-primary/20 text-primary text-[10px] font-bold px-2 py-0.5">
-                  Historical Record
+                  {t("phase.historicalRecord")}
                 </span>
                 <h3 className="font-bold text-foreground text-sm sm:text-base">
-                  Cycle #{selectedPastCycle.cycleNumber} ({selectedPastCycle.length} Days)
+                  {t("phase.cycleHeader", {
+                    num: fmtInteger
+                      ? fmtInteger(selectedPastCycle.cycleNumber)
+                      : selectedPastCycle.cycleNumber,
+                    len: fmtInteger
+                      ? fmtInteger(selectedPastCycle.length)
+                      : selectedPastCycle.length,
+                  })}
                 </h3>
               </div>
               <p className="text-xs text-muted-foreground mt-0.5">
@@ -335,41 +343,49 @@ export function PhaseCards({ showAll = true, allowObservationLog = true, classNa
               onClick={() => setSelectedCycleTab("current")}
               className="text-xs font-bold text-primary hover:underline self-start sm:self-auto"
             >
-              ← Back to Current Tracker
+              {t("phase.backToCurrent")}
             </button>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
             <div className="rounded-2xl bg-card/80 border border-border/60 p-3 space-y-0.5">
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide block">
-                Total Duration
+                {t("phase.totalDuration")}
               </span>
               <span className="text-sm font-bold text-foreground">
-                {selectedPastCycle.length} Days
+                {t("common.days", { n: selectedPastCycle.length })}
               </span>
             </div>
             <div className="rounded-2xl bg-card/80 border border-border/60 p-3 space-y-0.5">
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide block">
-                Period Duration
+                {t("phase.periodDuration")}
               </span>
               <span className="text-sm font-bold text-period">
-                {selectedPastCycle.periodDuration} Days
+                {t("common.days", { n: selectedPastCycle.periodDuration })}
               </span>
             </div>
             <div className="rounded-2xl bg-card/80 border border-border/60 p-3 space-y-0.5">
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide block">
-                Symptoms Logged
+                {t("phase.symptomsLogged")}
               </span>
               <span className="text-sm font-bold text-foreground">
-                {selectedPastCycle.symptomsCount} logs
+                {t("phase.logsCount", {
+                  n: fmtInteger
+                    ? fmtInteger(selectedPastCycle.symptomsCount)
+                    : selectedPastCycle.symptomsCount,
+                })}
               </span>
             </div>
             <div className="rounded-2xl bg-card/80 border border-border/60 p-3 space-y-0.5">
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide block">
-                Observations
+                {t("phase.observations")}
               </span>
               <span className="text-sm font-bold text-foreground">
-                {selectedPastCycle.observationsCount} entries
+                {t("phase.entriesCount", {
+                  n: fmtInteger
+                    ? fmtInteger(selectedPastCycle.observationsCount)
+                    : selectedPastCycle.observationsCount,
+                })}
               </span>
             </div>
           </div>
@@ -387,28 +403,31 @@ export function PhaseCards({ showAll = true, allowObservationLog = true, classNa
                 className="bg-period h-full flex items-center justify-center"
                 title={`Period: ${selectedPastCycle.periodDuration}d`}
               >
-                Period
+                {t("phase.period")}
               </div>
               <div
                 style={{
                   width: `${Math.max(10, Math.round(((selectedPastCycle.estimatedFollicularEnd - selectedPastCycle.periodDuration) / selectedPastCycle.length) * 100))}%`,
                 }}
                 className="bg-emerald-500/80 h-full flex items-center justify-center text-emerald-950"
-                title="Follicular"
+                title={t("phase.follicular")}
               >
-                Foll.
+                {t("phase.follShort")}
               </div>
               <div
                 className="bg-amber-500/80 h-full flex-1 flex items-center justify-center text-amber-950"
-                title="Luteal"
+                title={t("phase.luteal")}
               >
-                Luteal
+                {t("phase.luteal")}
               </div>
             </div>
             <div className="flex justify-between text-[10px] text-muted-foreground pt-0.5">
-              <span>Day 1 ({fmt(selectedPastCycle.start)})</span>
+              <span>{t("phase.dayStart", { date: fmt(selectedPastCycle.start) })}</span>
               <span>
-                Day {selectedPastCycle.length} ({fmt(selectedPastCycle.end)})
+                {t("phase.dayEnd", {
+                  n: fmtInteger ? fmtInteger(selectedPastCycle.length) : selectedPastCycle.length,
+                  date: fmt(selectedPastCycle.end),
+                })}
               </span>
             </div>
           </div>
@@ -417,7 +436,11 @@ export function PhaseCards({ showAll = true, allowObservationLog = true, classNa
           {selectedPastCycle.symptoms.length > 0 && (
             <div className="space-y-1.5 border-t border-border/40 pt-3">
               <span className="text-xs font-bold text-foreground">
-                Symptoms Recorded in Cycle #{selectedPastCycle.cycleNumber}
+                {t("phase.symptomsInCycle", {
+                  num: fmtInteger
+                    ? fmtInteger(selectedPastCycle.cycleNumber)
+                    : selectedPastCycle.cycleNumber,
+                })}
               </span>
               <div className="flex flex-wrap gap-1.5">
                 {selectedPastCycle.symptoms.map((sEntry, idx) => (
@@ -425,7 +448,8 @@ export function PhaseCards({ showAll = true, allowObservationLog = true, classNa
                     key={idx}
                     className="rounded-lg bg-card border border-border/60 px-2 py-0.5 text-[11px] text-foreground font-medium"
                   >
-                    Day {sEntry.cycleDay}: {sEntry.symptoms.map((s) => t(`sym.${s}`)).join(", ")}
+                    {`${t("phase.dayNum", { day: fmtInteger ? fmtInteger(sEntry.cycleDay) : sEntry.cycleDay })}:`}{" "}
+                    {sEntry.symptoms.map((s) => t(`sym.${s}`)).join(", ")}
                   </span>
                 ))}
               </div>
@@ -436,7 +460,7 @@ export function PhaseCards({ showAll = true, allowObservationLog = true, classNa
           {selectedPastCycle.observations.length > 0 && (
             <div className="space-y-1.5 border-t border-border/40 pt-3">
               <span className="text-xs font-bold text-foreground">
-                Ovulation Observations Recorded
+                {t("phase.ovulationObservationsRecorded")}
               </span>
               <div className="flex flex-wrap gap-2">
                 {selectedPastCycle.observations.map((obs, idx) => (
@@ -445,11 +469,14 @@ export function PhaseCards({ showAll = true, allowObservationLog = true, classNa
                     className="rounded-lg bg-card border border-primary/25 px-2.5 py-1 text-[11px] text-foreground font-medium flex items-center gap-1.5"
                   >
                     <Sparkles className="h-3 w-3 text-primary" />
-                    Day {obs.cycleDay} ({fmt(obs.date)}):{" "}
-                    {obs.testResult && obs.testResult !== "none" ? `LH ${obs.testResult}` : ""}
+                    {`${t("phase.dayNum", { day: fmtInteger ? fmtInteger(obs.cycleDay) : obs.cycleDay })}:`}{" "}
+                    ({fmt(obs.date)}):{" "}
+                    {obs.testResult && obs.testResult !== "none"
+                      ? `${t("phase.lhLabel")} ${obs.testResult}`
+                      : ""}
                     {obs.bbt != null ? ` • ${obs.bbt}°${obs.bbtUnit || "C"}` : ""}
                     {obs.cervicalFluid && obs.cervicalFluid !== "none"
-                      ? ` • Fluid ${obs.cervicalFluid}`
+                      ? ` • ${t("phase.fluidLabel")} ${obs.cervicalFluid}`
                       : ""}
                   </span>
                 ))}
@@ -460,7 +487,7 @@ export function PhaseCards({ showAll = true, allowObservationLog = true, classNa
       )}
 
       {/* 5. Two Functional Tracker Cards (Follicular & Luteal) */}
-      {isViewingCurrent && (
+      {isViewingCurrent && follicularTracker && lutealTracker && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Card A: Follicular Phase Tracker */}
           <div
@@ -513,7 +540,7 @@ export function PhaseCards({ showAll = true, allowObservationLog = true, classNa
               ) : (
                 <div className="h-2.5 w-full rounded-full border border-dashed border-border/70 bg-muted/30 flex items-center justify-center">
                   <span className="text-[9px] text-muted-foreground font-mono">
-                    boundary unestablished
+                    {t("phase.boundaryUnestablished")}
                   </span>
                 </div>
               )}
@@ -620,7 +647,7 @@ export function PhaseCards({ showAll = true, allowObservationLog = true, classNa
               ) : (
                 <div className="h-2.5 w-full rounded-full border border-dashed border-border/70 bg-muted/30 flex items-center justify-center">
                   <span className="text-[9px] text-muted-foreground font-mono">
-                    boundary unestablished
+                    {t("phase.boundaryUnestablished")}
                   </span>
                 </div>
               )}
@@ -717,7 +744,9 @@ export function PhaseCards({ showAll = true, allowObservationLog = true, classNa
                       <span className="font-bold text-foreground">{fmt(obs.date)}</span>
                       {obs.cycleDay && (
                         <span className="rounded-md bg-muted px-1.5 py-0.2 text-[10px] text-muted-foreground font-mono">
-                          Day {obs.cycleDay}
+                          {t("phase.dayBadge", {
+                            day: fmtInteger ? fmtInteger(obs.cycleDay) : obs.cycleDay,
+                          })}
                         </span>
                       )}
                     </div>
@@ -731,7 +760,7 @@ export function PhaseCards({ showAll = true, allowObservationLog = true, classNa
                               : "bg-muted text-muted-foreground",
                           )}
                         >
-                          LH: {obs.testResult}
+                          {t("phase.lhLabel")}: {obs.testResult}
                         </span>
                       )}
                       {obs.bbt != null && (
@@ -741,7 +770,7 @@ export function PhaseCards({ showAll = true, allowObservationLog = true, classNa
                       )}
                       {obs.cervicalFluid && obs.cervicalFluid !== "none" && (
                         <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px]">
-                          Fluid: {obs.cervicalFluid}
+                          {t("phase.fluidLabel")}: {obs.cervicalFluid}
                         </span>
                       )}
                     </div>
@@ -816,7 +845,7 @@ export function PhaseCards({ showAll = true, allowObservationLog = true, classNa
             {/* Tracking Status Overview */}
             <div className="rounded-2xl bg-muted/30 border border-border/40 p-4 space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-foreground">Tracking Status</span>
+                <span className="font-bold text-foreground">{t("phase.trackingStatus")}</span>
                 {getStatusBadge(
                   activeDetailModal === "follicular"
                     ? follicularTracker.status

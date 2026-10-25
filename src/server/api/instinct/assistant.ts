@@ -9,6 +9,7 @@
  */
 
 import { VERIFIED_ENTERTAINMENT } from "../../../content/entertainment.js";
+import { translate } from "../../../i18n/index.js";
 
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const MAX_REQUESTS_PER_WINDOW = 20;
@@ -78,6 +79,7 @@ export async function handleInstinctChat(
   message: string,
   history: Array<{ role: string; content: string }> = [],
   clientIp: string = "anonymous",
+  locale: string = "en",
 ): Promise<{ text: string; recommendations?: Array<Record<string, unknown>> }> {
   if (!checkRateLimit(clientIp)) {
     return {
@@ -121,7 +123,16 @@ export async function handleInstinctChat(
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          systemInstruction: { parts: [{ text: INSTINCT_SYSTEM_PROMPT }] },
+          systemInstruction: {
+            parts: [
+              {
+                text:
+                  locale && locale !== "en"
+                    ? `${INSTINCT_SYSTEM_PROMPT}\n6. The user's active interface language is '${locale}'. Respond fluently and naturally in this language.`
+                    : INSTINCT_SYSTEM_PROMPT,
+              },
+            ],
+          },
           contents,
           generationConfig: {
             temperature: 0.7,
@@ -187,7 +198,12 @@ export async function handleInstinctChat(
     )
     .join("\n");
 
-  const responseText = `Here are verified recommendations tailored to your vibe:\n\n${titlesList}\n\nAll of these feature verified ratings, verified Indian streaming availability, and rich storylines. Let me know if you want something lighter, more intense, or from a specific language!`;
+  const prefix =
+    locale && locale !== "en" && translate(locale, "diva.compositePrefix")
+      ? translate(locale, "diva.compositePrefix")
+      : "Here are verified recommendations tailored to your vibe:";
+
+  const responseText = `${prefix}\n\n${titlesList}\n\nAll of these feature verified ratings, verified Indian streaming availability, and rich storylines. Let me know if you want something lighter, more intense, or from a specific language!`;
 
   return {
     text: responseText,

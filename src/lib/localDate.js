@@ -45,44 +45,32 @@ export function ymd(y, m0, d) {
 export const daysInMonth = (y, m0) => new Date(Date.UTC(y, m0 + 1, 0)).getUTCDate();
 export const weekdayOf = (s) => new Date(toNum(s) * DAY).getUTCDay(); // 0=Sun
 
-export const LOCALE_MAP = {
-  en: "en-IN",
-  hi: "hi-IN",
-  mr: "mr-IN",
-  bn: "bn-IN",
-  te: "te-IN",
-  kn: "kn-IN",
-  ta: "ta-IN",
-  gu: "gu-IN",
-  pa: "pa-IN",
-  ml: "ml-IN",
-  or: "or-IN",
-  as: "as-IN",
-  ur: "ur-IN",
-};
+import {
+  LOCALE_MAP,
+  formatNumber as formatNumLocale,
+  formatDate as formatDtLocale,
+  getLocaleTag,
+  shouldUseNativeNumerals,
+} from "./locale.js";
 
+export { LOCALE_MAP };
 export const loc = (lang) => LOCALE_MAP[lang] || "en-IN";
 
-export function formatNumber(n, lang = "en") {
-  if (typeof n !== "number" || isNaN(n)) return String(n);
-  try {
-    return new Intl.NumberFormat(loc(lang)).format(n);
-  } catch {
-    return String(n);
-  }
+export function formatNumber(n, lang = "en", options = {}) {
+  return formatNumLocale(n, lang, options);
 }
 export function formatDate(s, lang = "en", opts = { day: "numeric", month: "short" }) {
   if (!isValidDate(s)) return "";
-  return new Intl.DateTimeFormat(loc(lang), { ...opts, timeZone: "UTC" }).format(
-    new Date(toNum(s) * DAY),
-  );
+  return formatDtLocale(s, lang, opts);
 }
-export function formatRange(a, b, lang = "en") {
-  if (a === b) return formatDate(a, lang);
-  return `${formatDate(a, lang)} – ${formatDate(b, lang)}`;
+export function formatRange(a, b, lang = "en", opts = {}) {
+  if (a === b) return formatDate(a, lang, opts);
+  return `${formatDate(a, lang, opts)} – ${formatDate(b, lang, opts)}`;
 }
-export function monthTitle(y, m0, lang = "en") {
-  return new Intl.DateTimeFormat(loc(lang), {
+export function monthTitle(y, m0, lang = "en", options = {}) {
+  const useNative = shouldUseNativeNumerals(lang, options);
+  const tag = getLocaleTag(lang, useNative);
+  return new Intl.DateTimeFormat(tag, {
     month: "long",
     year: "numeric",
     timeZone: "UTC",

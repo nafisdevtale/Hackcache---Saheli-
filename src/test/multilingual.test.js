@@ -209,7 +209,11 @@ describe("Saheli 13 Indian Languages & Multilingual Framework", () => {
       expect(LOCALE_MAP[lang.code]).toBeDefined();
     }
     expect(formatNumber(1234, "en")).toBe("1,234");
-    expect(formatNumber(1234, "hi")).toBe("1,234");
-    expect(formatNumber(1234567, "hi")).toBe("12,34,567");
+    // Saheli 10.6: Non-English languages default to native digits with Indian grouping
+    expect(formatNumber(1234, "hi")).toBe("१,२३४");
+    expect(formatNumber(1234567, "hi")).toBe("१२,३४,५६७");
+    // Explicit Latin override maintains compatibility
+    expect(formatNumber(1234, "hi", { latinNumerals: true })).toBe("1,234");
+    expect(formatNumber(1234567, "hi", { latinNumerals: true })).toBe("12,34,567");
   });
 });

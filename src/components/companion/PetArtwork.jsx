@@ -9,11 +9,17 @@
 
 export function PetArtwork({
   speciesId = "cat",
-  mood = "happy",
+  mood: rawMood = "happy",
   accessory = "none",
   size = 180,
   className = "",
+  animationState = "idle",
+  isBlinking = false,
+  headTilt = 0,
+  reducedMotion = false,
 }) {
+  const mood = isBlinking || animationState === "sleeping" ? "sleepy" : rawMood;
+
   // Base coordinate space: 200x200
   const renderSpeciesSvg = () => {
     switch (speciesId) {
@@ -1077,6 +1083,26 @@ export function PetArtwork({
     }
   };
 
+  const animClass = (() => {
+    if (reducedMotion) return "";
+    switch (animationState) {
+      case "idle":
+        return "animate-pet-breathe";
+      case "walking":
+        return "animate-pet-waddle";
+      case "celebrating":
+        return "animate-pet-celebrate";
+      case "playing":
+        return "animate-pet-play";
+      case "eating":
+        return "animate-pet-chew";
+      case "being_petted":
+        return "animate-pet-lean";
+      default:
+        return "";
+    }
+  })();
+
   return (
     <svg
       viewBox="0 0 200 200"
@@ -1086,8 +1112,10 @@ export function PetArtwork({
       role="img"
       aria-label={`Saheli Companion - ${speciesId} in ${mood} mood`}
     >
-      {renderSpeciesSvg()}
-      {renderAccessorySvg()}
+      <g transform={headTilt ? `rotate(${headTilt} 100 100)` : undefined} className={animClass}>
+        {renderSpeciesSvg()}
+        {renderAccessorySvg()}
+      </g>
     </svg>
   );
 }

@@ -49,6 +49,10 @@ export async function idbWrite(puts = [], deletes = []) {
   });
 }
 
+export async function idbDel(key) {
+  return idbWrite([], [key]);
+}
+
 export function idbDeleteDatabase() {
   return new Promise((res, rej) => {
     const r = indexedDB.deleteDatabase(DB);
@@ -65,6 +69,9 @@ export const DEFAULT_PREFS = {
   theme: "system", // "light" | "dark" | "system"
   readAloud: false,
   discreet: false,
+  latinNumerals: false, // Default is false: non-English languages automatically use native script numerals
+  useLatinNumerals: false,
+  nativeNumerals: true,
 };
 let memoryStore = {};
 

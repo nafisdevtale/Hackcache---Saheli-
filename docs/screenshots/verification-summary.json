@@ -1,0 +1,453 @@
+{
+  "timestamp": "2026-10-24T15:20:44.658Z",
+  "results": [
+    {
+      "category": "Viewport",
+      "name": "mobile-320 (320x568) - Today Dashboard",
+      "pass": true,
+      "scrollWidth": 320,
+      "clientWidth": 320,
+      "screenshot": "vp_mobile-320_today.png"
+    },
+    {
+      "category": "Viewport",
+      "name": "mobile-320 (320x568) - Calendar View",
+      "pass": true,
+      "scrollWidth": 320,
+      "clientWidth": 320,
+      "screenshot": "vp_mobile-320_calendar.png"
+    },
+    {
+      "category": "Viewport",
+      "name": "mobile-320 (320x568) - Settings & Privacy",
+      "pass": true,
+      "scrollWidth": 320,
+      "clientWidth": 320,
+      "screenshot": "vp_mobile-320_settings.png"
+    },
+    {
+      "category": "Viewport",
+      "name": "mobile-375 (375x667) - Today Dashboard",
+      "pass": true,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "screenshot": "vp_mobile-375_today.png"
+    },
+    {
+      "category": "Viewport",
+      "name": "mobile-375 (375x667) - Calendar View",
+      "pass": true,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "screenshot": "vp_mobile-375_calendar.png"
+    },
+    {
+      "category": "Viewport",
+      "name": "mobile-375 (375x667) - Settings & Privacy",
+      "pass": true,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "screenshot": "vp_mobile-375_settings.png"
+    },
+    {
+      "category": "Viewport",
+      "name": "mobile-390 (390x844) - Today Dashboard",
+      "pass": true,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "screenshot": "vp_mobile-390_today.png"
+    },
+    {
+      "category": "Viewport",
+      "name": "mobile-390 (390x844) - Calendar View",
+      "pass": true,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "screenshot": "vp_mobile-390_calendar.png"
+    },
+    {
+      "category": "Viewport",
+      "name": "mobile-390 (390x844) - Settings & Privacy",
+      "pass": true,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "screenshot": "vp_mobile-390_settings.png"
+    },
+    {
+      "category": "Viewport",
+      "name": "tablet-768 (768x1024) - Today Dashboard",
+      "pass": true,
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "screenshot": "vp_tablet-768_today.png"
+    },
+    {
+      "category": "Viewport",
+      "name": "tablet-768 (768x1024) - Calendar View",
+      "pass": true,
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "screenshot": "vp_tablet-768_calendar.png"
+    },
+    {
+      "category": "Viewport",
+      "name": "tablet-768 (768x1024) - Settings & Privacy",
+      "pass": true,
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "screenshot": "vp_tablet-768_settings.png"
+    },
+    {
+      "category": "Viewport",
+      "name": "tablet-1024 (1024x768) - Today Dashboard",
+      "pass": true,
+      "scrollWidth": 1024,
+      "clientWidth": 1024,
+      "screenshot": "vp_tablet-1024_today.png"
+    },
+    {
+      "category": "Viewport",
+      "name": "tablet-1024 (1024x768) - Calendar View",
+      "pass": true,
+      "scrollWidth": 1024,
+      "clientWidth": 1024,
+      "screenshot": "vp_tablet-1024_calendar.png"
+    },
+    {
+      "category": "Viewport",
+      "name": "tablet-1024 (1024x768) - Settings & Privacy",
+      "pass": true,
+      "scrollWidth": 1024,
+      "clientWidth": 1024,
+      "screenshot": "vp_tablet-1024_settings.png"
+    },
+    {
+      "category": "Viewport",
+      "name": "desktop-1440 (1440x900) - Today Dashboard",
+      "pass": true,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "screenshot": "vp_desktop-1440_today.png"
+    },
+    {
+      "category": "Viewport",
+      "name": "desktop-1440 (1440x900) - Calendar View",
+      "pass": true,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "screenshot": "vp_desktop-1440_calendar.png"
+    },
+    {
+      "category": "Viewport",
+      "name": "desktop-1440 (1440x900) - Settings & Privacy",
+      "pass": true,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "screenshot": "vp_desktop-1440_settings.png"
+    },
+    {
+      "category": "Viewport",
+      "name": "desktop-1920 (1920x1080) - Today Dashboard",
+      "pass": true,
+      "scrollWidth": 1920,
+      "clientWidth": 1920,
+      "screenshot": "vp_desktop-1920_today.png"
+    },
+    {
+      "category": "Viewport",
+      "name": "desktop-1920 (1920x1080) - Calendar View",
+      "pass": true,
+      "scrollWidth": 1920,
+      "clientWidth": 1920,
+      "screenshot": "vp_desktop-1920_calendar.png"
+    },
+    {
+      "category": "Viewport",
+      "name": "desktop-1920 (1920x1080) - Settings & Privacy",
+      "pass": true,
+      "scrollWidth": 1920,
+      "clientWidth": 1920,
+      "screenshot": "vp_desktop-1920_settings.png"
+    },
+    {
+      "category": "Viewport",
+      "name": "zoom-200 (640x480) - Today Dashboard",
+      "pass": true,
+      "scrollWidth": 640,
+      "clientWidth": 640,
+      "screenshot": "vp_zoom-200_today.png"
+    },
+    {
+      "category": "Viewport",
+      "name": "zoom-200 (640x480) - Calendar View",
+      "pass": true,
+      "scrollWidth": 640,
+      "clientWidth": 640,
+      "screenshot": "vp_zoom-200_calendar.png"
+    },
+    {
+      "category": "Viewport",
+      "name": "zoom-200 (640x480) - Settings & Privacy",
+      "pass": true,
+      "scrollWidth": 640,
+      "clientWidth": 640,
+      "screenshot": "vp_zoom-200_settings.png"
+    },
+    {
+      "category": "Multilingual",
+      "name": "English [en] - Today Dashboard",
+      "pass": true,
+      "dir": "ltr",
+      "rawKeys": 0,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "screenshot": "lang_en_today.png"
+    },
+    {
+      "category": "Multilingual",
+      "name": "English [en] - Saheli Companion",
+      "pass": true,
+      "dir": "ltr",
+      "rawKeys": 0,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "screenshot": "lang_en_companion.png"
+    },
+    {
+      "category": "Multilingual",
+      "name": "Hindi (Devanagari) [hi] - Today Dashboard",
+      "pass": true,
+      "dir": "ltr",
+      "rawKeys": 0,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "screenshot": "lang_hi_today.png"
+    },
+    {
+      "category": "Multilingual",
+      "name": "Hindi (Devanagari) [hi] - Saheli Companion",
+      "pass": true,
+      "dir": "ltr",
+      "rawKeys": 0,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "screenshot": "lang_hi_companion.png"
+    },
+    {
+      "category": "Multilingual",
+      "name": "Marathi (Devanagari) [mr] - Today Dashboard",
+      "pass": true,
+      "dir": "ltr",
+      "rawKeys": 0,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "screenshot": "lang_mr_today.png"
+    },
+    {
+      "category": "Multilingual",
+      "name": "Marathi (Devanagari) [mr] - Saheli Companion",
+      "pass": true,
+      "dir": "ltr",
+      "rawKeys": 0,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "screenshot": "lang_mr_companion.png"
+    },
+    {
+      "category": "Multilingual",
+      "name": "Bengali (Eastern Nagari) [bn] - Today Dashboard",
+      "pass": true,
+      "dir": "ltr",
+      "rawKeys": 0,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "screenshot": "lang_bn_today.png"
+    },
+    {
+      "category": "Multilingual",
+      "name": "Bengali (Eastern Nagari) [bn] - Saheli Companion",
+      "pass": true,
+      "dir": "ltr",
+      "rawKeys": 0,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "screenshot": "lang_bn_companion.png"
+    },
+    {
+      "category": "Multilingual",
+      "name": "Tamil (Brahmic) [ta] - Today Dashboard",
+      "pass": true,
+      "dir": "ltr",
+      "rawKeys": 0,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "screenshot": "lang_ta_today.png"
+    },
+    {
+      "category": "Multilingual",
+      "name": "Tamil (Brahmic) [ta] - Saheli Companion",
+      "pass": true,
+      "dir": "ltr",
+      "rawKeys": 0,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "screenshot": "lang_ta_companion.png"
+    },
+    {
+      "category": "Multilingual",
+      "name": "Urdu (Nastaliq RTL) [ur] - Today Dashboard",
+      "pass": true,
+      "dir": "rtl",
+      "rawKeys": 0,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "screenshot": "lang_ur_today.png"
+    },
+    {
+      "category": "Multilingual",
+      "name": "Urdu (Nastaliq RTL) [ur] - Saheli Companion",
+      "pass": true,
+      "dir": "rtl",
+      "rawKeys": 0,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "screenshot": "lang_ur_companion.png"
+    },
+    {
+      "category": "Pages",
+      "name": "Today Dashboard",
+      "pass": true,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "cards": 2,
+      "screenshot": "page_today.png"
+    },
+    {
+      "category": "Pages",
+      "name": "Calendar View",
+      "pass": true,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "cards": 2,
+      "screenshot": "page_calendar.png"
+    },
+    {
+      "category": "Pages",
+      "name": "Log Day Entry",
+      "pass": true,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "cards": 2,
+      "screenshot": "page_log.png"
+    },
+    {
+      "category": "Pages",
+      "name": "Insights & Analytics",
+      "pass": true,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "cards": 2,
+      "screenshot": "page_insights.png"
+    },
+    {
+      "category": "Pages",
+      "name": "Saheli Companion",
+      "pass": true,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "cards": 2,
+      "screenshot": "page_companion.png"
+    },
+    {
+      "category": "Pages",
+      "name": "Self Care Sanctuary",
+      "pass": true,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "cards": 2,
+      "screenshot": "page_selfcare.png"
+    },
+    {
+      "category": "Pages",
+      "name": "Discover Health",
+      "pass": true,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "cards": 2,
+      "screenshot": "page_discover.png"
+    },
+    {
+      "category": "Pages",
+      "name": "Learn Academy",
+      "pass": true,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "cards": 2,
+      "screenshot": "page_learn.png"
+    },
+    {
+      "category": "Pages",
+      "name": "Community Circles",
+      "pass": true,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "cards": 2,
+      "screenshot": "page_community.png"
+    },
+    {
+      "category": "Pages",
+      "name": "Eeve Health AI",
+      "pass": true,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "cards": 2,
+      "screenshot": "page_eeve.png"
+    },
+    {
+      "category": "Pages",
+      "name": "FLASH Essentials",
+      "pass": true,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "cards": 2,
+      "screenshot": "page_flash.png"
+    },
+    {
+      "category": "Pages",
+      "name": "INSTINCT Entertainment",
+      "pass": true,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "cards": 2,
+      "screenshot": "page_instinct.png"
+    },
+    {
+      "category": "Pages",
+      "name": "Diva Central Assistant",
+      "pass": true,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "cards": 2,
+      "screenshot": "page_diva.png"
+    },
+    {
+      "category": "Pages",
+      "name": "Settings & Privacy",
+      "pass": true,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "cards": 2,
+      "screenshot": "page_settings.png"
+    },
+    {
+      "category": "Pages",
+      "name": "More Hub",
+      "pass": true,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "cards": 2,
+      "screenshot": "page_more.png"
+    }
+  ],
+  "failures": 0
+}

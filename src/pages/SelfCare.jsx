@@ -32,7 +32,17 @@ import {
   Info,
 } from "lucide-react";
 import { useApp } from "@/App.jsx";
-import { Btn, Card, Chip, Sources, inputCls, cx } from "@/components/common/ui.jsx";
+import { Btn, Sources, inputCls, cx } from "@/components/common/ui.jsx";
+import {
+  NovaHeading,
+  NovaText,
+  NovaButton,
+  NovaCard,
+  NovaBadge,
+  NovaDialog,
+  NovaPageHeader,
+  NovaChip,
+} from "@/components/nova";
 import {
   SELF_CARE_CATEGORIES,
   SELF_CARE_PROGRAMMES,
@@ -71,7 +81,7 @@ const ICON_MAP = {
 };
 
 export default function SelfCare() {
-  const { t, L, record, today, safety, prefs } = useApp();
+  const { t, L, record, today, safety, prefs, fmtInteger } = useApp();
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeModalProg, setActiveModalProg] = useState(null);
   const [activeBreathingModal, setActiveBreathingModal] = useState(false);
@@ -189,25 +199,23 @@ export default function SelfCare() {
   const favoriteSounds = SOUNDSCAPES.filter((s) => userData.favorites.includes(s.id));
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-8 animate-fade-in max-w-5xl mx-auto">
       {/* 1. Header & Intro */}
-      <div className="border-b border-border/60 pb-5">
-        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
-          <Sparkles className="h-4 w-4" />
-          <span>{prefs.discreet ? t("app.discreetName") : t("nav.selfCare")}</span>
-        </div>
-        <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground mt-1">
-          {t("selfcare.title")}
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1 max-w-2xl leading-relaxed">
-          {t("selfcare.subtitle")}
-        </p>
+      <NovaPageHeader
+        tag={prefs.discreet ? t("app.discreetName") : t("nav.selfCare")}
+        title={t("selfcare.title")}
+        subtitle={t("selfcare.subtitle")}
+      />
 
-        <div className="mt-3 flex items-center gap-2 rounded-2xl bg-muted/60 p-3 text-xs text-muted-foreground border border-border/40">
-          <ShieldCheck className="h-4 w-4 text-secondary-strong shrink-0" />
-          <span>{t("selfcare.bannerNotice")}</span>
-        </div>
-      </div>
+      <NovaCard
+        variant="subtle"
+        className="p-3.5 flex items-center gap-2.5 text-xs text-muted-foreground -mt-4"
+      >
+        <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
+        <NovaText variant="muted" size="xs">
+          {t("selfcare.bannerNotice")}
+        </NovaText>
+      </NovaCard>
 
       {/* 2. Today's Personalised Self-Care Suggestion */}
       <section aria-labelledby="today-selfcare-heading">
@@ -233,46 +241,47 @@ export default function SelfCare() {
             </div>
           </div>
         ) : (
-          <div className="rounded-3xl border border-primary/30 bg-gradient-to-br from-hero via-card to-card p-6 shadow-soft space-y-4">
+          <NovaCard variant="elevated" className="p-6 space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-border/50">
               <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
                 <Sparkles className="h-4 w-4" />
                 {t("selfcare.today.title")}
               </span>
-              <span className="text-[11px] font-semibold text-muted-foreground px-2.5 py-0.5 rounded-full bg-primary/10 text-primary">
+              <NovaBadge variant="primary" size="sm">
                 {t("selfcare.evidence.informed")}
-              </span>
+              </NovaBadge>
             </div>
 
             <div className="space-y-1.5">
-              <h3 className="font-display font-bold text-lg sm:text-xl text-foreground">
+              <NovaHeading level={3} className="text-lg sm:text-xl">
                 {t(recommendation.titleKey)}
-              </h3>
-              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+              </NovaHeading>
+              <NovaText variant="secondary" size="xs" className="leading-relaxed">
                 {t(recommendation.descKey)}
-              </p>
+              </NovaText>
             </div>
 
             <div className="flex flex-wrap items-center gap-3 pt-1">
               {recommendation.targetProgrammeId && (
-                <Btn
+                <NovaButton
+                  variant="primary"
+                  size="md"
                   onClick={() => {
                     const target = SELF_CARE_PROGRAMMES.find(
                       (p) => p.id === recommendation.targetProgrammeId,
                     );
                     if (target) openProgramme(target);
                   }}
-                  className="text-xs font-bold min-h-11 px-5 flex items-center gap-2 shadow-sm"
+                  leftIcon={<Play className="h-3.5 w-3.5 fill-current" />}
                 >
-                  <Play className="h-3.5 w-3.5 fill-current" />
                   {t("selfcare.today.viewDetails")}
-                </Btn>
+                </NovaButton>
               )}
-              <span className="text-[11px] text-muted-foreground italic">
-                Optional comfort practice • Free & non-mandatory
-              </span>
+              <NovaText variant="muted" size="xs" className="italic">
+                {t("selfcare.optionalComfortNotice")}
+              </NovaText>
             </div>
-          </div>
+          </NovaCard>
         )}
       </section>
 
@@ -352,16 +361,22 @@ export default function SelfCare() {
               const evidence =
                 EVIDENCE_LEVELS[prog.evidenceLevel] || EVIDENCE_LEVELS.wellbeing_practice;
               return (
-                <div
+                <NovaCard
                   key={prog.id}
-                  className="flex flex-col justify-between rounded-3xl border border-border/70 bg-card p-5 shadow-soft hover:border-primary/40 transition-all space-y-4"
+                  variant="interactive"
+                  className="p-5 space-y-4 flex flex-col justify-between"
                 >
                   <div className="space-y-3">
                     {/* Header tags: Category & Favorite */}
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground bg-muted px-2.5 py-0.5 rounded-full">
-                        {t(`selfcare.cat.${prog.category}`)} • {prog.suggestedDuration}m
-                      </span>
+                      <NovaBadge variant="neutral" size="sm">
+                        {t(`selfcare.cat.${prog.category}`)} •{" "}
+                        {t("selfcare.durationMinutes", {
+                          n: fmtInteger
+                            ? fmtInteger(prog.suggestedDuration)
+                            : prog.suggestedDuration,
+                        })}
+                      </NovaBadge>
                       <button
                         type="button"
                         onClick={() => handleToggleFav(prog.id)}
@@ -380,12 +395,12 @@ export default function SelfCare() {
                     </div>
 
                     <div className="space-y-1">
-                      <h3 className="font-display font-bold text-base text-foreground leading-snug">
+                      <NovaHeading level={3} className="text-base leading-snug">
                         {t(prog.titleKey)}
-                      </h3>
-                      <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
+                      </NovaHeading>
+                      <NovaText variant="secondary" size="xs" className="line-clamp-3">
                         {t(prog.descKey)}
-                      </p>
+                      </NovaText>
                     </div>
 
                     {/* Evidence Level Badge */}
@@ -402,19 +417,19 @@ export default function SelfCare() {
                   </div>
 
                   <div className="pt-3 border-t border-border/40 flex items-center justify-between gap-3">
-                    <span className="text-[11px] text-muted-foreground font-medium">
+                    <NovaText variant="muted" size="xs">
                       {prog.steps.length} {t("selfcare.prog.next").toLowerCase()}
-                    </span>
-                    <Btn
+                    </NovaText>
+                    <NovaButton
                       size="sm"
+                      variant="primary"
                       onClick={() => openProgramme(prog)}
-                      className="text-xs font-bold min-h-10 px-4 flex items-center gap-1.5"
+                      leftIcon={<Play className="h-3 w-3 fill-current" />}
                     >
-                      <Play className="h-3 w-3 fill-current" />
                       {t("selfcare.prog.start")}
-                    </Btn>
+                    </NovaButton>
                   </div>
-                </div>
+                </NovaCard>
               );
             })}
           </div>
@@ -483,7 +498,7 @@ export default function SelfCare() {
                         {isPlaying ? (
                           <Pause className="h-5 w-5 fill-current" />
                         ) : (
-                          <Play className="h-5 w-5 fill-current ml-0.5" />
+                          <Play className="h-5 w-5 fill-current ms-0.5" />
                         )}
                       </button>
 
@@ -500,7 +515,7 @@ export default function SelfCare() {
                     <button
                       type="button"
                       onClick={() => handleToggleFav(sound.id)}
-                      aria-label="Toggle favourite sound"
+                      aria-label={t("aria.toggleFavouriteSound") || "Toggle favourite sound"}
                       className={cx(
                         "p-1.5 rounded-full transition-colors cursor-pointer",
                         isFav
@@ -567,7 +582,7 @@ export default function SelfCare() {
                       : "bg-card text-foreground border border-border/60 hover:bg-muted",
                   )}
                 >
-                  {mins}m
+                  {t("selfcare.durationMinutes", { n: fmtInteger ? fmtInteger(mins) : mins })}
                 </button>
               ))}
               <button
@@ -608,16 +623,19 @@ export default function SelfCare() {
             {/* Left: Saved Favourites & Recent */}
             <div className="lg:col-span-7 space-y-6">
               {/* Favorites */}
-              <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-3">
-                <h3 className="font-bold text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+              <NovaCard variant="elevated" className="p-5 space-y-3">
+                <NovaHeading
+                  level={4}
+                  className="text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"
+                >
                   <Bookmark className="h-3.5 w-3.5 text-primary" />
                   {t("selfcare.mycare.favorites")} ({favoritesList.length + favoriteSounds.length})
-                </h3>
+                </NovaHeading>
 
                 {favoritesList.length === 0 && favoriteSounds.length === 0 ? (
-                  <p className="text-xs text-muted-foreground py-2 leading-relaxed">
+                  <NovaText variant="muted" size="xs" className="py-2 leading-relaxed">
                     {t("selfcare.mycare.noFavorites")}
-                  </p>
+                  </NovaText>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     {favoritesList.map((prog) => (
@@ -628,13 +646,9 @@ export default function SelfCare() {
                         <span className="font-bold text-foreground truncate pr-2">
                           {t(prog.titleKey)}
                         </span>
-                        <Btn
-                          size="sm"
-                          onClick={() => openProgramme(prog)}
-                          className="text-[11px] font-bold px-2.5 py-1 min-h-8"
-                        >
+                        <NovaButton size="sm" variant="primary" onClick={() => openProgramme(prog)}>
                           {t("selfcare.prog.start")}
-                        </Btn>
+                        </NovaButton>
                       </div>
                     ))}
                     {favoriteSounds.map((snd) => (
@@ -645,27 +659,29 @@ export default function SelfCare() {
                         <span className="font-bold text-foreground truncate pr-2">
                           {t(snd.titleKey)}
                         </span>
-                        <Btn
+                        <NovaButton
                           size="sm"
-                          variant="secondary"
+                          variant="outline"
                           onClick={() => soundscapeEngine.toggle(snd.id)}
-                          className="text-[11px] font-bold px-2.5 py-1 min-h-8"
+                          leftIcon={<Volume2 className="h-3 w-3 me-1" />}
                         >
-                          <Volume2 className="h-3 w-3 mr-1" />
                           {t("selfcare.sound.title")}
-                        </Btn>
+                        </NovaButton>
                       </div>
                     ))}
                   </div>
                 )}
-              </div>
+              </NovaCard>
 
               {/* Recently Completed Activity History */}
-              <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-3">
+              <NovaCard variant="elevated" className="p-5 space-y-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-xs uppercase tracking-wider text-muted-foreground">
+                  <NovaHeading
+                    level={4}
+                    className="text-xs uppercase tracking-wider text-muted-foreground"
+                  >
                     {t("selfcare.mycare.recent")}
-                  </h3>
+                  </NovaHeading>
                   {userData.history.length > 0 && (
                     <button
                       type="button"
@@ -684,9 +700,9 @@ export default function SelfCare() {
                 </div>
 
                 {userData.history.length === 0 ? (
-                  <p className="text-xs text-muted-foreground py-2 leading-relaxed">
+                  <NovaText variant="muted" size="xs" className="py-2 leading-relaxed">
                     {t("selfcare.mycare.noRecent")}
-                  </p>
+                  </NovaText>
                 ) : (
                   <ul className="divide-y divide-border/50 max-h-60 overflow-y-auto pr-1 text-xs">
                     {userData.history.map((h, i) => {
@@ -698,7 +714,10 @@ export default function SelfCare() {
                               {prog ? t(prog.titleKey) : h.id}
                             </span>
                             <span className="text-[10px] text-muted-foreground">
-                              {new Date(h.completedAt).toLocaleDateString()} • {h.durationMinutes}m
+                              {new Date(h.completedAt).toLocaleDateString()} •{" "}
+                              {t("selfcare.durationMinutes", {
+                                n: fmtInteger ? fmtInteger(h.durationMinutes) : h.durationMinutes,
+                              })}
                             </span>
                           </div>
                           <span className="text-[10px] font-semibold text-secondary-strong bg-secondary/20 px-2 py-0.5 rounded-full flex items-center gap-1">
@@ -710,18 +729,18 @@ export default function SelfCare() {
                     })}
                   </ul>
                 )}
-              </div>
+              </NovaCard>
             </div>
 
             {/* Right: Personal Wellbeing Notes */}
-            <div className="lg:col-span-5 rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
+            <NovaCard variant="elevated" className="lg:col-span-5 p-5 space-y-4">
               <div>
-                <h3 className="font-display font-bold text-base text-foreground">
+                <NovaHeading level={3} className="text-base">
                   {t("selfcare.mycare.notes")}
-                </h3>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Private comfort observations stored strictly on this device.
-                </p>
+                </NovaHeading>
+                <NovaText variant="muted" size="xs" className="mt-0.5">
+                  {t("selfcare.privateNotesDesc")}
+                </NovaText>
               </div>
 
               <textarea
@@ -733,17 +752,17 @@ export default function SelfCare() {
               />
 
               <div className="flex items-center justify-between pt-1">
-                <Btn
+                <NovaButton
                   size="sm"
+                  variant="primary"
                   onClick={() => {
                     updateWellbeingNote(noteInput);
                     setNoteSavedFeedback(true);
                     setTimeout(() => setNoteSavedFeedback(false), 3000);
                   }}
-                  className="text-xs font-bold min-h-10 px-4"
                 >
                   {t("selfcare.mycare.saveNotes")}
-                </Btn>
+                </NovaButton>
                 {noteSavedFeedback && (
                   <span className="text-[11px] font-semibold text-secondary-strong flex items-center gap-1 animate-fade-in">
                     <CheckCircle2 className="h-3.5 w-3.5" />
@@ -751,7 +770,7 @@ export default function SelfCare() {
                   </span>
                 )}
               </div>
-            </div>
+            </NovaCard>
           </div>
         </section>
       )}
@@ -772,7 +791,11 @@ export default function SelfCare() {
               <div className="space-y-0.5">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
                   {t(`selfcare.cat.${activeModalProg.category}`)} •{" "}
-                  {activeModalProg.suggestedDuration}m
+                  {t("selfcare.durationMinutes", {
+                    n: fmtInteger
+                      ? fmtInteger(activeModalProg.suggestedDuration)
+                      : activeModalProg.suggestedDuration,
+                  })}
                 </span>
                 <h2 id="player-title" className="font-display font-bold text-lg text-foreground">
                   {t(activeModalProg.titleKey)}
@@ -782,7 +805,7 @@ export default function SelfCare() {
                 type="button"
                 onClick={closeProgrammeModal}
                 className="rounded-full p-1.5 text-muted-foreground hover:bg-muted cursor-pointer"
-                aria-label="Close"
+                aria-label={t("aria.close") || "Close"}
               >
                 <X className="h-4 w-4" />
               </button>
@@ -835,7 +858,7 @@ export default function SelfCare() {
                     disabled={activeStepIndex === 0}
                     className="text-xs font-bold min-h-10 px-4"
                   >
-                    <ChevronLeft className="h-3.5 w-3.5 mr-1" />
+                    <ChevronLeft className="h-3.5 w-3.5 me-1 rtl-mirror" />
                     {t("selfcare.prog.prev")}
                   </Btn>
 
@@ -847,7 +870,7 @@ export default function SelfCare() {
                     {activeStepIndex === activeModalProg.steps.length - 1
                       ? t("selfcare.prog.finish")
                       : t("selfcare.prog.next")}
-                    <ChevronRight className="h-3.5 w-3.5 ml-1" />
+                    <ChevronRight className="h-3.5 w-3.5 ms-1 rtl-mirror" />
                   </Btn>
                 </div>
               </div>
@@ -861,12 +884,11 @@ export default function SelfCare() {
                   {t("selfcare.prog.completed")}!
                 </h3>
                 <p className="text-xs text-muted-foreground max-w-sm mx-auto leading-relaxed">
-                  Saved to your personal wellness diary. Remember to rest, hydrate, and take time
-                  for yourself.
+                  {t("selfcare.completedDesc")}
                 </p>
                 <div className="pt-2">
                   <Btn onClick={closeProgrammeModal} className="text-xs font-bold min-h-10 px-6">
-                    Close Routine
+                    {t("selfcare.closeRoutine")}
                   </Btn>
                 </div>
               </div>
@@ -946,7 +968,7 @@ function BreathingGuideModal({ onClose }) {
             type="button"
             onClick={handleClose}
             className="rounded-full p-1.5 text-muted-foreground hover:bg-muted cursor-pointer"
-            aria-label="Close"
+            aria-label={t("aria.close") || "Close"}
           >
             <X className="h-4 w-4" />
           </button>
@@ -963,7 +985,10 @@ function BreathingGuideModal({ onClose }) {
                   : "scale-90 bg-gradient-to-tr from-muted to-muted/60 border border-border/60",
               )}
             >
-              <span className="font-mono font-extrabold text-2xl text-foreground">{seconds}s</span>
+              <span className="font-mono font-extrabold text-2xl text-foreground">
+                {seconds}
+                {t("selfcare.secUnit")}
+              </span>
             </div>
             <p className="mt-4 font-display font-bold text-base text-foreground animate-fade-in">
               {phase === "inhale" ? t("selfcare.breathing.inhale") : t("selfcare.breathing.exhale")}
@@ -999,7 +1024,7 @@ function BreathingGuideModal({ onClose }) {
             ) : (
               <VolumeX className="h-3.5 w-3.5" />
             )}
-            Sound Chime
+            {t("selfcare.soundChime")}
           </button>
 
           <button

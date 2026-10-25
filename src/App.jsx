@@ -13,10 +13,20 @@ import {
   idbGet,
   idbWrite,
   idbDeleteDatabase,
+  idbDel,
   loadPrefs,
   savePrefs,
   clearAppLocalStorage,
 } from "./lib/storage.js";
+import { getOrCreateIdentity } from "./lib/identity.ts";
+import {
+  initializeVault,
+  unlockVault,
+  encryptVaultRecord,
+  decryptVaultRecord,
+  updateVaultLockMethod,
+} from "./lib/vault.ts";
+import { syncOwnerSnapshot, flushPartnerOutbox, loadPartnerState } from "./lib/partnerClient.ts";
 import {
   deriveKey,
   encryptJSON,
@@ -38,6 +48,18 @@ import {
   defaultOvulationObservation,
 } from "./lib/exportImport.js";
 import { todayStr, formatDate, formatRange, addDays, isValidDate } from "./lib/localDate.js";
+import {
+  formatNumber,
+  formatInteger,
+  formatPercent,
+  formatCurrency,
+  formatUnit,
+  formatTime,
+  formatRelativeTime,
+  formatList,
+  isRTL,
+  shouldUseNativeNumerals,
+} from "./lib/locale.js";
 import { translate, pick } from "./i18n/index.js";
 import {
   isStandalone,
@@ -65,7 +87,11 @@ export function AppProvider({ children }) {
   const [isInstalled, setIsInstalled] = useState(isStandalone);
   const [canInstall, setCanInstall] = useState(false);
   const [updateWaiting, setUpdateWaiting] = useState(false);
+  const [identity, setIdentity] = useState(null);
+  const identityRef = useRef(null);
+  const [vaultMeta, setVaultMeta] = useState(null);
   const keyRef = useRef(null);
+  const dekRef = useRef(null);
   const stateRef = useRef({ meta: null, record: null });
   const writes = useRef(Promise.resolve());
   const today = todayStr();
@@ -80,17 +106,64 @@ export function AppProvider({ children }) {
 
   const t = useCallback((k, v) => translate(prefs.lang, k, v), [prefs.lang]);
   const L = useCallback((o) => pick(prefs.lang, o), [prefs.lang]);
-  const fmt = useCallback((d, o) => formatDate(d, prefs.lang, o), [prefs.lang]);
-  const fmtRange = useCallback((a, b) => formatRange(a, b, prefs.lang), [prefs.lang]);
+  const isNativeNum = shouldUseNativeNumerals(prefs.lang, prefs);
+  const fmt = useCallback(
+    (d, o) => formatDate(d, prefs.lang, { useNativeNumerals: isNativeNum, ...o }),
+    [prefs.lang, isNativeNum],
+  );
+  const fmtRange = useCallback(
+    (a, b, o) => formatRange(a, b, prefs.lang, { useNativeNumerals: isNativeNum, ...o }),
+    [prefs.lang, isNativeNum],
+  );
+  const fmtNumber = useCallback(
+    (n, o) => formatNumber(n, prefs.lang, { useNativeNumerals: isNativeNum, ...o }),
+    [prefs.lang, isNativeNum],
+  );
+  const fmtInteger = useCallback(
+    (n, o) => formatInteger(n, prefs.lang, { useNativeNumerals: isNativeNum, ...o }),
+    [prefs.lang, isNativeNum],
+  );
+  const fmtPercent = useCallback(
+    (n, o) => formatPercent(n, prefs.lang, { useNativeNumerals: isNativeNum, ...o }),
+    [prefs.lang, isNativeNum],
+  );
+  const fmtCurrency = useCallback(
+    (n, cur, o) =>
+      formatCurrency(n, cur || "INR", prefs.lang, {
+        useNativeNumerals: isNativeNum,
+        ...o,
+      }),
+    [prefs.lang, isNativeNum],
+  );
+  const fmtUnit = useCallback(
+    (n, u, o) => formatUnit(n, u, prefs.lang, { useNativeNumerals: isNativeNum, ...o }),
+    [prefs.lang, isNativeNum],
+  );
+  const fmtTime = useCallback(
+    (v, o) => formatTime(v, prefs.lang, { useNativeNumerals: isNativeNum, ...o }),
+    [prefs.lang, isNativeNum],
+  );
+  const fmtRelative = useCallback(
+    (v, u, o) => formatRelativeTime(v, u, prefs.lang, { useNativeNumerals: isNativeNum, ...o }),
+    [prefs.lang, isNativeNum],
+  );
+  const fmtList = useCallback((items, o) => formatList(items, prefs.lang, o), [prefs.lang]);
 
   // Initial load
   useEffect(() => {
     (async () => {
       try {
+        const id = await getOrCreateIdentity();
+        setIdentity(id);
+        identityRef.current = id;
+
+        const vm = await idbGet("vault_meta");
+        if (vm) setVaultMeta(vm);
+
         const m = await idbGet("meta");
         if (!m?.onboarded) return setStatus("onboarding");
         setMeta(m);
-        if (m.pin?.enabled) return setStatus("locked");
+        if (vm || m.pin?.enabled) return setStatus("locked");
         const r = await idbGet(storeKey(m));
         if (isEncrypted(r)) return setStatus("locked");
         const normalized = normalizeRecord(r);
@@ -107,7 +180,10 @@ export function AppProvider({ children }) {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const handleOnline = () => setIsOnline(true);
+    const handleOnline = () => {
+      setIsOnline(true);
+      flushPartnerOutbox().catch(() => {});
+    };
     const handleOffline = () => setIsOnline(false);
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
@@ -192,7 +268,15 @@ export function AppProvider({ children }) {
   }, [prefs.discreet, prefs.lang, pathname]);
 
   async function writeRecord(next, nextMeta = meta, extraDeletes = []) {
-    const value = keyRef.current ? await encryptJSON(keyRef.current, next) : next;
+    let value;
+    if (dekRef.current) {
+      value = await encryptVaultRecord(dekRef.current, next);
+    } else if (keyRef.current) {
+      value = await encryptJSON(keyRef.current, next);
+    } else {
+      value = next;
+    }
+
     await idbWrite(
       [
         ["meta", nextMeta],
@@ -203,6 +287,16 @@ export function AppProvider({ children }) {
     setMeta(nextMeta);
     setRecord(next);
     stateRef.current = { meta: nextMeta, record: next };
+
+    // Background opportunistic sync for paired partner
+    try {
+      const pState = await loadPartnerState();
+      if (pState?.isOwner && pState?.paired && identityRef.current) {
+        syncOwnerSnapshot(next, identityRef.current, pState.permissions).catch(() => {});
+      }
+    } catch {
+      // Offline or network error handled gracefully
+    }
   }
 
   // Serialize mutations and read the last committed record, not a stale render.
@@ -346,21 +440,96 @@ export function AppProvider({ children }) {
       const r = buildDemo(todayStr());
       await writeRecord(r, { ...meta, mode: "demo" }, ["real"]);
     },
-    async unlock(pin) {
-      const key = await deriveKey(pin, meta.pin.salt, meta.pin.iterations);
+    async unlock(secret, method = null) {
+      const vm = vaultMeta || (await idbGet("vault_meta"));
+      if (vm) {
+        const determinedMethod = method || vm.activeLockMethod || "pin";
+        const dek = await unlockVault(secret, determinedMethod);
+        dekRef.current = dek;
+        keyRef.current = dek;
+        const payload = await idbGet(storeKey(meta));
+        let r;
+        if (payload?.v === 2) {
+          r = await decryptVaultRecord(dek, payload);
+        } else if (isEncrypted(payload)) {
+          try {
+            r = await decryptVaultRecord(dek, payload);
+          } catch {
+            r = await decryptJSON(dek, payload);
+          }
+        } else {
+          r = payload;
+        }
+        const normalized = normalizeRecord(r);
+        setRecord(normalized);
+        stateRef.current = { meta, record: normalized };
+        setStatus("ready");
+        return;
+      }
+
+      // Legacy PIN fallback
+      const key = await deriveKey(secret, meta.pin.salt, meta.pin.iterations);
       const payload = await idbGet(storeKey(meta));
       const r = await decryptJSON(key, payload); // throws on wrong PIN / corrupt data
       keyRef.current = key;
-      setRecord(normalizeRecord(r));
-      stateRef.current = { meta, record: normalizeRecord(r) };
+      const normalized = normalizeRecord(r);
+      setRecord(normalized);
+      stateRef.current = { meta, record: normalized };
       setStatus("ready");
     },
     lock() {
       keyRef.current = null;
+      dekRef.current = null;
       stateRef.current = { meta, record: null };
       setRecord(null);
       setBanners([]);
       setStatus("locked");
+    },
+    async setupVaultLock(method, secret) {
+      const currentRecord = stateRef.current.record || record || emptyRecord();
+      const { vaultMeta: newVm, dek, recoveryKey } = await initializeVault(method, secret);
+      dekRef.current = dek;
+      keyRef.current = dek;
+      setVaultMeta(newVm);
+      const encrypted = await encryptVaultRecord(dek, currentRecord);
+      const nextMeta = {
+        ...meta,
+        pin: { enabled: true, method, cipher: "AES-GCM-256", kdf: "PBKDF2-SHA256" },
+      };
+      await idbWrite([
+        ["meta", nextMeta],
+        [storeKey(nextMeta), encrypted],
+      ]);
+      setMeta(nextMeta);
+      stateRef.current = { meta: nextMeta, record: currentRecord };
+      return { recoveryKey, vaultMeta: newVm };
+    },
+    async disableVaultLock(secret, method = null) {
+      const vm = vaultMeta || (await idbGet("vault_meta"));
+      if (vm) {
+        const determinedMethod = method || vm.activeLockMethod || "pin";
+        await unlockVault(secret, determinedMethod);
+        await idbDel("vault_meta");
+        setVaultMeta(null);
+      } else if (meta?.pin?.enabled) {
+        await api.verifyPin(secret);
+      }
+      dekRef.current = null;
+      keyRef.current = null;
+      const currentRecord = stateRef.current.record || record;
+      const nextMeta = { ...meta, pin: { enabled: false } };
+      await idbWrite([
+        ["meta", nextMeta],
+        [storeKey(nextMeta), currentRecord],
+      ]);
+      setMeta(nextMeta);
+      stateRef.current = { meta: nextMeta, record: currentRecord };
+    },
+    async changeVaultLock(newMethod, newSecret) {
+      if (!dekRef.current) throw new Error("Vault is locked");
+      const updatedMeta = await updateVaultLockMethod(dekRef.current, newMethod, newSecret);
+      setVaultMeta(updatedMeta);
+      return updatedMeta;
     },
     async enablePin(pin) {
       const salt = randomSaltB64();
@@ -548,6 +717,51 @@ export function AppProvider({ children }) {
     return () => clearInterval(id);
   }, [status, record, analysis, fire, prefs.discreet]);
 
+  // Auto-lock inactivity timer and background visibility lock
+  useEffect(() => {
+    if (status !== "ready") return;
+    const isLockedState = !!(dekRef.current || keyRef.current || meta?.pin?.enabled || vaultMeta);
+    if (!isLockedState) return;
+
+    const timeoutMinutes = prefs.autoLockMinutes ?? 10;
+    let timer = null;
+
+    const resetTimer = () => {
+      if (timer) clearTimeout(timer);
+      if (timeoutMinutes > 0) {
+        timer = setTimeout(
+          () => {
+            if (status === "ready") {
+              api.lock();
+            }
+          },
+          timeoutMinutes * 60 * 1000,
+        );
+      }
+    };
+
+    const handleActivity = () => resetTimer();
+    window.addEventListener("pointerdown", handleActivity, { passive: true });
+    window.addEventListener("keydown", handleActivity, { passive: true });
+    window.addEventListener("touchstart", handleActivity, { passive: true });
+    resetTimer();
+
+    const handleVisibility = () => {
+      if (document.hidden && prefs.autoLockOnBackground) {
+        api.lock();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      if (timer) clearTimeout(timer);
+      window.removeEventListener("pointerdown", handleActivity);
+      window.removeEventListener("keydown", handleActivity);
+      window.removeEventListener("touchstart", handleActivity);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [status, prefs.autoLockMinutes, prefs.autoLockOnBackground, meta, vaultMeta]);
+
   const bannersView = banners;
 
   const value = {
@@ -557,6 +771,15 @@ export function AppProvider({ children }) {
     L,
     fmt,
     fmtRange,
+    fmtNumber,
+    fmtInteger,
+    fmtPercent,
+    fmtCurrency,
+    fmtUnit,
+    fmtTime,
+    fmtRelative,
+    fmtList,
+    isRTL: isRTL(prefs.lang),
     lang: prefs.lang,
     today,
     status,
@@ -567,6 +790,8 @@ export function AppProvider({ children }) {
     safety,
     fertilityVisible,
     pregnancyVisible,
+    identity,
+    vaultMeta,
     isDemo: meta?.mode === "demo",
     isOnline,
     canInstall,

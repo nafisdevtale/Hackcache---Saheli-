@@ -23,7 +23,7 @@ export default function DoctorGuidance() {
       {/* Page Header */}
       <div className="border-b border-border/60 pb-3">
         <span className="text-xs font-bold uppercase tracking-wider text-primary">
-          Clinical Guidance
+          {t("doc.badge")}
         </span>
         <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
           {t("doc.title")}
@@ -43,7 +43,7 @@ export default function DoctorGuidance() {
           <MoodSupport mood={safety.mood} />
 
           {/* Doctor Visit Summary Quick CTA */}
-          <div className="rounded-3xl border-2 border-primary/20 bg-hero p-6 shadow-soft flex flex-col sm:flex-row items-center gap-5">
+          <div className="nova-card-elevated p-6 border-2 border-primary/20 flex flex-col sm:flex-row items-center gap-5">
             <DoctorPrepArt className="w-20 h-20 shrink-0" />
             <div className="space-y-2 text-center sm:text-left flex-1">
               <div className="flex items-center justify-center sm:justify-start gap-2 text-primary font-bold">
@@ -53,9 +53,7 @@ export default function DoctorGuidance() {
                 </h2>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Generate a printable, one-page clinical summary of your recorded cycle lengths,
-                symptom frequencies, pain levels, and custom doctor questions to take to your
-                appointment.
+                {t("doc.prepareSummaryDesc")}
               </p>
               <div className="pt-1">
                 <Link
@@ -72,18 +70,16 @@ export default function DoctorGuidance() {
           {/* Diary Clinical Observations */}
           <div className="space-y-3">
             <h2 className="font-bold text-xs uppercase tracking-wider text-muted-foreground">
-              Diary Pattern Observations
+              {t("doc.diaryObservations")}
             </h2>
             {safety.cards.length ? (
               safety.cards.map((c) => <GuidanceCard key={c.id} card={c} />)
             ) : (
-              <div className="rounded-3xl border border-border/70 bg-card p-6 shadow-soft space-y-2 text-center">
+              <div className="nova-card-elevated p-6 space-y-2 text-center">
                 <CalendarCheck className="mx-auto h-8 w-8 text-secondary-strong" />
                 <p className="text-sm font-bold text-foreground">{t("doc.none")}</p>
                 <p className="text-xs text-muted-foreground max-w-md mx-auto">
-                  Continue logging your cycles and symptoms regularly. If unusual bleeding, severe
-                  cramps, or prolonged delays occur, Saheli will surface relevant clinical guidance
-                  here.
+                  {t("doc.diaryObservationsEmpty")}
                 </p>
               </div>
             )}
@@ -93,9 +89,9 @@ export default function DoctorGuidance() {
         {/* Right Column: Unloggable Red Flags & Helplines */}
         <div className="lg:col-span-5 space-y-4">
           {/* Healthcare Helplines */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-3">
+          <div className="nova-card-elevated p-5 space-y-3">
             <h3 className="font-bold text-xs uppercase tracking-wider text-muted-foreground">
-              Direct Health Resources
+              {t("doc.directResources") || "Direct Health Resources"}
             </h3>
             <div className="space-y-2">
               <a
@@ -107,9 +103,11 @@ export default function DoctorGuidance() {
                 <div className="flex items-center gap-2.5">
                   <Stethoscope className="h-5 w-5 text-primary" />
                   <div>
-                    <p className="text-xs font-bold text-foreground">eSanjeevani OPD</p>
+                    <p className="text-xs font-bold text-foreground">
+                      {t("doc.eSanjeevani") || "eSanjeevani OPD"}
+                    </p>
                     <p className="text-[10px] text-muted-foreground">
-                      Free Govt of India Teleconsultation
+                      {t("doc.optEsan") || "Free Govt of India Teleconsultation"}
                     </p>
                   </div>
                 </div>
@@ -123,10 +121,8 @@ export default function DoctorGuidance() {
                 <div className="flex items-center gap-2.5">
                   <Phone className="h-5 w-5 text-secondary-strong" />
                   <div>
-                    <p className="text-xs font-bold text-foreground">Tele-MANAS: 14416</p>
-                    <p className="text-[10px] text-muted-foreground">
-                      24/7 Mental Health Support (Toll-Free)
-                    </p>
+                    <p className="text-xs font-bold text-foreground">{t("doc.teleManasTitle")}</p>
+                    <p className="text-[10px] text-muted-foreground">{t("doc.teleManasSub")}</p>
                   </div>
                 </div>
                 <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
@@ -139,8 +135,12 @@ export default function DoctorGuidance() {
                 <div className="flex items-center gap-2.5">
                   <Phone className="h-5 w-5 text-urgent" />
                   <div>
-                    <p className="text-xs font-bold text-urgent">Emergency Helpline: 112</p>
-                    <p className="text-[10px] text-muted-foreground">National Emergency Number</p>
+                    <p className="text-xs font-bold text-urgent">
+                      {t("doc.emergencyNumber") || "Emergency Helpline: 112"}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {t("doc.nationalEmergency") || "National Emergency Number"}
+                    </p>
                   </div>
                 </div>
                 <ArrowRight className="h-4 w-4 text-urgent group-hover:translate-x-0.5 transition-transform" />
@@ -155,8 +155,7 @@ export default function DoctorGuidance() {
               <span>{t("doc.cantTrack")}</span>
             </h2>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Certain symptoms cannot be managed through self-tracking and warrant immediate
-              in-person clinical examination:
+              {t("doc.unloggableWarningDesc")}
             </p>
             <ul className="space-y-2.5 text-xs">
               {UNLOGGABLE_SIGNS.map((s) => (

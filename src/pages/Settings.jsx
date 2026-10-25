@@ -22,6 +22,11 @@ import {
   Play,
   Stethoscope,
   HeartPulse,
+  ChevronRight,
+  ShieldCheck,
+  Users,
+  KeyRound,
+  Copy,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useApp } from "@/App.jsx";
@@ -35,6 +40,17 @@ import {
   Status,
   cx,
 } from "@/components/common/ui.jsx";
+import {
+  NovaHeading,
+  NovaText,
+  NovaButton,
+  NovaCard,
+  NovaBadge,
+  NovaPageHeader,
+  NovaSegmented,
+  NovaChip,
+  NovaDialog,
+} from "@/components/nova";
 import { SYMPTOMS } from "@/data/symptoms.js";
 import {
   exportJSON,
@@ -219,7 +235,7 @@ function PinSection() {
         </div>
         {enabled && (
           <Btn size="sm" variant="outline" className="rounded-xl text-xs font-bold" onClick={lock}>
-            <Lock className="h-3 w-3 mr-1" />
+            <Lock className="h-3 w-3 me-1" />
             {t("set.lockNow")}
           </Btn>
         )}
@@ -370,6 +386,106 @@ function PinSection() {
           <Status msg={msg?.key && t(msg.key)} tone={msg?.tone} />
         </form>
       )}
+
+      {enabled && (
+        <div className="pt-3 border-t border-border/50 space-y-3">
+          <div>
+            <label
+              htmlFor="autolock-select"
+              className="block text-xs font-bold text-foreground mb-1"
+            >
+              {t("set.autoLockTimeout")}
+            </label>
+            <select
+              id="autolock-select"
+              value={prefs.autoLockMinutes ?? 10}
+              onChange={(e) => setPrefs({ autoLockMinutes: Number(e.target.value) })}
+              className="h-9 w-full sm:w-64 rounded-xl border border-border bg-card px-3 text-xs font-semibold text-foreground cursor-pointer"
+            >
+              <option value="1">1 min</option>
+              <option value="5">5 min</option>
+              <option value="10">10 min</option>
+              <option value="30">30 min</option>
+              <option value="0">{t("common.off")}</option>
+            </select>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SerialIdentityCard() {
+  const { t, identity } = useApp();
+  const [copied, setCopied] = useState(false);
+
+  const copySerial = () => {
+    if (!identity?.serialId) return;
+    navigator.clipboard?.writeText(identity.serialId).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h3 className="font-bold text-sm sm:text-base text-foreground flex items-center gap-2">
+            <ShieldCheck className="h-4 w-4 text-primary" />
+            <span>{t("set.serialId")}</span>
+          </h3>
+          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+            {t("set.serialIdDesc")}
+          </p>
+        </div>
+      </div>
+
+      <div className="p-3.5 rounded-2xl bg-muted/40 border border-border/70 flex flex-wrap items-center justify-between gap-3">
+        <div className="font-mono text-sm sm:text-base font-extrabold text-foreground tracking-wider">
+          {identity?.serialId || "..."}
+        </div>
+        <Btn
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={copySerial}
+          className="rounded-xl text-xs font-bold gap-1.5"
+        >
+          <Copy className="h-3.5 w-3.5" />
+          <span>{copied ? "✓" : t("set.export")}</span>
+        </Btn>
+      </div>
+    </div>
+  );
+}
+
+function PartnerConnectCard() {
+  const { t } = useApp();
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h3 className="font-bold text-sm sm:text-base text-foreground flex items-center gap-2">
+            <Users className="h-4 w-4 text-primary" />
+            <span>{t("partner.title")}</span>
+          </h3>
+          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+            {t("partner.subtitle")}
+          </p>
+        </div>
+      </div>
+
+      <div className="pt-1 flex justify-end">
+        <Link to="/partner">
+          <Btn size="sm" className="rounded-xl text-xs font-bold gap-1.5">
+            <Users className="h-3.5 w-3.5" />
+            <span>{t("partner.title")}</span>
+            <ChevronRight className="h-3.5 w-3.5" />
+          </Btn>
+        </Link>
+      </div>
     </div>
   );
 }
@@ -382,6 +498,7 @@ export default function Settings() {
     meta,
     prefs,
     setPrefs,
+    fmtInteger,
     isDemo,
     exitDemo,
     tryDemo,
@@ -550,25 +667,21 @@ export default function Settings() {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="border-b border-border/60 pb-3">
-        <span className="text-xs font-bold uppercase tracking-wider text-primary">
-          {prefs.discreet ? t("app.discreetName") : t("app.name")}
-        </span>
-        <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-          {t("set.title")}
-        </h1>
-      </div>
+    <div className="space-y-6 pb-12 max-w-5xl mx-auto">
+      <NovaPageHeader
+        tag={prefs.discreet ? t("app.discreetName") : t("app.name")}
+        title={t("set.title")}
+      />
 
       {/* Settings Navigation Tabs */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 rounded-2xl bg-muted/60 p-1.5 border border-border/60">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 rounded-2xl bg-muted/60 p-1.5 border border-border/60">
         {TABS.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
             type="button"
             onClick={() => setActiveTab(id)}
             className={cx(
-              "flex min-h-[44px] items-center justify-center gap-2 rounded-xl text-xs font-bold transition-all",
+              "flex min-h-[44px] items-center justify-center gap-2 rounded-xl text-xs font-bold transition-all active:scale-95",
               activeTab === id
                 ? "bg-card text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground",
@@ -584,7 +697,7 @@ export default function Settings() {
       {activeTab === "display" && (
         <div className="space-y-6 animate-fade-in">
           {/* Language Selector Grid with Native Scripts */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
+          <div className="nova-card-elevated p-5 sm:p-6 space-y-4">
             <div className="flex items-center gap-2">
               <Globe className="h-5 w-5 text-primary" />
               <h2 className="font-bold text-sm sm:text-base text-foreground">
@@ -600,7 +713,7 @@ export default function Settings() {
                     type="button"
                     onClick={() => setPrefs({ lang: l.code })}
                     className={cx(
-                      "flex flex-col items-start justify-center rounded-2xl p-3 text-left transition-all border",
+                      "flex flex-col items-start justify-center rounded-2xl p-3 text-left transition-all border active:scale-95",
                       isSelected
                         ? "border-primary bg-primary/10 text-primary font-bold shadow-xs ring-1 ring-primary/30"
                         : "border-border/60 bg-muted/20 hover:bg-muted text-foreground",
@@ -614,10 +727,45 @@ export default function Settings() {
                 );
               })}
             </div>
+
+            {/* Optional Latin Numerals Compatibility Toggle */}
+            {prefs.lang !== "en" && (
+              <div className="pt-3 border-t border-border/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="space-y-0.5">
+                  <span className="text-xs font-bold text-foreground">
+                    {t("settings.latinNumerals") || "Standard Latin Digits (0-9)"}
+                  </span>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    {t("settings.latinNumeralsDesc") ||
+                      "Display numbers using standard Latin digits instead of your language's native script"}
+                  </p>
+                  <p className="text-xs font-semibold text-primary pt-1">
+                    {t("settings.nativeNumeralsPreview", {
+                      n: fmtInteger ? fmtInteger(14) : 14,
+                      total: fmtInteger ? fmtInteger(28) : 28,
+                    }) ||
+                      `Preview: Day ${fmtInteger ? fmtInteger(14) : 14} of ${fmtInteger ? fmtInteger(28) : 28}`}
+                  </p>
+                </div>
+                <Toggle
+                  checked={Boolean(
+                    prefs.latinNumerals || prefs.useLatinNumerals || prefs.nativeNumerals === false,
+                  )}
+                  onChange={(checked) =>
+                    setPrefs({
+                      latinNumerals: checked,
+                      useLatinNumerals: checked,
+                      nativeNumerals: !checked,
+                    })
+                  }
+                  id="latin-numerals-toggle"
+                />
+              </div>
+            )}
           </div>
 
           {/* Theme, Text Size & Accessibility */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
+          <div className="nova-card-elevated p-5 sm:p-6 space-y-4">
             <div className="flex items-center gap-2">
               <Palette className="h-5 w-5 text-primary" />
               <h2 className="font-bold text-sm sm:text-base text-foreground">{t("set.theme")}</h2>
@@ -668,7 +816,7 @@ export default function Settings() {
           </div>
 
           {/* Saheli Chime & Notification Audio */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
+          <div className="nova-card-elevated p-5 sm:p-6 space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Volume2 className="h-5 w-5 text-primary" />
@@ -744,7 +892,7 @@ export default function Settings() {
       {activeTab === "cycle" && (
         <div className="space-y-6 animate-fade-in">
           {/* Age Group & Clinical Thresholds */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
+          <div className="nova-card-elevated p-5 sm:p-6 space-y-4">
             <div>
               <h2 className="font-bold text-sm sm:text-base text-foreground">{t("set.age")}</h2>
               <p className="text-xs text-muted-foreground mt-0.5">{t("set.ageHelp")}</p>
@@ -779,7 +927,7 @@ export default function Settings() {
           </div>
 
           {/* Health Conditions Questionnaire & Educational Personalisation */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
+          <div className="nova-card-elevated p-5 sm:p-6 space-y-4">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="font-bold text-sm sm:text-base text-foreground flex items-center gap-2">
@@ -828,7 +976,7 @@ export default function Settings() {
                           <div className="font-bold text-foreground">
                             {info ? t(info.labelKey) : item.id}
                             {item.id === "other" && healthConditions.otherText && (
-                              <span className="font-normal text-muted-foreground ml-1">
+                              <span className="font-normal text-muted-foreground ms-1">
                                 ("{healthConditions.otherText}")
                               </span>
                             )}
@@ -952,7 +1100,7 @@ export default function Settings() {
           </div>
 
           {/* Tracked Symptoms & Categories */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-5">
+          <div className="nova-card-elevated p-5 sm:p-6 space-y-5">
             <div>
               <h2 className="font-bold text-sm sm:text-base text-foreground">
                 {t("set.trackedSymptoms")}
@@ -1024,11 +1172,9 @@ export default function Settings() {
             {/* Quick Log Favorites Selection */}
             <div className="space-y-2 pt-2 border-t border-border/50">
               <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                ★ {t("today.upcomingReminders")} (Quick Log)
+                ★ {t("today.upcomingReminders")} ({t("settings.quickLogTitle")})
               </span>
-              <p className="text-[11px] text-muted-foreground">
-                Select your favorite symptoms for instant 1-tap logging.
-              </p>
+              <p className="text-[11px] text-muted-foreground">{t("settings.quickLogDesc")}</p>
               <div className="flex flex-wrap gap-1.5">
                 {SYMPTOMS.filter((s) => !s.safety).map((s) => {
                   const isFav = (record.settings?.quickLogFavorites || []).includes(s.id);
@@ -1067,7 +1213,7 @@ export default function Settings() {
                   className={cx(inputCls, "h-11 rounded-2xl text-xs")}
                 />
                 <Btn type="submit" size="sm" className="rounded-2xl px-4">
-                  <Plus className="h-4 w-4 mr-1" />
+                  <Plus className="h-4 w-4 me-1" />
                   {t("common.add")}
                 </Btn>
               </form>
@@ -1104,7 +1250,7 @@ export default function Settings() {
                           type="button"
                           onClick={() => removeCustomSymptom(cs.id)}
                           className="text-muted-foreground hover:text-destructive p-1"
-                          title="Delete"
+                          title={t("common.delete")}
                         >
                           ×
                         </button>
@@ -1121,13 +1267,23 @@ export default function Settings() {
       {/* TAB 3: PRIVACY & SECURITY */}
       {activeTab === "privacy" && (
         <div className="space-y-6 animate-fade-in">
-          {/* PIN Lock Management */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft">
+          {/* Saheli Serial Identity */}
+          <div className="nova-card-elevated p-5 sm:p-6 space-y-4">
+            <SerialIdentityCard />
+          </div>
+
+          {/* PIN / Vault Lock Management */}
+          <div className="nova-card-elevated p-5 sm:p-6 space-y-4">
             <PinSection />
           </div>
 
+          {/* Saheli Partner Connect */}
+          <div className="nova-card-elevated p-5 sm:p-6 space-y-4">
+            <PartnerConnectCard />
+          </div>
+
           {/* Discreet Mode Configuration */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-3">
+          <div className="nova-card-elevated p-5 sm:p-6 space-y-3">
             <Toggle
               label={t("set.discreet")}
               desc={t("set.discreetDesc")}
@@ -1137,7 +1293,7 @@ export default function Settings() {
           </div>
 
           {/* Shared Phone Privacy Guide */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-3">
+          <div className="nova-card-elevated p-5 sm:p-6 space-y-3">
             <h2 className="font-bold text-sm sm:text-base text-foreground">{t("guide.title")}</h2>
             <p className="text-xs text-muted-foreground leading-relaxed">{t("guide.intro")}</p>
             <div className="space-y-2 pt-2 border-t border-border/50 text-xs">
@@ -1158,7 +1314,7 @@ export default function Settings() {
       {activeTab === "data" && (
         <div className="space-y-6 animate-fade-in">
           {/* Export Records */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-3">
+          <div className="nova-card-elevated p-5 sm:p-6 space-y-3">
             <div>
               <h2 className="font-bold text-sm sm:text-base text-foreground">{t("set.export")}</h2>
               <p className="text-xs text-muted-foreground mt-0.5">{t("set.exportDesc")}</p>
@@ -1167,7 +1323,7 @@ export default function Settings() {
           </div>
 
           {/* Import Records */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-3">
+          <div className="nova-card-elevated p-5 sm:p-6 space-y-3">
             <div>
               <h2 className="font-bold text-sm sm:text-base text-foreground">{t("set.import")}</h2>
               <p className="text-xs text-muted-foreground mt-0.5">{t("set.importDesc")}</p>
@@ -1222,7 +1378,7 @@ export default function Settings() {
           </div>
 
           {/* Demo Controls */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-3">
+          <div className="nova-card-elevated p-5 sm:p-6 space-y-3">
             <h2 className="font-bold text-sm sm:text-base text-foreground">
               {isDemo ? t("set.demoActive") : t("set.tryDemo")}
             </h2>
@@ -1241,7 +1397,7 @@ export default function Settings() {
                   disabled={Object.keys(record.days).length > 0}
                   onClick={tryDemo}
                 >
-                  <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+                  <RefreshCw className="h-3.5 w-3.5 me-1.5" />
                   {t("set.startDemo")}
                 </Btn>
               )}
@@ -1260,7 +1416,7 @@ export default function Settings() {
                 className="rounded-2xl border-destructive/40 text-destructive hover:bg-destructive/10 text-xs font-bold"
                 onClick={() => setConfirmWipe(true)}
               >
-                <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                <Trash2 className="h-3.5 w-3.5 me-1.5" />
                 {t("set.wipeBtn")}
               </Btn>
             ) : (
@@ -1287,7 +1443,7 @@ export default function Settings() {
       {/* TAB 5: HELP & BUG REPORTING */}
       {activeTab === "feedback" && (
         <div className="space-y-6 animate-fade-in">
-          <div className="rounded-3xl border border-border/70 bg-card p-6 shadow-soft space-y-4">
+          <div className="nova-card-elevated p-6 space-y-4">
             <div className="flex items-center gap-2.5">
               <MessageSquareWarning className="h-6 w-6 text-primary" />
               <div>

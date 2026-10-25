@@ -29,7 +29,7 @@ export default function Pregnancy() {
     return (
       <div className="space-y-4 max-w-xl mx-auto py-8">
         <PageTitle>{t("preg.title")}</PageTitle>
-        <div className="rounded-3xl border border-border/70 bg-card p-6 shadow-soft space-y-3">
+        <div className="nova-card-elevated p-6 space-y-3">
           <p className="text-sm text-muted-foreground">{t("preg.hiddenUnder18")}</p>
           <Link
             to="/settings"
@@ -53,7 +53,7 @@ export default function Pregnancy() {
       <div className="space-y-6 max-w-xl mx-auto py-4">
         <div className="border-b border-border/60 pb-3">
           <span className="text-xs font-bold uppercase tracking-wider text-primary">
-            Maternity Care
+            {t("preg.badge")}
           </span>
           <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
             {t("preg.title")}
@@ -61,10 +61,10 @@ export default function Pregnancy() {
           <p className="text-sm text-muted-foreground mt-0.5">{t("preg.intro")}</p>
         </div>
 
-        <div className="rounded-3xl border border-border/70 bg-card p-6 shadow-soft space-y-4">
+        <div className="nova-card-elevated p-6 space-y-4">
           <div className="flex items-center gap-2 text-primary font-bold text-sm">
             <Baby className="h-5 w-5" />
-            <span>Enable Pregnancy Mode</span>
+            <span>{t("preg.enableMode") || "Enable Pregnancy Mode"}</span>
           </div>
 
           <label className="flex min-h-12 items-start gap-3 cursor-pointer">
@@ -142,7 +142,7 @@ export default function Pregnancy() {
       {/* Header */}
       <div className="border-b border-border/60 pb-3">
         <span className="text-xs font-bold uppercase tracking-wider text-primary">
-          Maternity Tracking
+          {t("preg.activeBadge")}
         </span>
         <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
           {t("preg.title")}
@@ -156,7 +156,7 @@ export default function Pregnancy() {
           <div className="rounded-3xl border-2 border-primary/20 bg-hero p-6 shadow-soft space-y-3">
             <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-wider">
               <Baby className="h-4 w-4" />
-              <span>Current Gestational Age</span>
+              <span>{t("preg.currentAge") || "Current Gestational Age"}</span>
             </div>
             <p className="font-display text-3xl sm:text-4xl font-extrabold text-foreground">
               {t("preg.week", { w, d })}

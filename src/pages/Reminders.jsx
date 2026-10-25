@@ -14,8 +14,15 @@ import { useApp } from "@/App.jsx";
 import { Btn, PageTitle, Toggle, inputCls, Status } from "@/components/common/ui.jsx";
 
 export default function Reminders() {
-  const { t, record, update, fire, prefs } = useApp();
-  const r = record.reminders;
+  const { t, record, update, fire, prefs, fmtInteger } = useApp();
+  const r = record?.reminders || {
+    notify: false,
+    nextPeriod: false,
+    daily: { on: false, time: "20:00" },
+    medicines: [],
+    custom: { on: false, text: "", time: "09:00" },
+    quietHours: { on: false, start: "22:00", end: "07:00" },
+  };
   const [note, setNote] = useState("");
   const [med, setMed] = useState({ name: "", time: "08:00" });
 
@@ -42,7 +49,7 @@ export default function Reminders() {
       {/* Page Header */}
       <div className="border-b border-border/60 pb-3">
         <span className="text-xs font-bold uppercase tracking-wider text-primary">
-          Notifications & Alerts
+          {t("rem.badge")}
         </span>
         <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
           {t("rem.title")}
@@ -54,7 +61,7 @@ export default function Reminders() {
         {/* Left Column: Master Notification & Automated Reminders */}
         <div className="lg:col-span-6 space-y-4">
           {/* Master Notification Toggle */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-3">
+          <div className="nova-card-elevated p-5 sm:p-6 space-y-3">
             <Toggle
               label={t("rem.notify")}
               desc={t("rem.notifyDesc")}
@@ -69,7 +76,7 @@ export default function Reminders() {
           </div>
 
           {/* Quiet Hours Card */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-3">
+          <div className="nova-card-elevated p-5 sm:p-6 space-y-3">
             <Toggle
               label={t("rem.quietHours")}
               desc={t("rem.quietHoursDesc")}
@@ -134,16 +141,16 @@ export default function Reminders() {
           </div>
 
           {/* Automated Cycle & Habit Reminders */}
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
+          <div className="nova-card-elevated p-5 sm:p-6 space-y-4">
             <h2 className="font-bold text-xs uppercase tracking-wider text-muted-foreground">
-              Cycle & Daily Nudges
+              {t("rem.nudgesTitle")}
             </h2>
 
             {/* Next Period Alert */}
             <div className="pb-3 border-b border-border/50">
               <Toggle
                 label={t("rem.nextPeriod")}
-                desc="Gentle heads-up 2 days before your predicted cycle window"
+                desc={t("rem.nextPeriodDesc")}
                 checked={r.nextPeriod}
                 onChange={(v) => save({ nextPeriod: v })}
               />
@@ -216,7 +223,7 @@ export default function Reminders() {
               className="w-full text-xs font-semibold min-h-11"
               onClick={() => fire("rem.msg.daily")}
             >
-              <Bell className="h-4 w-4 mr-2" />
+              <Bell className="h-4 w-4 me-2" />
               {t("rem.test")}
             </Btn>
           </div>
@@ -224,7 +231,7 @@ export default function Reminders() {
 
         {/* Right Column: Medications & Supplements */}
         <div className="lg:col-span-6 space-y-4">
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
+          <div className="nova-card-elevated p-5 sm:p-6 space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Pill className="h-5 w-5 text-primary" />
@@ -233,15 +240,15 @@ export default function Reminders() {
                 </h2>
               </div>
               <span className="text-xs font-semibold text-muted-foreground">
-                {r.medicines.length} Active
+                {t("rem.activeCount", {
+                  n: fmtInteger ? fmtInteger(r.medicines.length) : r.medicines.length,
+                })}
               </span>
             </div>
 
             {/* List of active medicines */}
             {r.medicines.length === 0 ? (
-              <p className="text-xs text-muted-foreground py-3 text-center">
-                No medication or supplement reminders scheduled.
-              </p>
+              <p className="text-xs text-muted-foreground py-3 text-center">{t("rem.noMeds")}</p>
             ) : (
               <ul className="space-y-2">
                 {r.medicines.map((m, i) => (
@@ -295,7 +302,7 @@ export default function Reminders() {
                 <input
                   id="med-name"
                   className={inputCls}
-                  placeholder="e.g., Iron supplement, Folic acid, Meftal"
+                  placeholder={t("rem.medNamePlaceholder")}
                   value={med.name}
                   maxLength={60}
                   onChange={(e) => setMed({ ...med, name: e.target.value })}
@@ -316,7 +323,7 @@ export default function Reminders() {
               </div>
 
               <Btn type="submit" variant="secondary" className="w-full text-xs font-bold min-h-11">
-                <Plus className="h-4 w-4 mr-1.5" />
+                <Plus className="h-4 w-4 me-1.5" />
                 {t("rem.addMed")}
               </Btn>
             </form>
@@ -326,13 +333,9 @@ export default function Reminders() {
           <div className="rounded-3xl border border-border/70 bg-hero p-5 shadow-soft space-y-2">
             <div className="flex items-center gap-2 text-xs font-bold text-foreground">
               <Sparkles className="h-4 w-4 text-primary" />
-              <span>Discreet Notifications on Shared Devices</span>
+              <span>{t("rem.discreetTitle") || "Discreet Notifications on Shared Devices"}</span>
             </div>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              When discreet mode is active in Settings, all reminder push messages use neutral,
-              private titles such as "Health Check-in" rather than revealing cycle or period details
-              on your lock screen.
-            </p>
+            <p className="text-xs text-muted-foreground leading-relaxed">{t("rem.discreetDesc")}</p>
           </div>
         </div>
       </div>

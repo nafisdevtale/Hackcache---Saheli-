@@ -13,7 +13,43 @@ import as from "./as.js";
 import ur from "./ur.js";
 import { LANGUAGES } from "./languages.js";
 
-export { LANGUAGES };
+import {
+  LOCALE_MAP,
+  SCRIPT_MAP,
+  NATIVE_NUMBERING_SYSTEMS,
+  getLocaleTag,
+  isRTL,
+  getLanguageMetadata,
+  formatNumber,
+  formatInteger,
+  formatPercent,
+  formatCurrency,
+  formatUnit,
+  formatDate,
+  formatTime,
+  formatRelativeTime,
+  formatList,
+  parseLocalizedNumber,
+} from "../lib/locale.js";
+
+export {
+  LOCALE_MAP,
+  SCRIPT_MAP,
+  NATIVE_NUMBERING_SYSTEMS,
+  getLocaleTag,
+  isRTL,
+  getLanguageMetadata,
+  formatNumber,
+  formatInteger,
+  formatPercent,
+  formatCurrency,
+  formatUnit,
+  formatDate,
+  formatTime,
+  formatRelativeTime,
+  formatList,
+  parseLocalizedNumber,
+};
 
 export const DICTS = {
   en,
@@ -31,7 +67,24 @@ export const DICTS = {
   ur,
 };
 
-const KEY_ALIASES = {
+export const KEY_ALIASES = {
+  // Diva aliases
+  "diva.explorehub": "diva.exploreHub",
+  "diva.openchat": "diva.openChat",
+  // Text sizes
+  "text.normal": "text.md",
+  "text.large": "text.lg",
+  "text.extraLarge": "text.lg",
+  // Discover category aliases
+  "discover.cat.menstrual_awareness": "discover.cat.awareness",
+  "discover.cat.supplies_unavailable": "discover.cat.unavailable",
+  "discover.cat.self_care": "discover.cat.selfCare",
+  // Companion action toasts
+  "companion.actionToast.feed": "pet.actionToast.feed",
+  "companion.actionToast.play": "pet.actionToast.play",
+  "companion.actionToast.brush": "pet.actionToast.brush",
+  "companion.actionToast.rest": "pet.actionToast.rest",
+  "companion.actionToast.affection": "pet.actionToast.affection",
   // Companion / Pet aliases
   "pet.badge": "companion.badge",
   "pet.adoptTitle": "companion.adoptionTitle",
@@ -104,10 +157,20 @@ export function translate(lang, key, vars) {
       s = DICTS[lang]?.[petKey] ?? en[petKey];
     }
   }
-  if (s === undefined) s = key;
+  if (s === undefined) {
+    if (
+      (typeof import.meta !== "undefined" && import.meta.env?.DEV) ||
+      (typeof process !== "undefined" && process.env?.NODE_ENV === "development")
+    ) {
+      console.warn(`[i18n] Missing translation for key "${key}" in language "${lang}".`);
+    }
+    s = key;
+  }
   if (vars && typeof s === "string") {
     for (const k of Object.keys(vars)) {
-      s = s.split(`{${k}}`).join(String(vars[k]));
+      const rawVal = vars[k];
+      const valStr = rawVal !== undefined && rawVal !== null ? String(rawVal) : "";
+      s = s.split(`{${k}}`).join(valStr);
     }
   }
   return s;

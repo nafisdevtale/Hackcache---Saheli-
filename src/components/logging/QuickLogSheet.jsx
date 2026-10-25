@@ -28,7 +28,7 @@ const COMMON_SYMPTOMS = [
 ];
 
 export function QuickLogSheet({ isOpen, onClose, targetDate }) {
-  const { t, fmt, record, today, saveDay } = useApp();
+  const { t, fmt, fmtInteger, record, today, saveDay } = useApp();
   const date = isValidDate(targetDate) && targetDate <= today ? targetDate : today;
 
   const [form, setForm] = useState(() => ({
@@ -299,10 +299,10 @@ export function QuickLogSheet({ isOpen, onClose, targetDate }) {
               className="h-2.5 w-full cursor-pointer appearance-none rounded-lg bg-muted accent-primary"
             />
             <div className="flex justify-between text-[10px] text-muted-foreground px-1">
-              <span>0 (None)</span>
-              <span>3 (Mild)</span>
-              <span>6 (Moderate)</span>
-              <span>10 (Severe)</span>
+              <span>{t("log.painNone", { n: fmtInteger ? fmtInteger(0) : "0" })}</span>
+              <span>{t("log.painMild", { n: fmtInteger ? fmtInteger(3) : "3" })}</span>
+              <span>{t("log.painModerate", { n: fmtInteger ? fmtInteger(6) : "6" })}</span>
+              <span>{t("log.painSevere", { n: fmtInteger ? fmtInteger(10) : "10" })}</span>
             </div>
           </div>
 

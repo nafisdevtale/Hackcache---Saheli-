@@ -202,7 +202,7 @@ export default function Feedback() {
             {t("feedback.successDesc")}
           </p>
           <div className="inline-flex items-center gap-2 rounded-xl bg-muted px-3 py-1.5 font-mono text-xs font-bold text-foreground">
-            <span>Report ID:</span>
+            <span>{t("feedback.reportId") || "Report ID"}:</span>
             <span>{submittedReportId}</span>
           </div>
           <div className="pt-4 flex flex-wrap justify-center gap-3">
@@ -372,7 +372,7 @@ export default function Feedback() {
                 <div className="flex items-center gap-4 rounded-2xl border border-border/80 bg-muted/40 p-3">
                   <img
                     src={formData.screenshotBase64}
-                    alt="Screenshot attachment preview"
+                    alt={t("feedback.screenshotAlt")}
                     className="h-16 w-16 rounded-xl object-cover border border-border"
                   />
                   <div className="flex-1 text-xs">
@@ -406,7 +406,9 @@ export default function Feedback() {
                     <ImageIcon className="h-4 w-4 text-primary" />
                     <span>{t("feedback.attachScreenshot")}</span>
                   </label>
-                  <span className="text-[11px] text-muted-foreground">PNG/JPEG up to 2MB</span>
+                  <span className="text-[11px] text-muted-foreground">
+                    {t("feedback.maxFileSize") || "PNG/JPEG up to 2MB"}
+                  </span>
                 </div>
               )}
             </div>
@@ -421,7 +423,7 @@ export default function Feedback() {
                 <p className="text-muted-foreground">{t("feedback.offlineFallbackNotice")}</p>
                 <div className="pt-1 flex gap-2">
                   <Btn type="button" variant="outline" size="sm" onClick={handleExportText}>
-                    <Download className="h-3.5 w-3.5 mr-1" />
+                    <Download className="h-3.5 w-3.5 me-1" />
                     {t("feedback.exportReport")}
                   </Btn>
                 </div>
@@ -456,11 +458,11 @@ export default function Feedback() {
                     alert(t("feedback.draftSavedAlert"));
                   }}
                 >
-                  <Save className="h-4 w-4 mr-1.5" />
+                  <Save className="h-4 w-4 me-1.5" />
                   {t("feedback.saveDraft")}
                 </Btn>
                 <Btn type="button" variant="ghost" size="sm" onClick={handleExportText}>
-                  <Download className="h-4 w-4 mr-1.5" />
+                  <Download className="h-4 w-4 me-1.5" />
                   {t("feedback.exportReport")}
                 </Btn>
               </div>
@@ -474,12 +476,12 @@ export default function Feedback() {
               >
                 {submissionState === "sending" ? (
                   <>
-                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    <RefreshCw className="h-4 w-4 me-2 animate-spin" />
                     {t("feedback.sending")}
                   </>
                 ) : (
                   <>
-                    <Send className="h-4 w-4 mr-2" />
+                    <Send className="h-4 w-4 me-2" />
                     {t("feedback.submitReport")}
                   </>
                 )}

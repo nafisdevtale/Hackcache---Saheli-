@@ -1,25 +1,41 @@
 // Lightweight accessible SVG bar chart. Values are also printed as text.
+import { useApp } from "@/App.jsx";
+import { translate } from "@/i18n/index.js";
+
 export function BarChart({ data = [], title, refLines = [], summary = "" }) {
+  let t;
+  try {
+    const app = useApp();
+    t = app?.t || ((k) => translate("en", k));
+  } catch {
+    t = (k) => translate("en", k);
+  }
   if (!data || data.length === 0) {
     return (
       <figure className="py-4 text-center text-sm text-muted-foreground">
         <p>{title}</p>
-        <figcaption className="sr-only">{title}: No data recorded yet.</figcaption>
+        <figcaption className="sr-only">
+          {title ? `${title}: ` : ""}
+          {t("common.noDataRecorded")}
+        </figcaption>
       </figure>
     );
   }
 
-  const max = Math.max(...data.map((d) => d.value), ...refLines.map((r) => r.value), 1);
+  const cleanData = (data || []).map((d) => ({ ...d, value: Number(d?.value) || 0 }));
+  const cleanRefLines = (refLines || []).map((r) => ({ ...r, value: Number(r?.value) || 0 }));
+  const max = Math.max(...cleanData.map((d) => d.value), ...cleanRefLines.map((r) => r.value), 1);
   const w = 320,
     h = 160,
     pad = 24,
-    bw = (w - pad) / Math.max(data.length, 1);
-  const textSummary = summary || `${title}: ${data.map((d) => `${d.label} ${d.value}`).join(", ")}`;
+    bw = (w - pad) / Math.max(cleanData.length, 1);
+  const textSummary =
+    summary || `${title}: ${cleanData.map((d) => `${d.label} ${d.value}`).join(", ")}`;
 
   return (
     <figure>
       <svg viewBox={`0 0 ${w} ${h + 28}`} role="img" aria-label={textSummary} className="w-full">
-        {refLines.map((r) => {
+        {cleanRefLines.map((r) => {
           const y = h - (r.value / max) * (h - 16);
           return (
             <g key={r.value}>
@@ -37,7 +53,7 @@ export function BarChart({ data = [], title, refLines = [], summary = "" }) {
             </g>
           );
         })}
-        {data.map((d, i) => {
+        {cleanData.map((d, i) => {
           const bh = (d.value / max) * (h - 16);
           const x = pad + i * bw + bw * 0.15;
           return (

@@ -33,7 +33,19 @@ import {
   ArrowUpDown,
 } from "lucide-react";
 import { useApp } from "@/App.jsx";
-import { Btn, Card, Chip, inputCls, cx } from "@/components/common/ui.jsx";
+import { Btn, Card, inputCls, cx } from "@/components/common/ui.jsx";
+import {
+  NovaHeading,
+  NovaText,
+  NovaButton,
+  NovaCard,
+  NovaBadge,
+  NovaPageHeader,
+  NovaSegmented,
+  NovaChip,
+  NovaAgentBadge,
+  NovaDialog,
+} from "@/components/nova";
 import { PRODUCT_CATEGORIES, VERIFIED_PRODUCTS } from "@/content/products.js";
 import {
   loadFlashState,
@@ -209,62 +221,59 @@ export default function FlashEssentials() {
       )}
 
       {/* Header */}
-      <div className="border-b border-border/60 pb-4">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-accent-foreground">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <span>{t("flash.badge")}</span>
+      <NovaPageHeader
+        tag={t("flash.badge")}
+        title={t("flash.title")}
+        subtitle={t("flash.subtitle")}
+        action={
+          <div className="flex flex-wrap items-center gap-3">
+            <NovaAgentBadge agent="flash" />
+            {/* Personalisation / Anonymous Toggle */}
+            <div className="flex items-center gap-1.5 rounded-2xl bg-muted/60 p-1 border border-border/60 text-xs">
+              <button
+                type="button"
+                onClick={() => handleTogglePersonalisation(true)}
+                className={cx(
+                  "rounded-xl px-3 py-1 font-bold transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer",
+                  state.preferences.personalisationEnabled
+                    ? "bg-card text-foreground shadow-2xs border border-border/60"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <Sparkles className="h-3.5 w-3.5 text-primary" />
+                <span>{t("flash.modePersonalised")}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleTogglePersonalisation(false)}
+                className={cx(
+                  "rounded-xl px-3 py-1 font-bold transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer",
+                  !state.preferences.personalisationEnabled
+                    ? "bg-card text-foreground shadow-2xs border border-border/60"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <Lock className="h-3.5 w-3.5 text-muted-foreground" />
+                <span>{t("flash.modeAnonymous")}</span>
+              </button>
+            </div>
           </div>
+        }
+      />
 
-          {/* Personalisation / Anonymous Toggle */}
-          <div className="flex items-center gap-2 rounded-2xl bg-muted/60 p-1 border border-border/60 text-xs">
-            <button
-              type="button"
-              onClick={() => handleTogglePersonalisation(true)}
-              className={cx(
-                "rounded-xl px-3 py-1 font-bold transition-all flex items-center gap-1.5",
-                state.preferences.personalisationEnabled
-                  ? "bg-card text-foreground shadow-2xs border border-border/60"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              <Sparkles className="h-3.5 w-3.5 text-primary" />
-              <span>{t("flash.modePersonalised")}</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleTogglePersonalisation(false)}
-              className={cx(
-                "rounded-xl px-3 py-1 font-bold transition-all flex items-center gap-1.5",
-                !state.preferences.personalisationEnabled
-                  ? "bg-card text-foreground shadow-2xs border border-border/60"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              <Lock className="h-3.5 w-3.5 text-muted-foreground" />
-              <span>{t("flash.modeAnonymous")}</span>
-            </button>
-          </div>
+      {/* Status & Privacy Banner */}
+      <NovaCard
+        variant="subtle"
+        className="flex flex-wrap items-center justify-between gap-2 p-3 text-xs text-muted-foreground -mt-4"
+      >
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
+          <span>{t("flash.modeNotice")}</span>
         </div>
-
-        <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground mt-2">
-          {t("flash.title")}
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1 max-w-2xl leading-relaxed">
-          {t("flash.subtitle")}
-        </p>
-
-        {/* Status & Privacy Banner */}
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-muted/40 border border-border/60 p-3 text-xs text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
-            <span>{t("flash.modeNotice")}</span>
-          </div>
-          <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
-            {t("flash.statusVerifiedCache")}
-          </span>
-        </div>
-      </div>
+        <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+          {t("flash.statusVerifiedCache")}
+        </span>
+      </NovaCard>
 
       {/* Navigation Tabs (Discover vs Saved Bag) */}
       <div className="flex items-center justify-between border-b border-border/50 pb-2">
@@ -497,9 +506,10 @@ export default function FlashEssentials() {
                   const isRationaleExpanded = expandedRationaleId === (p.productId || p.id);
 
                   return (
-                    <Card
+                    <NovaCard
                       key={p.productId || p.id}
-                      className="group flex flex-col justify-between rounded-3xl border border-border/70 bg-card p-5 shadow-soft transition-all hover:border-primary/40 space-y-4"
+                      variant="elevated"
+                      className="group flex flex-col justify-between p-5 space-y-4"
                     >
                       {/* Top Bar: Brand, Category, Save */}
                       <div>
@@ -516,7 +526,7 @@ export default function FlashEssentials() {
                             type="button"
                             onClick={() => handleToggleSave(p.productId || p.id)}
                             className={cx(
-                              "rounded-full p-2 transition-all shrink-0",
+                              "rounded-full p-2 transition-all shrink-0 cursor-pointer",
                               saved
                                 ? "bg-primary text-primary-foreground shadow-2xs"
                                 : "text-muted-foreground hover:bg-muted",
@@ -588,7 +598,7 @@ export default function FlashEssentials() {
                                 isRationaleExpanded ? null : p.productId || p.id,
                               )
                             }
-                            className="flex w-full items-center justify-between text-xs font-bold text-primary hover:underline"
+                            className="flex w-full items-center justify-between text-xs font-bold text-primary hover:underline cursor-pointer"
                           >
                             <span className="flex items-center gap-1.5">
                               <Sparkles className="h-3.5 w-3.5" />
@@ -624,8 +634,8 @@ export default function FlashEssentials() {
                                 </div>
                               )}
                               <div className="pt-1 text-[10px] text-muted-foreground italic">
-                                Price verified: {p.priceTimestamp || p.lastPriceCheck} · Merchant:{" "}
-                                {p.merchant || p.retailer}
+                                {t("flash.priceVerified")} {p.priceTimestamp || p.lastPriceCheck} ·{" "}
+                                {t("flash.merchant")} {p.merchant || p.retailer}
                               </div>
 
                               {/* Local-only private recommendation feedback */}
@@ -637,16 +647,16 @@ export default function FlashEssentials() {
                                   <button
                                     type="button"
                                     onClick={() => handleFeedback(p.productId || p.id, true)}
-                                    className="p-1 rounded-md text-muted-foreground hover:text-emerald-600 hover:bg-emerald-500/10 transition-colors"
-                                    title="Yes"
+                                    className="p-1 rounded-md text-muted-foreground hover:text-emerald-600 hover:bg-emerald-500/10 transition-colors cursor-pointer"
+                                    title={t("common.yes")}
                                   >
                                     <ThumbsUp className="h-3.5 w-3.5" />
                                   </button>
                                   <button
                                     type="button"
                                     onClick={() => handleFeedback(p.productId || p.id, false)}
-                                    className="p-1 rounded-md text-muted-foreground hover:text-rose-600 hover:bg-rose-500/10 transition-colors"
-                                    title="No"
+                                    className="p-1 rounded-md text-muted-foreground hover:text-rose-600 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                                    title={t("common.no")}
                                   >
                                     <ThumbsDown className="h-3.5 w-3.5" />
                                   </button>
@@ -664,7 +674,7 @@ export default function FlashEssentials() {
                             type="checkbox"
                             checked={isCompared}
                             onChange={() => toggleCompare(p.productId || p.id)}
-                            className="h-3.5 w-3.5 rounded border-border text-primary"
+                            className="h-3.5 w-3.5 rounded border-border text-primary cursor-pointer"
                           />
                           <span>{t("flash.addToCompare")}</span>
                         </label>
@@ -673,7 +683,7 @@ export default function FlashEssentials() {
                           <button
                             type="button"
                             onClick={() => setSelectedProductDetails(p)}
-                            className="font-bold text-foreground hover:text-primary transition-colors text-[11px]"
+                            className="font-bold text-foreground hover:text-primary transition-colors text-[11px] cursor-pointer"
                           >
                             {t("flash.viewDetails")}
                           </button>
@@ -691,7 +701,7 @@ export default function FlashEssentials() {
                           )}
                         </div>
                       </div>
-                    </Card>
+                    </NovaCard>
                   );
                 })}
               </div>
@@ -921,8 +931,8 @@ export default function FlashEssentials() {
                   {t("flash.merchantTitle")}
                 </span>
                 <p className="text-muted-foreground bg-muted/30 p-2.5 rounded-xl">
-                  {selectedProductDetails.merchant || selectedProductDetails.retailer} · Last
-                  verified:{" "}
+                  {selectedProductDetails.merchant || selectedProductDetails.retailer} ·{" "}
+                  {t("flash.lastVerified")}{" "}
                   {selectedProductDetails.priceTimestamp || selectedProductDetails.lastPriceCheck}
                 </p>
               </div>

@@ -32,7 +32,7 @@ import {
 } from "@/components/brand/SaheliArt.jsx";
 
 export function OnboardingFlow() {
-  const { t, prefs, setPrefs, completeOnboarding, restoreFromBackup, today } = useApp();
+  const { t, prefs, setPrefs, completeOnboarding, restoreFromBackup, today, identity } = useApp();
   const [step, setStep] = useState(1);
   const [age, setAge] = useState("under18");
   const [pinEnabled, setPinEnabled] = useState(false);
@@ -218,6 +218,14 @@ export function OnboardingFlow() {
             <p className="mx-auto max-w-md text-sm text-muted-foreground leading-relaxed">
               {t("onb.intro")}
             </p>
+            {identity?.serialId && (
+              <div className="pt-2 flex justify-center">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-mono font-bold text-primary shadow-sm">
+                  <ShieldCheck className="w-3.5 h-3.5 text-primary" />
+                  <span>{identity.serialId}</span>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="space-y-3 pt-2 text-left max-w-md mx-auto">

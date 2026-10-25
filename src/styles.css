@@ -5,27 +5,24 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Saheli 5.0 Design System — "The Living Rhythm"
+ * Saheli Bloom 9.0 Design System — "Warm, Calm, Multilingual & Accessible"
  *
- * Palette Specifications:
- * - Deep Plum:      #352640 (oklch(0.28 0.05 315))
- * - Saheli Violet:  #7555A5 (oklch(0.49 0.13 298))
- * - Soft Orchid:    #B99ACA (oklch(0.72 0.08 300))
- * - Warm Coral:     #D77C86 (oklch(0.65 0.12 18))
- * - Peach:          #F3B69D (oklch(0.81 0.08 55))
- * - Warm Ivory:     #FBF7F3 (oklch(0.978 0.008 65))
- * - Sage Green:     #9BB8A5 (oklch(0.74 0.05 155))
- * - Deep Text:      #272331 (oklch(0.24 0.03 300))
+ * Primary Color Palette:
+ * - Warm Canvas:    #FCF9F6 (oklch(0.985 0.007 75))
+ * - Plum Brand:     #744E83 (oklch(0.48 0.11 315))
+ * - Rose Accent:    #DA8997 (oklch(0.71 0.11 15))
+ * - Sage Accent:    #89A99C (oklch(0.72 0.05 160))
+ * - Dark Ink:       #262536 (oklch(0.25 0.03 295))
  */
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 6px);
-  --radius-md: calc(var(--radius) - 3px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 16px);
-  --radius-4xl: calc(var(--radius) + 24px);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 28px;
+  --radius-3xl: 36px;
+  --radius-full: 9999px;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -48,13 +45,11 @@
   --color-ring: var(--ring);
   --color-ring-offset-background: var(--background);
 
+  --color-canvas: var(--canvas);
   --color-plum: var(--plum);
-  --color-violet: var(--violet);
-  --color-orchid: var(--orchid);
-  --color-coral: var(--coral);
-  --color-peach: var(--peach);
-  --color-ivory: var(--ivory);
+  --color-rose: var(--rose);
   --color-sage: var(--sage);
+  --color-dark-ink: var(--dark-ink);
 
   --color-urgent: var(--urgent);
   --color-urgent-foreground: var(--urgent-foreground);
@@ -66,16 +61,31 @@
   --color-secondary-strong: var(--secondary-strong);
   --color-accent-strong: var(--accent-strong);
 
+  --color-nova-bg: var(--nova-bg);
+  --color-nova-surface: var(--nova-surface);
+  --color-nova-surface-subtle: var(--nova-surface-subtle);
+  --color-nova-primary: var(--nova-primary);
+  --color-nova-primary-soft: var(--nova-primary-soft);
+  --color-nova-period: var(--nova-period);
+  --color-nova-period-soft: var(--nova-period-soft);
+  --color-nova-text: var(--nova-text);
+  --color-nova-text-muted: var(--nova-text-muted);
+  --color-nova-border: var(--nova-border);
+  --color-nova-border-subtle: var(--nova-border-subtle);
+
   --font-display:
-    "Noto Serif Devanagari", "Rozha One", "Noto Nastaliq Urdu", "Noto Serif Bengali",
-    "Noto Serif Tamil", "Noto Serif Telugu", Georgia, serif;
+    "Plus Jakarta Sans", "Noto Serif Devanagari", "Rozha One", "Noto Nastaliq Urdu",
+    "Noto Serif Bengali", "Noto Serif Tamil", "Noto Serif Telugu", Georgia, serif;
   --font-body:
-    system-ui, -apple-system, "Noto Sans Devanagari", "Kohinoor Devanagari", "Mukta",
-    "Noto Sans Bengali", "Kohinoor Bangla", "Noto Sans Tamil", "Tamil Sangam MN",
+    "Plus Jakarta Sans", system-ui, -apple-system, "Noto Sans Devanagari", "Kohinoor Devanagari",
+    "Mukta", "Noto Sans Bengali", "Kohinoor Bangla", "Noto Sans Tamil", "Tamil Sangam MN",
     "Noto Sans Telugu", "Kohinoor Telugu", "Noto Sans Gujarati", "Kohinoor Gujarati",
     "Noto Sans Kannada", "Kannada Sangam MN", "Noto Sans Malayalam", "Malayalam Sangam MN",
     "Noto Sans Gurmukhi", "Gurmukhi MN", "Noto Sans Oriya", "Noto Nastaliq Urdu",
     "Noto Sans Arabic", "Geeza Pro", "Nirmala UI", "Segoe UI", sans-serif;
+  --font-urdu:
+    "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", "Noto Sans Arabic", "Geeza Pro", "Damascus",
+    "Urdu Typesetting", "Nirmala UI", Tahoma, Arial, sans-serif;
 
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
@@ -88,142 +98,164 @@
 }
 
 :root {
-  --radius: 1rem;
+  --radius: 1.25rem;
 
-  /* Saheli 5.0 Core Tokens (Light Mode - Warm Ivory Background) */
-  --plum: oklch(0.28 0.05 315);
-  --violet: oklch(0.49 0.13 298);
-  --orchid: oklch(0.72 0.08 300);
-  --coral: oklch(0.65 0.12 18);
-  --peach: oklch(0.81 0.08 55);
-  --ivory: oklch(0.978 0.008 65);
-  --sage: oklch(0.74 0.05 155);
+  /* Saheli Bloom Core Semantic Tokens (Light Mode) */
+  --canvas: #fcf9f6;
+  --plum: #744e83;
+  --rose: #da8997;
+  --sage: #89a99c;
+  --dark-ink: #262536;
 
-  --background: oklch(0.978 0.008 65);
-  --foreground: oklch(0.24 0.03 300);
-  --card: oklch(0.996 0.003 65);
-  --card-foreground: oklch(0.24 0.03 300);
-  --popover: oklch(0.996 0.003 65);
-  --popover-foreground: oklch(0.24 0.03 300);
+  /* Saheli Nova Design System Tokens (Light Mode) */
+  --nova-bg: #faf8f5;
+  --nova-surface: #ffffff;
+  --nova-surface-subtle: #f4efea;
+  --nova-primary: #704875;
+  --nova-primary-soft: rgba(112, 72, 117, 0.12);
+  --nova-period: #c85265;
+  --nova-period-soft: rgba(200, 82, 101, 0.12);
+  --nova-text: #1f1a24;
+  --nova-text-muted: #665e6d;
+  --nova-border: rgba(112, 72, 117, 0.15);
+  --nova-border-subtle: rgba(112, 72, 117, 0.08);
 
-  /* Primary brand interactive color: Saheli Violet #7555A5 */
-  --primary: oklch(0.49 0.13 298);
-  --primary-foreground: oklch(0.99 0 0);
+  --background: #fcf9f6;
+  --foreground: #262536;
+  --card: #ffffff;
+  --card-foreground: #262536;
+  --popover: #ffffff;
+  --popover-foreground: #262536;
 
-  /* Secondary supportive: Sage Green #9BB8A5 */
-  --secondary: oklch(0.92 0.03 155);
-  --secondary-foreground: oklch(0.26 0.05 155);
-  --secondary-strong: oklch(0.55 0.08 155);
+  /* Primary brand interactive color: Plum #744E83 */
+  --primary: #744e83;
+  --primary-foreground: #ffffff;
+
+  /* Secondary supportive: Sage #89A99C tint */
+  --secondary: #eef4f1;
+  --secondary-foreground: #20352c;
+  --secondary-strong: #89a99c;
 
   /* Muted backgrounds and text */
-  --muted: oklch(0.94 0.01 65);
-  --muted-foreground: oklch(0.46 0.03 300);
+  --muted: #f4efe9;
+  --muted-foreground: #5b566e;
 
-  /* Accent: Peach #F3B69D */
-  --accent: oklch(0.92 0.05 55);
-  --accent-foreground: oklch(0.3 0.05 50);
-  --accent-strong: oklch(0.7 0.1 50);
+  /* Accent: Rose #DA8997 tint */
+  --accent: #fbf0f2;
+  --accent-foreground: #4a2830;
+  --accent-strong: #da8997;
 
-  /* Period / Menstruation indicator: Warm Coral #D77C86 */
-  --period: oklch(0.65 0.12 18);
-  --period-foreground: oklch(0.99 0 0);
+  /* Period / Menstruation indicator: Rose Accent */
+  --period: #da8997;
+  --period-foreground: #262536;
 
   /* Urgent & Emergency */
-  --urgent: oklch(0.48 0.2 27);
-  --urgent-foreground: oklch(0.99 0 0);
-  --urgent-soft: oklch(0.96 0.03 27);
-  --destructive: oklch(0.5 0.19 27);
-  --destructive-foreground: oklch(0.99 0 0);
+  --urgent: #b8283e;
+  --urgent-foreground: #ffffff;
+  --urgent-soft: #fde8ec;
+  --destructive: #b8283e;
+  --destructive-foreground: #ffffff;
 
-  --info: oklch(0.55 0.08 230);
-  --info-foreground: oklch(0.36 0.07 230);
+  --info: #2a6496;
+  --info-foreground: #143554;
 
-  --border: oklch(0.9 0.01 65);
-  --input: oklch(0.88 0.015 65);
-  --ring: oklch(0.49 0.13 298);
+  --border: #eae4dc;
+  --input: #e0d7cb;
+  --ring: #744e83;
 
-  --sidebar: oklch(0.978 0.008 65);
-  --sidebar-foreground: oklch(0.24 0.03 300);
-  --sidebar-primary: oklch(0.49 0.13 298);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.94 0.01 65);
-  --sidebar-accent-foreground: oklch(0.24 0.03 300);
-  --sidebar-border: oklch(0.9 0.01 65);
-  --sidebar-ring: oklch(0.49 0.13 298);
+  --sidebar: #fcf9f6;
+  --sidebar-foreground: #262536;
+  --sidebar-primary: #744e83;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f4efe9;
+  --sidebar-accent-foreground: #262536;
+  --sidebar-border: #eae4dc;
+  --sidebar-ring: #744e83;
 
-  --hero: linear-gradient(135deg, oklch(0.96 0.02 55), oklch(0.95 0.02 155));
+  --hero: linear-gradient(135deg, rgba(218, 137, 151, 0.12), rgba(137, 169, 156, 0.14));
 }
 
 .dark {
-  --plum: oklch(0.28 0.05 315);
-  --violet: oklch(0.7 0.12 298);
-  --orchid: oklch(0.75 0.08 300);
-  --coral: oklch(0.72 0.12 18);
-  --peach: oklch(0.82 0.08 55);
-  --ivory: oklch(0.2 0.02 300);
-  --sage: oklch(0.72 0.06 155);
+  --canvas: #16141d;
+  --plum: #9f75b0;
+  --rose: #e49ba8;
+  --sage: #9bbdb0;
+  --dark-ink: #f7f5f9;
 
-  --background: oklch(0.18 0.03 315);
-  --foreground: oklch(0.97 0.01 65);
-  --card: oklch(0.22 0.03 315);
-  --card-foreground: oklch(0.97 0.01 65);
-  --popover: oklch(0.22 0.03 315);
-  --popover-foreground: oklch(0.97 0.01 65);
+  /* Saheli Nova Design System Tokens (Dark Mode) */
+  --nova-bg: #141216;
+  --nova-surface: #1e1b22;
+  --nova-surface-subtle: #26222b;
+  --nova-primary: #c8a8cf;
+  --nova-primary-soft: rgba(200, 168, 207, 0.15);
+  --nova-period: #f28d9e;
+  --nova-period-soft: rgba(242, 141, 158, 0.15);
+  --nova-text: #f6f4f8;
+  --nova-text-muted: #a9a2af;
+  --nova-border: rgba(200, 168, 207, 0.16);
+  --nova-border-subtle: rgba(200, 168, 207, 0.08);
 
-  --primary: oklch(0.72 0.12 298);
-  --primary-foreground: oklch(0.16 0.03 315);
+  --background: #16141d;
+  --foreground: #f7f5f9;
+  --card: #1e1b26;
+  --card-foreground: #f7f5f9;
+  --popover: #272332;
+  --popover-foreground: #f7f5f9;
 
-  --secondary: oklch(0.28 0.04 155);
-  --secondary-foreground: oklch(0.92 0.04 155);
-  --secondary-strong: oklch(0.7 0.07 155);
+  --primary: #9f75b0;
+  --primary-foreground: #16141d;
 
-  --muted: oklch(0.25 0.02 315);
-  --muted-foreground: oklch(0.72 0.02 65);
+  --secondary: #252230;
+  --secondary-foreground: #e0dbe8;
+  --secondary-strong: #9bbdb0;
 
-  --accent: oklch(0.3 0.05 55);
-  --accent-foreground: oklch(0.94 0.04 55);
-  --accent-strong: oklch(0.75 0.1 50);
+  --muted: #252230;
+  --muted-foreground: #aba4b8;
 
-  --period: oklch(0.72 0.12 18);
-  --period-foreground: oklch(0.16 0.03 315);
+  --accent: #332328;
+  --accent-foreground: #f5d3da;
+  --accent-strong: #e49ba8;
 
-  --destructive: oklch(0.65 0.19 27);
-  --destructive-foreground: oklch(0.99 0 0);
-  --urgent: oklch(0.65 0.2 27);
-  --urgent-foreground: oklch(0.99 0 0);
-  --urgent-soft: oklch(0.26 0.06 27);
+  --period: #e49ba8;
+  --period-foreground: #16141d;
 
-  --info: oklch(0.7 0.08 230);
-  --info-foreground: oklch(0.92 0.05 230);
+  --destructive: #e6536c;
+  --destructive-foreground: #ffffff;
+  --urgent: #e6536c;
+  --urgent-foreground: #ffffff;
+  --urgent-soft: #381a22;
 
-  --border: oklch(0.29 0.02 315);
-  --input: oklch(0.32 0.02 315);
-  --ring: oklch(0.72 0.12 298);
+  --info: #6fa2d6;
+  --info-foreground: #f0f6fc;
 
-  --sidebar: oklch(0.18 0.03 315);
-  --sidebar-foreground: oklch(0.97 0.01 65);
-  --sidebar-primary: oklch(0.72 0.12 298);
-  --sidebar-primary-foreground: oklch(0.16 0.03 315);
-  --sidebar-accent: oklch(0.25 0.02 315);
-  --sidebar-accent-foreground: oklch(0.97 0.01 65);
-  --sidebar-border: oklch(0.29 0.02 315);
-  --sidebar-ring: oklch(0.72 0.12 298);
+  --border: #2d293a;
+  --input: #383348;
+  --ring: #c29bd3;
 
-  --hero: linear-gradient(135deg, oklch(0.23 0.03 315), oklch(0.21 0.03 155));
+  --sidebar: #16141d;
+  --sidebar-foreground: #f7f5f9;
+  --sidebar-primary: #9f75b0;
+  --sidebar-primary-foreground: #16141d;
+  --sidebar-accent: #252230;
+  --sidebar-accent-foreground: #f7f5f9;
+  --sidebar-border: #2d293a;
+  --sidebar-ring: #c29bd3;
+
+  --hero: linear-gradient(135deg, rgba(228, 155, 168, 0.12), rgba(155, 189, 176, 0.12));
 }
 
 .hc {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0 0 0);
-  --primary: oklch(0.32 0.14 298);
-  --muted: oklch(0.95 0 0);
-  --muted-foreground: oklch(0.15 0 0);
-  --border: oklch(0.15 0 0);
-  --input: oklch(0.15 0 0);
-  --period: oklch(0.38 0.15 18);
-  --urgent: oklch(0.38 0.2 27);
+  --background: #ffffff;
+  --foreground: #000000;
+  --card: #ffffff;
+  --card-foreground: #000000;
+  --primary: #451b54;
+  --muted: #f0f0f0;
+  --muted-foreground: #111111;
+  --border: #000000;
+  --input: #000000;
+  --period: #8c2438;
+  --urgent: #900c22;
 }
 
 @layer base {
@@ -237,80 +269,40 @@
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+    text-rendering: optimizeLegibility;
   }
 }
 
-/* Custom Saheli 5.0 Utilities */
-.saheli-glass {
-  background: color-mix(in oklch, var(--card) 85%, transparent);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid color-mix(in oklch, var(--border) 70%, transparent);
-}
+/* ========================================================================= */
+/* MULTILINGUAL SCRIPT & TYPOGRAPHY RESILIENCE                               */
+/* ========================================================================= */
 
-.saheli-elevated {
-  box-shadow:
-    0 4px 20px -2px rgba(53, 38, 64, 0.06),
-    0 2px 6px -1px rgba(53, 38, 64, 0.04);
-}
-
-.saheli-card-editorial {
-  border-radius: 1.5rem;
-  background: var(--card);
-  border: 1px solid var(--border);
-  transition:
-    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 0.2s ease;
-}
-
-.saheli-card-editorial:hover {
-  border-color: color-mix(in oklch, var(--primary) 30%, var(--border));
-  box-shadow:
-    0 12px 28px -4px rgba(53, 38, 64, 0.08),
-    0 4px 10px -2px rgba(53, 38, 64, 0.04);
-}
-
-.shadow-soft {
-  box-shadow:
-    0 10px 30px -4px rgba(53, 38, 64, 0.06),
-    0 4px 12px -2px rgba(53, 38, 64, 0.03);
-}
-
-.tactile-press {
-  transition:
-    transform 0.15s cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 0.15s ease;
-}
-.tactile-press:active {
-  transform: scale(0.97);
-}
-
-/* Focus styles for keyboard accessibility */
-:focus-visible {
-  outline: 2px solid var(--color-ring);
-  outline-offset: 2px;
-}
-
-/* Print Page Rules */
-@media print {
-  body {
-    background: #ffffff !important;
-    color: #000000 !important;
-  }
-  .print-page {
-    box-shadow: none !important;
-    border: none !important;
-  }
-}
-
-/* RTL (Urdu) Layout and Typography Rules */
-[dir="rtl"] {
-  text-align: right;
-  --font-body:
-    "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", "Noto Sans Arabic", "Geeza Pro", "Damascus",
-    "Urdu Typesetting", "Nirmala UI", Tahoma, Arial, sans-serif;
+/* Indic script-safe line-height and shirorekha preservation */
+:lang(hi),
+:lang(mr),
+:lang(bn),
+:lang(as),
+:lang(gu),
+:lang(pa),
+:lang(kn),
+:lang(ml),
+:lang(or),
+:lang(ta),
+:lang(te) {
+  line-height: 1.65;
   letter-spacing: normal !important;
+  text-transform: none !important;
+}
+
+/* Urdu Nastaliq & Arabic RTL layout rules */
+:lang(ur),
+[dir="rtl"] {
+  font-family: var(--font-urdu);
+  line-height: 1.95;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+  text-align: start;
 }
 
 [dir="rtl"] .rtl-mirror {
@@ -328,10 +320,254 @@
   text-align: right;
 }
 
-/* Logical spacing utilities for RTL resilience */
-[dir="rtl"] .text-left {
-  text-align: right !important;
+/* ========================================================================= */
+/* SAHELI BLOOM CARD & SURFACE PRIMITIVES                                    */
+/* ========================================================================= */
+
+.bloom-card {
+  border-radius: 1.25rem;
+  background-color: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid var(--border);
+  box-shadow:
+    0 2px 8px -1px rgba(38, 37, 54, 0.04),
+    0 1px 3px 0 rgba(38, 37, 54, 0.02);
+  transition:
+    box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.2s ease,
+    transform 0.15s ease;
 }
-[dir="rtl"] .text-right {
-  text-align: left !important;
+
+.bloom-card-elevated {
+  border-radius: 1.5rem;
+  background-color: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid var(--border);
+  box-shadow:
+    0 10px 28px -4px rgba(38, 37, 54, 0.07),
+    0 4px 10px -2px rgba(38, 37, 54, 0.03);
+}
+
+.bloom-glass {
+  background-color: color-mix(in srgb, var(--card) 85%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
+}
+
+.bloom-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.4;
+  border: 1px solid transparent;
+}
+
+.shadow-soft {
+  box-shadow:
+    0 8px 24px -4px rgba(38, 37, 54, 0.06),
+    0 2px 6px -1px rgba(38, 37, 54, 0.03);
+}
+
+.tactile-press {
+  transition:
+    transform 0.15s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.15s ease;
+}
+
+.tactile-press:active {
+  transform: scale(0.98);
+}
+
+/* Accessible focus outline */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Print styling */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .print-page {
+    box-shadow: none !important;
+    border: none !important;
+  }
+}
+
+/* ========================================================================= */
+/* NOVA DESIGN SYSTEM UTILITIES                                              */
+/* ========================================================================= */
+.nova-card {
+  background-color: var(--nova-surface);
+  border: 1px solid var(--nova-border);
+  border-radius: 1.25rem;
+  padding: 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.nova-card-elevated {
+  background-color: var(--nova-surface);
+  border: 1px solid var(--nova-border);
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  box-shadow:
+    0 10px 28px -4px rgba(31, 26, 36, 0.06),
+    0 4px 10px -2px rgba(31, 26, 36, 0.03);
+}
+
+.nova-card-interactive {
+  background-color: var(--nova-surface);
+  border: 1px solid var(--nova-border);
+  border-radius: 1.25rem;
+  padding: 1.25rem;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.nova-card-interactive:hover {
+  border-color: rgba(112, 72, 117, 0.35);
+  box-shadow: 0 4px 16px -2px rgba(112, 72, 117, 0.08);
+}
+
+.nova-card-interactive:active {
+  transform: scale(0.985);
+}
+
+/* ========================================================================= */
+/* LIVING COMPANION PROCEDURAL ANIMATIONS (SAHELI 10.3)                       */
+/* ========================================================================= */
+@keyframes pet-breathe {
+  0%,
+  100% {
+    transform: scale(1, 1) translateY(0);
+  }
+  50% {
+    transform: scale(1.025, 0.985) translateY(-1.5px);
+  }
+}
+
+@keyframes pet-waddle {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-5px) rotate(-4deg);
+  }
+  75% {
+    transform: translateY(-5px) rotate(4deg);
+  }
+}
+
+@keyframes pet-celebrate {
+  0%,
+  100% {
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-16px) scale(1.08) rotate(-5deg);
+  }
+  50% {
+    transform: translateY(0) scale(0.96) rotate(0deg);
+  }
+  75% {
+    transform: translateY(-14px) scale(1.06) rotate(5deg);
+  }
+}
+
+@keyframes pet-play {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-8px) rotate(-7deg);
+  }
+  75% {
+    transform: translateY(-8px) rotate(7deg);
+  }
+}
+
+@keyframes pet-chew {
+  0%,
+  100% {
+    transform: scale(1, 1) translateY(0);
+  }
+  50% {
+    transform: scale(1.03, 0.97) translateY(2.5px);
+  }
+}
+
+@keyframes pet-lean {
+  0%,
+  100% {
+    transform: rotate(2deg) translateY(1px);
+  }
+  50% {
+    transform: rotate(6deg) translateY(3px);
+  }
+}
+
+@keyframes float-particle {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(0.8);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-40px) scale(1.2);
+  }
+}
+
+.animate-pet-breathe {
+  animation: pet-breathe 2.8s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+.animate-pet-waddle {
+  animation: pet-waddle 0.5s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+.animate-pet-celebrate {
+  animation: pet-celebrate 1s cubic-bezier(0.2, 0.8, 0.3, 1) infinite;
+  transform-origin: center bottom;
+}
+
+.animate-pet-play {
+  animation: pet-play 0.65s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+.animate-pet-chew {
+  animation: pet-chew 0.4s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+.animate-pet-lean {
+  animation: pet-lean 1.2s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+.animate-float-particle {
+  animation: float-particle 1.6s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pet-breathe,
+  .animate-pet-waddle,
+  .animate-pet-celebrate,
+  .animate-pet-play,
+  .animate-pet-chew,
+  .animate-pet-lean,
+  .animate-float-particle {
+    animation: none !important;
+  }
 }

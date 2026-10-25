@@ -28,29 +28,38 @@ import {
   Star,
 } from "lucide-react";
 import { useApp } from "@/App.jsx";
-import { Btn, Card, cx, inputCls } from "@/components/common/ui.jsx";
+import { cx, inputCls } from "@/components/common/ui.jsx";
+import {
+  NovaHeading,
+  NovaText,
+  NovaButton,
+  NovaCard,
+  NovaBadge,
+  NovaAgentBadge,
+  NovaDialog,
+} from "@/components/nova";
 import { AGENT_REGISTRY } from "@/lib/divaRegistry.js";
 import { executeDivaRequest } from "@/lib/divaOrchestrator.js";
 
 const SUGGESTED_PROMPTS = [
   {
-    label: "Why is my period late and what can I do?",
+    key: "diva.suggested.1",
     agentHint: "eeve",
   },
   {
-    label: "Recommend an affordable reusable menstrual cup",
+    key: "diva.suggested.2",
     agentHint: "flash",
   },
   {
-    label: "Suggest a heartwarming K-drama to unwind",
+    key: "diva.suggested.3",
     agentHint: "instinct",
   },
   {
-    label: "Explain period cramps and suggest an affordable heating pad",
+    key: "diva.suggested.4",
     agentHint: "multi_agent",
   },
   {
-    label: "I have cramps. Recommend something relaxing to watch",
+    key: "diva.suggested.5",
     agentHint: "multi_agent",
   },
 ];
@@ -68,7 +77,9 @@ export default function Diva() {
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (typeof messagesEndRef.current?.scrollIntoView === "function") {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   useEffect(() => {
@@ -118,7 +129,7 @@ export default function Diva() {
         {
           id: `msg_${Date.now()}_err`,
           role: "assistant",
-          error: "Diva encountered a temporary communication glitch. Please try again.",
+          error: t("diva.errorGlitch"),
           timestamp: new Date().toISOString(),
         },
       ]);
@@ -134,7 +145,7 @@ export default function Diva() {
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-24">
       {/* Diva Header */}
-      <div className="p-6 rounded-3xl bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-pink-500/10 border border-indigo-500/20 shadow-soft">
+      <NovaCard variant="elevated" className="p-6 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="h-12 w-12 rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center text-white shadow-md">
@@ -145,9 +156,7 @@ export default function Diva() {
                 <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground">
                   {t("diva.title", "Diva — Your Saheli AI Coordinator")}
                 </h1>
-                <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-                  Orchestrator
-                </span>
+                <NovaAgentBadge agent="diva" />
               </div>
               <p className="text-xs text-muted-foreground font-medium mt-0.5">
                 {t("diva.tagline", "One conversation. Three specialists.")}
@@ -158,53 +167,65 @@ export default function Diva() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setActivePrivacyModal(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-card border border-border/60 hover:bg-muted text-xs font-semibold text-muted-foreground transition-all shadow-2xs"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-card border border-border/60 hover:bg-muted text-xs font-semibold text-muted-foreground transition-all shadow-2xs active:scale-95"
             >
               <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-              <span>Privacy Firewall</span>
+              <span>{t("diva.privacyFirewall", "Privacy Firewall")}</span>
             </button>
 
             {messages.length > 0 && (
               <button
                 onClick={handleClearChat}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-card border border-border/60 hover:bg-muted text-xs font-semibold text-muted-foreground transition-all shadow-2xs"
-                title="Clear current conversation"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-card border border-border/60 hover:bg-muted text-xs font-semibold text-muted-foreground transition-all shadow-2xs active:scale-95"
+                title={t("common.reset", "Reset")}
               >
                 <RotateCcw className="h-3.5 w-3.5" />
-                <span>Reset</span>
+                <span>{t("common.reset", "Reset")}</span>
               </button>
             )}
           </div>
         </div>
 
         {/* Specialist Legend */}
-        <div className="mt-4 pt-4 border-t border-border/40 grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+        <div className="pt-3 border-t border-border/40 grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-primary/5 border border-primary/10">
             <Stethoscope className="h-4 w-4 text-primary shrink-0" />
             <span className="font-bold text-foreground">Eeve</span>
-            <span className="text-[11px] text-muted-foreground">· Health & Guidance</span>
+            <span className="text-[11px] text-muted-foreground">
+              · {t("diva.specialistEeveSub")}
+            </span>
           </div>
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/5 border border-amber-500/10">
             <ShoppingBag className="h-4 w-4 text-amber-500 shrink-0" />
             <span className="font-bold text-foreground">FLASH</span>
-            <span className="text-[11px] text-muted-foreground">· Verified Essentials</span>
+            <span className="text-[11px] text-muted-foreground">
+              · {t("diva.specialistFlashSub")}
+            </span>
           </div>
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-rose-500/5 border border-rose-500/10">
             <Film className="h-4 w-4 text-rose-500 shrink-0" />
             <span className="font-bold text-foreground">INSTINCT</span>
-            <span className="text-[11px] text-muted-foreground">· Movies & Music</span>
+            <span className="text-[11px] text-muted-foreground">
+              · {t("diva.specialistInstinctSub")}
+            </span>
           </div>
         </div>
-      </div>
+      </NovaCard>
 
       {/* Specialist Selector Bar */}
       <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-        <span className="text-xs font-bold text-muted-foreground shrink-0">Routing:</span>
+        <span className="text-xs font-bold text-muted-foreground shrink-0">
+          {t("diva.routing")}:
+        </span>
         {[
           { id: "auto", label: t("diva.mode.auto", "Auto (Diva routes)"), icon: Sparkles },
-          { id: "eeve", label: "Eeve (Health)", icon: Stethoscope },
-          { id: "flash", label: "FLASH (Essentials)", icon: ShoppingBag },
-          { id: "instinct", label: "INSTINCT (Entertainment)", icon: Film },
+          { id: "eeve", label: t("diva.mode.eeve", "Eeve (Health)"), icon: Stethoscope },
+          { id: "flash", label: t("diva.mode.flash", "FLASH (Essentials)"), icon: ShoppingBag },
+          {
+            id: "instinct",
+            label: t("diva.mode.instinct", "INSTINCT (Entertainment)"),
+            icon: Film,
+          },
         ].map((item) => {
           const Icon = item.icon;
           const isSelected = selectedAgent === item.id;
@@ -213,7 +234,7 @@ export default function Diva() {
               key={item.id}
               onClick={() => setSelectedAgent(item.id)}
               className={cx(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0",
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 active:scale-95",
                 isSelected
                   ? "bg-foreground text-background shadow-xs"
                   : "bg-muted/40 text-muted-foreground hover:bg-muted/70 hover:text-foreground",
@@ -247,15 +268,18 @@ export default function Diva() {
 
             {/* Suggested Prompts */}
             <div className="flex flex-wrap items-center justify-center gap-2 pt-2 max-w-xl mx-auto">
-              {SUGGESTED_PROMPTS.map((prompt, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => handleSend(prompt.label)}
-                  className="px-3 py-1.5 rounded-full bg-background border border-border/70 hover:border-primary text-xs text-muted-foreground hover:text-foreground transition-all shadow-2xs text-left"
-                >
-                  {prompt.label}
-                </button>
-              ))}
+              {SUGGESTED_PROMPTS.map((prompt, idx) => {
+                const promptText = t(prompt.key);
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => handleSend(promptText)}
+                    className="px-3 py-1.5 rounded-full bg-background border border-border/70 hover:border-primary text-xs text-muted-foreground hover:text-foreground transition-all shadow-2xs text-left"
+                  >
+                    {promptText}
+                  </button>
+                );
+              })}
             </div>
           </div>
         ) : (
@@ -281,7 +305,7 @@ export default function Diva() {
                     <div className="p-5 rounded-3xl bg-card border border-border shadow-xs space-y-3">
                       <div className="flex items-center gap-2 text-xs font-bold text-foreground">
                         <Bot className="h-4 w-4 text-primary" />
-                        <span>Diva needs a quick clarification:</span>
+                        <span>{t("diva.clarificationTitle")}</span>
                       </div>
                       <p className="text-xs text-muted-foreground leading-relaxed">
                         {msg.response.clarificationPrompt}
@@ -411,7 +435,7 @@ export default function Diva() {
                                     ) : card.type === "emergency_helplines" ? (
                                       <div className="space-y-1">
                                         <p className="font-bold text-destructive">
-                                          Emergency Helplines:
+                                          {t("diva.emergencyHelplines")}
                                         </p>
                                         {card.helplines?.map((hl, hIdx) => (
                                           <p key={hIdx} className="text-[11px]">
@@ -428,7 +452,7 @@ export default function Diva() {
                             {/* Specialist Sources */}
                             {result.sources && result.sources.length > 0 && (
                               <div className="text-[10px] text-muted-foreground pt-1 flex items-center gap-1.5 flex-wrap">
-                                <strong>Sources:</strong>
+                                <strong>{t("diva.sources")}:</strong>
                                 {result.sources.map((s, sIdx) => (
                                   <span key={sIdx} className="underline">
                                     {s}
@@ -450,7 +474,7 @@ export default function Diva() {
         {isLoading && (
           <div className="flex items-center gap-2 p-4 rounded-2xl bg-card border border-border/70 text-xs text-muted-foreground">
             <Bot className="h-4 w-4 animate-spin text-primary" />
-            <span>Diva is coordinating specialists...</span>
+            <span>{t("diva.coordinating")}</span>
           </div>
         )}
 
@@ -477,50 +501,45 @@ export default function Diva() {
           className="flex-1 px-4 py-2.5 text-xs bg-transparent focus:outline-none text-foreground placeholder:text-muted-foreground"
         />
 
-        <Btn type="submit" size="sm" disabled={isLoading || !inputValue.trim()} className="gap-1.5">
-          <Send className="h-3.5 w-3.5" />
-          <span>Ask</span>
-        </Btn>
+        <NovaButton
+          type="submit"
+          size="sm"
+          variant="primary"
+          disabled={isLoading || !inputValue.trim()}
+          leftIcon={<Send className="h-3.5 w-3.5" />}
+        >
+          {t("diva.askButton")}
+        </NovaButton>
       </form>
 
       {/* Privacy Firewall Modal */}
-      {activePrivacyModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <div className="relative w-full max-w-lg bg-card rounded-3xl border border-border p-6 space-y-4 shadow-2xl">
-            <button
-              onClick={() => setActivePrivacyModal(false)}
-              className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted text-muted-foreground"
-            >
-              <X className="h-4 w-4" />
-            </button>
-
-            <div className="flex items-center gap-2 text-primary font-bold text-base">
-              <ShieldCheck className="h-5 w-5" />
-              <h3>Diva Privacy Firewall Guarantees</h3>
-            </div>
-
-            <div className="text-xs space-y-2 text-muted-foreground leading-relaxed">
-              <p>
-                <strong>1. No Unified Surveillance Profile:</strong> Diva coordinates requests in
-                memory during the active session. It never writes a merged tracking history across
-                health, shopping, and entertainment.
-              </p>
-              <p>
-                <strong>2. Health Isolation:</strong> FLASH (Essentials) and INSTINCT
-                (Entertainment) can never read your period dates, symptoms, or health logs.
-              </p>
-              <p>
-                <strong>3. Discrete Specialist Memories:</strong> Eeve, FLASH, and INSTINCT maintain
-                strictly separate private storage buckets on your device.
-              </p>
-            </div>
-
-            <Btn size="sm" onClick={() => setActivePrivacyModal(false)} className="w-full">
-              Understood
-            </Btn>
-          </div>
+      <NovaDialog
+        open={activePrivacyModal}
+        onClose={() => setActivePrivacyModal(false)}
+        title={t("diva.privacyTitle")}
+        footer={
+          <NovaButton
+            size="sm"
+            variant="primary"
+            onClick={() => setActivePrivacyModal(false)}
+            className="w-full justify-center"
+          >
+            {t("diva.understood")}
+          </NovaButton>
+        }
+      >
+        <div className="text-xs space-y-2 text-muted-foreground leading-relaxed">
+          <p>
+            <strong>{t("diva.privacyPoint1Title")}</strong> {t("diva.privacyPoint1Desc")}
+          </p>
+          <p>
+            <strong>{t("diva.privacyPoint2Title")}</strong> {t("diva.privacyPoint2Desc")}
+          </p>
+          <p>
+            <strong>{t("diva.privacyPoint3Title")}</strong> {t("diva.privacyPoint3Desc")}
+          </p>
         </div>
-      )}
+      </NovaDialog>
     </div>
   );
 }

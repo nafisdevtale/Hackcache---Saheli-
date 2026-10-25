@@ -1,0 +1,252 @@
+{
+  "timestamp": "2026-10-24T17:52:27.806Z",
+  "results": [
+    {
+      "category": "Viewport",
+      "name": "mobile-320",
+      "width": 320,
+      "pass": true,
+      "scrollWidth": 320,
+      "clientWidth": 320,
+      "screenshot": "vp_mobile-320.png"
+    },
+    {
+      "category": "Viewport",
+      "name": "mobile-375",
+      "width": 375,
+      "pass": true,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "screenshot": "vp_mobile-375.png"
+    },
+    {
+      "category": "Viewport",
+      "name": "mobile-390",
+      "width": 390,
+      "pass": true,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "screenshot": "vp_mobile-390.png"
+    },
+    {
+      "category": "Viewport",
+      "name": "tablet-768",
+      "width": 768,
+      "pass": true,
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "screenshot": "vp_tablet-768.png"
+    },
+    {
+      "category": "Viewport",
+      "name": "tablet-1024",
+      "width": 1024,
+      "pass": true,
+      "scrollWidth": 1024,
+      "clientWidth": 1024,
+      "screenshot": "vp_tablet-1024.png"
+    },
+    {
+      "category": "Viewport",
+      "name": "desktop-1440",
+      "width": 1440,
+      "pass": true,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "screenshot": "vp_desktop-1440.png"
+    },
+    {
+      "category": "Viewport",
+      "name": "desktop-1920",
+      "width": 1920,
+      "pass": true,
+      "scrollWidth": 1920,
+      "clientWidth": 1920,
+      "screenshot": "vp_desktop-1920.png"
+    },
+    {
+      "category": "Viewport",
+      "name": "zoom-200",
+      "width": 640,
+      "pass": true,
+      "scrollWidth": 640,
+      "clientWidth": 640,
+      "screenshot": "vp_zoom-200.png"
+    },
+    {
+      "category": "Language",
+      "name": "English",
+      "code": "en",
+      "dir": "ltr",
+      "pass": true,
+      "rawKeys": 0,
+      "screenshot": "lang_en.png"
+    },
+    {
+      "category": "Language",
+      "name": "Hindi (Devanagari)",
+      "code": "hi",
+      "dir": "ltr",
+      "pass": true,
+      "rawKeys": 0,
+      "screenshot": "lang_hi.png"
+    },
+    {
+      "category": "Language",
+      "name": "Marathi (Devanagari)",
+      "code": "mr",
+      "dir": "ltr",
+      "pass": true,
+      "rawKeys": 0,
+      "screenshot": "lang_mr.png"
+    },
+    {
+      "category": "Language",
+      "name": "Bengali (Eastern Nagari)",
+      "code": "bn",
+      "dir": "ltr",
+      "pass": true,
+      "rawKeys": 0,
+      "screenshot": "lang_bn.png"
+    },
+    {
+      "category": "Language",
+      "name": "Tamil (Brahmic)",
+      "code": "ta",
+      "dir": "ltr",
+      "pass": true,
+      "rawKeys": 0,
+      "screenshot": "lang_ta.png"
+    },
+    {
+      "category": "Language",
+      "name": "Urdu (Nastaliq RTL)",
+      "code": "ur",
+      "dir": "rtl",
+      "pass": true,
+      "rawKeys": 0,
+      "screenshot": "lang_ur.png"
+    },
+    {
+      "category": "Pages",
+      "name": "Today Dashboard",
+      "pass": true,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "screenshot": "page_today.png"
+    },
+    {
+      "category": "Pages",
+      "name": "Calendar View",
+      "pass": true,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "screenshot": "page_calendar.png"
+    },
+    {
+      "category": "Pages",
+      "name": "Log Day Entry",
+      "pass": true,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "screenshot": "page_log.png"
+    },
+    {
+      "category": "Pages",
+      "name": "Insights & Analytics",
+      "pass": true,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "screenshot": "page_insights.png"
+    },
+    {
+      "category": "Pages",
+      "name": "Saheli Companion",
+      "pass": true,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "screenshot": "page_companion.png"
+    },
+    {
+      "category": "Pages",
+      "name": "Self Care Sanctuary",
+      "pass": true,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "screenshot": "page_selfcare.png"
+    },
+    {
+      "category": "Pages",
+      "name": "Discover Health",
+      "pass": true,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "screenshot": "page_discover.png"
+    },
+    {
+      "category": "Pages",
+      "name": "Learn Academy",
+      "pass": true,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "screenshot": "page_learn.png"
+    },
+    {
+      "category": "Pages",
+      "name": "Community Circles",
+      "pass": true,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "screenshot": "page_community.png"
+    },
+    {
+      "category": "Pages",
+      "name": "Eeve Health AI",
+      "pass": true,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "screenshot": "page_eeve.png"
+    },
+    {
+      "category": "Pages",
+      "name": "FLASH Essentials",
+      "pass": true,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "screenshot": "page_flash.png"
+    },
+    {
+      "category": "Pages",
+      "name": "INSTINCT Entertainment",
+      "pass": true,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "screenshot": "page_instinct.png"
+    },
+    {
+      "category": "Pages",
+      "name": "Diva Central Assistant",
+      "pass": true,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "screenshot": "page_diva.png"
+    },
+    {
+      "category": "Pages",
+      "name": "Settings & Privacy",
+      "pass": true,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "screenshot": "page_settings.png"
+    },
+    {
+      "category": "Pages",
+      "name": "More Hub",
+      "pass": true,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "screenshot": "page_more.png"
+    }
+  ],
+  "failures": 0
+}

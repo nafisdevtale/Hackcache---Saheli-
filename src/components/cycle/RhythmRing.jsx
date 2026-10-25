@@ -7,7 +7,7 @@ import { diffDays, addDays, todayStr } from "@/lib/localDate.js";
 import { phaseKey, getAuthoritativeCycleState } from "@/lib/cycle.js";
 
 export function RhythmRing({ analysis, record, onOpenLogger, className }) {
-  const { t, fmt, fmtRange, today, cycleState: appCycleState } = useApp();
+  const { t, fmt, fmtRange, fmtInteger, today, cycleState: appCycleState } = useApp();
   const patternId = useId();
 
   const cycleState = appCycleState || (record ? getAuthoritativeCycleState(record, today) : null);
@@ -69,7 +69,7 @@ export function RhythmRing({ analysis, record, onOpenLogger, className }) {
   return (
     <div
       role="region"
-      aria-label="Interactive cycle rhythm ring"
+      aria-label={t("aria.cycleRing") || "Interactive cycle rhythm ring"}
       className={cx("relative mx-auto flex flex-col items-center justify-center p-2", className)}
     >
       <div className="relative flex items-center justify-center w-full max-w-[340px] aspect-square">
@@ -197,7 +197,7 @@ export function RhythmRing({ analysis, record, onOpenLogger, className }) {
                 className="cursor-pointer transition-transform hover:scale-110 focus:outline-none"
                 tabIndex={0}
                 role="button"
-                aria-label={`Cycle Day ${dayNum}`}
+                aria-label={t("today.cycleDay", { n: dayNum })}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     setSelectedDayNum(dayNum);
@@ -324,10 +324,15 @@ export function RhythmRing({ analysis, record, onOpenLogger, className }) {
       {/* Screen reader text-only accessible equivalent */}
       <div className="sr-only">
         <p>
-          Cycle Day {currentCycleDay} of {totalDays}.
+          {t("rhythm.srSummary", {
+            day: fmtInteger ? fmtInteger(currentCycleDay) : currentCycleDay,
+            total: fmtInteger ? fmtInteger(totalDays) : totalDays,
+          })}
           {hasPrediction &&
-            ` Next estimated period range is ${fmtRange(analysis.prediction.start, analysis.prediction.end)}.`}
-          {hasLoggedPeriod ? " Menstruation active." : " Follicular or luteal phase."}
+            t("rhythm.srNext", {
+              range: fmtRange(analysis.prediction.start, analysis.prediction.end),
+            })}
+          {hasLoggedPeriod ? t("rhythm.menstruationActive") : t("rhythm.nonPeriodActive")}
         </p>
       </div>
     </div>

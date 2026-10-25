@@ -14,7 +14,7 @@ export default function VisitSummary() {
   const [includeQuestions, setIncludeQuestions] = useState(true);
   const [customQuestions, setCustomQuestions] = useState("");
 
-  const days = Object.values(record.days);
+  const days = Object.values(record?.days || {});
   const symCount = {};
   days.forEach((d) => (d.symptoms || []).forEach((s) => (symCount[s] = (symCount[s] || 0) + 1)));
   const maxPain = Math.max(0, ...days.map((d) => d.pain || 0));
@@ -130,11 +130,13 @@ export default function VisitSummary() {
         <h1 className="font-display text-2xl font-bold">{t("visit.title")}</h1>
         <p className="text-sm text-muted-foreground">
           {t("visit.generated", { date: fmt(today, full) })} ·{" "}
-          {t("visit.ageGroup", { g: t(`age.${record.settings.ageGroup}`) })}
+          {t("visit.ageGroup", {
+            g: record?.settings?.ageGroup ? t(`age.${record.settings.ageGroup}`) : t("age.adult"),
+          })}
         </p>
       </div>
 
-      {a.periods.length === 0 ? (
+      {(a?.periods || []).length === 0 ? (
         <p>{t("visit.noData")}</p>
       ) : (
         <>
@@ -204,7 +206,7 @@ export default function VisitSummary() {
           {includeGuidance && (
             <section className="space-y-1">
               <h2 className="font-bold text-base">{t("visit.guidance")}</h2>
-              <ul className="ml-5 list-disc text-sm">
+              <ul className="ms-5 list-disc text-sm">
                 {[
                   ...safety.urgent.map((c) => t(`urgent.${c.id}.title`)),
                   ...safety.cards.map((c) => t(`rf.${c.id}.title`, c.params)),
@@ -221,7 +223,7 @@ export default function VisitSummary() {
       {includeQuestions && (
         <section className="space-y-2">
           <h2 className="font-bold text-base">{t("visit.questions")}</h2>
-          <ol className="ml-5 list-decimal text-sm space-y-1">
+          <ol className="ms-5 list-decimal text-sm space-y-1">
             {["q1", "q2", "q3", "q4"].map((q) => (
               <li key={q}>{t(`visit.${q}`)}</li>
             ))}

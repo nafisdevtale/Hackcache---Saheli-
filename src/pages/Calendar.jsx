@@ -7,10 +7,16 @@ import {
   Calendar as CalendarIcon,
   Sparkles,
   Edit3,
-  Plus,
 } from "lucide-react";
 import { useApp } from "@/App.jsx";
-import { Card, PageTitle, Btn } from "@/components/common/ui.jsx";
+import {
+  NovaHeading,
+  NovaText,
+  NovaButton,
+  NovaCard,
+  NovaBadge,
+  NovaPageHeader,
+} from "@/components/nova";
 import { MonthGrid } from "@/components/calendar/MonthGrid.jsx";
 import { monthTitle } from "@/lib/localDate.js";
 import { blankDay } from "@/lib/exportImport.js";
@@ -19,7 +25,7 @@ import { CalendarEmptyArt } from "@/components/brand/SaheliArt.jsx";
 import { PhaseCards } from "@/components/cycle/PhaseCards.jsx";
 
 export default function Calendar() {
-  const { t, today, lang, record, fmt, saveDay } = useApp();
+  const { t, today, lang, record, fmt, fmtNumber, saveDay } = useApp();
   const [ym, setYm] = useState(() => [Number(today.slice(0, 4)), Number(today.slice(5, 7)) - 1]);
   const [sel, setSel] = useState(today);
   const [quickLogOpen, setQuickLogOpen] = useState(false);
@@ -34,128 +40,113 @@ export default function Calendar() {
   const isSelectedToday = sel === today;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between border-b border-border/60 pb-3">
-        <div>
-          <span className="text-xs font-bold uppercase tracking-wider text-primary">
-            {t("cal.title")}
-          </span>
-          <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-            {monthTitle(ym[0], ym[1], lang)}
-          </h1>
-        </div>
-
-        {/* Quick Return to Today if navigated away */}
-        {!isSelectedToday && (
-          <button
-            type="button"
-            onClick={() => {
-              setSel(today);
-              setYm([Number(today.slice(0, 4)), Number(today.slice(5, 7)) - 1]);
-            }}
-            className="rounded-xl border border-border bg-card px-3 py-1.5 text-xs font-semibold text-primary hover:bg-muted transition-all"
-          >
-            {t("cal.today")}
-          </button>
-        )}
-      </div>
+    <div className="space-y-6 sm:space-y-8 animate-fade-in">
+      <NovaPageHeader
+        tag={t("cal.title")}
+        title={monthTitle(ym[0], ym[1], lang)}
+        action={
+          !isSelectedToday && (
+            <NovaButton
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                setSel(today);
+                setYm([Number(today.slice(0, 4)), Number(today.slice(5, 7)) - 1]);
+              }}
+            >
+              <CalendarIcon className="h-3.5 w-3.5" />
+              <span>{t("cal.today")}</span>
+            </NovaButton>
+          )
+        }
+      />
 
       {/* Responsive Layout: 2 Columns on large screens */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column: Interactive Month Grid & Navigation */}
         <div className="lg:col-span-7 space-y-4">
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft">
+          <NovaCard variant="elevated" padding="md" className="space-y-4">
             {/* Month Switcher Controls */}
-            <div className="mb-4 flex items-center justify-between">
-              <button
-                type="button"
-                aria-label={t("cal.prevMonth")}
-                onClick={() => move(-1)}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-border hover:bg-muted text-foreground transition-all active:scale-95"
-              >
+            <div className="flex items-center justify-between pb-3 border-b border-border/60">
+              <NovaButton variant="icon" aria-label={t("cal.prevMonth")} onClick={() => move(-1)}>
                 <ChevronLeft aria-hidden className="h-5 w-5" />
-              </button>
+              </NovaButton>
               <h2 className="font-display text-lg font-bold text-foreground" aria-live="polite">
                 {monthTitle(ym[0], ym[1], lang)}
               </h2>
-              <button
-                type="button"
-                aria-label={t("cal.nextMonth")}
-                onClick={() => move(1)}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-border hover:bg-muted text-foreground transition-all active:scale-95"
-              >
+              <NovaButton variant="icon" aria-label={t("cal.nextMonth")} onClick={() => move(1)}>
                 <ChevronRight aria-hidden className="h-5 w-5" />
-              </button>
+              </NovaButton>
             </div>
 
             {/* Calendar Grid */}
             <MonthGrid year={ym[0]} month={ym[1]} selected={sel} onSelect={setSel} />
-          </div>
+          </NovaCard>
 
           {/* Calendar Visual Legend */}
-          <div className="rounded-2xl border border-border/70 bg-card/60 p-4 shadow-xs text-xs">
-            <h3 className="font-bold text-muted-foreground uppercase tracking-wider mb-2.5 text-[11px]">
+          <NovaCard variant="subtle" padding="sm" className="space-y-2.5">
+            <h3 className="font-bold text-muted-foreground uppercase tracking-wider text-[11px]">
               {t("cal.legend")}
             </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-wrap gap-2">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-card border border-border/80 px-3 py-1 text-xs">
                 <span
                   aria-hidden
-                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-period text-period-foreground"
+                  className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-period text-primary-foreground"
                 >
-                  <Droplet className="h-3 w-3" fill="currentColor" />
+                  <Droplet className="h-2.5 w-2.5 fill-current" />
                 </span>
-                <span className="font-medium">{t("cal.logged")}</span>
+                <span className="font-medium text-foreground">{t("cal.logged")}</span>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-card border border-border/80 px-3 py-1 text-xs">
                 <span
                   aria-hidden
-                  className="predicted-pattern h-6 w-6 shrink-0 rounded-full border-2 border-dashed border-primary"
+                  className="predicted-pattern h-4 w-4 shrink-0 rounded-full border-2 border-dashed border-primary"
                 />
-                <span className="font-medium">{t("cal.predicted")}</span>
+                <span className="font-medium text-foreground">{t("cal.predicted")}</span>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-card border border-border/80 px-3 py-1 text-xs">
                 <span
                   aria-hidden
-                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border bg-card"
+                  className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-border bg-card"
                 >
                   <span className="h-1.5 w-1.5 rounded-full bg-foreground" />
                 </span>
-                <span className="font-medium">{t("cal.symptom")}</span>
+                <span className="font-medium text-foreground">{t("cal.symptom")}</span>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-card border border-border/80 px-3 py-1 text-xs">
                 <span
                   aria-hidden
-                  className="flex h-6 w-6 shrink-0 items-center justify-center font-bold underline decoration-2 underline-offset-2"
+                  className="flex h-4 w-4 shrink-0 items-center justify-center font-bold text-primary underline decoration-2 underline-offset-2 text-xs"
                 >
-                  1
+                  •
                 </span>
-                <span className="font-medium">{t("cal.today")}</span>
+                <span className="font-medium text-foreground">{t("cal.today")}</span>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-card border border-border/80 px-3 py-1 text-xs">
                 <span
                   aria-hidden
-                  className="flex h-6 w-6 shrink-0 items-center justify-center text-sm"
+                  className="flex h-4 w-4 shrink-0 items-center justify-center text-xs"
                 >
                   ✨
                 </span>
-                <span className="font-medium">{t("cal.obsDay")}</span>
+                <span className="font-medium text-foreground">{t("cal.obsDay")}</span>
               </div>
             </div>
-            <p className="mt-3 text-[11px] text-muted-foreground">
+            <p className="text-[11px] text-muted-foreground pt-1 border-t border-border/40">
               {t("common.fertilityDisclaimer").split(".")[0]}.
             </p>
-          </div>
+          </NovaCard>
         </div>
 
         {/* Right Column: Selected Day Inspector & Quick Logger */}
         <div className="lg:col-span-5 space-y-4">
-          <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft space-y-4">
-            <div className="flex items-center justify-between border-b border-border/50 pb-3">
+          <NovaCard variant="elevated" padding="md" className="space-y-4">
+            <div className="flex items-center justify-between border-b border-border/60 pb-3">
               <div>
                 <span className="text-[11px] font-bold uppercase tracking-wider text-primary">
                   {isSelectedToday ? t("cal.today") : t("cal.title")}
@@ -165,14 +156,10 @@ export default function Calendar() {
                 </h2>
               </div>
               {sel <= today && (
-                <button
-                  type="button"
-                  onClick={() => setQuickLogOpen(true)}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground shadow-sm hover:bg-primary/90 transition-all active:scale-95"
-                >
+                <NovaButton variant="primary" size="sm" onClick={() => setQuickLogOpen(true)}>
                   <Edit3 className="h-3.5 w-3.5" />
                   <span>{e ? t("cal.editEntry") : t("cal.addEntry")}</span>
-                </button>
+                </NovaButton>
               )}
             </div>
 
@@ -181,25 +168,17 @@ export default function Calendar() {
               <div className="space-y-3">
                 <div className="flex flex-wrap gap-2 text-xs">
                   {e.period && (
-                    <span className="inline-flex items-center gap-1 rounded-xl bg-period/15 px-3 py-1 font-bold text-period">
+                    <NovaBadge tone="period">
                       🩸 {t("cal.periodDay")} ({t(`flow.${e.flow || "medium"}`)})
-                    </span>
+                    </NovaBadge>
                   )}
                   {e.pain > 0 && (
-                    <span className="inline-flex items-center gap-1 rounded-xl bg-destructive/15 px-3 py-1 font-semibold text-destructive">
+                    <NovaBadge tone="urgent">
                       ⚡ {t("log.pain")}: {e.pain}/10
-                    </span>
+                    </NovaBadge>
                   )}
-                  {e.mood && (
-                    <span className="inline-flex items-center gap-1 rounded-xl bg-secondary px-3 py-1 font-semibold text-secondary-foreground">
-                      ✨ {t(`mood.${e.mood}`)}
-                    </span>
-                  )}
-                  {e.energy && (
-                    <span className="inline-flex items-center gap-1 rounded-xl bg-accent px-3 py-1 font-semibold text-accent-foreground">
-                      ⚡ {t(`energy.${e.energy}`)}
-                    </span>
-                  )}
+                  {e.mood && <NovaBadge tone="secondary">✨ {t(`mood.${e.mood}`)}</NovaBadge>}
+                  {e.energy && <NovaBadge tone="primary">⚡ {t(`energy.${e.energy}`)}</NovaBadge>}
                 </div>
 
                 {e.symptoms?.length > 0 && (
@@ -207,11 +186,11 @@ export default function Calendar() {
                     <span className="text-[11px] font-bold uppercase text-muted-foreground block mb-1">
                       {t("log.symptoms")}
                     </span>
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap gap-1.5">
                       {e.symptoms.map((s) => (
                         <span
                           key={s}
-                          className="rounded-lg border border-border bg-muted/70 px-2 py-0.5 text-xs font-medium text-muted-foreground"
+                          className="rounded-lg border border-border/80 bg-muted/60 px-2 py-0.5 text-xs font-medium text-foreground"
                         >
                           {t(`sym.${s}`)}
                         </span>
@@ -242,7 +221,7 @@ export default function Calendar() {
                 <div className="flex flex-wrap gap-2 text-[11px] text-muted-foreground pt-0.5">
                   {record.ovulationObservations[sel].testResult !== "none" && (
                     <span className="font-semibold text-primary">
-                      LH:{" "}
+                      {t("phase.lhLabel")}:{" "}
                       {t(
                         `phase.lh${record.ovulationObservations[sel].testResult.charAt(0).toUpperCase() + record.ovulationObservations[sel].testResult.slice(1)}`,
                       )}
@@ -250,13 +229,16 @@ export default function Calendar() {
                   )}
                   {record.ovulationObservations[sel].bbt != null && (
                     <span>
-                      BBT: {record.ovulationObservations[sel].bbt} °
-                      {record.ovulationObservations[sel].bbtUnit || "C"}
+                      {t("phase.bbtLabel")}:{" "}
+                      {fmtNumber
+                        ? fmtNumber(record.ovulationObservations[sel].bbt)
+                        : record.ovulationObservations[sel].bbt}{" "}
+                      °{record.ovulationObservations[sel].bbtUnit || "C"}
                     </span>
                   )}
                   {record.ovulationObservations[sel].cervicalFluid !== "none" && (
                     <span>
-                      Fluid:{" "}
+                      {t("phase.fluidLabel")}:{" "}
                       {t(
                         `phase.fluid${record.ovulationObservations[sel].cervicalFluid.charAt(0).toUpperCase() + record.ovulationObservations[sel].cervicalFluid.slice(1)}`,
                       )}
@@ -273,9 +255,9 @@ export default function Calendar() {
             {sel <= today && (
               <div className="pt-2 border-t border-border/50 flex flex-wrap gap-2">
                 {!e?.period ? (
-                  <Btn
-                    variant="outline"
-                    className="flex-1 min-h-11 rounded-2xl text-xs font-bold"
+                  <NovaButton
+                    variant="period"
+                    className="flex-1"
                     onClick={() =>
                       saveDay({
                         ...blankDay(sel),
@@ -286,11 +268,11 @@ export default function Calendar() {
                     }
                   >
                     🩸 {t("cal.startPeriod")}
-                  </Btn>
+                  </NovaButton>
                 ) : (
-                  <Btn
-                    variant="outline"
-                    className="flex-1 min-h-11 rounded-2xl text-xs font-bold"
+                  <NovaButton
+                    variant="secondary"
+                    className="flex-1"
                     onClick={() =>
                       saveDay({
                         ...blankDay(sel),
@@ -301,19 +283,19 @@ export default function Calendar() {
                     }
                   >
                     {t("cal.endPeriod")}
-                  </Btn>
+                  </NovaButton>
                 )}
 
                 <Link
                   to="/log"
                   search={{ date: sel }}
-                  className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-border px-4 text-xs font-semibold hover:bg-muted text-foreground transition-all"
+                  className="inline-flex min-h-[44px] items-center justify-center rounded-2xl border border-border bg-card px-4 text-xs font-semibold hover:bg-muted text-foreground transition-all cursor-pointer"
                 >
                   {t("log.title")}
                 </Link>
               </div>
             )}
-          </div>
+          </NovaCard>
         </div>
       </div>
 
